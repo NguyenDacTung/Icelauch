@@ -102,10 +102,21 @@ jobs:
           CI: "true"
           CAPACITOR_TELEMETRY: "false"
 
+      - name: Accept Android SDK Licenses
+        run: yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses || true
+
       - name: Build Android APK via Gradle
         run: |
           cd android
-          ./gradlew assembleDebug --no-daemon --stacktrace
+          ./gradlew assembleDebug --no-daemon --stacktrace 2>&1 | tee gradle.log || GRADLE_EXIT=$?
+          echo "=== Gradle Exit Code: ${GRADLE_EXIT:-0} ==="
+          echo "### Gradle Build Log (Exit: ${GRADLE_EXIT:-0})" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          tail -n 120 gradle.log >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          if [ -n "$GRADLE_EXIT" ] && [ "$GRADLE_EXIT" -ne 0 ]; then
+            exit $GRADLE_EXIT
+          fi
         env:
           ANDROID_HOME: /usr/local/lib/android/sdk
           ANDROID_SDK_ROOT: /usr/local/lib/android/sdk
