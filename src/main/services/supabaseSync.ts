@@ -381,7 +381,7 @@ export class SupabaseSyncService {
       tags: game.tags || [],
       action_buttons: game.actionButtonIds || [],
       featured: Boolean(game.featured),
-      file_size: game.expectedSize || null,
+      file_size: game.expectedSize ? Math.round(game.expectedSize) : null,
       updated_at: new Date().toISOString(),
     };
 
