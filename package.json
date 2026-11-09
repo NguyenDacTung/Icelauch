@@ -1,6 +1,6 @@
 {
   "name": "icelauch",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Trình quản lý game và giải trí cá nhân cho Windows 10",
   "main": "dist-electron/main/index.js",
   "scripts": {

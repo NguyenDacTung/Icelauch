@@ -50,6 +50,7 @@ jobs:
           path: |
             release/*.exe
             release/*.blockmap
+            release/latest.yml
           if-no-files-found: error
 
   # ============================================================================
@@ -190,6 +191,8 @@ jobs:
           files: |
             dist-release/*.exe
             dist-release/*.apk
+            dist-release/latest.yml
+            dist-release/*.blockmap
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
