@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Gamepad2,
   Monitor,
@@ -12,7 +12,10 @@ import {
   VolumeX,
   ChevronLeft,
   ChevronRight,
-  Bookmark
+  Bookmark,
+  Flame,
+  Tag,
+  Play
 } from 'lucide-react';
 import type { Game, SectionBannerSettings } from '../../types';
 import { resolveBannerItems } from '../../utils/bannerResolver';
@@ -36,9 +39,24 @@ export const TVGameView: React.FC<TVGameViewProps> = ({
 }) => {
   const [heroIndex, setHeroIndex] = useState(0);
   const [selectedGameModal, setSelectedGameModal] = useState<Game | null>(null);
+  const [isMuted, setIsMuted] = useState(true);
+  const [showTrailerPreview, setShowTrailerPreview] = useState(false);
 
   const resolvedGames = resolveBannerItems(bannerSettings, games, 'game');
   const activeHero = resolvedGames[heroIndex]?.item || games[0];
+
+  const parsedTrailer = activeHero?.trailerUrl ? parseMediaUrl(activeHero.trailerUrl) : null;
+  const isYouTubeTrailer = parsedTrailer?.kind === 'youtube' && parsedTrailer.id;
+
+  // Auto-preview trailer after 1.5s delay on active hero
+  useEffect(() => {
+    setShowTrailerPreview(false);
+    if (!isYouTubeTrailer) return;
+    const timer = setTimeout(() => {
+      setShowTrailerPreview(true);
+    }, 1500);
+    return () => clearTimeout(timer);
+  }, [activeHero?.id, isYouTubeTrailer]);
 
   const formatBytes = (bytes?: number) => {
     if (!bytes || bytes === 0) return 'Chưa rõ';
@@ -46,6 +64,16 @@ export const TVGameView: React.FC<TVGameViewProps> = ({
     if (mb > 1024) return `${(mb / 1024).toFixed(1)} GB`;
     return `${Math.round(mb)} MB`;
   };
+
+  // Extract unique tags for game shelves (similar to Windows)
+  const availableTags = Array.from(
+    new Set(
+      games.flatMap((g) => g.tags || (g.genre ? g.genre.split(',').map((s) => s.trim()) : []))
+    )
+  ).filter(Boolean);
+
+  const spotlightGames = games.filter((g) => g.featured || (g.viewCount && g.viewCount > 0));
+  const primarySpotlight = spotlightGames.length > 0 ? spotlightGames : games.slice(0, 6);
 
   const handleHeroPrev = () => {
     if (resolvedGames.length <= 1) return;
@@ -81,17 +109,29 @@ export const TVGameView: React.FC<TVGameViewProps> = ({
         </div>
       </div>
 
-      {/* 2. GRAND 16:9 PC GAME TV HERO BANNER */}
+      {/* 2. EXACT 16:9 PC GAME TV HERO BANNER (Height ~52% screen for peek-through) */}
       {activeHero && (
-        <div className="relative w-full aspect-[21/9] min-h-[320px] max-h-[420px] rounded-3xl overflow-hidden border border-white/10 shadow-2xl bg-[#11141D] group/banner flex items-end p-8">
-          <img
-            key={activeHero.id}
-            src={heroImage}
-            alt={activeHero.name}
-            className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover/banner:scale-105"
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-[#0A0D14] via-[#0A0D14]/60 to-transparent" />
-          <div className="absolute inset-0 bg-gradient-to-r from-[#0A0D14]/90 via-[#0A0D14]/40 to-transparent w-2/3" />
+        <div className="relative w-full aspect-video max-h-[52vh] rounded-3xl overflow-hidden border border-white/10 shadow-2xl bg-[#0E1118] group/banner flex items-end p-8">
+          {/* Background: Auto-preview Trailer (Muted) or 16:9 Artwork */}
+          {showTrailerPreview && isYouTubeTrailer ? (
+            <iframe
+              src={`https://www.youtube-nocookie.com/embed/${parsedTrailer.id}?autoplay=1&mute=${isMuted ? 1 : 0}&controls=0&loop=1&playlist=${parsedTrailer.id}&rel=0&playsinline=1`}
+              title={activeHero.name}
+              allow="autoplay; encrypted-media"
+              className="absolute inset-0 w-full h-full object-cover scale-125 pointer-events-none transition-opacity duration-1000"
+            />
+          ) : (
+            <img
+              key={activeHero.id}
+              src={heroImage}
+              alt={activeHero.name}
+              className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover/banner:scale-105"
+            />
+          )}
+
+          {/* Gradients */}
+          <div className="absolute inset-0 bg-gradient-to-t from-[#0A0D14] via-[#0A0D14]/70 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-r from-[#0A0D14]/95 via-[#0A0D14]/50 to-transparent w-3/4" />
 
           {/* Banner Meta */}
           <div className="relative z-10 max-w-2xl space-y-3">
@@ -101,16 +141,22 @@ export const TVGameView: React.FC<TVGameViewProps> = ({
                 <span>GAME PC NỔI BẬT</span>
               </span>
               <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-white/15 text-white backdrop-blur-md border border-white/15">
-                {activeHero.genre || 'Hành Động'}
+                {activeHero.genre || 'Game PC'}
               </span>
+              {showTrailerPreview && (
+                <span className="px-2 py-0.5 rounded text-[9px] font-extrabold uppercase bg-red-600/30 text-red-300 border border-red-500/40 flex items-center gap-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-ping" />
+                  <span>Đang xem trailer</span>
+                </span>
+              )}
             </div>
 
-            <h1 className="text-2xl lg:text-3xl font-black text-white leading-tight drop-shadow-md line-clamp-2">
+            <h1 className="text-2xl lg:text-4xl font-black text-white leading-tight drop-shadow-lg line-clamp-2">
               {activeHero.name}
             </h1>
 
             {activeHero.description && (
-              <p className="text-xs text-white/80 line-clamp-2 leading-relaxed drop-shadow">
+              <p className="text-xs lg:text-sm text-white/85 line-clamp-2 leading-relaxed drop-shadow max-w-xl">
                 {activeHero.description}
               </p>
             )}
@@ -123,7 +169,7 @@ export const TVGameView: React.FC<TVGameViewProps> = ({
                   sfx.playClick();
                   setSelectedGameModal(activeHero);
                 }}
-                className="h-12 px-6 rounded-2xl bg-gradient-to-r from-blue-600 to-ice-accent text-white font-black text-xs uppercase tracking-wider flex items-center gap-2 shadow-xl shadow-blue-900/40 outline-none focus:ring-4 focus:ring-amber-400 focus:scale-105 transition-all"
+                className="h-12 px-7 rounded-2xl bg-gradient-to-r from-blue-600 to-ice-accent text-white font-black text-xs uppercase tracking-wider flex items-center gap-2 shadow-xl shadow-blue-900/40 outline-none transition-all active:scale-95"
               >
                 <Info className="w-4 h-4" />
                 <span>XEM CHI TIẾT & TRAILER</span>
@@ -136,11 +182,23 @@ export const TVGameView: React.FC<TVGameViewProps> = ({
                   sfx.playClick();
                   onIncompatibleClick(activeHero);
                 }}
-                className="h-12 px-4 rounded-2xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 text-xs font-bold border border-amber-500/40 flex items-center gap-2 outline-none focus:ring-4 focus:ring-amber-400 focus:scale-105 transition-all"
+                className="h-12 px-4 rounded-2xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 text-xs font-bold border border-amber-500/40 flex items-center gap-2 outline-none transition-all"
               >
                 <Monitor className="w-4 h-4 text-amber-400" />
                 <span>🚫 Chỉ Chạy Trên PC</span>
               </button>
+
+              {isYouTubeTrailer && (
+                <button
+                  data-tv-focus="game-hero-mute"
+                  type="button"
+                  onClick={() => setIsMuted(!isMuted)}
+                  className="h-12 w-12 rounded-2xl bg-white/10 hover:bg-white/20 text-white flex items-center justify-center backdrop-blur-md border border-white/15 outline-none transition-all"
+                  title={isMuted ? 'Bật tiếng trailer' : 'Tắt tiếng'}
+                >
+                  {isMuted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4 text-amber-400" />}
+                </button>
+              )}
             </div>
           </div>
 
@@ -151,7 +209,7 @@ export const TVGameView: React.FC<TVGameViewProps> = ({
                 data-tv-focus="game-hero-prev"
                 type="button"
                 onClick={handleHeroPrev}
-                className="w-10 h-10 rounded-xl bg-black/60 hover:bg-amber-400 hover:text-black text-white flex items-center justify-center backdrop-blur-md border border-white/20 outline-none focus:ring-4 focus:ring-amber-400 focus:scale-110 transition-all"
+                className="w-10 h-10 rounded-xl bg-black/60 hover:bg-amber-400 hover:text-black text-white flex items-center justify-center backdrop-blur-md border border-white/20 outline-none transition-all"
               >
                 <ChevronLeft className="w-5 h-5" />
               </button>
@@ -162,7 +220,7 @@ export const TVGameView: React.FC<TVGameViewProps> = ({
                 data-tv-focus="game-hero-next"
                 type="button"
                 onClick={handleHeroNext}
-                className="w-10 h-10 rounded-xl bg-black/60 hover:bg-amber-400 hover:text-black text-white flex items-center justify-center backdrop-blur-md border border-white/20 outline-none focus:ring-4 focus:ring-amber-400 focus:scale-110 transition-all"
+                className="w-10 h-10 rounded-xl bg-black/60 hover:bg-amber-400 hover:text-black text-white flex items-center justify-center backdrop-blur-md border border-white/20 outline-none transition-all"
               >
                 <ChevronRight className="w-5 h-5" />
               </button>
@@ -171,57 +229,118 @@ export const TVGameView: React.FC<TVGameViewProps> = ({
         </div>
       )}
 
-      {/* 3. ROW: DANH SÁCH GAME PC */}
-      <section className="space-y-3">
-        <div className="flex items-center justify-between">
-          <h2 className="text-sm font-black text-white uppercase tracking-wider flex items-center gap-2">
-            <Gamepad2 className="w-4 h-4 text-blue-400" />
-            <span>Kho Game PC Đồng Bộ ({games.length})</span>
-          </h2>
-        </div>
+      {/* 3. ROW 1: GAME NỔI BẬT & ĐỀ XUẤT */}
+      {primarySpotlight.length > 0 && (
+        <section className="space-y-3">
+          <div className="flex items-center justify-between">
+            <h2 className="text-sm font-black text-white uppercase tracking-wider flex items-center gap-2">
+              <Flame className="w-4 h-4 text-rose-500 fill-rose-500" />
+              <span>Game Nổi Bật & Đề Xuất ({primarySpotlight.length})</span>
+            </h2>
+          </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
-          {games.map((game, idx) => (
-            <div
-              key={game.id}
-              data-tv-focus={`game-card-${idx}`}
-              tabIndex={0}
-              onClick={() => {
-                sfx.playClick();
-                setSelectedGameModal(game);
-              }}
-              className="group/card relative aspect-[3/4] rounded-2xl overflow-hidden bg-[#151924] border border-white/10 cursor-pointer shadow-lg outline-none focus:ring-4 focus:ring-amber-400 focus:scale-105 focus:z-20 transition-all hover:scale-102 hover:border-amber-400"
-            >
-              <img
-                src={game.coverPath || game.bannerPath || ''}
-                alt={game.name}
-                className="w-full h-full object-cover transition-transform duration-300 group-hover/card:scale-105"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent opacity-85 group-hover/card:opacity-95 transition-opacity" />
+          <div className="flex items-center gap-4 overflow-x-auto no-scrollbar py-2">
+            {primarySpotlight.map((game, idx) => (
+              <div
+                key={game.id}
+                data-tv-focus={`game-spotlight-${idx}`}
+                tabIndex={0}
+                onClick={() => {
+                  sfx.playClick();
+                  setSelectedGameModal(game);
+                }}
+                className="group/card relative w-52 lg:w-60 aspect-[16/10] rounded-2xl overflow-hidden bg-[#151924] border border-white/10 shrink-0 cursor-pointer shadow-lg outline-none transition-all hover:scale-102 hover:border-amber-400"
+              >
+                <img
+                  src={game.bannerPath || game.coverPath || ''}
+                  alt={game.name}
+                  className="w-full h-full object-cover transition-transform duration-300 group-hover/card:scale-105"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black via-black/30 to-transparent opacity-85 group-hover/card:opacity-95 transition-opacity" />
 
-              <div className="absolute top-2 right-2">
-                <span className="text-[9px] px-2 py-0.5 rounded-full bg-amber-500/30 text-amber-300 font-bold border border-amber-500/40">
-                  PC
-                </span>
+                <div className="absolute top-2.5 right-2.5">
+                  <span className="text-[9px] px-2 py-0.5 rounded-full bg-amber-500/30 text-amber-300 font-bold border border-amber-500/40">
+                    PC
+                  </span>
+                </div>
+
+                <div className="absolute bottom-3 left-3 right-3 z-10 space-y-1">
+                  <span className="text-[9px] px-1.5 py-0.5 rounded bg-blue-600/40 text-blue-300 font-bold uppercase">
+                    {game.genre || 'Game'}
+                  </span>
+                  <h3 className="text-xs font-black text-white leading-tight line-clamp-1">
+                    {game.name}
+                  </h3>
+                  <p className="text-[10px] text-ice-muted">
+                    {formatBytes(game.expectedSize)}
+                  </p>
+                </div>
               </div>
+            ))}
+          </div>
+        </section>
+      )}
 
-              <div className="absolute bottom-3 left-3 right-3 z-10 space-y-1">
-                <span className="text-[9px] px-1.5 py-0.5 rounded bg-blue-600/40 text-blue-300 font-bold uppercase">
-                  {game.genre || 'Game'}
-                </span>
-                <h3 className="text-xs font-black text-white leading-tight line-clamp-1">
-                  {game.name}
-                </h3>
-                <p className="text-[10px] text-ice-muted">
-                  {formatBytes(game.expectedSize)}
-                </p>
-              </div>
+      {/* 4. DYNAMIC TAG SHELVES (HORIZONTALLY SCROLLABLE NETFLIX-STYLE ROWS FOR GAMES) */}
+      {availableTags.map((tag, tagIdx) => {
+        const tagGames = games.filter(
+          (g) =>
+            (g.tags && g.tags.includes(tag)) ||
+            (g.genre && g.genre.toLowerCase().includes(tag.toLowerCase()))
+        );
+
+        if (tagGames.length === 0) return null;
+
+        return (
+          <section key={tag} className="space-y-3">
+            <div className="flex items-center justify-between">
+              <h2 className="text-sm font-black text-white uppercase tracking-wider flex items-center gap-2">
+                <Tag className="w-4 h-4 text-blue-400" />
+                <span>Thể Loại: {tag} ({tagGames.length})</span>
+              </h2>
             </div>
-          ))}
-        </div>
-      </section>
 
-      {/* 4. MODAL: CHI TIẾT GAME TRÊN TV (TRAILER & SPECS) */}
+            <div className="flex items-center gap-4 overflow-x-auto no-scrollbar py-2">
+              {tagGames.map((game, gameIdx) => (
+                <div
+                  key={game.id}
+                  data-tv-focus={`game-tag-${tagIdx}-${gameIdx}`}
+                  tabIndex={0}
+                  onClick={() => {
+                    sfx.playClick();
+                    setSelectedGameModal(game);
+                  }}
+                  className="group/card relative w-44 lg:w-48 aspect-[3/4] rounded-2xl overflow-hidden bg-[#151924] border border-white/10 shrink-0 cursor-pointer shadow-lg outline-none transition-all hover:scale-102 hover:border-amber-400"
+                >
+                  <img
+                    src={game.coverPath || game.bannerPath || ''}
+                    alt={game.name}
+                    className="w-full h-full object-cover transition-transform duration-300 group-hover/card:scale-105"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent opacity-85 group-hover/card:opacity-95 transition-opacity" />
+
+                  <div className="absolute top-2 right-2">
+                    <span className="text-[9px] px-1.5 py-0.5 rounded bg-black/60 text-amber-300 font-bold border border-white/10">
+                      PC
+                    </span>
+                  </div>
+
+                  <div className="absolute bottom-2.5 left-2.5 right-2.5 z-10 space-y-0.5">
+                    <h3 className="text-xs font-black text-white leading-tight line-clamp-1">
+                      {game.name}
+                    </h3>
+                    <p className="text-[10px] text-ice-muted">
+                      {formatBytes(game.expectedSize)}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
+        );
+      })}
+
+      {/* 5. MODAL: CHI TIẾT GAME TRÊN TV (TRAILER & SPECS) */}
       {selectedGameModal && (
         <div className="absolute inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-8 animate-fade-in">
           <div className="w-full max-w-4xl bg-[#131722] border-2 border-amber-500/50 rounded-3xl overflow-hidden shadow-2xl flex flex-col max-h-[85vh]">
@@ -235,7 +354,7 @@ export const TVGameView: React.FC<TVGameViewProps> = ({
                 data-tv-focus="modal-game-close"
                 type="button"
                 onClick={() => setSelectedGameModal(null)}
-                className="w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center outline-none focus:ring-4 focus:ring-amber-400"
+                className="w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center outline-none transition-all"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -307,7 +426,7 @@ export const TVGameView: React.FC<TVGameViewProps> = ({
                 data-tv-focus="modal-game-ok"
                 type="button"
                 onClick={() => setSelectedGameModal(null)}
-                className="px-6 h-10 rounded-xl bg-amber-500 text-black font-bold text-xs uppercase tracking-wider outline-none focus:ring-4 focus:ring-amber-400"
+                className="px-6 h-10 rounded-xl bg-amber-500 text-black font-bold text-xs uppercase tracking-wider outline-none"
               >
                 Đã Hiểu
               </button>
@@ -318,4 +437,3 @@ export const TVGameView: React.FC<TVGameViewProps> = ({
     </div>
   );
 };
-
