@@ -4,11 +4,21 @@ import { URL } from 'url';
 import { GoogleDriveService } from './gdrive';
 import { StorageService } from './storage';
 
+export interface MemoryBufferEntry {
+  buffer: Buffer;
+  totalLength: number | null;
+  contentType: string;
+  createdAt: number;
+}
+
 export class StreamProxyService {
   private static instance: StreamProxyService;
   private server: http.Server | null = null;
   private port: number = 0;
   private resolvedUrlCache = new Map<string, { url: string; headers: Record<string, string>; expiresAt: number }>();
+  private memoryBufferCache = new Map<string, MemoryBufferEntry>();
+  private static readonly MAX_BUFFER_BYTES = 16 * 1024 * 1024; // 16MB Pure RAM Buffer
+  private static readonly MAX_CACHE_ENTRIES = 3; // Max 3 items in RAM (~48MB total)
 
   private constructor() {}
 
@@ -127,6 +137,50 @@ export class StreamProxyService {
             return;
           }
 
+          // Parse client Range header
+          let reqStart = 0;
+          let reqEnd: number | null = null;
+          const rangeHeader = req.headers.range;
+          if (rangeHeader) {
+            const match = rangeHeader.match(/bytes=(\d+)-(\d*)/);
+            if (match) {
+              reqStart = parseInt(match[1], 10);
+              if (match[2]) {
+                reqEnd = parseInt(match[2], 10);
+              }
+            }
+          }
+
+          // 1. FAST PATH: Check Pure 16MB In-Memory Ring Buffer
+          const mem = this.memoryBufferCache.get(targetUrl);
+          if (mem && mem.buffer.length > 0) {
+            const canServeFromMemory = (
+              reqStart < mem.buffer.length &&
+              (
+                (reqEnd !== null && reqEnd < mem.buffer.length) ||
+                (reqEnd === null && mem.totalLength !== null && mem.buffer.length >= mem.totalLength)
+              )
+            );
+
+            if (canServeFromMemory) {
+              const end = reqEnd !== null ? reqEnd : (mem.totalLength ? mem.totalLength - 1 : mem.buffer.length - 1);
+              const slice = mem.buffer.subarray(reqStart, end + 1);
+              const totalStr = mem.totalLength !== null ? mem.totalLength.toString() : '*';
+
+              res.writeHead(rangeHeader ? 206 : 200, {
+                'Content-Type': mem.contentType || 'video/mp4',
+                'Content-Length': slice.length.toString(),
+                'Content-Range': `bytes ${reqStart}-${end}/${totalStr}`,
+                'Accept-Ranges': 'bytes',
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Headers': '*',
+                'Cache-Control': 'no-cache',
+              });
+              res.end(slice);
+              return;
+            }
+          }
+
           // If it's a Google Drive link, resolve download URL with cookies/confirm token
           const gdrive = GoogleDriveService.getInstance();
           const storage = StorageService.getInstance();
@@ -144,11 +198,11 @@ export class StreamProxyService {
               const resolved = await gdrive.resolveDownloadUrl(targetUrl, settings);
               resolvedUrl = resolved.url;
               customHeaders = resolved.headers;
-              // Cache for 15 minutes to eliminate latency on range / seek requests
+              // Cache for 30 minutes to eliminate latency on range / seek requests
               this.resolvedUrlCache.set(targetUrl, {
                 url: resolvedUrl,
                 headers: customHeaders,
-                expiresAt: Date.now() + 15 * 60 * 1000,
+                expiresAt: Date.now() + 30 * 60 * 1000,
               });
             } catch (resolveErr) {
               console.warn('Failed to resolve target url via gdrive service, using raw url:', resolveErr);
@@ -182,7 +236,7 @@ export class StreamProxyService {
                 const redirectUrl = proxyRes.headers.location;
                 const redirectClient = redirectUrl.startsWith('https:') ? https : http;
                 const subReq = redirectClient.request(redirectUrl, { method: req.method, headers }, (subRes) => {
-                  this.pipeProxyResponse(subRes, res);
+                  this.pipeProxyResponse(subRes, res, targetUrl, reqStart);
                 });
                 subReq.on('error', (err) => {
                   if (!res.headersSent) {
@@ -194,7 +248,7 @@ export class StreamProxyService {
                 return;
               }
 
-              this.pipeProxyResponse(proxyRes, res);
+              this.pipeProxyResponse(proxyRes, res, targetUrl, reqStart);
             }
           );
 
@@ -247,7 +301,12 @@ export class StreamProxyService {
     });
   }
 
-  private pipeProxyResponse(sourceRes: http.IncomingMessage, targetRes: http.ServerResponse): void {
+  private pipeProxyResponse(
+    sourceRes: http.IncomingMessage, 
+    targetRes: http.ServerResponse,
+    targetUrl?: string,
+    reqStart: number = 0
+  ): void {
     const resHeaders: Record<string, any> = {
       'Access-Control-Allow-Origin': '*',
       'Access-Control-Allow-Headers': '*',
@@ -270,7 +329,51 @@ export class StreamProxyService {
     }
 
     targetRes.writeHead(sourceRes.statusCode || 200, resHeaders);
+
+    // If request starts from byte 0 and targetUrl is given, accumulate up to 16MB in Pure RAM Buffer
+    if (targetUrl && reqStart === 0 && (sourceRes.statusCode === 200 || sourceRes.statusCode === 206)) {
+      const chunks: Buffer[] = [];
+      let accumulated = 0;
+      const MAX_BUFFER = StreamProxyService.MAX_BUFFER_BYTES;
+
+      sourceRes.on('data', (chunk: Buffer) => {
+        if (accumulated < MAX_BUFFER) {
+          const take = Math.min(chunk.length, MAX_BUFFER - accumulated);
+          chunks.push(chunk.subarray(0, take));
+          accumulated += take;
+        }
+      });
+
+      sourceRes.on('end', () => {
+        if (chunks.length > 0) {
+          let totalLen: number | null = null;
+          const cr = sourceRes.headers['content-range'];
+          if (cr) {
+            const m = cr.match(/\/(\d+)/);
+            if (m) totalLen = parseInt(m[1], 10);
+          } else if (sourceRes.headers['content-length']) {
+            totalLen = parseInt(sourceRes.headers['content-length'], 10);
+          }
+
+          this.saveToMemoryBuffer(targetUrl, {
+            buffer: Buffer.concat(chunks),
+            totalLength: totalLen,
+            contentType: (sourceRes.headers['content-type'] as string) || 'video/mp4',
+            createdAt: Date.now(),
+          });
+        }
+      });
+    }
+
     sourceRes.pipe(targetRes);
+  }
+
+  private saveToMemoryBuffer(key: string, entry: MemoryBufferEntry): void {
+    if (this.memoryBufferCache.size >= StreamProxyService.MAX_CACHE_ENTRIES) {
+      const oldestKey = this.memoryBufferCache.keys().next().value;
+      if (oldestKey) this.memoryBufferCache.delete(oldestKey);
+    }
+    this.memoryBufferCache.set(key, entry);
   }
 
   public getPort(): number {

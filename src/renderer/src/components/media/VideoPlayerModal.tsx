@@ -232,6 +232,7 @@ export const VideoPlayerModal: React.FC<VideoPlayerModalProps> = ({
           src={proxyUrl || media.link}
           autoPlay
           playsInline
+          preload="auto"
           onTimeUpdate={handleTimeUpdate}
           onLoadedMetadata={handleLoadedMetadata}
           onClick={togglePlay}

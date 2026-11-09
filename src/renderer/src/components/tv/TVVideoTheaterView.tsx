@@ -11,7 +11,8 @@ import {
   Volume2,
   VolumeX,
   Sparkles,
-  Tv
+  Tv,
+  Flame,
 } from 'lucide-react';
 import { parseMediaUrl, getActiveProxyPort } from '../../utils/mediaUrl';
 import type { MediaItem } from '../../types';
@@ -37,7 +38,14 @@ export const TVVideoTheaterView: React.FC<TVVideoTheaterViewProps> = ({
   const [duration, setDuration] = useState(0);
   const [playbackMode, setPlaybackMode] = useState<'proxy' | 'direct'>('proxy');
   const [showControls, setShowControls] = useState(true);
+  const [isLoadingStream, setIsLoadingStream] = useState(true);
+  const [loadingStatus, setLoadingStatus] = useState('Đang nạp bộ đệm 16MB...');
   const hideControlsTimer = useRef<NodeJS.Timeout | null>(null);
+
+  useEffect(() => {
+    setIsLoadingStream(true);
+    setLoadingStatus('Đang nạp bộ đệm 16MB...');
+  }, [media.id]);
 
   const parsed = parseMediaUrl(media.link);
   const isYouTube = parsed.kind === 'youtube' && parsed.id;
@@ -114,15 +122,21 @@ export const TVVideoTheaterView: React.FC<TVVideoTheaterViewProps> = ({
           src={`atom://${media.localFilePath}`}
           controls={false}
           autoPlay
+          preload="auto"
+          onCanPlay={() => setIsLoadingStream(false)}
+          onWaiting={() => { setIsLoadingStream(true); setLoadingStatus('Đang nạp thêm dữ liệu...'); }}
+          onPlaying={() => setIsLoadingStream(false)}
           onTimeUpdate={handleTimeUpdate}
           className="w-full h-full object-contain"
         />
       ) : isYouTube ? (
         <iframe
-          src={`https://www.youtube-nocookie.com/embed/${parsed.id}?autoplay=1&rel=0&playsinline=1&enablejsapi=1`}
+          src={parsed.embedUrl || `https://www.youtube-nocookie.com/embed/${parsed.id}?autoplay=1&rel=0&playsinline=1&enablejsapi=1`}
           title={media.title}
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+          referrerPolicy="strict-origin-when-cross-origin"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
           allowFullScreen
+          onLoad={() => setIsLoadingStream(false)}
           className="w-full h-full border-0 absolute inset-0"
         />
       ) : isGoogleDrive && playbackMode === 'proxy' && proxyUrl ? (
@@ -131,6 +145,10 @@ export const TVVideoTheaterView: React.FC<TVVideoTheaterViewProps> = ({
           src={proxyUrl}
           controls={false}
           autoPlay
+          preload="auto"
+          onCanPlay={() => setIsLoadingStream(false)}
+          onWaiting={() => { setIsLoadingStream(true); setLoadingStatus('Đang nạp bộ đệm 16MB...'); }}
+          onPlaying={() => setIsLoadingStream(false)}
           onTimeUpdate={handleTimeUpdate}
           className="w-full h-full object-contain"
         />
@@ -140,6 +158,7 @@ export const TVVideoTheaterView: React.FC<TVVideoTheaterViewProps> = ({
           title={media.title}
           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
           allowFullScreen
+          onLoad={() => setIsLoadingStream(false)}
           className="w-full h-full border-0 absolute inset-0"
         />
       ) : (
@@ -148,9 +167,26 @@ export const TVVideoTheaterView: React.FC<TVVideoTheaterViewProps> = ({
           src={parsed.directUrl || media.link}
           controls={false}
           autoPlay
+          preload="auto"
+          onCanPlay={() => setIsLoadingStream(false)}
+          onWaiting={() => { setIsLoadingStream(true); setLoadingStatus('Đang nạp thêm dữ liệu...'); }}
+          onPlaying={() => setIsLoadingStream(false)}
           onTimeUpdate={handleTimeUpdate}
           className="w-full h-full object-contain"
         />
+      )}
+
+      {/* Amber Cinematic Loading Overlay for TV (< 0.5s) */}
+      {isLoadingStream && (
+        <div className="absolute inset-0 bg-black/75 backdrop-blur-md z-40 flex flex-col items-center justify-center gap-3 transition-opacity duration-300 pointer-events-none">
+          <div className="relative flex items-center justify-center">
+            <div className="w-14 h-14 rounded-full border-4 border-amber-500/20 border-t-amber-500 animate-spin" />
+            <Flame className="w-6 h-6 text-amber-400 absolute animate-pulse" />
+          </div>
+          <span className="text-sm font-bold text-amber-300 tracking-wide font-mono animate-pulse">
+            {loadingStatus}
+          </span>
+        </div>
       )}
 
       {/* 2. ON-SCREEN TV CONTROL OVERLAY (D-PAD & REMOTE FRIENDLY) */}

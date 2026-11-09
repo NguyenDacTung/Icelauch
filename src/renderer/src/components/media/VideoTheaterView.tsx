@@ -86,6 +86,14 @@ export const VideoTheaterView: React.FC<VideoTheaterViewProps> = ({
     return 'stream';
   });
 
+  const [isLoadingStream, setIsLoadingStream] = useState(true);
+  const [loadingStatus, setLoadingStatus] = useState('Đang nạp bộ đệm 16MB...');
+
+  useEffect(() => {
+    setIsLoadingStream(true);
+    setLoadingStatus('Đang nạp bộ đệm 16MB...');
+  }, [media.id, sourceMode]);
+
   useEffect(() => {
     if (isDownloaded) {
       setSourceMode('offline');
@@ -262,6 +270,10 @@ export const VideoTheaterView: React.FC<VideoTheaterViewProps> = ({
                   autoPlay
                   controls
                   playsInline
+                  preload="auto"
+                  onCanPlay={() => setIsLoadingStream(false)}
+                  onWaiting={() => { setIsLoadingStream(true); setLoadingStatus('Đang nạp thêm dữ liệu...'); }}
+                  onPlaying={() => setIsLoadingStream(false)}
                   onTimeUpdate={() => {
                     if (videoRef.current) {
                       setCurrentTime(videoRef.current.currentTime);
@@ -284,6 +296,7 @@ export const VideoTheaterView: React.FC<VideoTheaterViewProps> = ({
                   referrerPolicy="strict-origin-when-cross-origin"
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                   allowFullScreen
+                  onLoad={() => setIsLoadingStream(false)}
                   className="w-full h-full border-0 relative z-10"
                 />
               )}
@@ -295,6 +308,7 @@ export const VideoTheaterView: React.FC<VideoTheaterViewProps> = ({
                   title={media.title}
                   allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
                   allowFullScreen
+                  onLoad={() => setIsLoadingStream(false)}
                   className="w-full h-full border-0 relative z-10"
                 />
               )}
@@ -306,6 +320,7 @@ export const VideoTheaterView: React.FC<VideoTheaterViewProps> = ({
                   title={media.title}
                   allow="autoplay; fullscreen"
                   allowFullScreen
+                  onLoad={() => setIsLoadingStream(false)}
                   className="w-full h-full border-0 relative z-10"
                 />
               )}
@@ -318,6 +333,10 @@ export const VideoTheaterView: React.FC<VideoTheaterViewProps> = ({
                   autoPlay
                   controls
                   playsInline
+                  preload="auto"
+                  onCanPlay={() => setIsLoadingStream(false)}
+                  onWaiting={() => { setIsLoadingStream(true); setLoadingStatus('Đang nạp thêm dữ liệu...'); }}
+                  onPlaying={() => setIsLoadingStream(false)}
                   onTimeUpdate={() => {
                     if (videoRef.current) {
                       setCurrentTime(videoRef.current.currentTime);
@@ -330,6 +349,19 @@ export const VideoTheaterView: React.FC<VideoTheaterViewProps> = ({
                   onEnded={handleVideoEnded}
                   className="w-full h-full object-contain relative z-10"
                 />
+              )}
+
+              {/* Amber Cinematic Loading Overlay (< 0.5s) */}
+              {isLoadingStream && (
+                <div className="absolute inset-0 bg-black/70 backdrop-blur-sm z-20 flex flex-col items-center justify-center gap-3 transition-opacity duration-300 pointer-events-none">
+                  <div className="relative flex items-center justify-center">
+                    <div className="w-12 h-12 rounded-full border-4 border-amber-500/20 border-t-amber-500 animate-spin" />
+                    <Flame className="w-5 h-5 text-amber-400 absolute animate-pulse" />
+                  </div>
+                  <span className="text-xs font-bold text-amber-300/90 tracking-wide font-mono animate-pulse">
+                    {loadingStatus}
+                  </span>
+                </div>
               )}
 
               {/* Fullscreen Button Overlay on Hover */}
