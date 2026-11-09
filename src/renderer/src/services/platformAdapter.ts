@@ -172,3 +172,4 @@ export async function fetchDirectCloudCatalog(
     return { games: [], media: [], profiles: [], playlists: [] };
   }
 }
+

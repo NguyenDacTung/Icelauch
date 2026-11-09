@@ -32,3 +32,4 @@ echo [SUCCESS] Android APK built successfully!
 echo File location: android\app\build\outputs\apk\debug\app-debug.apk
 echo ===================================================
 pause
+
