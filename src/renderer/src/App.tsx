@@ -170,6 +170,20 @@ export default function App() {
           const cloud = await window.api.getCloudSyncSettings();
           if (cloud) setCloudSyncSettings(cloud);
         }
+
+        // If local catalog is empty on PC, immediately fetch from Supabase Cloud
+        if (data && data.games.length === 0 && data.media.length === 0 && window.api.syncCloud) {
+          window.api.syncCloud().then(async (syncRes: any) => {
+            if (syncRes && syncRes.success) {
+              const freshData = await window.api.getAppData();
+              if (freshData) setAppData(freshData);
+              if (window.api.getProfiles) {
+                const freshProfiles = await window.api.getProfiles();
+                if (freshProfiles) setProfiles(freshProfiles);
+              }
+            }
+          }).catch(console.warn);
+        }
       } catch (err) {
         console.error('Failed to get app data from IPC:', err);
       }

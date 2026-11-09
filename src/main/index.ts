@@ -4,7 +4,7 @@ import fs from 'fs';
 import https from 'https';
 import http from 'http';
 import * as child_process from 'child_process';
-import { StorageService } from './services/storage';
+import { StorageService, DEFAULT_SUPABASE_URL, DEFAULT_SUPABASE_ANON_KEY } from './services/storage';
 import { StreamProxyService } from './services/streamProxy';
 import { DownloadManager } from './services/downloader';
 import { GoogleDriveService } from './services/gdrive';
@@ -747,10 +747,10 @@ app.whenReady().then(async () => {
     return SupabaseSyncService.getInstance().testConnection(url, key);
   });
 
-  ipcMain.handle('cloud:sync', async (_event, { url, key }: { url?: string; key?: string }) => {
+  ipcMain.handle('cloud:sync', async (_event, { url, key }: { url?: string; key?: string } = {}) => {
     const syncSettings = storage.getCloudSyncSettings();
-    const targetUrl = url || syncSettings.supabaseUrl || '';
-    const targetKey = key || syncSettings.supabaseAnonKey || '';
+    const targetUrl = (url && url.trim()) || syncSettings.supabaseUrl || DEFAULT_SUPABASE_URL;
+    const targetKey = (key && key.trim()) || syncSettings.supabaseAnonKey || DEFAULT_SUPABASE_ANON_KEY;
 
     if (!targetUrl || !targetKey) {
       return { success: false, message: 'Chưa cấu hình Supabase Project URL hoặc Anon Key' };
@@ -874,8 +874,8 @@ app.whenReady().then(async () => {
     }
   };
 
-  // 1. Initial background sync 6s after launch
-  setTimeout(() => runAutoCloudSync('startup'), 6000);
+  // 1. Initial background sync 1s after launch
+  setTimeout(() => runAutoCloudSync('startup'), 1000);
 
   // 2. Periodic sync check (checks every 60s if interval elapsed)
   let lastSyncTimestamp = Date.now();

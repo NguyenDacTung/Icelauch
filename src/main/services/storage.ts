@@ -3,6 +3,9 @@ import path from 'path';
 import crypto from 'crypto';
 import type { AppData, Game, MediaItem, AppSettings, MediaPlaylist, UserProfile, CloudSyncSettings } from '../../renderer/src/types';
 
+export const DEFAULT_SUPABASE_URL = 'https://wqmmagfrwwctvipopazx.supabase.co';
+export const DEFAULT_SUPABASE_ANON_KEY = 'sb_publishable_l1vNbLKXXhLNnfi1pI5UnQ_0EaqbXuJ';
+
 // =========================================================================
 // MÃ PIN ADMIN GỐC / DỰ PHÒNG (PIN_PRI)
 // - Mã PIN này là bất biến, chỉ có tác giả (developer) thay đổi trực tiếp tại đây trong code.
@@ -104,9 +107,9 @@ export class StorageService {
       activeProfileId: null,
       rememberedProfileId: null,
       cloudSync: {
-        enabled: false,
-        supabaseUrl: '',
-        supabaseAnonKey: '',
+        enabled: true,
+        supabaseUrl: DEFAULT_SUPABASE_URL,
+        supabaseAnonKey: DEFAULT_SUPABASE_ANON_KEY,
         autoSyncIntervalMinutes: 5,
         lastSyncStatus: 'idle',
       },
@@ -203,12 +206,17 @@ export class StorageService {
         parsed.activeProfileId = parsed.activeProfileId || null;
         parsed.rememberedProfileId = parsed.rememberedProfileId || null;
         parsed.cloudSync = parsed.cloudSync || {
-          enabled: false,
-          supabaseUrl: '',
-          supabaseAnonKey: '',
+          enabled: true,
+          supabaseUrl: DEFAULT_SUPABASE_URL,
+          supabaseAnonKey: DEFAULT_SUPABASE_ANON_KEY,
           autoSyncIntervalMinutes: 5,
           lastSyncStatus: 'idle',
         };
+        if (!parsed.cloudSync.supabaseUrl || !parsed.cloudSync.supabaseAnonKey) {
+          parsed.cloudSync.supabaseUrl = DEFAULT_SUPABASE_URL;
+          parsed.cloudSync.supabaseAnonKey = DEFAULT_SUPABASE_ANON_KEY;
+          parsed.cloudSync.enabled = true;
+        }
         parsed.media.forEach((m: any, idx: number) => {
           if (!m.id) {
             m.id = `media-${idx + 1}-${Date.now()}`;
@@ -948,21 +956,24 @@ export class StorageService {
   }
 
   public getCloudSyncSettings(): CloudSyncSettings {
-    return this.data.cloudSync || {
-      enabled: false,
-      supabaseUrl: '',
-      supabaseAnonKey: '',
-      autoSyncIntervalMinutes: 5,
-      lastSyncStatus: 'idle',
+    const cs = this.data.cloudSync;
+    return {
+      enabled: cs?.enabled ?? true,
+      supabaseUrl: cs?.supabaseUrl || DEFAULT_SUPABASE_URL,
+      supabaseAnonKey: cs?.supabaseAnonKey || DEFAULT_SUPABASE_ANON_KEY,
+      autoSyncIntervalMinutes: cs?.autoSyncIntervalMinutes || 5,
+      lastSyncStatus: cs?.lastSyncStatus || 'idle',
+      lastSyncedAt: cs?.lastSyncedAt,
+      lastSyncMessage: cs?.lastSyncMessage,
     };
   }
 
   public saveCloudSyncSettings(settings: Partial<CloudSyncSettings>): CloudSyncSettings {
     this.data.cloudSync = {
       ...(this.data.cloudSync || {
-        enabled: false,
-        supabaseUrl: '',
-        supabaseAnonKey: '',
+        enabled: true,
+        supabaseUrl: DEFAULT_SUPABASE_URL,
+        supabaseAnonKey: DEFAULT_SUPABASE_ANON_KEY,
         autoSyncIntervalMinutes: 5,
         lastSyncStatus: 'idle',
       }),

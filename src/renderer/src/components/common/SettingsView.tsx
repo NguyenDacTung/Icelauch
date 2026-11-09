@@ -353,9 +353,12 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
   };
 
   // --- 6. SUPABASE CLOUD SYNC STATES & HANDLERS ---
-  const [cloudEnabled, setCloudEnabled] = useState(cloudSync?.enabled ?? false);
-  const [supabaseUrl, setSupabaseUrl] = useState(cloudSync?.supabaseUrl || '');
-  const [supabaseAnonKey, setSupabaseAnonKey] = useState(cloudSync?.supabaseAnonKey || '');
+  const DEFAULT_SUPABASE_URL = 'https://wqmmagfrwwctvipopazx.supabase.co';
+  const DEFAULT_SUPABASE_ANON_KEY = 'sb_publishable_l1vNbLKXXhLNnfi1pI5UnQ_0EaqbXuJ';
+
+  const [cloudEnabled, setCloudEnabled] = useState(cloudSync?.enabled ?? true);
+  const [supabaseUrl, setSupabaseUrl] = useState(cloudSync?.supabaseUrl || DEFAULT_SUPABASE_URL);
+  const [supabaseAnonKey, setSupabaseAnonKey] = useState(cloudSync?.supabaseAnonKey || DEFAULT_SUPABASE_ANON_KEY);
   const [syncInterval, setSyncInterval] = useState(cloudSync?.autoSyncIntervalMinutes || 5);
   const [cloudTestResult, setCloudTestResult] = useState<{ success?: boolean; message?: string } | null>(null);
   const [isTestingCloud, setIsTestingCloud] = useState(false);
@@ -365,9 +368,9 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
 
   React.useEffect(() => {
     if (cloudSync) {
-      setCloudEnabled(cloudSync.enabled ?? false);
-      setSupabaseUrl(cloudSync.supabaseUrl || '');
-      setSupabaseAnonKey(cloudSync.supabaseAnonKey || '');
+      setCloudEnabled(cloudSync.enabled ?? true);
+      setSupabaseUrl(cloudSync.supabaseUrl || DEFAULT_SUPABASE_URL);
+      setSupabaseAnonKey(cloudSync.supabaseAnonKey || DEFAULT_SUPABASE_ANON_KEY);
       setSyncInterval(cloudSync.autoSyncIntervalMinutes || 5);
     }
   }, [cloudSync]);
@@ -404,10 +407,19 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
     setIsSyncingCloud(true);
     setSyncMessage(null);
     try {
-      const res = await window.api.syncCloud({ url: supabaseUrl, key: supabaseAnonKey });
+      const targetUrl = (supabaseUrl && supabaseUrl.trim()) || DEFAULT_SUPABASE_URL;
+      const targetKey = (supabaseAnonKey && supabaseAnonKey.trim()) || DEFAULT_SUPABASE_ANON_KEY;
+      const res = await window.api.syncCloud({ url: targetUrl, key: targetKey });
       if (res.success) {
         sfx.playSuccess();
         setSyncMessage(`✓ ${res.message}`);
+        setCloudEnabled(true);
+        onSaveCloudSync?.({
+          enabled: true,
+          supabaseUrl: targetUrl,
+          supabaseAnonKey: targetKey,
+          autoSyncIntervalMinutes: syncInterval,
+        });
       } else {
         sfx.playError();
         setSyncMessage(`✕ ${res.message}`);
@@ -1273,7 +1285,7 @@ CREATE POLICY "Public Update Assets" ON storage.objects FOR UPDATE TO anon WITH 
               <button
                 type="button"
                 onClick={handleManualCloudSync}
-                disabled={isSyncingCloud || !cloudEnabled}
+                disabled={isSyncingCloud}
                 className={`px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all ${
                   isSyncingCloud
                     ? 'bg-white/10 text-white/50 cursor-not-allowed'
