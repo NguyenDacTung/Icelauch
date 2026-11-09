@@ -152,6 +152,8 @@ export interface AppSettings {
   askInstallLocationBeforeDownload?: boolean;
   // v1.5 Centralized Banner Manager
   bannerSettings?: AppBannerSettings;
+  // TV Settings
+  tvAutoPlayTrailer?: boolean;
 }
 
 export interface BannerItemConfig {

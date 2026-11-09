@@ -35,6 +35,7 @@ import { DeviceTVFrame } from './components/tv/DeviceTVFrame';
 import { TVHomeMediaView } from './components/tv/TVHomeMediaView';
 import { TVGameView } from './components/tv/TVGameView';
 import { TVVideoTheaterView } from './components/tv/TVVideoTheaterView';
+import { TVSettingsView } from './components/tv/TVSettingsView';
 import { sfx } from './utils/sfx';
 import { registerItemToBanner } from './utils/bannerResolver';
 import type { 
@@ -860,11 +861,13 @@ export default function App() {
 
                 {/* TV Tab 4: Cài Đặt */}
                 {currentTab === 'settings' && (
-                  <MobileSettingsView
+                  <TVSettingsView
                     settings={appData.settings}
                     isAdmin={isAdmin}
                     cloudSync={cloudSyncSettings}
-                    onChangePin={() => setIsChangeAdminPinOpen(true)}
+                    activeProfile={activeProfile}
+                    onSwitchProfile={handleSwitchProfile}
+                    onLockAdmin={handleLockAdmin}
                     onOpenAdminAuth={() => setIsAdminAuthOpen(true)}
                     onSaveSettings={handleSaveSettings}
                     onSaveCloudSync={handleSaveCloudSync}
@@ -947,6 +950,10 @@ export default function App() {
                     settings={appData.settings}
                     isAdmin={isAdmin}
                     cloudSync={cloudSyncSettings}
+                    activeProfile={activeProfile}
+                    onSwitchProfile={handleSwitchProfile}
+                    onEditProfile={() => setIsEditingCurrentProfile(true)}
+                    onLockAdmin={handleLockAdmin}
                     onChangePin={() => setIsChangeAdminPinOpen(true)}
                     onOpenAdminAuth={() => setIsAdminAuthOpen(true)}
                     onSaveSettings={handleSaveSettings}

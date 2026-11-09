@@ -369,5 +369,17 @@
     "backgroundAudioEnabled": true,
     "userGamerTitle": "Tân Binh Băng Giá"
   },
-  "playlists": []
+  "playlists": [],
+  "profiles": [],
+  "activeProfileId": null,
+  "rememberedProfileId": null,
+  "cloudSync": {
+    "enabled": false,
+    "supabaseUrl": "https://wqmmagfrwwctvipopazx.supabase.co",
+    "supabaseAnonKey": "sb_publishable_l1vNbLKXXhLNnfi1pI5UnQ_0EaqbXuJ",
+    "autoSyncIntervalMinutes": 5,
+    "lastSyncStatus": "success",
+    "lastSyncedAt": "2026-11-09T12:48:14.116Z",
+    "lastSyncMessage": "Đồng bộ thành công 0 hồ sơ với Supabase Cloud"
+  }
 }

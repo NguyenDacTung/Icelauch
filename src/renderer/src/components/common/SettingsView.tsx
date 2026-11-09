@@ -422,7 +422,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
 
   const handleCopySchemaSql = () => {
     sfx.playClick();
-    const sql = `-- Bảng Profiles
+    const sql = `-- ICELAUCH MULTI-USER & FULL CATALOG CLOUD SYNC SCHEMA
 CREATE TABLE IF NOT EXISTS icelauch_profiles (
   id TEXT PRIMARY KEY,
   nickname TEXT NOT NULL,
@@ -432,7 +432,6 @@ CREATE TABLE IF NOT EXISTS icelauch_profiles (
   last_active TIMESTAMPTZ DEFAULT now()
 );
 
--- Bảng User Data
 CREATE TABLE IF NOT EXISTS icelauch_user_data (
   profile_id TEXT PRIMARY KEY REFERENCES icelauch_profiles(id) ON DELETE CASCADE,
   library JSONB DEFAULT '[]'::jsonb,
@@ -442,11 +441,78 @@ CREATE TABLE IF NOT EXISTS icelauch_user_data (
   updated_at TIMESTAMPTZ DEFAULT now()
 );
 
+CREATE TABLE IF NOT EXISTS icelauch_games (
+  id TEXT PRIMARY KEY,
+  name TEXT NOT NULL,
+  drive_url TEXT,
+  trailer_url TEXT,
+  banner_url TEXT,
+  cover_url TEXT,
+  description TEXT,
+  category TEXT,
+  genre TEXT,
+  tags JSONB DEFAULT '[]'::jsonb,
+  action_buttons JSONB DEFAULT '[]'::jsonb,
+  featured BOOLEAN DEFAULT false,
+  release_year INT,
+  developer TEXT,
+  file_size BIGINT,
+  updated_at TIMESTAMPTZ DEFAULT now()
+);
+
+CREATE TABLE IF NOT EXISTS icelauch_media (
+  id TEXT PRIMARY KEY,
+  title TEXT NOT NULL,
+  type TEXT NOT NULL DEFAULT 'video',
+  link TEXT NOT NULL,
+  cover_path TEXT,
+  banner_path TEXT,
+  description TEXT,
+  category TEXT,
+  tags JSONB DEFAULT '[]'::jsonb,
+  duration INT DEFAULT 0,
+  is_banner_pinned BOOLEAN DEFAULT false,
+  updated_at TIMESTAMPTZ DEFAULT now()
+);
+
+CREATE TABLE IF NOT EXISTS icelauch_playlists (
+  id TEXT PRIMARY KEY,
+  title TEXT NOT NULL,
+  description TEXT,
+  cover_path TEXT,
+  item_ids JSONB DEFAULT '[]'::jsonb,
+  updated_at TIMESTAMPTZ DEFAULT now()
+);
+
 ALTER TABLE icelauch_profiles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE icelauch_user_data ENABLE ROW LEVEL SECURITY;
+ALTER TABLE icelauch_games ENABLE ROW LEVEL SECURITY;
+ALTER TABLE icelauch_media ENABLE ROW LEVEL SECURITY;
+ALTER TABLE icelauch_playlists ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Icelauch Profiles Anon All" ON icelauch_profiles;
+DROP POLICY IF EXISTS "Icelauch User Data Anon All" ON icelauch_user_data;
+DROP POLICY IF EXISTS "Icelauch Games Anon All" ON icelauch_games;
+DROP POLICY IF EXISTS "Icelauch Media Anon All" ON icelauch_media;
+DROP POLICY IF EXISTS "Icelauch Playlists Anon All" ON icelauch_playlists;
 
 CREATE POLICY "Icelauch Profiles Anon All" ON icelauch_profiles FOR ALL TO anon USING (true) WITH CHECK (true);
-CREATE POLICY "Icelauch User Data Anon All" ON icelauch_user_data FOR ALL TO anon USING (true) WITH CHECK (true);`;
+CREATE POLICY "Icelauch User Data Anon All" ON icelauch_user_data FOR ALL TO anon USING (true) WITH CHECK (true);
+CREATE POLICY "Icelauch Games Anon All" ON icelauch_games FOR ALL TO anon USING (true) WITH CHECK (true);
+CREATE POLICY "Icelauch Media Anon All" ON icelauch_media FOR ALL TO anon USING (true) WITH CHECK (true);
+CREATE POLICY "Icelauch Playlists Anon All" ON icelauch_playlists FOR ALL TO anon USING (true) WITH CHECK (true);
+
+INSERT INTO storage.buckets (id, name, public)
+VALUES ('icelauch-assets', 'icelauch-assets', true)
+ON CONFLICT (id) DO NOTHING;
+
+DROP POLICY IF EXISTS "Public Read Assets" ON storage.objects;
+DROP POLICY IF EXISTS "Public Upload Assets" ON storage.objects;
+DROP POLICY IF EXISTS "Public Update Assets" ON storage.objects;
+
+CREATE POLICY "Public Read Assets" ON storage.objects FOR SELECT TO public USING (bucket_id = 'icelauch-assets');
+CREATE POLICY "Public Upload Assets" ON storage.objects FOR INSERT TO anon WITH CHECK (bucket_id = 'icelauch-assets');
+CREATE POLICY "Public Update Assets" ON storage.objects FOR UPDATE TO anon WITH CHECK (bucket_id = 'icelauch-assets');`;
 
     navigator.clipboard.writeText(sql);
     setCopiedSql(true);
@@ -454,17 +520,18 @@ CREATE POLICY "Icelauch User Data Anon All" ON icelauch_user_data FOR ALL TO ano
   };
 
   return (
-    <div className="flex-1 flex flex-col overflow-y-auto px-8 py-6 max-w-5xl select-none space-y-6">
-      {/* Title & Header */}
-      <div>
-        <h1 className="text-2xl font-black text-white tracking-wide flex items-center gap-2.5">
-          <Sliders className="w-6 h-6 text-amber-400" />
-          <span>CÀI ĐẶT & QUẢN TRỊ HỆ THỐNG</span>
-        </h1>
-        <p className="text-xs text-ice-subtext mt-1">
-          Tùy chỉnh giao diện, hiệu ứng mùa hè/đông/thu/xuân, thư viện nút mở app ngoài, lưu trữ di động và bảo mật.
-        </p>
-      </div>
+    <div className="flex-1 w-full overflow-y-auto select-none custom-scrollbar">
+      <div className="w-full max-w-5xl mx-auto px-8 py-8 space-y-6">
+        {/* Title & Header */}
+        <div>
+          <h1 className="text-2xl font-black text-white tracking-wide flex items-center gap-2.5">
+            <Sliders className="w-6 h-6 text-amber-400" />
+            <span>CÀI ĐẶT & QUẢN TRỊ HỆ THỐNG</span>
+          </h1>
+          <p className="text-xs text-ice-subtext mt-1">
+            Tùy chỉnh giao diện, hiệu ứng mùa hè/đông/thu/xuân, thư viện nút mở app ngoài, lưu trữ di động và bảo mật.
+          </p>
+        </div>
 
       {/* 4 Categorized Tabs Navigation */}
       <div className="flex items-center gap-2 p-1.5 rounded-2xl bg-ice-card border border-ice-border shadow-md">
@@ -902,7 +969,7 @@ CREATE POLICY "Icelauch User Data Anon All" ON icelauch_user_data FOR ALL TO ano
                 </p>
               </div>
 
-              {isAdmin && (
+              {isAdmin ? (
                 <button
                   onClick={() => {
                     sfx.playClick();
@@ -913,6 +980,15 @@ CREATE POLICY "Icelauch User Data Anon All" ON icelauch_user_data FOR ALL TO ano
                 >
                   <Plus className="w-4 h-4" />
                   <span>+ Thêm Nút Mới</span>
+                </button>
+              ) : (
+                <button
+                  onClick={onOpenAdminAuth}
+                  className="px-3.5 py-1.5 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 border border-amber-500/30 text-xs font-bold transition-colors flex items-center gap-1.5"
+                  title="Nhập mã PIN Admin để thêm hoặc sửa nút liên kết"
+                >
+                  <Lock className="w-3.5 h-3.5" />
+                  <span>Mở Khóa Admin Để Thêm / Sửa Nút</span>
                 </button>
               )}
             </div>
@@ -1221,171 +1297,223 @@ CREATE POLICY "Icelauch User Data Anon All" ON icelauch_user_data FOR ALL TO ano
             </div>
           )}
 
-          {/* Section 1: Configuration Form */}
-          <section className="p-6 rounded-2xl bg-ice-card border border-ice-border shadow-md space-y-5">
-            <div className="flex items-center justify-between pb-4 border-b border-ice-border/60">
-              <div className="space-y-0.5">
-                <span className="text-sm font-bold text-white block">Cấu Hình Kết Nối Supabase</span>
-                <span className="text-xs text-ice-subtext block">
-                  Sử dụng cơ sở dữ liệu PostgreSQL miễn phí của Supabase để lưu trữ an toàn
+          {/* User Auto-Sync Interval Card (Visible to All Users) */}
+          <section className="p-6 rounded-2xl bg-ice-card border border-ice-border shadow-md space-y-4">
+            <div className="flex items-center justify-between border-b border-ice-border/60 pb-3">
+              <div>
+                <span className="text-sm font-bold text-white block">Tùy Chọn Tự Động Đồng Bộ Ngầm</span>
+                <span className="text-xs text-ice-subtext block mt-0.5">
+                  Tự động đồng bộ tiến độ phim, danh sách yêu thích và thư viện game sau mỗi khoảng thời gian
                 </span>
               </div>
-
-              {/* Master Toggle */}
-              <label className="flex items-center gap-2.5 cursor-pointer">
-                <span className="text-xs font-bold text-ice-subtext">Kích hoạt:</span>
-                <input
-                  type="checkbox"
-                  checked={cloudEnabled}
-                  onChange={(e) => setCloudEnabled(e.target.checked)}
-                  className="w-5 h-5 rounded accent-indigo-500 cursor-pointer"
-                />
-              </label>
+              <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold ${
+                cloudEnabled ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : 'bg-white/10 text-ice-muted'
+              }`}>
+                {cloudEnabled ? 'ĐANG KÍCH HOẠT' : 'CHƯA BẬT'}
+              </span>
             </div>
 
-            <div className="grid grid-cols-1 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
               <div className="space-y-1.5">
                 <label className="text-xs font-semibold text-ice-subtext uppercase tracking-wider">
-                  Supabase Project URL *
+                  Chu kỳ Tự Động Đồng Bộ
                 </label>
-                <input
-                  type="text"
-                  value={supabaseUrl}
-                  onChange={(e) => setSupabaseUrl(e.target.value)}
-                  placeholder="https://your-project-id.supabase.co"
-                  className="w-full h-10 px-3.5 rounded-xl bg-black/40 border border-ice-border text-xs text-white placeholder-ice-subtext/50 focus:outline-none focus:border-indigo-400 font-mono transition-colors"
-                />
+                <select
+                  value={syncInterval}
+                  onChange={(e) => {
+                    const val = Number(e.target.value);
+                    setSyncInterval(val);
+                    onSaveCloudSync?.({ autoSyncIntervalMinutes: val });
+                  }}
+                  className="w-full h-10 px-3.5 rounded-xl bg-black/40 border border-ice-border text-xs text-white focus:outline-none focus:border-indigo-400 font-semibold"
+                >
+                  <option value={3}>Mỗi 3 phút</option>
+                  <option value={5}>Mỗi 5 phút (Khuyên dùng)</option>
+                  <option value={15}>Mỗi 15 phút</option>
+                  <option value={30}>Mỗi 30 phút</option>
+                </select>
               </div>
 
-              <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-ice-subtext uppercase tracking-wider">
-                  Supabase Anon Public API Key *
-                </label>
-                <input
-                  type="password"
-                  value={supabaseAnonKey}
-                  onChange={(e) => setSupabaseAnonKey(e.target.value)}
-                  placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
-                  className="w-full h-10 px-3.5 rounded-xl bg-black/40 border border-ice-border text-xs text-white placeholder-ice-subtext/50 focus:outline-none focus:border-indigo-400 font-mono transition-colors"
-                />
-                <span className="text-[11px] text-ice-subtext block">
-                  🔒 Chỉ cần dùng Anon Key (Public Key), tuyệt đối KHÔNG cần dùng Service Role Key bí mật.
-                </span>
+              <div className="space-y-1.5 flex flex-col justify-end">
+                <div className="text-[11px] text-ice-subtext leading-relaxed p-2.5 rounded-xl bg-indigo-500/10 border border-indigo-500/20">
+                  <span className="text-indigo-300 font-bold block mb-0.5">⚡ Tự động hóa ngầm:</span>
+                  Ứng dụng tự động kiểm tra và đồng bộ khi khởi động, định kỳ mỗi {syncInterval} phút và trước khi thoát.
+                </div>
               </div>
+            </div>
+          </section>
 
-              {/* Auto-Sync Interval Selection */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
-                <div className="space-y-1.5">
-                  <label className="text-xs font-semibold text-ice-subtext uppercase tracking-wider">
-                    Chu kỳ Tự Động Đồng Bộ Ngầm
+          {/* Non-Admin Security Notice */}
+          {!isAdmin ? (
+            <div className="p-6 rounded-2xl bg-[#141722]/80 border border-amber-500/30 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-md">
+              <div className="flex items-center gap-3.5">
+                <div className="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 shrink-0">
+                  <Lock className="w-5 h-5" />
+                </div>
+                <div>
+                  <h4 className="text-xs font-bold text-white uppercase tracking-wider">
+                    Cấu Hình Máy Chủ Supabase (Dành Riêng Cho Quản Trị Viên)
+                  </h4>
+                  <p className="text-xs text-ice-subtext mt-0.5">
+                    Thông tin kết nối Supabase Project URL, Khóa API Anon và lệnh khởi tạo bảng SQL được ẩn để bảo vệ hệ thống. Nhập mã PIN Admin để chỉnh sửa.
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={onOpenAdminAuth}
+                className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-black text-xs font-bold shrink-0 transition-all flex items-center gap-1.5 shadow-md active:scale-98"
+              >
+                <ShieldCheck className="w-4 h-4" />
+                <span>Mở Khóa Quản Trị</span>
+              </button>
+            </div>
+          ) : (
+            <>
+              {/* Section 1: Configuration Form (Admin Only) */}
+              <section className="p-6 rounded-2xl bg-ice-card border border-amber-500/40 shadow-md space-y-5">
+                <div className="flex items-center justify-between pb-4 border-b border-ice-border/60">
+                  <div className="space-y-0.5">
+                    <span className="text-sm font-bold text-white flex items-center gap-2">
+                      <ShieldCheck className="w-4 h-4 text-amber-400" />
+                      <span>Cấu Hình Kết Nối Supabase (Quản Trị Viên)</span>
+                    </span>
+                    <span className="text-xs text-ice-subtext block">
+                      Sử dụng cơ sở dữ liệu PostgreSQL miễn phí của Supabase để lưu trữ an toàn
+                    </span>
+                  </div>
+
+                  {/* Master Toggle */}
+                  <label className="flex items-center gap-2.5 cursor-pointer">
+                    <span className="text-xs font-bold text-ice-subtext">Kích hoạt:</span>
+                    <input
+                      type="checkbox"
+                      checked={cloudEnabled}
+                      onChange={(e) => setCloudEnabled(e.target.checked)}
+                      className="w-5 h-5 rounded accent-indigo-500 cursor-pointer"
+                    />
                   </label>
-                  <select
-                    value={syncInterval}
-                    onChange={(e) => setSyncInterval(Number(e.target.value))}
-                    className="w-full h-10 px-3.5 rounded-xl bg-black/40 border border-ice-border text-xs text-white focus:outline-none focus:border-indigo-400 font-semibold"
-                  >
-                    <option value={3}>Mỗi 3 phút</option>
-                    <option value={5}>Mỗi 5 phút (Khuyên dùng)</option>
-                    <option value={15}>Mỗi 15 phút</option>
-                    <option value={30}>Mỗi 30 phút</option>
-                  </select>
                 </div>
 
-                <div className="space-y-1.5 flex flex-col justify-end">
-                  <div className="text-[11px] text-ice-subtext leading-relaxed p-2.5 rounded-xl bg-indigo-500/10 border border-indigo-500/20">
-                    <span className="text-indigo-300 font-bold block mb-0.5">⚡ Tự động hóa thông minh:</span>
-                    Hệ thống tự động đồng bộ khi mở app, định kỳ mỗi {syncInterval} phút và ngay khi đóng ứng dụng.
+                <div className="grid grid-cols-1 gap-4">
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-semibold text-ice-subtext uppercase tracking-wider">
+                      Supabase Project URL *
+                    </label>
+                    <input
+                      type="text"
+                      value={supabaseUrl}
+                      onChange={(e) => setSupabaseUrl(e.target.value)}
+                      placeholder="https://your-project-id.supabase.co"
+                      className="w-full h-10 px-3.5 rounded-xl bg-black/40 border border-ice-border text-xs text-white placeholder-ice-subtext/50 focus:outline-none focus:border-indigo-400 font-mono transition-colors"
+                    />
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-semibold text-ice-subtext uppercase tracking-wider">
+                      Supabase Anon Public API Key *
+                    </label>
+                    <input
+                      type="password"
+                      value={supabaseAnonKey}
+                      onChange={(e) => setSupabaseAnonKey(e.target.value)}
+                      placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                      className="w-full h-10 px-3.5 rounded-xl bg-black/40 border border-ice-border text-xs text-white placeholder-ice-subtext/50 focus:outline-none focus:border-indigo-400 font-mono transition-colors"
+                    />
+                    <span className="text-[11px] text-ice-subtext block">
+                      🔒 Chỉ cần dùng Anon Key (Public Key), tuyệt đối KHÔNG cần dùng Service Role Key bí mật.
+                    </span>
                   </div>
                 </div>
-              </div>
-            </div>
 
-            {/* Test Connection Result Box */}
-            {cloudTestResult && (
-              <div className={`p-3.5 rounded-xl text-xs font-medium border flex items-center gap-2.5 ${
-                cloudTestResult.success
-                  ? 'bg-emerald-500/15 border-emerald-500/30 text-emerald-300'
-                  : 'bg-rose-500/15 border-rose-500/30 text-rose-300'
-              }`}>
-                {cloudTestResult.success ? (
-                  <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-400" />
-                ) : (
-                  <AlertCircle className="w-4 h-4 shrink-0 text-rose-400" />
+                {/* Test Connection Result Box */}
+                {cloudTestResult && (
+                  <div className={`p-3.5 rounded-xl text-xs font-medium border flex items-center gap-2.5 ${
+                    cloudTestResult.success
+                      ? 'bg-emerald-500/15 border-emerald-500/30 text-emerald-300'
+                      : 'bg-rose-500/15 border-rose-500/30 text-rose-300'
+                  }`}>
+                    {cloudTestResult.success ? (
+                      <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-400" />
+                    ) : (
+                      <AlertCircle className="w-4 h-4 shrink-0 text-rose-400" />
+                    )}
+                    <span>{cloudTestResult.message}</span>
+                  </div>
                 )}
-                <span>{cloudTestResult.message}</span>
-              </div>
-            )}
 
-            {/* Action Buttons */}
-            <div className="flex flex-wrap items-center justify-between pt-2 gap-3">
-              <button
-                type="button"
-                onClick={handleTestCloudConnection}
-                disabled={isTestingCloud || !supabaseUrl || !supabaseAnonKey}
-                className="px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/15 text-white text-xs font-bold flex items-center gap-2 transition-colors border border-white/10 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                <Database className={`w-3.5 h-3.5 text-indigo-400 ${isTestingCloud ? 'animate-spin' : ''}`} />
-                <span>{isTestingCloud ? 'Đang kiểm tra kết nối...' : 'Kiểm Tra Kết Nối'}</span>
-              </button>
+                {/* Action Buttons */}
+                <div className="flex flex-wrap items-center justify-between pt-2 gap-3">
+                  <button
+                    type="button"
+                    onClick={handleTestCloudConnection}
+                    disabled={isTestingCloud || !supabaseUrl || !supabaseAnonKey}
+                    className="px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/15 text-white text-xs font-bold flex items-center gap-2 transition-colors border border-white/10 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <Database className={`w-3.5 h-3.5 text-indigo-400 ${isTestingCloud ? 'animate-spin' : ''}`} />
+                    <span>{isTestingCloud ? 'Đang kiểm tra kết nối...' : 'Kiểm Tra Kết Nối'}</span>
+                  </button>
 
-              <button
-                type="button"
-                onClick={handleSaveCloudSettings}
-                className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 text-white text-xs font-black tracking-wider uppercase flex items-center gap-2 shadow-lg shadow-emerald-950/40 transition-all transform hover:-translate-y-0.5"
-              >
-                <Check className="w-4 h-4" />
-                <span>Lưu Cài Đặt Đồng Bộ</span>
-              </button>
-            </div>
-          </section>
+                  <button
+                    type="button"
+                    onClick={handleSaveCloudSettings}
+                    className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 text-white text-xs font-black tracking-wider uppercase flex items-center gap-2 shadow-lg shadow-emerald-950/40 transition-all transform hover:-translate-y-0.5"
+                  >
+                    <Check className="w-4 h-4" />
+                    <span>Lưu Cài Đặt Đồng Bộ</span>
+                  </button>
+                </div>
+              </section>
 
-          {/* Section 2: One-Click SQL Schema Guide */}
-          <section className="p-6 rounded-2xl bg-ice-card border border-ice-border shadow-md space-y-4">
-            <div className="flex items-center justify-between">
-              <div className="space-y-0.5">
-                <span className="text-sm font-bold text-white block">Hướng Dẫn Khởi Tạo Bảng Supabase (1 Lần Duy Nhất)</span>
-                <span className="text-xs text-ice-subtext block">
-                  Nếu bạn vừa tạo Project Supabase mới, hãy sao chép đoạn mã SQL này và chạy trong SQL Editor
-                </span>
-              </div>
+              {/* Section 2: One-Click SQL Schema Guide (Admin Only) */}
+              <section className="p-6 rounded-2xl bg-ice-card border border-ice-border shadow-md space-y-4">
+                <div className="flex items-center justify-between">
+                  <div className="space-y-0.5">
+                    <span className="text-sm font-bold text-white block">Hướng Dẫn Khởi Tạo Bảng Supabase (1 Lần Duy Nhất)</span>
+                    <span className="text-xs text-ice-subtext block">
+                      Nếu bạn vừa tạo Project Supabase mới, hãy sao chép đoạn mã SQL này và chạy trong SQL Editor
+                    </span>
+                  </div>
 
-              <button
-                type="button"
-                onClick={handleCopySchemaSql}
-                className={`px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all ${
-                  copiedSql
-                    ? 'bg-emerald-500 text-black shadow-md'
-                    : 'bg-indigo-500/20 hover:bg-indigo-500/30 text-indigo-300 border border-indigo-500/40'
-                }`}
-              >
-                {copiedSql ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
-                <span>{copiedSql ? 'Đã Sao Chép SQL!' : 'Sao Chép Mã SQL Schema'}</span>
-              </button>
-            </div>
+                  <button
+                    type="button"
+                    onClick={handleCopySchemaSql}
+                    className={`px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all ${
+                      copiedSql
+                        ? 'bg-emerald-500 text-black shadow-md'
+                        : 'bg-indigo-500/20 hover:bg-indigo-500/30 text-indigo-300 border border-indigo-500/40'
+                    }`}
+                  >
+                    {copiedSql ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
+                    <span>{copiedSql ? 'Đã Sao Chép SQL!' : 'Sao Chép Mã SQL Schema'}</span>
+                  </button>
+                </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 pt-2">
-              <div className="p-3.5 rounded-xl bg-white/5 border border-white/5 space-y-1">
-                <span className="text-xs font-bold text-amber-400 block">Bước 1: Tạo Project Miễn Phí</span>
-                <p className="text-[11px] text-ice-subtext leading-relaxed">
-                  Truy cập <strong>supabase.com</strong>, tạo một Project mới bất kỳ (chọn vùng Singapore để tốc độ nhanh nhất).
-                </p>
-              </div>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3 pt-2">
+                  <div className="p-3.5 rounded-xl bg-white/5 border border-white/5 space-y-1">
+                    <span className="text-xs font-bold text-amber-400 block">Bước 1: Tạo Project Miễn Phí</span>
+                    <p className="text-[11px] text-ice-subtext leading-relaxed">
+                      Truy cập <strong>supabase.com</strong>, tạo một Project mới bất kỳ (chọn vùng Singapore để tốc độ nhanh nhất).
+                    </p>
+                  </div>
 
-              <div className="p-3.5 rounded-xl bg-white/5 border border-white/5 space-y-1">
-                <span className="text-xs font-bold text-amber-400 block">Bước 2: Chạy Mã SQL</span>
-                <p className="text-[11px] text-ice-subtext leading-relaxed">
-                  Vào thanh menu bên trái &gt; <strong>SQL Editor</strong> &gt; Bấm <em>New query</em> &gt; Dán đoạn mã vừa sao chép ở trên rồi bấm <strong>Run</strong>.
-                </p>
-              </div>
+                  <div className="p-3.5 rounded-xl bg-white/5 border border-white/5 space-y-1">
+                    <span className="text-xs font-bold text-amber-400 block">Bước 2: Chạy Mã SQL</span>
+                    <p className="text-[11px] text-ice-subtext leading-relaxed">
+                      Vào thanh menu bên trái &gt; <strong>SQL Editor</strong> &gt; Bấm <em>New query</em> &gt; Dán đoạn mã vừa sao chép ở trên rồi bấm <strong>Run</strong>.
+                    </p>
+                  </div>
 
-              <div className="p-3.5 rounded-xl bg-white/5 border border-white/5 space-y-1">
-                <span className="text-xs font-bold text-amber-400 block">Bước 3: Lấy Khóa API</span>
-                <p className="text-[11px] text-ice-subtext leading-relaxed">
-                  Vào <strong>Project Settings &gt; Data API</strong>, copy <em>Project URL</em> và <em>anon public key</em> dán vào bảng trên là xong!
-                </p>
-              </div>
-            </div>
-          </section>
+                  <div className="p-3.5 rounded-xl bg-white/5 border border-white/5 space-y-1">
+                    <span className="text-xs font-bold text-amber-400 block">Bước 3: Lấy Khóa API</span>
+                    <p className="text-[11px] text-ice-subtext leading-relaxed">
+                      Vào <strong>Project Settings &gt; Data API</strong>, copy <em>Project URL</em> và <em>anon public key</em> dán vào bảng trên là xong!
+                    </p>
+                  </div>
+                </div>
+              </section>
+            </>
+          )}
         </div>
       )}
 
@@ -1759,6 +1887,7 @@ CREATE POLICY "Icelauch User Data Anon All" ON icelauch_user_data FOR ALL TO ano
           onSave={handleSaveActionButton}
         />
       )}
+      </div>
     </div>
   );
 };
