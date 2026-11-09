@@ -25,6 +25,7 @@ interface LibraryViewProps {
   games: Game[];
   selectedGameId: string | null;
   isAdmin?: boolean;
+  userLibraryIds?: string[];
   onSelectGame: (game: Game) => void;
   onOpenDetail?: (game: Game) => void;
   onLaunch: (id: string) => void;
@@ -44,6 +45,7 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
   games,
   selectedGameId,
   isAdmin = false,
+  userLibraryIds,
   onSelectGame,
   onOpenDetail,
   onLaunch,
@@ -62,9 +64,11 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
   const [search, setSearch] = useState('');
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
-  // Library contains games that are inLibrary OR downloaded/installed (filtered for normal users)
+  // Library contains games that are in personal library OR downloaded/installed
+  const isPersonalInLibrary = (g: Game) => userLibraryIds ? userLibraryIds.includes(g.id) : g.inLibrary;
+
   const libraryGames = games.filter(
-    (g) => (isAdmin || !g.hidden) && (g.inLibrary || g.status === 'ready' || g.status === 'downloading' || g.status === 'installing')
+    (g) => (isAdmin || !g.hidden) && (isPersonalInLibrary(g) || g.status === 'ready' || g.status === 'downloading' || g.status === 'installing')
   );
 
   // Filter

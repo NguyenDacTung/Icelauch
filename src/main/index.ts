@@ -13,7 +13,9 @@ import { ExeScannerService } from './services/exeScanner';
 import { GameRunnerService } from './services/gameRunner';
 import { MediaDownloadManager } from './services/mediaDownloader';
 import { UpdateManager } from './services/updateManager';
-import type { Game, MediaItem, AppSettings, MediaPlaylist } from '../renderer/src/types';
+import { SupabaseSyncService } from './services/supabaseSync';
+import crypto from 'crypto';
+import type { Game, MediaItem, AppSettings, MediaPlaylist, UserProfile, CloudSyncSettings } from '../renderer/src/types';
 
 // Force dark theme across Windows DWM and remove global application menu
 nativeTheme.themeSource = 'dark';
@@ -651,6 +653,120 @@ app.whenReady().then(async () => {
     } catch (err: any) {
       console.error('Failed to launch action:', err);
       return { success: false, error: err?.message || String(err) };
+    }
+  });
+
+  // ==========================================
+  // MULTI-USER PROFILES & CLOUD SYNC IPC
+  // ==========================================
+  ipcMain.handle('profile:get-all', () => {
+    return storage.getProfiles();
+  });
+
+  ipcMain.handle('profile:get-active', () => {
+    return storage.getActiveProfile();
+  });
+
+  ipcMain.handle('profile:get-remembered', () => {
+    return storage.getRememberedProfileId();
+  });
+
+  ipcMain.handle('profile:save', (_event, profile: UserProfile) => {
+    return storage.saveProfile(profile);
+  });
+
+  ipcMain.handle('profile:delete', (_event, id: string) => {
+    return storage.deleteProfile(id);
+  });
+
+  ipcMain.handle('profile:login', (_event, { id, pin, remember }: { id: string; pin: string; remember?: boolean }) => {
+    const p = storage.getProfile(id);
+    if (!p) {
+      return { success: false, error: 'Không tìm thấy hồ sơ người dùng' };
+    }
+
+    const hashedInput = crypto.createHash('sha256').update(pin || '').digest('hex');
+    if (p.pinHash && p.pinHash !== hashedInput) {
+      return { success: false, error: 'Mã PIN không chính xác' };
+    }
+
+    storage.setActiveProfileId(id);
+    if (remember) {
+      storage.setRememberedProfileId(id);
+    } else if (storage.getRememberedProfileId() === id) {
+      storage.setRememberedProfileId(null);
+    }
+
+    return { success: true, profile: p };
+  });
+
+  ipcMain.handle('profile:switch', () => {
+    storage.setActiveProfileId(null);
+    return { success: true };
+  });
+
+  ipcMain.handle('profile:logout', () => {
+    storage.setActiveProfileId(null);
+    storage.setRememberedProfileId(null);
+    return { success: true };
+  });
+
+  ipcMain.handle('profile:update-library', (_event, { profileId, gameId, inLibrary }: { profileId: string; gameId: string; inLibrary: boolean }) => {
+    storage.updateProfileLibrary(profileId, gameId, inLibrary);
+    return { success: true };
+  });
+
+  ipcMain.handle('profile:update-watch-progress', (_event, { profileId, mediaId, position, duration, completed }: { profileId: string; mediaId: string; position: number; duration: number; completed: boolean }) => {
+    storage.updateProfileWatchProgress(profileId, mediaId, position, duration, completed);
+    return { success: true };
+  });
+
+  ipcMain.handle('profile:update-favorite', (_event, { profileId, mediaId, isFav }: { profileId: string; mediaId: string; isFav: boolean }) => {
+    storage.updateProfileFavoriteMedia(profileId, mediaId, isFav);
+    return { success: true };
+  });
+
+  ipcMain.handle('profile:hash-pin', (_event, pin: string) => {
+    return crypto.createHash('sha256').update(pin || '').digest('hex');
+  });
+
+  // Cloud Sync Handlers
+  ipcMain.handle('cloud:get-settings', () => {
+    return storage.getCloudSyncSettings();
+  });
+
+  ipcMain.handle('cloud:save-settings', (_event, settings: Partial<CloudSyncSettings>) => {
+    return storage.saveCloudSyncSettings(settings);
+  });
+
+  ipcMain.handle('cloud:test-connection', async (_event, { url, key }: { url: string; key: string }) => {
+    return SupabaseSyncService.getInstance().testConnection(url, key);
+  });
+
+  ipcMain.handle('cloud:sync', async (_event, { url, key }: { url?: string; key?: string }) => {
+    const syncSettings = storage.getCloudSyncSettings();
+    const targetUrl = url || syncSettings.supabaseUrl || '';
+    const targetKey = key || syncSettings.supabaseAnonKey || '';
+
+    if (!targetUrl || !targetKey) {
+      return { success: false, message: 'Chưa cấu hình Supabase Project URL hoặc Anon Key' };
+    }
+
+    try {
+      const res = await SupabaseSyncService.getInstance().syncAll(targetUrl, targetKey, storage.getProfiles());
+      storage.setAllProfiles(res.updatedProfiles);
+      storage.saveCloudSyncSettings({
+        lastSyncedAt: new Date().toISOString(),
+        lastSyncStatus: 'success',
+        lastSyncMessage: res.message,
+      });
+      return { success: true, message: res.message, profiles: res.updatedProfiles };
+    } catch (err: any) {
+      storage.saveCloudSyncSettings({
+        lastSyncStatus: 'error',
+        lastSyncMessage: err?.message || 'Lỗi đồng bộ',
+      });
+      return { success: false, message: err?.message || 'Lỗi đồng bộ đám mây' };
     }
   });
 

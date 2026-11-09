@@ -28,19 +28,24 @@ import {
   Play,
   RefreshCw,
   Download,
-  GitBranch
+  GitBranch,
+  Cloud,
+  Database,
+  CheckCircle2,
+  Copy
 } from 'lucide-react';
 import type { 
   AppSettings, 
   AppActionButton, 
   ParticleConfig, 
   WallpaperConfig, 
-  SeasonTheme 
+  SeasonTheme,
+  CloudSyncSettings
 } from '../../types';
 import { ActionButtonModal } from '../admin/ActionButtonModal';
 import { sfx } from '../../utils/sfx';
 
-type SettingsTab = 'appearance' | 'integrations' | 'storage' | 'admin' | 'updates';
+type SettingsTab = 'appearance' | 'integrations' | 'storage' | 'cloud' | 'admin' | 'updates';
 
 interface SettingsViewProps {
   settings: AppSettings;
@@ -54,6 +59,8 @@ interface SettingsViewProps {
   onOpenBannerManager?: () => void;
   onUpdateTags?: (type: 'game' | 'media', tags: string[]) => void;
   onSaveSettings?: (settings: Partial<AppSettings>) => void;
+  cloudSync?: CloudSyncSettings;
+  onSaveCloudSync?: (settings: Partial<CloudSyncSettings>) => void;
 }
 
 export const SettingsView: React.FC<SettingsViewProps> = ({
@@ -68,6 +75,8 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
   onOpenBannerManager,
   onUpdateTags,
   onSaveSettings,
+  cloudSync,
+  onSaveCloudSync,
 }) => {
   const [activeTab, setActiveTab] = useState<SettingsTab>('appearance');
 
@@ -343,6 +352,107 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
     window.api?.installUpdate?.();
   };
 
+  // --- 6. SUPABASE CLOUD SYNC STATES & HANDLERS ---
+  const [cloudEnabled, setCloudEnabled] = useState(cloudSync?.enabled ?? false);
+  const [supabaseUrl, setSupabaseUrl] = useState(cloudSync?.supabaseUrl || '');
+  const [supabaseAnonKey, setSupabaseAnonKey] = useState(cloudSync?.supabaseAnonKey || '');
+  const [syncInterval, setSyncInterval] = useState(cloudSync?.autoSyncIntervalMinutes || 5);
+  const [cloudTestResult, setCloudTestResult] = useState<{ success?: boolean; message?: string } | null>(null);
+  const [isTestingCloud, setIsTestingCloud] = useState(false);
+  const [isSyncingCloud, setIsSyncingCloud] = useState(false);
+  const [syncMessage, setSyncMessage] = useState<string | null>(null);
+  const [copiedSql, setCopiedSql] = useState(false);
+
+  React.useEffect(() => {
+    if (cloudSync) {
+      setCloudEnabled(cloudSync.enabled ?? false);
+      setSupabaseUrl(cloudSync.supabaseUrl || '');
+      setSupabaseAnonKey(cloudSync.supabaseAnonKey || '');
+      setSyncInterval(cloudSync.autoSyncIntervalMinutes || 5);
+    }
+  }, [cloudSync]);
+
+  const handleTestCloudConnection = async () => {
+    sfx.playClick();
+    setIsTestingCloud(true);
+    setCloudTestResult(null);
+    try {
+      const res = await window.api.testSupabaseConnection(supabaseUrl, supabaseAnonKey);
+      setCloudTestResult(res);
+      if (res.success) sfx.playSuccess();
+      else sfx.playError();
+    } catch (err: any) {
+      setCloudTestResult({ success: false, message: err?.message || 'Lỗi kiểm tra' });
+      sfx.playError();
+    } finally {
+      setIsTestingCloud(false);
+    }
+  };
+
+  const handleSaveCloudSettings = () => {
+    sfx.playSuccess();
+    onSaveCloudSync?.({
+      enabled: cloudEnabled,
+      supabaseUrl: supabaseUrl.trim(),
+      supabaseAnonKey: supabaseAnonKey.trim(),
+      autoSyncIntervalMinutes: syncInterval,
+    });
+  };
+
+  const handleManualCloudSync = async () => {
+    sfx.playClick();
+    setIsSyncingCloud(true);
+    setSyncMessage(null);
+    try {
+      const res = await window.api.syncCloud({ url: supabaseUrl, key: supabaseAnonKey });
+      if (res.success) {
+        sfx.playSuccess();
+        setSyncMessage(`✓ ${res.message}`);
+      } else {
+        sfx.playError();
+        setSyncMessage(`✕ ${res.message}`);
+      }
+    } catch (err: any) {
+      sfx.playError();
+      setSyncMessage(`✕ ${err?.message || 'Lỗi đồng bộ'}`);
+    } finally {
+      setIsSyncingCloud(false);
+    }
+  };
+
+  const handleCopySchemaSql = () => {
+    sfx.playClick();
+    const sql = `-- Bảng Profiles
+CREATE TABLE IF NOT EXISTS icelauch_profiles (
+  id TEXT PRIMARY KEY,
+  nickname TEXT NOT NULL,
+  avatar TEXT NOT NULL DEFAULT 'avatar_1',
+  pin_hash TEXT NOT NULL,
+  created_at TIMESTAMPTZ DEFAULT now(),
+  last_active TIMESTAMPTZ DEFAULT now()
+);
+
+-- Bảng User Data
+CREATE TABLE IF NOT EXISTS icelauch_user_data (
+  profile_id TEXT PRIMARY KEY REFERENCES icelauch_profiles(id) ON DELETE CASCADE,
+  library JSONB DEFAULT '[]'::jsonb,
+  watch_progress JSONB DEFAULT '{}'::jsonb,
+  favorite_media JSONB DEFAULT '[]'::jsonb,
+  game_stats JSONB DEFAULT '{}'::jsonb,
+  updated_at TIMESTAMPTZ DEFAULT now()
+);
+
+ALTER TABLE icelauch_profiles ENABLE ROW LEVEL SECURITY;
+ALTER TABLE icelauch_user_data ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Icelauch Profiles Anon All" ON icelauch_profiles FOR ALL TO anon USING (true) WITH CHECK (true);
+CREATE POLICY "Icelauch User Data Anon All" ON icelauch_user_data FOR ALL TO anon USING (true) WITH CHECK (true);`;
+
+    navigator.clipboard.writeText(sql);
+    setCopiedSql(true);
+    setTimeout(() => setCopiedSql(false), 3000);
+  };
+
   return (
     <div className="flex-1 flex flex-col overflow-y-auto px-8 py-6 max-w-5xl select-none space-y-6">
       {/* Title & Header */}
@@ -404,6 +514,24 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
         >
           <HardDrive className="w-4 h-4 text-emerald-400" />
           <span>Lưu Trữ & Thư Mục</span>
+        </button>
+
+        <button
+          onClick={() => {
+            sfx.playClick();
+            setActiveTab('cloud');
+          }}
+          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all ${
+            activeTab === 'cloud'
+              ? 'bg-indigo-600/25 text-indigo-300 border border-indigo-500/50 shadow-md'
+              : 'text-ice-subtext hover:text-white hover:bg-white/5 border border-transparent'
+          }`}
+        >
+          <Cloud className="w-4 h-4 text-indigo-400" />
+          <span>Đồng Bộ Đám Mây</span>
+          {cloudEnabled && (
+            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" title="Đang bật đồng bộ" />
+          )}
         </button>
 
         <button
@@ -1036,6 +1164,200 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
                 />
                 <span>Mặc định yêu cầu quyền Quản trị (Admin UAC) khi thêm game mới</span>
               </label>
+            </div>
+          </section>
+        </div>
+      )}
+
+      {/* ========================================================= */}
+      {/* TAB: ĐỒNG BỘ ĐÁM MÂY SUPABASE */}
+      {/* ========================================================= */}
+      {activeTab === 'cloud' && (
+        <div className="space-y-6 animate-fade-in">
+          {/* Header Banner */}
+          <div className="p-6 rounded-2xl bg-gradient-to-r from-indigo-900/30 via-[#161922] to-blue-900/20 border border-indigo-500/30 shadow-lg flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-2xl bg-indigo-500/20 border border-indigo-500/40 flex items-center justify-center text-indigo-400 shrink-0 shadow-md">
+                <Cloud className="w-6 h-6" />
+              </div>
+              <div>
+                <h3 className="text-base font-bold text-white tracking-wide flex items-center gap-2">
+                  <span>Đồng Bộ Đám Mây Đa Thiết Bị (Supabase BaaS)</span>
+                  <span className="px-2 py-0.5 rounded text-[10px] font-mono bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 font-bold">
+                    Zero-Friction
+                  </span>
+                </h3>
+                <p className="text-xs text-ice-subtext mt-0.5 max-w-xl">
+                  Đồng bộ 2 chiều tiến độ xem phim dở, danh sách game yêu thích và hồ sơ cá nhân xuyên suốt mọi máy tính PC, Laptop và Android TV mà không cần đăng ký tài khoản phức tạp.
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2 shrink-0">
+              <button
+                type="button"
+                onClick={handleManualCloudSync}
+                disabled={isSyncingCloud || !cloudEnabled}
+                className={`px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all ${
+                  isSyncingCloud
+                    ? 'bg-white/10 text-white/50 cursor-not-allowed'
+                    : 'bg-indigo-600 hover:bg-indigo-500 text-white shadow-md shadow-indigo-950/40 transform hover:-translate-y-0.5'
+                }`}
+              >
+                <RefreshCw className={`w-3.5 h-3.5 ${isSyncingCloud ? 'animate-spin' : ''}`} />
+                <span>{isSyncingCloud ? 'Đang đồng bộ...' : 'Đồng Bộ Ngay'}</span>
+              </button>
+            </div>
+          </div>
+
+          {/* Sync Message Feedback */}
+          {syncMessage && (
+            <div className={`p-3.5 rounded-xl text-xs font-semibold flex items-center gap-2 border ${
+              syncMessage.startsWith('✓')
+                ? 'bg-emerald-500/15 border-emerald-500/30 text-emerald-300'
+                : 'bg-rose-500/15 border-rose-500/30 text-rose-300'
+            }`}>
+              <span>{syncMessage}</span>
+            </div>
+          )}
+
+          {/* Section 1: Configuration Form */}
+          <section className="p-6 rounded-2xl bg-ice-card border border-ice-border shadow-md space-y-5">
+            <div className="flex items-center justify-between pb-4 border-b border-ice-border/60">
+              <div className="space-y-0.5">
+                <span className="text-sm font-bold text-white block">Cấu Hình Kết Nối Supabase</span>
+                <span className="text-xs text-ice-subtext block">
+                  Sử dụng cơ sở dữ liệu PostgreSQL miễn phí của Supabase để lưu trữ an toàn
+                </span>
+              </div>
+
+              {/* Master Toggle */}
+              <label className="flex items-center gap-2.5 cursor-pointer">
+                <span className="text-xs font-bold text-ice-subtext">Kích hoạt:</span>
+                <input
+                  type="checkbox"
+                  checked={cloudEnabled}
+                  onChange={(e) => setCloudEnabled(e.target.checked)}
+                  className="w-5 h-5 rounded accent-indigo-500 cursor-pointer"
+                />
+              </label>
+            </div>
+
+            <div className="grid grid-cols-1 gap-4">
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-ice-subtext uppercase tracking-wider">
+                  Supabase Project URL *
+                </label>
+                <input
+                  type="text"
+                  value={supabaseUrl}
+                  onChange={(e) => setSupabaseUrl(e.target.value)}
+                  placeholder="https://your-project-id.supabase.co"
+                  className="w-full h-10 px-3.5 rounded-xl bg-black/40 border border-ice-border text-xs text-white placeholder-ice-subtext/50 focus:outline-none focus:border-indigo-400 font-mono transition-colors"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-ice-subtext uppercase tracking-wider">
+                  Supabase Anon Public API Key *
+                </label>
+                <input
+                  type="password"
+                  value={supabaseAnonKey}
+                  onChange={(e) => setSupabaseAnonKey(e.target.value)}
+                  placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                  className="w-full h-10 px-3.5 rounded-xl bg-black/40 border border-ice-border text-xs text-white placeholder-ice-subtext/50 focus:outline-none focus:border-indigo-400 font-mono transition-colors"
+                />
+                <span className="text-[11px] text-ice-subtext block">
+                  🔒 Chỉ cần dùng Anon Key (Public Key), tuyệt đối KHÔNG cần dùng Service Role Key bí mật.
+                </span>
+              </div>
+            </div>
+
+            {/* Test Connection Result Box */}
+            {cloudTestResult && (
+              <div className={`p-3.5 rounded-xl text-xs font-medium border flex items-center gap-2.5 ${
+                cloudTestResult.success
+                  ? 'bg-emerald-500/15 border-emerald-500/30 text-emerald-300'
+                  : 'bg-rose-500/15 border-rose-500/30 text-rose-300'
+              }`}>
+                {cloudTestResult.success ? (
+                  <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-400" />
+                ) : (
+                  <AlertCircle className="w-4 h-4 shrink-0 text-rose-400" />
+                )}
+                <span>{cloudTestResult.message}</span>
+              </div>
+            )}
+
+            {/* Action Buttons */}
+            <div className="flex flex-wrap items-center justify-between pt-2 gap-3">
+              <button
+                type="button"
+                onClick={handleTestCloudConnection}
+                disabled={isTestingCloud || !supabaseUrl || !supabaseAnonKey}
+                className="px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/15 text-white text-xs font-bold flex items-center gap-2 transition-colors border border-white/10 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <Database className={`w-3.5 h-3.5 text-indigo-400 ${isTestingCloud ? 'animate-spin' : ''}`} />
+                <span>{isTestingCloud ? 'Đang kiểm tra kết nối...' : 'Kiểm Tra Kết Nối'}</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={handleSaveCloudSettings}
+                className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 text-white text-xs font-black tracking-wider uppercase flex items-center gap-2 shadow-lg shadow-emerald-950/40 transition-all transform hover:-translate-y-0.5"
+              >
+                <Check className="w-4 h-4" />
+                <span>Lưu Cài Đặt Đồng Bộ</span>
+              </button>
+            </div>
+          </section>
+
+          {/* Section 2: One-Click SQL Schema Guide */}
+          <section className="p-6 rounded-2xl bg-ice-card border border-ice-border shadow-md space-y-4">
+            <div className="flex items-center justify-between">
+              <div className="space-y-0.5">
+                <span className="text-sm font-bold text-white block">Hướng Dẫn Khởi Tạo Bảng Supabase (1 Lần Duy Nhất)</span>
+                <span className="text-xs text-ice-subtext block">
+                  Nếu bạn vừa tạo Project Supabase mới, hãy sao chép đoạn mã SQL này và chạy trong SQL Editor
+                </span>
+              </div>
+
+              <button
+                type="button"
+                onClick={handleCopySchemaSql}
+                className={`px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all ${
+                  copiedSql
+                    ? 'bg-emerald-500 text-black shadow-md'
+                    : 'bg-indigo-500/20 hover:bg-indigo-500/30 text-indigo-300 border border-indigo-500/40'
+                }`}
+              >
+                {copiedSql ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
+                <span>{copiedSql ? 'Đã Sao Chép SQL!' : 'Sao Chép Mã SQL Schema'}</span>
+              </button>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 pt-2">
+              <div className="p-3.5 rounded-xl bg-white/5 border border-white/5 space-y-1">
+                <span className="text-xs font-bold text-amber-400 block">Bước 1: Tạo Project Miễn Phí</span>
+                <p className="text-[11px] text-ice-subtext leading-relaxed">
+                  Truy cập <strong>supabase.com</strong>, tạo một Project mới bất kỳ (chọn vùng Singapore để tốc độ nhanh nhất).
+                </p>
+              </div>
+
+              <div className="p-3.5 rounded-xl bg-white/5 border border-white/5 space-y-1">
+                <span className="text-xs font-bold text-amber-400 block">Bước 2: Chạy Mã SQL</span>
+                <p className="text-[11px] text-ice-subtext leading-relaxed">
+                  Vào thanh menu bên trái &gt; <strong>SQL Editor</strong> &gt; Bấm <em>New query</em> &gt; Dán đoạn mã vừa sao chép ở trên rồi bấm <strong>Run</strong>.
+                </p>
+              </div>
+
+              <div className="p-3.5 rounded-xl bg-white/5 border border-white/5 space-y-1">
+                <span className="text-xs font-bold text-amber-400 block">Bước 3: Lấy Khóa API</span>
+                <p className="text-[11px] text-ice-subtext leading-relaxed">
+                  Vào <strong>Project Settings &gt; Data API</strong>, copy <em>Project URL</em> và <em>anon public key</em> dán vào bảng trên là xong!
+                </p>
+              </div>
             </div>
           </section>
         </div>

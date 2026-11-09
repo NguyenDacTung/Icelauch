@@ -18,9 +18,23 @@ import { SeasonalParticleEngine } from './components/common/SeasonalParticleEngi
 import { AppWallpaper } from './components/common/AppWallpaper';
 import { FloatingMiniDiscWidget } from './components/media/FloatingMiniDiscWidget';
 import { UpdateToast } from './components/common/UpdateToast';
+import { ProfilePickerView } from './components/profile/ProfilePickerView';
+import { ProfileModal } from './components/profile/ProfileModal';
 import { sfx } from './utils/sfx';
 import { registerItemToBanner } from './utils/bannerResolver';
-import type { AppData, Game, MediaItem, NavigationTab, DownloadProgress, InstallProgress, MediaPlaylist, AppSettings, AppBannerSettings } from './types';
+import type { 
+  AppData, 
+  Game, 
+  MediaItem, 
+  NavigationTab, 
+  DownloadProgress, 
+  InstallProgress, 
+  MediaPlaylist, 
+  AppSettings, 
+  AppBannerSettings,
+  UserProfile,
+  CloudSyncSettings
+} from './types';
 
 export default function App() {
   const [appData, setAppData] = useState<AppData | null>(null);
@@ -53,6 +67,19 @@ export default function App() {
   const [currentTrack, setCurrentTrack] = useState<MediaItem | null>(null);
   const [isPlayingAudio, setIsPlayingAudio] = useState(false);
 
+  // Multi-User Profile State
+  const [profiles, setProfiles] = useState<UserProfile[]>([]);
+  const [activeProfile, setActiveProfile] = useState<UserProfile | null>(null);
+  const [isProfilePickerOpen, setIsProfilePickerOpen] = useState(false);
+  const [isEditingCurrentProfile, setIsEditingCurrentProfile] = useState(false);
+  const [cloudSyncSettings, setCloudSyncSettings] = useState<CloudSyncSettings>({
+    enabled: false,
+    supabaseUrl: '',
+    supabaseAnonKey: '',
+    autoSyncIntervalMinutes: 5,
+    lastSyncStatus: 'idle',
+  });
+
   // Load Initial App Data
   const loadData = async () => {
     if (window.api) {
@@ -65,6 +92,35 @@ export default function App() {
         }
         if (!data.settings?.pinHash) {
           setIsFirstRunOpen(true);
+        }
+
+        // Multi-User Profile Auto-Login & Initialization
+        if (window.api.getProfiles) {
+          const loadedProfiles = await window.api.getProfiles();
+          setProfiles(loadedProfiles || []);
+
+          const active = await window.api.getActiveProfile();
+          const rememberedId = await window.api.getRememberedProfileId();
+
+          if (active) {
+            setActiveProfile(active);
+            setIsProfilePickerOpen(false);
+          } else if (rememberedId) {
+            const remembered = (loadedProfiles || []).find((p: UserProfile) => p.id === rememberedId);
+            if (remembered) {
+              setActiveProfile(remembered);
+              setIsProfilePickerOpen(false);
+            } else if ((loadedProfiles || []).length > 0) {
+              setIsProfilePickerOpen(true);
+            }
+          } else if ((loadedProfiles || []).length > 0) {
+            setIsProfilePickerOpen(true);
+          }
+        }
+
+        if (window.api.getCloudSyncSettings) {
+          const cloud = await window.api.getCloudSyncSettings();
+          if (cloud) setCloudSyncSettings(cloud);
         }
       } catch (err) {
         console.error('Failed to get app data from IPC:', err);
@@ -245,7 +301,31 @@ export default function App() {
   };
 
   const handleToggleLibrary = async (id: string) => {
-    if (window.api) await window.api.toggleInLibrary(id);
+    if (activeProfile && window.api?.updateProfileLibrary) {
+      const isNowInLibrary = !activeProfile.library?.includes(id);
+      await window.api.updateProfileLibrary(activeProfile.id, id, isNowInLibrary);
+      setActiveProfile((prev) => {
+        if (!prev) return prev;
+        const newLib = isNowInLibrary
+          ? [...(prev.library || []), id]
+          : (prev.library || []).filter((item) => item !== id);
+        return { ...prev, library: newLib };
+      });
+      // Also update in profiles list
+      setProfiles((prev) =>
+        prev.map((p) => {
+          if (p.id === activeProfile.id) {
+            const newLib = isNowInLibrary
+              ? [...(p.library || []), id]
+              : (p.library || []).filter((item) => item !== id);
+            return { ...p, library: newLib };
+          }
+          return p;
+        })
+      );
+    } else if (window.api) {
+      await window.api.toggleInLibrary(id);
+    }
   };
 
   const handleOpenFolder = async (target: 'app' | 'games' | 'downloads' | 'gameDir', gameId?: string) => {
@@ -405,8 +485,129 @@ export default function App() {
   };
 
   const handleUpdateMediaProgress = async (mediaId: string, position: number, watched: boolean) => {
+    if (activeProfile && window.api?.updateProfileWatchProgress) {
+      const mediaItem = appData?.media.find((m) => m.id === mediaId);
+      const duration = mediaItem?.duration || 0;
+      await window.api.updateProfileWatchProgress(activeProfile.id, mediaId, position, duration, watched);
+      setActiveProfile((prev) => {
+        if (!prev) return prev;
+        return {
+          ...prev,
+          watchProgress: {
+            ...prev.watchProgress,
+            [mediaId]: {
+              currentTime: position,
+              duration,
+              completed: watched,
+              lastWatchedAt: Date.now(),
+            },
+          },
+        };
+      });
+    }
     if (window.api) {
       await window.api.updateMediaProgress(mediaId, position, watched);
+    }
+  };
+
+  // Profile Management Handlers
+  const handleSelectProfile = async (
+    profile: UserProfile,
+    remember: boolean
+  ): Promise<{ success: boolean; error?: string }> => {
+    if (window.api?.loginProfile) {
+      const res = await window.api.loginProfile({ id: profile.id, pin: (profile as any).enteredPin || '', remember });
+      if (res.success && res.profile) {
+        setActiveProfile(res.profile);
+        setIsProfilePickerOpen(false);
+        sfx.playSuccess();
+        return { success: true };
+      }
+      return { success: false, error: res.error || 'Mã PIN không đúng' };
+    }
+    setActiveProfile(profile);
+    setIsProfilePickerOpen(false);
+    return { success: true };
+  };
+
+  const handleSelectGuest = () => {
+    setActiveProfile(null);
+    setIsProfilePickerOpen(false);
+    sfx.playClick();
+  };
+
+  const handleSaveProfile = async (data: {
+    id?: string;
+    nickname: string;
+    avatar: string;
+    pin: string;
+    remember: boolean;
+  }) => {
+    if (window.api?.saveProfile) {
+      let pinHash = '';
+      if (data.pin && window.api.hashPin) {
+        pinHash = await window.api.hashPin(data.pin);
+      }
+
+      const existing = profiles.find((p) => p.id === data.id);
+      const toSave: UserProfile = {
+        id: data.id || `user-${Date.now()}`,
+        nickname: data.nickname,
+        avatar: data.avatar,
+        pinHash: pinHash || existing?.pinHash || '',
+        createdDate: existing?.createdDate || new Date().toISOString(),
+        lastActiveDate: new Date().toISOString(),
+        library: existing?.library || [],
+        favoriteMedia: existing?.favoriteMedia || [],
+        watchProgress: existing?.watchProgress || {},
+        gameStats: existing?.gameStats || {},
+      };
+
+      const saved = await window.api.saveProfile(toSave);
+      const updatedProfiles = await window.api.getProfiles();
+      setProfiles(updatedProfiles);
+      setActiveProfile(saved);
+      setIsProfilePickerOpen(false);
+
+      if (data.remember && window.api.loginProfile) {
+        await window.api.loginProfile({ id: saved.id, pin: data.pin, remember: true });
+      }
+
+      sfx.playSuccess();
+    }
+  };
+
+  const handleDeleteProfile = async (id: string) => {
+    if (window.api?.deleteProfile) {
+      await window.api.deleteProfile(id);
+      const updated = await window.api.getProfiles();
+      setProfiles(updated);
+      if (activeProfile?.id === id) {
+        setActiveProfile(null);
+        setIsProfilePickerOpen(true);
+      }
+      sfx.playSuccess();
+    }
+  };
+
+  const handleSwitchProfile = () => {
+    sfx.playClick();
+    setIsProfilePickerOpen(true);
+  };
+
+  const handleLogoutProfile = async () => {
+    sfx.playClick();
+    if (window.api?.logoutProfile) {
+      await window.api.logoutProfile();
+    }
+    setActiveProfile(null);
+    setIsProfilePickerOpen(true);
+  };
+
+  const handleSaveCloudSync = async (settings: Partial<CloudSyncSettings>) => {
+    if (window.api?.saveCloudSyncSettings) {
+      const updated = await window.api.saveCloudSyncSettings(settings);
+      setCloudSyncSettings(updated);
     }
   };
 
@@ -526,6 +727,10 @@ export default function App() {
         onOpenAdminAuth={() => setIsAdminAuthOpen(true)}
         onLockAdmin={handleLockAdmin}
         onOpenBannerManager={() => setIsBannerManagerOpen(true)}
+        activeProfile={activeProfile}
+        onSwitchProfile={handleSwitchProfile}
+        onEditCurrentProfile={() => setIsEditingCurrentProfile(true)}
+        onLogoutProfile={handleLogoutProfile}
       />
 
       {/* 2. Download Tray Floating Panel */}
@@ -596,6 +801,7 @@ export default function App() {
                 games={appData.games}
                 selectedGameId={selectedGameId}
                 isAdmin={isAdmin}
+                userLibraryIds={activeProfile?.library}
                 onSelectGame={(game) => setSelectedGameId(game.id)}
                 onOpenDetail={(game) => setViewingDetailGame(game)}
                 onLaunch={handleLaunchGame}
@@ -651,6 +857,8 @@ export default function App() {
                 onOpenAdminAuth={() => setIsAdminAuthOpen(true)}
                 onOpenBannerManager={() => setIsBannerManagerOpen(true)}
                 onSaveSettings={handleSaveSettings}
+                cloudSync={cloudSyncSettings}
+                onSaveCloudSync={handleSaveCloudSync}
                 onUpdateTags={async (type, tags) => {
                   const updatedSettings = {
                     ...appData.settings,
@@ -855,6 +1063,31 @@ export default function App() {
             setIsPlayingAudio(false);
             setCurrentTrack(null);
           }}
+        />
+      )}
+
+      {/* Netflix-Style Profile Picker */}
+      {isProfilePickerOpen && (
+        <ProfilePickerView
+          profiles={profiles}
+          onSelectProfile={handleSelectProfile}
+          onSelectGuest={handleSelectGuest}
+          onSaveProfile={handleSaveProfile}
+          onDeleteProfile={handleDeleteProfile}
+        />
+      )}
+
+      {/* Profile Edit Modal for active profile */}
+      {isEditingCurrentProfile && activeProfile && (
+        <ProfileModal
+          isOpen={true}
+          profile={activeProfile}
+          onClose={() => setIsEditingCurrentProfile(false)}
+          onSave={async (data) => {
+            await handleSaveProfile(data);
+            setIsEditingCurrentProfile(false);
+          }}
+          onDelete={handleDeleteProfile}
         />
       )}
 

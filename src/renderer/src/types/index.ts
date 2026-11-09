@@ -211,10 +211,45 @@ export interface WallpaperConfig {
   showWithParticles?: boolean;
 }
 
+export interface UserProfile {
+  id: string;                      // Unique UUID or slug
+  nickname: string;                // Display name (2 - 20 chars)
+  avatar: string;                  // Built-in avatar id ('cyber_1', 'game_1', etc.) or local file / URL
+  pinHash: string;                 // SHA-256 hash of PIN (4-10 digits)
+  createdDate: string;             // ISO 8601
+  lastActiveDate: string;          // ISO 8601
+  library: string[];               // game IDs in personal library
+  favoriteMedia: string[];         // media IDs in personal favorites
+  watchProgress: Record<string, {
+    currentTime: number;
+    duration: number;
+    completed: boolean;
+    lastWatchedAt: number;
+  }>;
+  gameStats?: Record<string, {
+    totalPlayMinutes: number;
+    lastPlayedAt: number;
+  }>;
+}
+
+export interface CloudSyncSettings {
+  enabled: boolean;
+  supabaseUrl?: string;
+  supabaseAnonKey?: string;
+  autoSyncIntervalMinutes?: number;
+  lastSyncedAt?: string;
+  lastSyncStatus?: 'success' | 'error' | 'idle';
+  lastSyncMessage?: string;
+}
+
 export interface AppData {
   games: Game[];
   media: MediaItem[];
   playlists?: MediaPlaylist[];
+  profiles?: UserProfile[];
+  activeProfileId?: string | null;
+  rememberedProfileId?: string | null;
+  cloudSync?: CloudSyncSettings;
   settings: AppSettings;
 }
 

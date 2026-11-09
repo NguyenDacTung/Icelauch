@@ -13,7 +13,8 @@ import {
   Square,
   Copy
 } from 'lucide-react';
-import type { NavigationTab } from '../../types';
+import { UserMenuWidget } from '../profile/UserMenuWidget';
+import type { NavigationTab, UserProfile } from '../../types';
 
 interface NavbarProps {
   currentTab: NavigationTab;
@@ -28,6 +29,10 @@ interface NavbarProps {
   onOpenAdminAuth: () => void;
   onLockAdmin: () => void;
   onOpenBannerManager?: () => void;
+  activeProfile?: UserProfile | null;
+  onSwitchProfile?: () => void;
+  onEditCurrentProfile?: () => void;
+  onLogoutProfile?: () => void;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
@@ -43,6 +48,10 @@ export const Navbar: React.FC<NavbarProps> = ({
   onOpenAdminAuth,
   onLockAdmin,
   onOpenBannerManager,
+  activeProfile = null,
+  onSwitchProfile,
+  onEditCurrentProfile,
+  onLogoutProfile,
 }) => {
   const [logoError, setLogoError] = useState(false);
   const [isMaximized, setIsMaximized] = useState(false);
@@ -223,6 +232,16 @@ export const Navbar: React.FC<NavbarProps> = ({
               <Sparkles className="w-3.5 h-3.5 text-amber-400" />
               <span className="hidden sm:inline">Quản Lý Banner</span>
             </button>
+          )}
+
+          {/* Multi-User Profile Widget */}
+          {onSwitchProfile && onEditCurrentProfile && onLogoutProfile && (
+            <UserMenuWidget
+              activeProfile={activeProfile}
+              onSwitchProfile={onSwitchProfile}
+              onEditCurrentProfile={onEditCurrentProfile}
+              onLogoutProfile={onLogoutProfile}
+            />
           )}
 
           {/* Admin Lock Button */}

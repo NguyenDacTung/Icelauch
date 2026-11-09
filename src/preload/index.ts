@@ -1,5 +1,5 @@
 import { contextBridge, ipcRenderer } from 'electron';
-import type { Game, MediaItem, AppData, AppSettings, DownloadProgress, InstallProgress, MediaPlaylist } from '../renderer/src/types';
+import type { Game, MediaItem, AppData, AppSettings, DownloadProgress, InstallProgress, MediaPlaylist, UserProfile, CloudSyncSettings } from '../renderer/src/types';
 
 export const API = {
   // Data operations
@@ -73,6 +73,33 @@ export const API = {
   importData: (jsonString?: string): Promise<{ success: boolean; count?: number; error?: string }> =>
     ipcRenderer.invoke('admin:import-data', jsonString),
   loadDemoData: (): Promise<AppData> => ipcRenderer.invoke('admin:load-demo-data'),
+
+  // Multi-User Profile & Cloud Sync
+  getProfiles: (): Promise<UserProfile[]> => ipcRenderer.invoke('profile:get-all'),
+  getActiveProfile: (): Promise<UserProfile | null> => ipcRenderer.invoke('profile:get-active'),
+  getRememberedProfileId: (): Promise<string | null> => ipcRenderer.invoke('profile:get-remembered'),
+  saveProfile: (profile: Partial<UserProfile>): Promise<UserProfile> => ipcRenderer.invoke('profile:save', profile),
+  deleteProfile: (id: string): Promise<boolean> => ipcRenderer.invoke('profile:delete', id),
+  loginProfile: (data: { id: string; pin: string; remember?: boolean }): Promise<{ success: boolean; profile?: UserProfile; error?: string }> =>
+    ipcRenderer.invoke('profile:login', data),
+  switchProfile: (): Promise<{ success: boolean }> => ipcRenderer.invoke('profile:switch'),
+  logoutProfile: (): Promise<{ success: boolean }> => ipcRenderer.invoke('profile:logout'),
+  updateProfileLibrary: (profileId: string, gameId: string, inLibrary: boolean): Promise<{ success: boolean }> =>
+    ipcRenderer.invoke('profile:update-library', { profileId, gameId, inLibrary }),
+  updateProfileWatchProgress: (profileId: string, mediaId: string, position: number, duration: number, completed: boolean): Promise<{ success: boolean }> =>
+    ipcRenderer.invoke('profile:update-watch-progress', { profileId, mediaId, position, duration, completed }),
+  updateProfileFavorite: (profileId: string, mediaId: string, isFav: boolean): Promise<{ success: boolean }> =>
+    ipcRenderer.invoke('profile:update-favorite', { profileId, mediaId, isFav }),
+  hashPin: (pin: string): Promise<string> => ipcRenderer.invoke('profile:hash-pin', pin),
+
+  // Cloud Sync Settings & Action
+  getCloudSyncSettings: (): Promise<CloudSyncSettings> => ipcRenderer.invoke('cloud:get-settings'),
+  saveCloudSyncSettings: (settings: Partial<CloudSyncSettings>): Promise<CloudSyncSettings> =>
+    ipcRenderer.invoke('cloud:save-settings', settings),
+  testSupabaseConnection: (url: string, key: string): Promise<{ success: boolean; message: string }> =>
+    ipcRenderer.invoke('cloud:test-connection', { url, key }),
+  syncCloud: (options?: { url?: string; key?: string }): Promise<{ success: boolean; message: string; profiles?: UserProfile[] }> =>
+    ipcRenderer.invoke('cloud:sync', options || {}),
 
   // Event Listeners
   onGameUpdated: (callback: (game: Game) => void) => {

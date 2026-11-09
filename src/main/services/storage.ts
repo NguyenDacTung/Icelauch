@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import crypto from 'crypto';
-import type { AppData, Game, MediaItem, AppSettings, MediaPlaylist } from '../../renderer/src/types';
+import type { AppData, Game, MediaItem, AppSettings, MediaPlaylist, UserProfile, CloudSyncSettings } from '../../renderer/src/types';
 
 export class StorageService {
   private static instance: StorageService;
@@ -92,6 +92,16 @@ export class StorageService {
       games: [],
       media: [],
       playlists: [],
+      profiles: [],
+      activeProfileId: null,
+      rememberedProfileId: null,
+      cloudSync: {
+        enabled: false,
+        supabaseUrl: '',
+        supabaseAnonKey: '',
+        autoSyncIntervalMinutes: 5,
+        lastSyncStatus: 'idle',
+      },
       settings: {
         deleteArchiveDefault: true,
         runAsAdminDefault: false,
@@ -179,6 +189,16 @@ export class StorageService {
         parsed.games = parsed.games || [];
         parsed.media = parsed.media || [];
         parsed.playlists = parsed.playlists || [];
+        parsed.profiles = parsed.profiles || [];
+        parsed.activeProfileId = parsed.activeProfileId || null;
+        parsed.rememberedProfileId = parsed.rememberedProfileId || null;
+        parsed.cloudSync = parsed.cloudSync || {
+          enabled: false,
+          supabaseUrl: '',
+          supabaseAnonKey: '',
+          autoSyncIntervalMinutes: 5,
+          lastSyncStatus: 'idle',
+        };
         parsed.media.forEach((m: any, idx: number) => {
           if (!m.id) {
             m.id = `media-${idx + 1}-${Date.now()}`;
@@ -709,5 +729,177 @@ export class StorageService {
     this.data.media = demoMedia;
     this.saveDataAtomic();
     return this.data;
+  }
+
+  // ==========================================
+  // MULTI-USER PROFILES & CLOUD SYNC SERVICES
+  // ==========================================
+
+  public getProfiles(): UserProfile[] {
+    return this.data.profiles || [];
+  }
+
+  public getProfile(id: string): UserProfile | null {
+    return (this.data.profiles || []).find((p) => p.id === id) || null;
+  }
+
+  public getActiveProfile(): UserProfile | null {
+    if (!this.data.activeProfileId) return null;
+    return this.getProfile(this.data.activeProfileId);
+  }
+
+  public getRememberedProfileId(): string | null {
+    return this.data.rememberedProfileId || null;
+  }
+
+  public setRememberedProfileId(id: string | null): void {
+    this.data.rememberedProfileId = id;
+    this.saveDataAtomic();
+  }
+
+  public setActiveProfileId(id: string | null): void {
+    this.data.activeProfileId = id;
+    if (id) {
+      const p = this.getProfile(id);
+      if (p) {
+        p.lastActiveDate = new Date().toISOString();
+      }
+    }
+    this.saveDataAtomic();
+  }
+
+  public saveProfile(profile: UserProfile): UserProfile {
+    if (!this.data.profiles) {
+      this.data.profiles = [];
+    }
+
+    const idx = this.data.profiles.findIndex((p) => p.id === profile.id);
+    if (idx !== -1) {
+      this.data.profiles[idx] = {
+        ...this.data.profiles[idx],
+        ...profile,
+        lastActiveDate: new Date().toISOString(),
+      };
+      profile = this.data.profiles[idx];
+    } else {
+      if (!profile.id) {
+        profile.id = `user-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`;
+      }
+      profile.createdDate = profile.createdDate || new Date().toISOString();
+      profile.lastActiveDate = new Date().toISOString();
+      profile.library = profile.library || [];
+      profile.favoriteMedia = profile.favoriteMedia || [];
+      profile.watchProgress = profile.watchProgress || {};
+      profile.gameStats = profile.gameStats || {};
+      this.data.profiles.push(profile);
+    }
+
+    this.saveDataAtomic();
+    return profile;
+  }
+
+  public deleteProfile(id: string): boolean {
+    if (!this.data.profiles) return false;
+    const initialLen = this.data.profiles.length;
+    this.data.profiles = this.data.profiles.filter((p) => p.id !== id);
+
+    if (this.data.activeProfileId === id) {
+      this.data.activeProfileId = null;
+    }
+    if (this.data.rememberedProfileId === id) {
+      this.data.rememberedProfileId = null;
+    }
+
+    this.saveDataAtomic();
+    return this.data.profiles.length < initialLen;
+  }
+
+  public setAllProfiles(profiles: UserProfile[]): void {
+    this.data.profiles = profiles;
+    this.saveDataAtomic();
+  }
+
+  public updateProfileLibrary(profileId: string, gameId: string, inLibrary: boolean): void {
+    const prof = this.getProfile(profileId);
+    if (!prof) return;
+
+    prof.library = prof.library || [];
+    if (inLibrary) {
+      if (!prof.library.includes(gameId)) prof.library.push(gameId);
+    } else {
+      prof.library = prof.library.filter((id) => id !== gameId);
+    }
+    this.saveDataAtomic();
+  }
+
+  public updateProfileWatchProgress(
+    profileId: string,
+    mediaId: string,
+    position: number,
+    duration: number,
+    completed: boolean
+  ): void {
+    const prof = this.getProfile(profileId);
+    if (!prof) return;
+
+    prof.watchProgress = prof.watchProgress || {};
+    prof.watchProgress[mediaId] = {
+      currentTime: position,
+      duration: duration || 0,
+      completed,
+      lastWatchedAt: Date.now(),
+    };
+    this.saveDataAtomic();
+  }
+
+  public updateProfileFavoriteMedia(profileId: string, mediaId: string, isFav: boolean): void {
+    const prof = this.getProfile(profileId);
+    if (!prof) return;
+
+    prof.favoriteMedia = prof.favoriteMedia || [];
+    if (isFav) {
+      if (!prof.favoriteMedia.includes(mediaId)) prof.favoriteMedia.push(mediaId);
+    } else {
+      prof.favoriteMedia = prof.favoriteMedia.filter((id) => id !== mediaId);
+    }
+    this.saveDataAtomic();
+  }
+
+  public updateProfileGameStats(profileId: string, gameId: string, playedMinutes: number): void {
+    const prof = this.getProfile(profileId);
+    if (!prof) return;
+
+    prof.gameStats = prof.gameStats || {};
+    const curr = prof.gameStats[gameId] || { totalPlayMinutes: 0, lastPlayedAt: 0 };
+    prof.gameStats[gameId] = {
+      totalPlayMinutes: curr.totalPlayMinutes + playedMinutes,
+      lastPlayedAt: Date.now(),
+    };
+    this.saveDataAtomic();
+  }
+
+  public getCloudSyncSettings(): CloudSyncSettings {
+    return this.data.cloudSync || {
+      enabled: false,
+      supabaseUrl: '',
+      supabaseAnonKey: '',
+      autoSyncIntervalMinutes: 5,
+      lastSyncStatus: 'idle',
+    };
+  }
+
+  public saveCloudSyncSettings(settings: Partial<CloudSyncSettings>): CloudSyncSettings {
+    this.data.cloudSync = {
+      ...(this.data.cloudSync || {
+        enabled: false,
+        supabaseUrl: '',
+        supabaseAnonKey: '',
+        autoSyncIntervalMinutes: 5,
+        lastSyncStatus: 'idle',
+      }),
+      ...settings,
+    };
+    this.saveDataAtomic();
+    return this.data.cloudSync;
   }
 }

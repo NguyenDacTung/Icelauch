@@ -10,6 +10,19 @@
 
 **Icelauch** là ứng dụng desktop quản lý thư viện trò chơi và trung tâm giải trí đa phương tiện chuẩn phong cách Steam & Netflix Dark Aesthetic:
 
+- **Hệ Thống Đa Hồ Sơ Người Dùng (Netflix-Style Multi-User Profiles) & Đồng Bộ Supabase Cloud:**
+  - **Màn Hình Chọn Profile Kiểu Netflix:** Xuất hiện trực quan khi khởi động app hoặc khi bấm *Chuyển Hồ Sơ*. Hiển thị thẻ người dùng với Avatar tròn nổi bật, hiệu ứng zoom và phát sáng khi hover.
+  - **Bộ Sưu Tập 20 Avatar Độc Quyền:** Cung cấp sẵn 20 mẫu Avatar phong cách Gaming, Cyberpunk, Anime, Retro, Creature vui nhộn tích hợp sẵn trong app (chọn nhanh 1-chạm không cần mạng), kèm tính năng duyệt ảnh từ máy tính hoặc dán link ảnh URL.
+  - **Mã PIN Cá Nhân 4-10 Chữ Số & Bàn Phím Số Trực Quan:** Bàn phím số ảo lẫn phím cứng, hỗ trợ mã PIN từ 4 đến 10 số với các chấm vàng động, bảo vệ tính riêng tư cho kho game và lịch sử xem phim của từng thành viên trong gia đình.
+  - **Cơ Chế Ghi Nhớ Đăng Nhập (Auto-Login):** Tích chọn *Ghi nhớ thiết bị này* để lần sau mở app tự động vào thẳng hồ sơ cá nhân mà không tốn thêm 1 giây nào.
+  - **Hồ Sơ Khách (Guest Mode):** Cho phép bạn bè trải nghiệm nhanh mà không ghi đè lịch sử của các thành viên.
+  - **Widget Hồ Sơ Trên Navbar:** Hiển thị Avatar nhỏ + Tên ở góc trên bên phải, bấm vào mở menu 1-chạm: *Chuyển Đổi Hồ Sơ*, *Chỉnh Sửa Hồ Sơ*, *Đăng Xuất*.
+  - **Phân Tách Dữ Liệu Hoàn Hảo:** Kho game & media của hệ thống là dữ liệu chung; còn Thư viện game cá nhân, tiến độ xem dở video (`watchProgress`), bài hát yêu thích gắn liền với từng Profile.
+  - **Đồng Bộ Đám Mây Đa Thiết Bị (Supabase BaaS):**
+    - Hoạt động Hybrid: Mặc định hoạt động Offline hoàn hảo (lưu nhiều profile trong máy), khi Admin cấu hình Project URL và Anon Key của Supabase trong tab **Cài Đặt > Đồng Bộ Đám Mây** thì tự động kích hoạt tính năng đồng bộ đám mây xuyên suốt mọi máy tính PC, Laptop và Android TV.
+    - Cung cấp nút *Kiểm Tra Kết Nối* và nút *Đồng Bộ Ngay (2 Chiều)*.
+    - Tích hợp nút *Sao Chép Mã SQL Schema (1-Click)* để Admin dễ dàng dán chạy trong SQL Editor của Supabase trong 5 giây.
+
 - **Giao Diện Không Viền Hiện Đại (Seamless Frameless Dark Titlebar & Controls):**
   - Loại bỏ hoàn toàn thanh trắng hệ thống và menu bar (`File Edit View Window`) mặc định của Windows, tích hợp giao diện dark theme `#0F1115` nguyên khối liền mạch phong cách Steam / Discord.
   - Bổ sung cụm nút điều khiển cửa sổ trực tiếp trên Navbar: **Thu nhỏ (`-`)**, **Phóng to / Khôi phục kích thước (`□` / `❐`)**, **Đóng ứng dụng (`✕` hover đỏ)**.
