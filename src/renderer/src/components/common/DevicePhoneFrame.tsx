@@ -132,8 +132,8 @@ export const DevicePhoneFrame: React.FC<DevicePhoneFrameProps> = ({
               ) : (
                 <User className="w-4 h-4" />
               )}
-              <span className="text-[10px] font-semibold line-clamp-1 max-w-[46px]">
-                {activeProfile?.nickname || (isAdmin ? 'Admin' : 'Hồ sơ')}
+              <span className="text-[10px] font-semibold line-clamp-1 max-w-[54px]">
+                {activeProfile?.nickname || 'Tài Khoản'}
               </span>
             </button>
           </div>

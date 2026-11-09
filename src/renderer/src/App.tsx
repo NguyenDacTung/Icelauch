@@ -31,6 +31,10 @@ import { MobileLibraryView } from './components/mobile/MobileLibraryView';
 import { MobileGameDetailView } from './components/mobile/MobileGameDetailView';
 import { MobileSettingsView } from './components/mobile/MobileSettingsView';
 import { MobileVinylPlayerModal } from './components/mobile/MobileVinylPlayerModal';
+import { DeviceTVFrame } from './components/tv/DeviceTVFrame';
+import { TVHomeMediaView } from './components/tv/TVHomeMediaView';
+import { TVGameView } from './components/tv/TVGameView';
+import { TVVideoTheaterView } from './components/tv/TVVideoTheaterView';
 import { sfx } from './utils/sfx';
 import { registerItemToBanner } from './utils/bannerResolver';
 import type { 
@@ -53,6 +57,7 @@ export default function App() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedGameId, setSelectedGameId] = useState<string | null>(null);
   const [viewingDetailGame, setViewingDetailGame] = useState<Game | null>(null);
+  const [tvPlayingMedia, setTvPlayingMedia] = useState<MediaItem | null>(null);
   const [isDownloadTrayOpen, setIsDownloadTrayOpen] = useState(false);
 
   // Admin state
@@ -776,7 +781,74 @@ export default function App() {
 
       {/* 3. Main Page Content View */}
       <main className="flex-1 flex overflow-hidden relative">
-        {effectiveDevice === 'android_mobile' ? (
+        {effectiveDevice === 'android_tv' ? (
+          <DeviceTVFrame
+            currentTab={currentTab}
+            onTabChange={(tab) => setCurrentTab(tab as NavigationTab)}
+            onExitSimulation={() => setSimulatedDevice('windows_pc')}
+            isAdmin={isAdmin}
+            adminTimeRemaining={adminTimeRemaining}
+            onOpenAdminAuth={() => setIsAdminAuthOpen(true)}
+            onLockAdmin={handleLockAdmin}
+            activeProfile={activeProfile}
+            onSwitchProfile={handleSwitchProfile}
+            onEditCurrentProfile={() => setIsEditingCurrentProfile(true)}
+            onLogoutProfile={handleLogoutProfile}
+          >
+            {tvPlayingMedia ? (
+              <TVVideoTheaterView
+                media={tvPlayingMedia}
+                onBack={() => setTvPlayingMedia(null)}
+                onUpdateProgress={handleUpdateMediaProgress}
+              />
+            ) : (
+              <>
+                {/* TV Tab 1: Giải Trí (Default Main Tab) */}
+                {currentTab === 'media' && (
+                  <TVHomeMediaView
+                    media={appData.media}
+                    bannerSettings={appData.settings.bannerSettings?.videos}
+                    onPlayMedia={(item) => setTvPlayingMedia(item)}
+                    onToggleLibrary={handleToggleLibrary}
+                  />
+                )}
+
+                {/* TV Tab 2: Game (PC Showcase) */}
+                {currentTab === 'home' && (
+                  <TVGameView
+                    games={appData.games}
+                    bannerSettings={appData.settings.bannerSettings?.games}
+                    onSelectGame={(game) => setViewingDetailGame(game)}
+                    onIncompatibleClick={(game) => setIncompatibleGame(game)}
+                    onToggleLibrary={handleToggleLibrary}
+                  />
+                )}
+
+                {/* TV Tab 3: Yêu thích (Library) */}
+                {currentTab === 'library' && (
+                  <TVHomeMediaView
+                    media={appData.media.filter((m) => activeProfile?.library?.includes(m.id))}
+                    onPlayMedia={(item) => setTvPlayingMedia(item)}
+                    onToggleLibrary={handleToggleLibrary}
+                  />
+                )}
+
+                {/* TV Tab 4: Cài Đặt */}
+                {currentTab === 'settings' && (
+                  <MobileSettingsView
+                    settings={appData.settings}
+                    isAdmin={isAdmin}
+                    cloudSync={cloudSyncSettings}
+                    onChangePin={() => setIsChangeAdminPinOpen(true)}
+                    onOpenAdminAuth={() => setIsAdminAuthOpen(true)}
+                    onSaveSettings={handleSaveSettings}
+                    onSaveCloudSync={handleSaveCloudSync}
+                  />
+                )}
+              </>
+            )}
+          </DeviceTVFrame>
+        ) : effectiveDevice === 'android_mobile' ? (
           <DevicePhoneFrame
             currentTab={currentTab}
             onTabChange={setCurrentTab}

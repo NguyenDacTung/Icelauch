@@ -246,3 +246,4 @@ export const MobileGameDetailView: React.FC<MobileGameDetailViewProps> = ({
     </div>
   );
 };
+

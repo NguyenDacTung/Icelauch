@@ -168,3 +168,4 @@ export const MobileVinylPlayerModal: React.FC<MobileVinylPlayerModalProps> = ({
     </div>
   );
 };
+

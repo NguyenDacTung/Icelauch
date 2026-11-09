@@ -205,14 +205,25 @@ export const MobileVideoTheaterView: React.FC<MobileVideoTheaterViewProps> = ({
               </>
             )}
 
-            {isYouTube && (
+            {isYouTube ? (
               <button
                 type="button"
                 onClick={() => window.open(media.link, '_blank')}
-                className="px-2.5 py-1 rounded-md text-[10px] font-bold bg-red-600/20 text-red-300 border border-red-500/30 flex items-center gap-1"
+                className="px-2.5 py-1 rounded-md text-[10px] font-bold bg-red-600/20 text-red-300 border border-red-500/30 flex items-center gap-1 hover:bg-red-600/30 transition-colors"
+                title="Mở ứng dụng hoặc trang YouTube"
               >
                 <ExternalLink className="w-3 h-3 text-red-400" />
                 <span>Mở YouTube</span>
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={() => window.open(media.link, '_blank')}
+                className="px-2.5 py-1 rounded-md text-[10px] font-bold bg-white/10 text-white/90 border border-white/15 flex items-center gap-1 hover:bg-white/20 transition-colors"
+                title="Mở link trên trình duyệt ngoài"
+              >
+                <ExternalLink className="w-3 h-3 text-amber-400" />
+                <span>Mở web ngoài</span>
               </button>
             )}
           </div>

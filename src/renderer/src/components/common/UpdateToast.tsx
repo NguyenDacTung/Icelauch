@@ -55,7 +55,7 @@ export const UpdateToast: React.FC<UpdateToastProps> = ({ onGoToSettings }) => {
   }
 
   return (
-    <div className="fixed bottom-6 right-6 z-50 animate-in slide-in-from-bottom-5 duration-300 select-none">
+    <div className="fixed bottom-20 sm:bottom-6 right-4 sm:right-6 left-4 sm:left-auto z-50 animate-in slide-in-from-bottom-5 duration-300 select-none max-w-sm ml-auto mr-auto sm:mr-0">
       <div className="bg-[#12161F]/95 backdrop-blur-md border border-amber-500/40 rounded-2xl p-4 shadow-2xl max-w-sm w-full text-white space-y-3 shadow-amber-950/20">
         <div className="flex items-start justify-between gap-3">
           <div className="flex items-center gap-2.5">

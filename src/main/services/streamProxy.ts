@@ -8,6 +8,7 @@ export class StreamProxyService {
   private static instance: StreamProxyService;
   private server: http.Server | null = null;
   private port: number = 0;
+  private resolvedUrlCache = new Map<string, { url: string; headers: Record<string, string>; expiresAt: number }>();
 
   private constructor() {}
 
@@ -134,12 +135,24 @@ export class StreamProxyService {
           let resolvedUrl = targetUrl;
           let customHeaders: Record<string, string> = {};
 
-          try {
-            const resolved = await gdrive.resolveDownloadUrl(targetUrl, settings);
-            resolvedUrl = resolved.url;
-            customHeaders = resolved.headers;
-          } catch (resolveErr) {
-            console.warn('Failed to resolve target url via gdrive service, using raw url:', resolveErr);
+          const cached = this.resolvedUrlCache.get(targetUrl);
+          if (cached && cached.expiresAt > Date.now()) {
+            resolvedUrl = cached.url;
+            customHeaders = cached.headers;
+          } else {
+            try {
+              const resolved = await gdrive.resolveDownloadUrl(targetUrl, settings);
+              resolvedUrl = resolved.url;
+              customHeaders = resolved.headers;
+              // Cache for 15 minutes to eliminate latency on range / seek requests
+              this.resolvedUrlCache.set(targetUrl, {
+                url: resolvedUrl,
+                headers: customHeaders,
+                expiresAt: Date.now() + 15 * 60 * 1000,
+              });
+            } catch (resolveErr) {
+              console.warn('Failed to resolve target url via gdrive service, using raw url:', resolveErr);
+            }
           }
 
           // Parse resolved URL

@@ -70,9 +70,9 @@ export const GameActionsWidget: React.FC<GameActionsWidgetProps> = ({
   };
 
   return (
-    <div className={`rounded-2xl bg-gradient-to-br from-[#121622] to-[#151926] border border-ice-border/80 p-5 shadow-lg space-y-4 ${className}`}>
+    <div className={`rounded-2xl bg-gradient-to-br from-[#121622] to-[#151926] border border-ice-border/80 p-3.5 sm:p-5 shadow-lg space-y-3.5 ${className}`}>
       {/* Title */}
-      <div className="flex items-center justify-between border-b border-white/5 pb-3">
+      <div className="flex items-center justify-between border-b border-white/5 pb-2.5">
         <div className="flex items-center gap-2">
           <Info className="w-4 h-4 text-amber-400" />
           <h3 className="text-xs font-bold text-white uppercase tracking-wider">
@@ -83,9 +83,9 @@ export const GameActionsWidget: React.FC<GameActionsWidgetProps> = ({
 
       {/* Guidance Text Block */}
       {requirementsText && (
-        <div className="bg-[#0A0D14]/70 border border-amber-500/20 rounded-xl p-3.5 text-xs text-ice-text leading-relaxed whitespace-pre-line flex items-start gap-2.5">
+        <div className="bg-[#0A0D14]/70 border border-amber-500/20 rounded-xl p-3 text-xs text-ice-text leading-relaxed whitespace-pre-line flex items-start gap-2.5">
           <span className="text-amber-400 shrink-0 text-sm mt-0.5">📌</span>
-          <div className="flex-1 text-[13px]">{requirementsText}</div>
+          <div className="flex-1 text-xs leading-relaxed">{requirementsText}</div>
         </div>
       )}
 
@@ -122,16 +122,16 @@ export const GameActionsWidget: React.FC<GameActionsWidgetProps> = ({
                   </div>
 
                   <div className="flex-1 min-w-0">
-                    <div className="text-xs font-bold truncate group-hover:text-amber-300 transition-colors">
+                    <div className="text-xs font-bold line-clamp-1 group-hover:text-amber-300 transition-colors break-words">
                       {btn.label}
                     </div>
                     {btn.description && (
-                      <div className="text-[10px] text-ice-muted truncate mt-0.5">
+                      <div className="text-[10px] text-ice-muted line-clamp-2 mt-0.5 leading-snug break-words">
                         {btn.description}
                       </div>
                     )}
                     {feedback && (
-                      <div className={`text-[10px] font-semibold mt-0.5 ${feedback.isError ? 'text-red-400' : 'text-emerald-400'}`}>
+                      <div className={`text-[10px] font-semibold mt-1 ${feedback.isError ? 'text-red-400' : 'text-emerald-400'}`}>
                         {feedback.msg}
                       </div>
                     )}
