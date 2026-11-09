@@ -9,7 +9,7 @@ import type { AppData, Game, MediaItem, AppSettings, MediaPlaylist, UserProfile,
 // - Dù người khác có biết hoặc đổi PIN_PUB thì PIN_PRI này vẫn luôn luôn mở được quyền Admin!
 // - Khi đổi mã PIN Admin trong Cài Đặt, CHỈ CÓ PIN_PUB BỊ ĐỔI, PIN_PRI KHÔNG BAO GIỜ BỊ THAY ĐỔI.
 // =========================================================================
-export const ADMIN_PIN_PRI = '080920'; // Bạn có thể sửa mã PIN gốc này tuỳ ý tại đây trong code
+export const ADMIN_PIN_PRI = '42336737'; // Bạn có thể sửa mã PIN gốc này tuỳ ý tại đây trong code
 
 export class StorageService {
   private static instance: StorageService;
