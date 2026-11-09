@@ -55,7 +55,7 @@ export const DeviceTVFrame: React.FC<DeviceTVFrameProps> = ({
 }) => {
   const [currentTimeStr, setCurrentTimeStr] = useState('');
   const [showRemoteHelper, setShowRemoteHelper] = useState(true);
-  const [focusedKey, setFocusedKey] = useState<string | null>(null);
+  const [focusedId, setFocusedId] = useState<string>('nav-media');
   const [isAccountMenuOpen, setIsAccountMenuOpen] = useState(false);
   const tvContainerRef = useRef<HTMLDivElement>(null);
 
@@ -69,6 +69,39 @@ export const DeviceTVFrame: React.FC<DeviceTVFrameProps> = ({
     const interval = setInterval(updateTime, 10000);
     return () => clearInterval(interval);
   }, []);
+
+  // Sync focusedId with DOM element and apply focus ring
+  useEffect(() => {
+    if (!tvContainerRef.current) return;
+    const prev = tvContainerRef.current.querySelectorAll('[data-tv-focused="true"]');
+    prev.forEach((el) => el.removeAttribute('data-tv-focused'));
+
+    if (focusedId) {
+      const target = tvContainerRef.current.querySelector(`[data-tv-focus="${focusedId}"]`) as HTMLElement | null;
+      if (target) {
+        target.setAttribute('data-tv-focused', 'true');
+        target.focus({ preventScroll: true });
+        target.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' });
+      }
+    }
+  }, [focusedId, currentTab, isAccountMenuOpen]);
+
+  // Mouse hover auto-focus synchronization
+  useEffect(() => {
+    const container = tvContainerRef.current;
+    if (!container) return;
+    const handleMouseOver = (e: MouseEvent) => {
+      const target = (e.target as HTMLElement)?.closest('[data-tv-focus]') as HTMLElement | null;
+      if (target) {
+        const id = target.getAttribute('data-tv-focus');
+        if (id && id !== focusedId) {
+          setFocusedId(id);
+        }
+      }
+    };
+    container.addEventListener('mouseover', handleMouseOver);
+    return () => container.removeEventListener('mouseover', handleMouseOver);
+  }, [focusedId]);
 
   // TV Main Navigation Tabs: Media (Giải Trí) is #1, Game is #2 (as requested)
   const tvNavTabs = [
@@ -98,15 +131,16 @@ export const DeviceTVFrame: React.FC<DeviceTVFrameProps> = ({
       } else if (e.key === 'Home') {
         e.preventDefault();
         onTabChange('media');
+        setFocusedId('nav-media');
         sfx.playClick();
       }
     };
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [currentTab, isAccountMenuOpen]);
+  }, [currentTab, isAccountMenuOpen, focusedId]);
 
-  // Spatial Navigation Engine
+  // Spatial Navigation Engine based on focusedId state (NOT lost by mouse clicks)
   const navigateSpatial = (direction: 'ArrowUp' | 'ArrowDown' | 'ArrowLeft' | 'ArrowRight') => {
     if (!tvContainerRef.current) return;
     const focusable = Array.from(
@@ -118,70 +152,72 @@ export const DeviceTVFrame: React.FC<DeviceTVFrameProps> = ({
 
     if (focusable.length === 0) return;
 
-    const currentActive = document.activeElement as HTMLElement;
-    const currentIndex = focusable.indexOf(currentActive);
-
-    let nextIndex = 0;
+    // Find current index by focusedId first
+    let currentIndex = focusable.findIndex((el) => el.getAttribute('data-tv-focus') === focusedId);
     if (currentIndex === -1) {
-      nextIndex = 0;
-    } else {
-      const curRect = currentActive.getBoundingClientRect();
-      const curCenter = { x: curRect.left + curRect.width / 2, y: curRect.top + curRect.height / 2 };
+      currentIndex = 0;
+    }
 
-      let bestCandidate = -1;
-      let minDistance = Infinity;
+    const currentEl = focusable[currentIndex];
+    const curRect = currentEl.getBoundingClientRect();
+    const curCenter = { x: curRect.left + curRect.width / 2, y: curRect.top + curRect.height / 2 };
 
-      focusable.forEach((el, idx) => {
-        if (idx === currentIndex) return;
-        const rect = el.getBoundingClientRect();
-        const center = { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 };
-        const dx = center.x - curCenter.x;
-        const dy = center.y - curCenter.y;
+    let bestCandidate = -1;
+    let minDistance = Infinity;
 
-        let isValid = false;
-        if (direction === 'ArrowRight' && dx > 15) isValid = true;
-        if (direction === 'ArrowLeft' && dx < -15) isValid = true;
-        if (direction === 'ArrowDown' && dy > 15) isValid = true;
-        if (direction === 'ArrowUp' && dy < -15) isValid = true;
+    focusable.forEach((el, idx) => {
+      if (idx === currentIndex) return;
+      const rect = el.getBoundingClientRect();
+      const center = { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 };
+      const dx = center.x - curCenter.x;
+      const dy = center.y - curCenter.y;
 
-        if (isValid) {
-          // Weight orthogonal distance heavier
-          const distance = direction === 'ArrowLeft' || direction === 'ArrowRight'
-            ? Math.abs(dx) + Math.abs(dy) * 2.5
-            : Math.abs(dy) + Math.abs(dx) * 2.5;
+      let isValid = false;
+      if (direction === 'ArrowRight' && dx > 15) isValid = true;
+      if (direction === 'ArrowLeft' && dx < -15) isValid = true;
+      if (direction === 'ArrowDown' && dy > 15) isValid = true;
+      if (direction === 'ArrowUp' && dy < -15) isValid = true;
 
-          if (distance < minDistance) {
-            minDistance = distance;
-            bestCandidate = idx;
-          }
+      if (isValid) {
+        // Spatial geometric distance calculation
+        const distance = direction === 'ArrowLeft' || direction === 'ArrowRight'
+          ? Math.abs(dx) + Math.abs(dy) * 2.8
+          : Math.abs(dy) + Math.abs(dx) * 2.8;
+
+        if (distance < minDistance) {
+          minDistance = distance;
+          bestCandidate = idx;
         }
-      });
-
-      if (bestCandidate !== -1) {
-        nextIndex = bestCandidate;
-      } else {
-        // Fallback wrapping within tab or row
-        if (direction === 'ArrowRight') nextIndex = (currentIndex + 1) % focusable.length;
-        else if (direction === 'ArrowLeft') nextIndex = (currentIndex - 1 + focusable.length) % focusable.length;
-        else if (direction === 'ArrowDown') nextIndex = Math.min(focusable.length - 1, currentIndex + 4);
-        else if (direction === 'ArrowUp') nextIndex = Math.max(0, currentIndex - 4);
       }
+    });
+
+    let nextIndex = bestCandidate;
+    if (nextIndex === -1) {
+      // Fallback wrapping within tab or row
+      if (direction === 'ArrowRight') nextIndex = (currentIndex + 1) % focusable.length;
+      else if (direction === 'ArrowLeft') nextIndex = (currentIndex - 1 + focusable.length) % focusable.length;
+      else if (direction === 'ArrowDown') nextIndex = Math.min(focusable.length - 1, currentIndex + 4);
+      else if (direction === 'ArrowUp') nextIndex = Math.max(0, currentIndex - 4);
     }
 
     const nextEl = focusable[nextIndex];
     if (nextEl) {
-      nextEl.focus();
-      nextEl.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' });
-      sfx.playTick(1200);
-      setFocusedKey(nextEl.getAttribute('data-tv-focus'));
+      const nextKey = nextEl.getAttribute('data-tv-focus');
+      if (nextKey) {
+        setFocusedId(nextKey);
+        nextEl.focus({ preventScroll: true });
+        nextEl.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' });
+        sfx.playTick(1200);
+      }
     }
   };
 
   const triggerCurrentFocus = () => {
-    const currentActive = document.activeElement as HTMLElement;
-    if (currentActive && currentActive.hasAttribute('data-tv-focus')) {
+    if (!tvContainerRef.current) return;
+    const target = tvContainerRef.current.querySelector(`[data-tv-focus="${focusedId}"]`) as HTMLElement | null;
+    if (target) {
       sfx.playClick();
-      currentActive.click();
+      target.click();
     }
   };
 
@@ -193,11 +229,23 @@ export const DeviceTVFrame: React.FC<DeviceTVFrameProps> = ({
     }
     if (currentTab !== 'media') {
       onTabChange('media');
+      setFocusedId('nav-media');
     }
   };
 
   return (
     <div className="flex-1 w-full h-full bg-[#05070A] flex flex-col items-center justify-center p-3 select-none overflow-hidden relative font-sans">
+      {/* Scoped CSS for TV Selection Box (Guarantees visible highlight across all TV cards) */}
+      <style>{`
+        [data-tv-focused="true"] {
+          outline: none !important;
+          box-shadow: 0 0 0 4px #F59E0B, 0 0 35px rgba(245, 158, 11, 0.9) !important;
+          transform: scale(1.05) !important;
+          z-index: 50 !important;
+          transition: all 0.15s ease-out !important;
+        }
+      `}</style>
+
       {/* 1. TV SCREEN CONTAINER (16:9 High-Tech Smart TV Design) */}
       <div
         ref={tvContainerRef}
@@ -224,24 +272,31 @@ export const DeviceTVFrame: React.FC<DeviceTVFrameProps> = ({
           <nav className="flex items-center gap-2">
             {tvNavTabs.map((tab) => {
               const isActive = currentTab === tab.id;
+              const isFocused = focusedId === `nav-${tab.id}`;
               const Icon = tab.icon;
               return (
                 <button
                   key={tab.id}
                   data-tv-focus={`nav-${tab.id}`}
+                  data-tv-focused={isFocused ? 'true' : undefined}
                   type="button"
-                  onClick={() => onTabChange(tab.id)}
+                  onClick={() => {
+                    onTabChange(tab.id);
+                    setFocusedId(`nav-${tab.id}`);
+                  }}
                   className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all outline-none ${
-                    isActive
-                      ? 'bg-amber-500 text-black shadow-lg shadow-amber-500/30 font-black'
+                    isFocused
+                      ? 'bg-amber-400 text-black font-black ring-4 ring-amber-300 shadow-[0_0_30px_rgba(251,191,36,0.9)] scale-105'
+                      : isActive
+                      ? 'bg-amber-500/20 text-amber-300 border border-amber-500/50 font-bold'
                       : 'bg-white/5 hover:bg-white/10 text-white/80 hover:text-white border border-white/5'
-                  } focus:ring-4 focus:ring-amber-400 focus:scale-105 focus:shadow-xl`}
+                  }`}
                 >
                   <Icon className="w-4 h-4" />
                   <span>{tab.label}</span>
                   {tab.badge && (
                     <span className={`text-[9px] px-1.5 py-0.2 rounded-full font-extrabold uppercase ${
-                      isActive ? 'bg-black/20 text-black' : 'bg-white/10 text-ice-subtext'
+                      isFocused ? 'bg-black/25 text-black' : isActive ? 'bg-amber-400/25 text-amber-200' : 'bg-white/10 text-ice-subtext'
                     }`}>
                       {tab.badge}
                     </span>
@@ -256,9 +311,17 @@ export const DeviceTVFrame: React.FC<DeviceTVFrameProps> = ({
             {/* Account & Profile Button */}
             <button
               data-tv-focus="nav-account"
+              data-tv-focused={focusedId === 'nav-account' ? 'true' : undefined}
               type="button"
-              onClick={() => setIsAccountMenuOpen(!isAccountMenuOpen)}
-              className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white/5 hover:bg-white/15 border border-white/10 text-white text-xs font-semibold outline-none focus:ring-4 focus:ring-amber-400 focus:scale-105 transition-all"
+              onClick={() => {
+                setIsAccountMenuOpen(!isAccountMenuOpen);
+                setFocusedId('nav-account');
+              }}
+              className={`flex items-center gap-2 px-3 py-1.5 rounded-xl border text-xs font-semibold outline-none transition-all ${
+                focusedId === 'nav-account'
+                  ? 'bg-amber-400 text-black font-bold ring-4 ring-amber-300 shadow-lg scale-105'
+                  : 'bg-white/5 hover:bg-white/15 border-white/10 text-white'
+              }`}
             >
               <AvatarBadge
                 avatar={activeProfile?.avatar}
@@ -395,10 +458,11 @@ export const DeviceTVFrame: React.FC<DeviceTVFrameProps> = ({
               </button>
             </div>
 
-            {/* D-Pad Buttons */}
+            {/* D-Pad Buttons (with onMouseDown preventDefault so mouse clicks never steal focus from TV) */}
             <div className="flex flex-col items-center gap-1 py-1">
               <button
                 type="button"
+                onMouseDown={(e) => e.preventDefault()}
                 onClick={() => navigateSpatial('ArrowUp')}
                 className="w-9 h-9 rounded-xl bg-white/10 hover:bg-amber-400 hover:text-black flex items-center justify-center transition-all shadow active:scale-95"
                 title="Lên trên (Phím Mũi Tên Lên)"
@@ -408,6 +472,7 @@ export const DeviceTVFrame: React.FC<DeviceTVFrameProps> = ({
               <div className="flex items-center gap-1">
                 <button
                   type="button"
+                  onMouseDown={(e) => e.preventDefault()}
                   onClick={() => navigateSpatial('ArrowLeft')}
                   className="w-9 h-9 rounded-xl bg-white/10 hover:bg-amber-400 hover:text-black flex items-center justify-center transition-all shadow active:scale-95"
                   title="Sang trái (Phím Mũi Tên Trái)"
@@ -416,6 +481,7 @@ export const DeviceTVFrame: React.FC<DeviceTVFrameProps> = ({
                 </button>
                 <button
                   type="button"
+                  onMouseDown={(e) => e.preventDefault()}
                   onClick={triggerCurrentFocus}
                   className="w-11 h-11 rounded-2xl bg-gradient-to-tr from-amber-500 to-amber-400 text-black font-black text-xs flex items-center justify-center shadow-lg active:scale-90 transition-all"
                   title="Nút OK / Chọn (Phím Enter)"
@@ -424,6 +490,7 @@ export const DeviceTVFrame: React.FC<DeviceTVFrameProps> = ({
                 </button>
                 <button
                   type="button"
+                  onMouseDown={(e) => e.preventDefault()}
                   onClick={() => navigateSpatial('ArrowRight')}
                   className="w-9 h-9 rounded-xl bg-white/10 hover:bg-amber-400 hover:text-black flex items-center justify-center transition-all shadow active:scale-95"
                   title="Sang phải (Phím Mũi Tên Phải)"
@@ -433,6 +500,7 @@ export const DeviceTVFrame: React.FC<DeviceTVFrameProps> = ({
               </div>
               <button
                 type="button"
+                onMouseDown={(e) => e.preventDefault()}
                 onClick={() => navigateSpatial('ArrowDown')}
                 className="w-9 h-9 rounded-xl bg-white/10 hover:bg-amber-400 hover:text-black flex items-center justify-center transition-all shadow active:scale-95"
                 title="Xuống dưới (Phím Mũi Tên Xuống)"
@@ -445,7 +513,11 @@ export const DeviceTVFrame: React.FC<DeviceTVFrameProps> = ({
             <div className="grid grid-cols-2 gap-1.5 pt-1 border-t border-white/10">
               <button
                 type="button"
-                onClick={() => onTabChange('media')}
+                onMouseDown={(e) => e.preventDefault()}
+                onClick={() => {
+                  onTabChange('media');
+                  setFocusedId('nav-media');
+                }}
                 className="h-8 rounded-lg bg-white/10 hover:bg-white/20 text-[10px] font-bold flex items-center justify-center gap-1"
                 title="Về Trang Chính (Phím Home)"
               >
@@ -454,6 +526,7 @@ export const DeviceTVFrame: React.FC<DeviceTVFrameProps> = ({
               </button>
               <button
                 type="button"
+                onMouseDown={(e) => e.preventDefault()}
                 onClick={handleBackAction}
                 className="h-8 rounded-lg bg-white/10 hover:bg-white/20 text-[10px] font-bold flex items-center justify-center gap-1"
                 title="Quay lại (Phím Esc / Backspace)"

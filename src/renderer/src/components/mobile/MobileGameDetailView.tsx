@@ -184,6 +184,7 @@ export const MobileGameDetailView: React.FC<MobileGameDetailViewProps> = ({
             Yêu cầu & Nút khởi chạy nhanh
           </span>
           <GameActionsWidget
+            variant="compact"
             requirementsText={game.requirementsText}
             buttons={game.actionButtonIds && game.actionButtonIds.length > 0
               ? globalActionButtons.filter((b) => game.actionButtonIds?.includes(b.id))

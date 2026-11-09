@@ -157,6 +157,7 @@ export const MobileLibraryView: React.FC<MobileLibraryViewProps> = ({
             {/* Action Buttons / Requirements (Steam, Discord, etc.) */}
             <div className="pt-2 border-t border-ice-border/60">
               <GameActionsWidget
+                variant="compact"
                 requirementsText={activeGame.requirementsText}
                 buttons={activeGame.actionButtonIds && activeGame.actionButtonIds.length > 0
                   ? globalActionButtons.filter((b) => activeGame.actionButtonIds?.includes(b.id))
