@@ -26,10 +26,10 @@ jobs:
       - name: Checkout Source Code
         uses: actions/checkout@v4
 
-      - name: Setup Node.js 20
+      - name: Setup Node.js 22
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: 'npm'
 
       - name: Install Node Dependencies
@@ -69,10 +69,10 @@ jobs:
           distribution: 'temurin'
           java-version: 21
 
-      - name: Setup Node.js 20
+      - name: Setup Node.js 22
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: 'npm'
 
       - name: Install Dependencies
@@ -85,7 +85,17 @@ jobs:
         run: chmod +x ./android/gradlew
 
       - name: Sync Capacitor Android
-        run: npm run cap:sync
+        run: |
+          echo "=== Running Capacitor Sync ==="
+          npm run cap:sync 2>&1 | tee cap_sync.log || SYNC_EXIT=$?
+          echo "=== Exit Code: ${SYNC_EXIT:-0} ==="
+          echo "### Capacitor Sync Log (Exit: ${SYNC_EXIT:-0})" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          cat cap_sync.log >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          if [ -n "$SYNC_EXIT" ] && [ "$SYNC_EXIT" -ne 0 ]; then
+            exit $SYNC_EXIT
+          fi
         env:
           ANDROID_HOME: /usr/local/lib/android/sdk
           ANDROID_SDK_ROOT: /usr/local/lib/android/sdk
