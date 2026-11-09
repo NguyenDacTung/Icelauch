@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Icelauch</string>
+    <string name="title_activity_main">Icelauch</string>
+    <string name="package_name">com.icelauch.app</string>
+    <string name="custom_url_scheme">com.icelauch.app</string>
+</resources>

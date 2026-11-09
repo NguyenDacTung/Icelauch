@@ -36,6 +36,17 @@ import { TVHomeMediaView } from './components/tv/TVHomeMediaView';
 import { TVGameView } from './components/tv/TVGameView';
 import { TVVideoTheaterView } from './components/tv/TVVideoTheaterView';
 import { TVSettingsView } from './components/tv/TVSettingsView';
+import { DeviceSelectionModal } from './components/common/DeviceSelectionModal';
+import {
+  isElectron,
+  isAndroidPlatform,
+  getStoredDevicePreference,
+  setStoredDevicePreference,
+  hasPromptedDeviceChoice,
+  fetchDirectCloudCatalog,
+  DEFAULT_SUPABASE_URL,
+  DEFAULT_SUPABASE_ANON_KEY
+} from './services/platformAdapter';
 import { sfx } from './utils/sfx';
 import { registerItemToBanner } from './utils/bannerResolver';
 import type { 
@@ -101,9 +112,24 @@ export default function App() {
 
   // Cross-Platform & Device Simulator State
   const [simulatedDevice, setSimulatedDevice] = useState<DeviceType>('windows_pc');
+  const [devicePreference, setDevicePreference] = useState<DeviceType | null>(() => getStoredDevicePreference());
+  const [isDeviceModalOpen, setIsDeviceModalOpen] = useState<boolean>(() => {
+    if (!isElectron() && isAndroidPlatform() && !hasPromptedDeviceChoice()) {
+      return true;
+    }
+    return false;
+  });
   const [incompatibleGame, setIncompatibleGame] = useState<Game | null>(null);
 
-  const effectiveDevice: DeviceType = isAdmin ? simulatedDevice : detectHardwareDevice();
+  const effectiveDevice: DeviceType = isAdmin
+    ? simulatedDevice
+    : (devicePreference || detectHardwareDevice());
+
+  const handleSelectDevice = (chosenDevice: DeviceType) => {
+    setDevicePreference(chosenDevice);
+    setStoredDevicePreference(chosenDevice);
+    setIsDeviceModalOpen(false);
+  };
 
   // Load Initial App Data
   const loadData = async () => {
@@ -148,18 +174,37 @@ export default function App() {
         console.error('Failed to get app data from IPC:', err);
       }
     } else {
-      console.warn('window.api not available yet, setting fallback default data...');
-      setAppData({
-        games: [],
-        media: [],
-        settings: {
-          deleteArchiveDefault: true,
-          runAsAdminDefault: false,
-          appRootPath: 'C:\\Icelauch',
-          gamesPath: 'C:\\Icelauch\\Games',
-          downloadsPath: 'C:\\Icelauch\\Downloads',
-        },
-      });
+      console.log('Running on Android / Web platform (no Electron IPC). Fetching from Supabase Cloud...');
+      try {
+        const cloudData = await fetchDirectCloudCatalog();
+        setAppData({
+          games: cloudData.games,
+          media: cloudData.media,
+          playlists: cloudData.playlists,
+          settings: {
+            deleteArchiveDefault: true,
+            runAsAdminDefault: false,
+            appRootPath: '/storage/emulated/0/Icelauch',
+            gamesPath: '/storage/emulated/0/Icelauch/Games',
+            downloadsPath: '/storage/emulated/0/Icelauch/Downloads',
+          },
+        });
+        setProfiles(cloudData.profiles || []);
+        if (cloudData.profiles?.length > 0) {
+          setActiveProfile(cloudData.profiles[0]);
+        }
+        setCloudSyncSettings({
+          enabled: true,
+          supabaseUrl: DEFAULT_SUPABASE_URL,
+          supabaseAnonKey: DEFAULT_SUPABASE_ANON_KEY,
+          autoSyncIntervalMinutes: 5,
+          lastSyncStatus: 'success',
+          lastSyncedAt: new Date().toISOString(),
+          lastSyncMessage: `Đã kết nối Supabase Cloud (${cloudData.games.length} game, ${cloudData.media.length} phim)`,
+        });
+      } catch (e) {
+        console.error('Error initializing direct Supabase on Android:', e);
+      }
     }
   };
 
@@ -1359,6 +1404,13 @@ export default function App() {
           setCurrentTrack(prev);
         }}
         onSelectTrack={(t) => setCurrentTrack(t)}
+      />
+
+      {/* First-Run Device Selection Modal for Android */}
+      <DeviceSelectionModal
+        isOpen={isDeviceModalOpen}
+        onSelectDevice={handleSelectDevice}
+        onClose={() => setIsDeviceModalOpen(false)}
       />
 
       {/* Floating In-App OTA Update Toast */}

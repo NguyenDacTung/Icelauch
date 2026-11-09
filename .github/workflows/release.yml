@@ -1,0 +1,165 @@
+name: Build & Release Icelauch (Windows & Android)
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: 'Tên Tag phát hành (ví dụ: v1.0.0)'
+        required: false
+        default: 'v1.0.0'
+
+permissions:
+  contents: write
+
+jobs:
+  # ============================================================================
+  # JOB 1: BUILD WINDOWS (SETUP NSIS & PORTABLE EXE)
+  # ============================================================================
+  build-windows:
+    name: Build Windows (.exe)
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install Node Dependencies
+        run: npm ci
+
+      - name: Compile Vite & TypeScript
+        run: npm run build
+
+      - name: Build Windows Installer & Portable Executable
+        run: npx electron-builder --win nsis portable
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload Windows Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-release
+          path: |
+            release/*.exe
+            release/*.blockmap
+          if-no-files-found: error
+
+  # ============================================================================
+  # JOB 2: BUILD ANDROID (UNIVERSAL APK FOR PHONE & ANDROID TV)
+  # ============================================================================
+  build-android:
+    name: Build Android APK (Phone & TV)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
+
+      - name: Setup Java JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: 17
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Build Web Application
+        run: npm run build
+
+      - name: Sync Capacitor Android
+        run: npx cap sync android
+
+      - name: Make Gradle Executable
+        run: chmod +x ./android/gradlew
+
+      - name: Build Android APK via Gradle
+        run: |
+          cd android
+          ./gradlew assembleDebug
+
+      - name: Rename & Prepare Universal APK
+        run: |
+          mkdir -p android-artifacts
+          cp android/app/build/outputs/apk/debug/app-debug.apk android-artifacts/Icelauch-universal.apk
+
+      - name: Upload Android Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-release
+          path: android-artifacts/Icelauch-universal.apk
+          if-no-files-found: error
+
+  # ============================================================================
+  # JOB 3: PUBLISH TO GITHUB RELEASES
+  # ============================================================================
+  publish-release:
+    name: Publish Release to GitHub
+    needs: [build-windows, build-android]
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
+
+      - name: Download Windows Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: windows-release
+          path: dist-release
+
+      - name: Download Android Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: android-release
+          path: dist-release
+
+      - name: Display Release Files
+        run: ls -la dist-release
+
+      - name: Create GitHub Release & Attach Binaries
+        uses: softprops/action-gh-release@v2
+        if: startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch'
+        with:
+          tag_name: ${{ github.event.inputs.release_tag || github.ref_name }}
+          name: Icelauch ${{ github.event.inputs.release_tag || github.ref_name }} - Multi-Platform Edition
+          draft: false
+          prerelease: false
+          generate_release_notes: true
+          body: |
+            ## 🚀 Icelauch - Trình Quản Lý Game & Media Đa Nền Tảng (Windows, Mobile & Android TV)
+
+            ### 📦 Danh Sách File Tải Về:
+            - **Windows Cài Đặt (NSIS Setup):** `Icelauch-Setup-*.exe` (Tự động tạo shortcut Desktop & Start Menu).
+            - **Windows Bản Portable:** `Icelauch-*.exe` (Chạy trực tiếp không cần cài đặt, thích hợp lưu trên USB/ổ cứng rời).
+            - **Android Phổ Quát (APK):** `Icelauch-universal.apk` (Dùng chung cho cả **Điện thoại Android** và **Android TV / Smart TV / TV Box**).
+
+            ---
+            ### ✨ Tính Năng Nổi Bật:
+            - ☁️ **Đồng bộ đám mây Supabase BaaS:** Lưu trữ hồ sơ, tiến độ phim và danh mục game xuyên suốt các thiết bị.
+            - 🎮 **Trình quản lý Game PC:** Hỗ trợ đa ổ đĩa, tự động nén/giải nén 7z độc lập.
+            - 🎬 **Rạp chiếu phim cá nhân:** Phát trực tiếp video Google Drive & YouTube Bridge với bộ đệm RAM 16MB mượt mà.
+            - 📺 **Giao diện 10-foot cho Android TV:** Điều khiển 100% bằng Remote TV (D-pad), hào quang vàng neon rõ ràng.
+            - 📱 **Giao diện chạm Mobile First:** Tối ưu hóa phím điều khiển và thao tác vuốt chạm trên điện thoại.
+          files: |
+            dist-release/*.exe
+            dist-release/*.apk
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

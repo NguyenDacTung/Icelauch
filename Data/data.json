@@ -3,7 +3,7 @@
     {
       "id": "game-bombanana",
       "name": "BOMBANANA!",
-      "coverPath": "C:\\Users\\dactu\\Downloads\\wallpaper10997.jpg",
+      "coverPath": "https://wqmmagfrwwctvipopazx.supabase.co/storage/v1/object/public/icelauch-assets/covers/68cca7fc75_wallpaper10997.jpg",
       "bannerPath": "C:\\Users\\dactu\\Downloads\\wallpaper10997.jpg",
       "downloadLinks": [
         "https://drive.google.com/file/d/1VuBePGR8UHDVaANxWMEQ1tjy7gwHmSNy/view?usp=sharing"
@@ -49,7 +49,7 @@
     },
     {
       "name": "How to Fish",
-      "coverPath": "C:\\Users\\dactu\\Downloads\\wallpaper10970.jpg",
+      "coverPath": "https://wqmmagfrwwctvipopazx.supabase.co/storage/v1/object/public/icelauch-assets/covers/7baf9a2720_wallpaper10970.jpg",
       "downloadLinks": [
         "https://drive.google.com/file/d/1ZpcznKK7OGi7ZDp7Gkcy1i2th-OmnLwR/view?usp=sharing"
       ],
@@ -60,7 +60,7 @@
       "featured": true,
       "addedAt": "2026-11-08T16:28:55.255Z",
       "id": "9c3f9281-18dc-434c-b430-411e215cf5f4",
-      "bannerPath": "C:\\Users\\dactu\\Downloads\\wallpaper10970.jpg",
+      "bannerPath": "https://wqmmagfrwwctvipopazx.supabase.co/storage/v1/object/public/icelauch-assets/banners/7baf9a2720_wallpaper10970.jpg",
       "expectedSize": 536870912,
       "archivePassword": "linkneverdie.com",
       "genre": "Hài hước",
@@ -329,7 +329,7 @@
     "particleConfig": {
       "theme": "autumn",
       "speed": 1,
-      "density": 35,
+      "density": 20,
       "opacity": 0.7
     },
     "wallpaperConfig": {
@@ -367,7 +367,8 @@
     "lowSpecMode": false,
     "sfxEnabled": true,
     "backgroundAudioEnabled": true,
-    "userGamerTitle": "Tân Binh Băng Giá"
+    "userGamerTitle": "Tân Binh Băng Giá",
+    "tvAutoPlayTrailer": false
   },
   "playlists": [],
   "profiles": [],
