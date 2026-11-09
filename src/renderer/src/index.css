@@ -1,0 +1,52 @@
+@import "tailwindcss";
+
+@theme {
+  --color-ice-bg: #0F1115;
+  --color-ice-card: #171A21;
+  --color-ice-hover: #1F242D;
+  --color-ice-border: #2A303B;
+  --color-ice-accent: #4F8CFF;
+  --color-ice-accentHover: #3b74e6;
+  --color-ice-success: #3FB950;
+  --color-ice-warning: #D29922;
+  --color-ice-error: #F85149;
+  --color-ice-text: #E6EAF0;
+  --color-ice-subtext: #8B94A3;
+
+  --aspect-cover: 2 / 3;
+  --aspect-banner: 16 / 9;
+}
+
+@layer base {
+  body {
+    background-color: var(--color-ice-bg);
+    color: var(--color-ice-text);
+    user-select: none;
+    -webkit-user-select: none;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  }
+
+  /* Custom scrollbar for modern gaming app look */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: #0F1115;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #2A303B;
+    border-radius: 9999px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #4F8CFF;
+  }
+}
+
+/* Glassmorphism & utilities */
+.glass-panel {
+  background: rgba(23, 26, 33, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(42, 48, 59, 0.6);
+}
