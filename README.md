@@ -164,9 +164,9 @@ C:\Icelauch\
    cd C:\Icelauch
    npm start
    ```
-2. **Mã PIN Quản trị viên (Admin):**
-   - Mã PIN mặc định là `3003` (hỗ trợ độ dài từ 4 đến 10 số).
-   - Mã PIN Quản trị khẩn cấp cấp cao (Master PIN_PRI): `42336737`.
+2. **Bảo Mật Quản Trị Viên (Admin Mode):**
+   - Các tính năng quản trị hệ thống (cấu hình Supabase, thêm/sửa/xóa game & phim) được bảo vệ bằng mã PIN an toàn.
+   - Quản trị viên có thể tùy ý thiết lập và đổi mã PIN (từ 4 đến 10 số) bất cứ lúc nào trong mục **Cài Đặt > Bảo Mật Quản Trị**.
 3. **Chuyển đổi giao diện giữa các thiết bị trên PC:**
    - Khi đang ở quyền Admin, bấm vào huy hiệu thiết bị ở thanh điều hướng để giả lập giao diện: **Windows PC**, **Điện Thoại Di Động** hoặc **Android TV** với điều khiển Remote ảo.
 4. **Cài đặt APK trên Android TV / Smart TV:**
