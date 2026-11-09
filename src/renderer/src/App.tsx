@@ -241,16 +241,28 @@ export default function App() {
         });
       }) : () => {};
 
-      const unsubCloud = (window.api as any).onCloudSynced ? (window.api as any).onCloudSynced((data: { profiles: UserProfile[]; message: string }) => {
+      const unsubCloud = (window.api as any).onCloudSynced ? (window.api as any).onCloudSynced((data: { profiles: UserProfile[]; games?: Game[]; media?: MediaItem[]; playlists?: MediaPlaylist[]; message: string }) => {
         if (data?.profiles) {
           setProfiles(data.profiles);
-          setCloudSyncSettings((prev) => ({
-            ...prev,
-            lastSyncedAt: new Date().toISOString(),
-            lastSyncStatus: 'success',
-            lastSyncMessage: data.message,
-          }));
         }
+        if (data?.games || data?.media || data?.playlists) {
+          setAppData((prev) => {
+            if (!prev) return prev;
+            return {
+              ...prev,
+              profiles: data.profiles || prev.profiles,
+              games: data.games || prev.games,
+              media: data.media || prev.media,
+              playlists: data.playlists || prev.playlists,
+            };
+          });
+        }
+        setCloudSyncSettings((prev) => ({
+          ...prev,
+          lastSyncedAt: new Date().toISOString(),
+          lastSyncStatus: 'success',
+          lastSyncMessage: data.message,
+        }));
       }) : () => {};
 
       return () => {

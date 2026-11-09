@@ -757,14 +757,40 @@ app.whenReady().then(async () => {
     }
 
     try {
-      const res = await SupabaseSyncService.getInstance().syncAll(targetUrl, targetKey, storage.getProfiles());
+      const res = await SupabaseSyncService.getInstance().syncAll(
+        targetUrl,
+        targetKey,
+        storage.getProfiles(),
+        storage.getGames(),
+        storage.getMedia(),
+        storage.getPlaylists()
+      );
       storage.setAllProfiles(res.updatedProfiles);
+      storage.setAllGames(res.updatedGames);
+      storage.setAllMedia(res.updatedMedia);
+      storage.setAllPlaylists(res.updatedPlaylists);
+
       storage.saveCloudSyncSettings({
         lastSyncedAt: new Date().toISOString(),
         lastSyncStatus: 'success',
         lastSyncMessage: res.message,
       });
-      return { success: true, message: res.message, profiles: res.updatedProfiles };
+
+      mainWindow?.webContents.send('cloud:synced', {
+        profiles: res.updatedProfiles,
+        games: res.updatedGames,
+        media: res.updatedMedia,
+        playlists: res.updatedPlaylists,
+        message: res.message,
+      });
+
+      return {
+        success: true,
+        message: res.message,
+        profiles: res.updatedProfiles,
+        games: res.updatedGames,
+        media: res.updatedMedia,
+      };
     } catch (err: any) {
       storage.saveCloudSyncSettings({
         lastSyncStatus: 'error',
@@ -814,9 +840,16 @@ app.whenReady().then(async () => {
       const res = await SupabaseSyncService.getInstance().syncAll(
         syncSettings.supabaseUrl,
         syncSettings.supabaseAnonKey,
-        storage.getProfiles()
+        storage.getProfiles(),
+        storage.getGames(),
+        storage.getMedia(),
+        storage.getPlaylists()
       );
       storage.setAllProfiles(res.updatedProfiles);
+      storage.setAllGames(res.updatedGames);
+      storage.setAllMedia(res.updatedMedia);
+      storage.setAllPlaylists(res.updatedPlaylists);
+
       storage.saveCloudSyncSettings({
         lastSyncedAt: new Date().toISOString(),
         lastSyncStatus: 'success',
@@ -824,6 +857,9 @@ app.whenReady().then(async () => {
       });
       mainWindow?.webContents.send('cloud:synced', {
         profiles: res.updatedProfiles,
+        games: res.updatedGames,
+        media: res.updatedMedia,
+        playlists: res.updatedPlaylists,
         message: res.message,
       });
       console.log(`[Supabase Auto-Sync] Success: ${res.message}`);
@@ -863,7 +899,10 @@ app.whenReady().then(async () => {
         await SupabaseSyncService.getInstance().syncAll(
           syncSettings.supabaseUrl,
           syncSettings.supabaseAnonKey,
-          storage.getProfiles()
+          storage.getProfiles(),
+          storage.getGames(),
+          storage.getMedia(),
+          storage.getPlaylists()
         );
       } catch (e) {
         console.warn('Final quit sync error:', e);

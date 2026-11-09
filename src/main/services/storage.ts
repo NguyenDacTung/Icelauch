@@ -873,6 +873,21 @@ export class StorageService {
     this.saveDataAtomic();
   }
 
+  public setAllGames(games: Game[]): void {
+    this.data.games = games;
+    this.saveDataAtomic();
+  }
+
+  public setAllMedia(media: MediaItem[]): void {
+    this.data.media = media;
+    this.saveDataAtomic();
+  }
+
+  public setAllPlaylists(playlists: MediaPlaylist[]): void {
+    this.data.playlists = playlists;
+    this.saveDataAtomic();
+  }
+
   public updateProfileLibrary(profileId: string, gameId: string, inLibrary: boolean): void {
     const prof = this.getProfile(profileId);
     if (!prof) return;

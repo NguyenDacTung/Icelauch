@@ -100,9 +100,9 @@ export const API = {
     ipcRenderer.invoke('cloud:save-settings', settings),
   testSupabaseConnection: (url: string, key: string): Promise<{ success: boolean; message: string }> =>
     ipcRenderer.invoke('cloud:test-connection', { url, key }),
-  syncCloud: (options?: { url?: string; key?: string }): Promise<{ success: boolean; message: string; profiles?: UserProfile[] }> =>
+  syncCloud: (options?: { url?: string; key?: string }): Promise<{ success: boolean; message: string; profiles?: UserProfile[]; games?: Game[]; media?: MediaItem[]; playlists?: MediaPlaylist[] }> =>
     ipcRenderer.invoke('cloud:sync', options || {}),
-  onCloudSynced: (callback: (data: { profiles: UserProfile[]; message: string }) => void) => {
+  onCloudSynced: (callback: (data: { profiles: UserProfile[]; games?: Game[]; media?: MediaItem[]; playlists?: MediaPlaylist[]; message: string }) => void) => {
     const handler = (_event: any, data: any) => callback(data);
     ipcRenderer.on('cloud:synced', handler);
     return () => ipcRenderer.removeListener('cloud:synced', handler);
