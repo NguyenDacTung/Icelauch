@@ -71,3 +71,4 @@ export const AvatarBadge: React.FC<AvatarBadgeProps> = ({
     </div>
   );
 };
+

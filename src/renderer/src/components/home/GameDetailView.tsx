@@ -20,15 +20,19 @@ import {
   ExternalLink,
   CheckCircle2,
   AlertCircle,
-  Film
+  Film,
+  Monitor
 } from 'lucide-react';
 import { parseMediaUrl, getActiveProxyPort } from '../../utils/mediaUrl';
 import type { Game, AppActionButton } from '../../types';
 import { GameActionsWidget } from '../common/GameActionsWidget';
+import { DeviceType, isMobileOrTV } from '../../utils/deviceDetector';
 
 interface GameDetailViewProps {
   game: Game;
   isAdmin: boolean;
+  deviceType?: DeviceType;
+  onIncompatibleClick?: (game: Game) => void;
   onBack: () => void;
   onLaunch: (id: string) => void;
   onDownload: (id: string) => void;
@@ -44,6 +48,8 @@ interface GameDetailViewProps {
 export const GameDetailView: React.FC<GameDetailViewProps> = ({
   game,
   isAdmin,
+  deviceType = 'windows_pc',
+  onIncompatibleClick,
   onBack,
   onLaunch,
   onDownload,
@@ -179,7 +185,7 @@ export const GameDetailView: React.FC<GameDetailViewProps> = ({
               {isTrailerActive && youtubeVideoId ? (
                 <div className="relative w-full h-full">
                   <iframe
-                    src={`http://127.0.0.1:${getActiveProxyPort()}/youtube/${youtubeVideoId}?autoplay=1&mute=${isMuted ? 1 : 0}`}
+                    src={`https://www.youtube-nocookie.com/embed/${youtubeVideoId}?autoplay=1&mute=${isMuted ? 1 : 0}&rel=0&playsinline=1&enablejsapi=1`}
                     title="Game Trailer"
                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                     referrerPolicy="strict-origin-when-cross-origin"
@@ -392,27 +398,40 @@ export const GameDetailView: React.FC<GameDetailViewProps> = ({
                 </div>
               )}
 
-              {/* Ready to Play CTA */}
-              {isReady && (
+              {/* Mobile / Android TV Incompatibility Notice */}
+              {isMobileOrTV(deviceType) ? (
                 <button
-                  onClick={() => onLaunch(game.id)}
-                  disabled={isRunning}
-                  className="w-full h-12 rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 text-white text-sm font-black tracking-wider uppercase flex items-center justify-center gap-2.5 shadow-xl shadow-emerald-950/40 transition-all transform hover:-translate-y-0.5 active:translate-y-0"
+                  onClick={() => onIncompatibleClick?.(game)}
+                  className="w-full h-12 rounded-xl bg-slate-800/90 hover:bg-slate-700/90 text-amber-300 border border-amber-500/40 text-xs font-black tracking-wider uppercase flex items-center justify-center gap-2.5 shadow-xl transition-all cursor-pointer hover:border-amber-400"
                 >
-                  <Play className="w-5 h-5 fill-white" />
-                  <span>{isRunning ? 'GAME ĐANG CHẠY...' : 'CHƠI NGAY'}</span>
+                  <Monitor className="w-4 h-4 text-amber-400" />
+                  <span>🚫 Chỉ hỗ trợ Windows PC</span>
                 </button>
-              )}
+              ) : (
+                <>
+                  {/* Ready to Play CTA */}
+                  {isReady && (
+                    <button
+                      onClick={() => onLaunch(game.id)}
+                      disabled={isRunning}
+                      className="w-full h-12 rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 text-white text-sm font-black tracking-wider uppercase flex items-center justify-center gap-2.5 shadow-xl shadow-emerald-950/40 transition-all transform hover:-translate-y-0.5 active:translate-y-0"
+                    >
+                      <Play className="w-5 h-5 fill-white" />
+                      <span>{isRunning ? 'GAME ĐANG CHẠY...' : 'CHƠI NGAY'}</span>
+                    </button>
+                  )}
 
-              {/* Uninstalled CTA */}
-              {game.status === 'uninstalled' && (
-                <button
-                  onClick={() => onDownload(game.id)}
-                  className="w-full h-12 rounded-xl bg-gradient-to-r from-ice-accent to-blue-600 hover:from-ice-accentHover hover:to-blue-500 text-white text-sm font-black tracking-wider uppercase flex items-center justify-center gap-2.5 shadow-xl shadow-blue-950/40 transition-all transform hover:-translate-y-0.5 active:translate-y-0"
-                >
-                  <Download className="w-5 h-5" />
-                  <span>TẢI GAME VỀ MÁY</span>
-                </button>
+                  {/* Uninstalled CTA */}
+                  {game.status === 'uninstalled' && (
+                    <button
+                      onClick={() => onDownload(game.id)}
+                      className="w-full h-12 rounded-xl bg-gradient-to-r from-ice-accent to-blue-600 hover:from-ice-accentHover hover:to-blue-500 text-white text-sm font-black tracking-wider uppercase flex items-center justify-center gap-2.5 shadow-xl shadow-blue-950/40 transition-all transform hover:-translate-y-0.5 active:translate-y-0"
+                    >
+                      <Download className="w-5 h-5" />
+                      <span>TẢI GAME VỀ MÁY</span>
+                    </button>
+                  )}
+                </>
               )}
 
               {/* Error Retry CTA */}

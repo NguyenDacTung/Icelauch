@@ -8,6 +8,8 @@
     "build": "tsc && vite build",
     "start": "node scripts/launch.cjs",
     "preview": "vite preview",
+    "cap:sync": "cap sync",
+    "cap:build:android": "npm run build && cap sync android",
     "dist": "tsc && vite build && electron-builder",
     "dist:win": "tsc && vite build && electron-builder --win"
   },
@@ -61,6 +63,7 @@
   "author": "Icelauch Team",
   "license": "MIT",
   "dependencies": {
+    "@capacitor/core": "^8.6.0",
     "clsx": "^2.1.1",
     "electron-updater": "^6.8.11",
     "lucide-react": "^1.16.0",
@@ -69,6 +72,8 @@
     "tailwind-merge": "^3.5.0"
   },
   "devDependencies": {
+    "@capacitor/android": "^8.6.0",
+    "@capacitor/cli": "^8.6.0",
     "@tailwindcss/postcss": "^4.3.5",
     "@types/node": "^25.2.0",
     "@types/react": "^19.2.14",

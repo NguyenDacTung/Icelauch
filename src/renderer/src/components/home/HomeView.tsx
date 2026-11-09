@@ -22,6 +22,7 @@ import {
   Users
 } from 'lucide-react';
 import type { Game, MediaItem, AppSettings } from '../../types';
+import type { DeviceType } from '../../utils/deviceDetector';
 import { sfx } from '../../utils/sfx';
 
 interface HomeViewProps {
@@ -30,6 +31,8 @@ interface HomeViewProps {
   settings?: AppSettings;
   isAdmin: boolean;
   searchQuery: string;
+  deviceType?: DeviceType;
+  onIncompatibleClick?: (game: Game) => void;
   onSelectGame: (game: Game) => void;
   onSelectMedia?: (media: MediaItem) => void;
   onLaunch: (id: string) => void;
@@ -52,6 +55,8 @@ export const HomeView: React.FC<HomeViewProps> = ({
   settings,
   isAdmin,
   searchQuery,
+  deviceType = 'windows_pc',
+  onIncompatibleClick,
   onSelectGame,
   onSelectMedia,
   onLaunch,
@@ -196,10 +201,12 @@ export const HomeView: React.FC<HomeViewProps> = ({
         <HeroBanner
           games={baseGames}
           bannerSettings={settings?.bannerSettings?.games}
+          deviceType={deviceType}
           onSelectGame={onSelectGame}
           onLaunch={onLaunch}
           onDownload={onDownload}
           onToggleLibrary={onToggleLibrary}
+          onIncompatibleClick={onIncompatibleClick}
         />
       )}
 

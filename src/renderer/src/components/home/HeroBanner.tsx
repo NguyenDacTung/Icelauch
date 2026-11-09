@@ -11,27 +11,33 @@ import {
   CheckCircle2,
   Clock,
   Flame,
-  Shuffle
+  Shuffle,
+  Monitor
 } from 'lucide-react';
 import type { Game, SectionBannerSettings } from '../../types';
 import { resolveBannerItems } from '../../utils/bannerResolver';
+import { DeviceType, isMobileOrTV, isAndroidMobile } from '../../utils/deviceDetector';
 
 interface HeroBannerProps {
   games: Game[];
   bannerSettings?: SectionBannerSettings;
+  deviceType?: DeviceType;
   onSelectGame: (game: Game) => void;
   onLaunch: (id: string) => void;
   onDownload: (id: string) => void;
   onToggleLibrary: (id: string) => void;
+  onIncompatibleClick?: (game: Game) => void;
 }
 
 export const HeroBanner: React.FC<HeroBannerProps> = ({
   games,
   bannerSettings,
+  deviceType = 'windows_pc',
   onSelectGame,
   onLaunch,
   onDownload,
   onToggleLibrary,
+  onIncompatibleClick,
 }) => {
   const resolvedList = resolveBannerItems(bannerSettings, games, 'game');
   const displayGames = resolvedList.map((r) => r.item);
@@ -69,6 +75,66 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({
   const mainImage = hoveredScreenshot || currentGame.bannerPath || currentGame.coverPath || 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=1600&q=80';
   const sharpenVal = !hoveredScreenshot ? (currentGame.bannerSharpen || currentGame.coverSharpen || 0) : 0;
   const edgeDarknessVal = !hoveredScreenshot ? (currentGame.bannerEdgeDarkness ?? 0) : 0;
+
+  // Mobile Android Layout: Full-Art Visual Banner (no side text column to maximize vertical screen fit)
+  if (isAndroidMobile(deviceType)) {
+    return (
+      <div className="relative w-full rounded-2xl overflow-hidden border border-ice-border shadow-xl select-none group bg-ice-card aspect-[16/10] flex flex-col justify-between p-4 my-2">
+        <img
+          key={mainImage}
+          src={mainImage}
+          alt={currentGame.name}
+          className="absolute inset-0 w-full h-full object-cover transition-transform duration-300"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#0A0C10] via-black/40 to-transparent" />
+
+        <div className="relative z-10 flex items-center justify-between">
+          <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-ice-accent/30 text-ice-accent border border-ice-accent/40 backdrop-blur-md">
+            {currentResolved?.badgeText || 'NỔI BẬT'}
+          </span>
+          <button
+            onClick={() => onToggleLibrary(currentGame.id)}
+            className="p-1.5 rounded-lg bg-black/60 text-white backdrop-blur-md border border-white/20"
+          >
+            {currentGame.inLibrary ? <BookmarkCheck className="w-3.5 h-3.5 text-ice-accent" /> : <Bookmark className="w-3.5 h-3.5" />}
+          </button>
+        </div>
+
+        <div className="relative z-10 space-y-2">
+          <div className="flex flex-wrap gap-1">
+            {tagsList.slice(0, 2).map((t) => (
+              <span key={t} className="px-2 py-0.5 rounded text-[9px] font-semibold bg-white/20 text-white backdrop-blur-xs">
+                {t}
+              </span>
+            ))}
+          </div>
+
+          <h3 
+            onClick={() => onSelectGame(currentGame)}
+            className="text-lg font-black text-white leading-tight line-clamp-1 cursor-pointer"
+          >
+            {currentGame.name}
+          </h3>
+
+          <div className="flex items-center gap-2 pt-1">
+            <button
+              onClick={() => onIncompatibleClick ? onIncompatibleClick(currentGame) : onSelectGame(currentGame)}
+              className="flex-1 h-9 rounded-xl bg-amber-500/20 border border-amber-500/40 text-amber-300 text-[11px] font-bold flex items-center justify-center gap-1.5 shadow-md"
+            >
+              <Monitor className="w-3.5 h-3.5" />
+              <span>🚫 Chỉ hỗ trợ PC</span>
+            </button>
+            <button
+              onClick={() => onSelectGame(currentGame)}
+              className="h-9 px-3.5 rounded-xl bg-white/15 text-white text-[11px] font-bold backdrop-blur-md"
+            >
+              Chi tiết
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="relative w-full max-w-[1360px] mx-auto rounded-2xl overflow-hidden border border-ice-border/80 shadow-2xl select-none group bg-ice-card flex flex-col md:flex-row items-stretch md:h-[440px]">
@@ -218,7 +284,17 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({
         {/* Bottom Action Bar: Play/Download button + Details + Carousel controls (shrink-0 guarantees buttons are never clipped) */}
         <div className="space-y-3 pt-3 border-t border-ice-border/60 shrink-0">
           <div className="flex items-center gap-2">
-            {isReady ? (
+            {isMobileOrTV(deviceType) ? (
+              <button
+                type="button"
+                onClick={() => onIncompatibleClick?.(currentGame)}
+                className="flex-1 h-11 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/35 text-amber-300 text-xs font-bold tracking-wider uppercase flex items-center justify-center gap-2 shadow-md transition-all"
+                title="Tựa game này chỉ chạy trên Windows PC"
+              >
+                <Monitor className="w-4 h-4 text-amber-400" />
+                <span>🚫 Chỉ hỗ trợ PC</span>
+              </button>
+            ) : isReady ? (
               <button
                 onClick={() => onLaunch(currentGame.id)}
                 className="flex-1 h-11 rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 text-white text-xs font-black tracking-wider uppercase flex items-center justify-center gap-2 shadow-lg shadow-emerald-950/40 transition-all transform hover:-translate-y-0.5 active:translate-y-0"

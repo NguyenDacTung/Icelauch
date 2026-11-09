@@ -166,3 +166,4 @@ export const UserMenuWidget: React.FC<UserMenuWidgetProps> = ({
     </div>
   );
 };
+

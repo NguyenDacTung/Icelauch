@@ -46,3 +46,4 @@ export function isCustomImageAvatar(avatar?: string): boolean {
     avatar.includes('\\')
   );
 }
+

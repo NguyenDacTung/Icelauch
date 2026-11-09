@@ -21,6 +21,10 @@ import { UpdateToast } from './components/common/UpdateToast';
 import { ProfilePickerView } from './components/profile/ProfilePickerView';
 import { ProfileModal } from './components/profile/ProfileModal';
 import { ChangeAdminPinModal } from './components/admin/ChangeAdminPinModal';
+import { DeviceSimulatorBar } from './components/admin/DeviceSimulatorBar';
+import { DevicePhoneFrame } from './components/common/DevicePhoneFrame';
+import { DeviceIncompatibleModal } from './components/common/DeviceIncompatibleModal';
+import { DeviceType, detectHardwareDevice, isMobileOrTV } from './utils/deviceDetector';
 import { sfx } from './utils/sfx';
 import { registerItemToBanner } from './utils/bannerResolver';
 import type { 
@@ -81,6 +85,12 @@ export default function App() {
     autoSyncIntervalMinutes: 5,
     lastSyncStatus: 'idle',
   });
+
+  // Cross-Platform & Device Simulator State
+  const [simulatedDevice, setSimulatedDevice] = useState<DeviceType>('windows_pc');
+  const [incompatibleGame, setIncompatibleGame] = useState<Game | null>(null);
+
+  const effectiveDevice: DeviceType = isAdmin ? simulatedDevice : detectHardwareDevice();
 
   // Load Initial App Data
   const loadData = async () => {
@@ -740,136 +750,300 @@ export default function App() {
         onRetry={handleRetryGame}
       />
 
+      {/* Admin Device Simulator Switcher Toolbar */}
+      {isAdmin && (
+        <DeviceSimulatorBar
+          currentDevice={simulatedDevice}
+          onChangeDevice={(dev) => {
+            setSimulatedDevice(dev);
+            if (dev !== 'windows_pc' && currentTab === 'home') {
+              setCurrentTab('media');
+            }
+          }}
+          isAdmin={isAdmin}
+        />
+      )}
+
       {/* 3. Main Page Content View */}
       <main className="flex-1 flex overflow-hidden relative">
-        {viewingDetailGame ? (
-          <GameDetailView
-            game={viewingDetailGame}
-            isAdmin={isAdmin}
-            onBack={() => setViewingDetailGame(null)}
-            onLaunch={handleLaunchGame}
-            onDownload={handleDownloadGame}
-            onCancelDownload={handleCancelDownload}
-            onRetry={handleRetryGame}
-            onToggleLibrary={handleToggleLibrary}
-            onToggleHide={handleToggleHideGame}
-            onEditGame={(game) => {
-              setEditingGame(game);
-              setIsGameFormOpen(true);
-            }}
-            onOpenFolder={(id) => handleOpenFolder('gameDir', id)}
-            globalActionButtons={appData.settings.globalActionButtons || []}
-          />
-        ) : (
-          <>
-            {currentTab === 'home' && (
-              <HomeView
-                games={appData.games}
-                allMedia={appData.media}
-                settings={appData.settings}
+        {effectiveDevice === 'android_mobile' ? (
+          <DevicePhoneFrame
+            currentTab={currentTab}
+            onTabChange={setCurrentTab}
+            onExitSimulation={() => setSimulatedDevice('windows_pc')}
+          >
+            {viewingDetailGame ? (
+              <GameDetailView
+                game={viewingDetailGame}
                 isAdmin={isAdmin}
-                searchQuery={searchQuery}
-                onSelectGame={(game) => setViewingDetailGame(game)}
-                onSelectMedia={(mediaItem) => {
-                  setCurrentTab('media');
-                }}
+                deviceType={effectiveDevice}
+                onIncompatibleClick={(game) => setIncompatibleGame(game)}
+                onBack={() => setViewingDetailGame(null)}
                 onLaunch={handleLaunchGame}
                 onDownload={handleDownloadGame}
                 onCancelDownload={handleCancelDownload}
                 onRetry={handleRetryGame}
                 onToggleLibrary={handleToggleLibrary}
                 onToggleHide={handleToggleHideGame}
-                onOpenFolder={(id) => handleOpenFolder('gameDir', id)}
-                onUninstall={handleUninstallGame}
                 onEditGame={(game) => {
                   setEditingGame(game);
                   setIsGameFormOpen(true);
                 }}
-                onDeleteGame={handleDeleteGame}
-                onOpenAddGame={() => {
-                  setEditingGame(null);
-                  setIsGameFormOpen(true);
-                }}
-                onLoadDemoData={handleLoadDemoData}
+                onOpenFolder={(id) => handleOpenFolder('gameDir', id)}
+                globalActionButtons={appData.settings.globalActionButtons || []}
               />
-            )}
+            ) : (
+              <>
+                {currentTab === 'home' && (
+                  <HomeView
+                    games={appData.games}
+                    allMedia={appData.media}
+                    settings={appData.settings}
+                    isAdmin={isAdmin}
+                    searchQuery={searchQuery}
+                    deviceType={effectiveDevice}
+                    onIncompatibleClick={(game) => setIncompatibleGame(game)}
+                    onSelectGame={(game) => setViewingDetailGame(game)}
+                    onSelectMedia={(mediaItem) => {
+                      setCurrentTab('media');
+                    }}
+                    onLaunch={handleLaunchGame}
+                    onDownload={handleDownloadGame}
+                    onCancelDownload={handleCancelDownload}
+                    onRetry={handleRetryGame}
+                    onToggleLibrary={handleToggleLibrary}
+                    onToggleHide={handleToggleHideGame}
+                    onOpenFolder={(id) => handleOpenFolder('gameDir', id)}
+                    onUninstall={handleUninstallGame}
+                    onEditGame={(game) => {
+                      setEditingGame(game);
+                      setIsGameFormOpen(true);
+                    }}
+                    onDeleteGame={handleDeleteGame}
+                    onOpenAddGame={() => {
+                      setEditingGame(null);
+                      setIsGameFormOpen(true);
+                    }}
+                    onLoadDemoData={handleLoadDemoData}
+                  />
+                )}
 
-            {currentTab === 'library' && (
-              <LibraryView
-                games={appData.games}
-                selectedGameId={selectedGameId}
+                {currentTab === 'library' && (
+                  <LibraryView
+                    games={appData.games}
+                    selectedGameId={selectedGameId}
+                    isAdmin={isAdmin}
+                    userLibraryIds={activeProfile?.library}
+                    onSelectGame={(game) => setSelectedGameId(game.id)}
+                    onOpenDetail={(game) => setViewingDetailGame(game)}
+                    onLaunch={handleLaunchGame}
+                    onDownload={handleDownloadGame}
+                    onCancelDownload={handleCancelDownload}
+                    onRetry={handleRetryGame}
+                    onOpenFolder={(id) => handleOpenFolder('gameDir', id)}
+                    onUninstall={handleUninstallGame}
+                    onSaveGameSettings={handleSaveGameSettings}
+                    onSelectCustomExe={handleSelectCustomExe}
+                    onAutoPickExe={handleAutoPickExe}
+                    onToggleLibrary={handleToggleLibrary}
+                    globalActionButtons={appData.settings.globalActionButtons || []}
+                  />
+                )}
+
+                {currentTab === 'media' && (
+                  <MediaView
+                    media={appData.media}
+                    playlists={appData.playlists || []}
+                    bannerSettings={appData.settings.bannerSettings}
+                    isAdmin={isAdmin}
+                    searchQuery={searchQuery}
+                    onPlayAudio={handlePlayAudio}
+                    onSaveMedia={handleSaveMedia}
+                    onDeleteMedia={handleDeleteMedia}
+                    onToggleHide={handleToggleHideMedia}
+                    onOpenAddMedia={() => {
+                      setEditingMedia(null);
+                      setIsMediaFormOpen(true);
+                    }}
+                    onEditMedia={(item) => {
+                      setEditingMedia(item);
+                      setIsMediaFormOpen(true);
+                    }}
+                    onUpdateMediaProgress={handleUpdateMediaProgress}
+                    onSavePlaylist={handleSavePlaylist}
+                    onDeletePlaylist={handleDeletePlaylist}
+                    onDownloadMedia={handleDownloadMedia}
+                    onDeleteDownloaded={handleDeleteDownloadedMedia}
+                  />
+                )}
+
+                {currentTab === 'settings' && (
+                  <SettingsView
+                    settings={appData.settings}
+                    isAdmin={isAdmin}
+                    onOpenFolder={handleOpenFolder}
+                    onExportData={handleExportData}
+                    onImportData={handleImportData}
+                    onLoadDemoData={handleLoadDemoData}
+                    onChangePin={() => setIsChangeAdminPinOpen(true)}
+                    onOpenAdminAuth={() => setIsAdminAuthOpen(true)}
+                    onOpenBannerManager={() => setIsBannerManagerOpen(true)}
+                    onSaveSettings={handleSaveSettings}
+                    cloudSync={cloudSyncSettings}
+                    onSaveCloudSync={handleSaveCloudSync}
+                    onUpdateTags={async (type, tags) => {
+                      const updatedSettings = {
+                        ...appData.settings,
+                        [type === 'game' ? 'gameTags' : 'mediaTags']: tags,
+                      };
+                      setAppData({ ...appData, settings: updatedSettings });
+                      if (window.api) {
+                        await window.api.saveSettings({
+                          [type === 'game' ? 'gameTags' : 'mediaTags']: tags,
+                        });
+                      }
+                    }}
+                  />
+                )}
+              </>
+            )}
+          </DevicePhoneFrame>
+        ) : (
+          <>
+            {viewingDetailGame ? (
+              <GameDetailView
+                game={viewingDetailGame}
                 isAdmin={isAdmin}
-                userLibraryIds={activeProfile?.library}
-                onSelectGame={(game) => setSelectedGameId(game.id)}
-                onOpenDetail={(game) => setViewingDetailGame(game)}
+                deviceType={effectiveDevice}
+                onIncompatibleClick={(game) => setIncompatibleGame(game)}
+                onBack={() => setViewingDetailGame(null)}
                 onLaunch={handleLaunchGame}
                 onDownload={handleDownloadGame}
                 onCancelDownload={handleCancelDownload}
                 onRetry={handleRetryGame}
-                onOpenFolder={(id) => handleOpenFolder('gameDir', id)}
-                onUninstall={handleUninstallGame}
-                onSaveGameSettings={handleSaveGameSettings}
-                onSelectCustomExe={handleSelectCustomExe}
-                onAutoPickExe={handleAutoPickExe}
                 onToggleLibrary={handleToggleLibrary}
+                onToggleHide={handleToggleHideGame}
+                onEditGame={(game) => {
+                  setEditingGame(game);
+                  setIsGameFormOpen(true);
+                }}
+                onOpenFolder={(id) => handleOpenFolder('gameDir', id)}
                 globalActionButtons={appData.settings.globalActionButtons || []}
               />
-            )}
+            ) : (
+              <>
+                {currentTab === 'home' && (
+                  <HomeView
+                    games={appData.games}
+                    allMedia={appData.media}
+                    settings={appData.settings}
+                    isAdmin={isAdmin}
+                    searchQuery={searchQuery}
+                    deviceType={effectiveDevice}
+                    onIncompatibleClick={(game) => setIncompatibleGame(game)}
+                    onSelectGame={(game) => setViewingDetailGame(game)}
+                    onSelectMedia={(mediaItem) => {
+                      setCurrentTab('media');
+                    }}
+                    onLaunch={handleLaunchGame}
+                    onDownload={handleDownloadGame}
+                    onCancelDownload={handleCancelDownload}
+                    onRetry={handleRetryGame}
+                    onToggleLibrary={handleToggleLibrary}
+                    onToggleHide={handleToggleHideGame}
+                    onOpenFolder={(id) => handleOpenFolder('gameDir', id)}
+                    onUninstall={handleUninstallGame}
+                    onEditGame={(game) => {
+                      setEditingGame(game);
+                      setIsGameFormOpen(true);
+                    }}
+                    onDeleteGame={handleDeleteGame}
+                    onOpenAddGame={() => {
+                      setEditingGame(null);
+                      setIsGameFormOpen(true);
+                    }}
+                    onLoadDemoData={handleLoadDemoData}
+                  />
+                )}
 
-            {currentTab === 'media' && (
-              <MediaView
-                media={appData.media}
-                playlists={appData.playlists || []}
-                bannerSettings={appData.settings.bannerSettings}
-                isAdmin={isAdmin}
-                searchQuery={searchQuery}
-                onPlayAudio={handlePlayAudio}
-                onSaveMedia={handleSaveMedia}
-                onDeleteMedia={handleDeleteMedia}
-                onToggleHide={handleToggleHideMedia}
-                onOpenAddMedia={() => {
-                  setEditingMedia(null);
-                  setIsMediaFormOpen(true);
-                }}
-                onEditMedia={(item) => {
-                  setEditingMedia(item);
-                  setIsMediaFormOpen(true);
-                }}
-                onUpdateMediaProgress={handleUpdateMediaProgress}
-                onSavePlaylist={handleSavePlaylist}
-                onDeletePlaylist={handleDeletePlaylist}
-                onDownloadMedia={handleDownloadMedia}
-                onDeleteDownloaded={handleDeleteDownloadedMedia}
-              />
-            )}
+                {currentTab === 'library' && (
+                  <LibraryView
+                    games={appData.games}
+                    selectedGameId={selectedGameId}
+                    isAdmin={isAdmin}
+                    userLibraryIds={activeProfile?.library}
+                    onSelectGame={(game) => setSelectedGameId(game.id)}
+                    onOpenDetail={(game) => setViewingDetailGame(game)}
+                    onLaunch={handleLaunchGame}
+                    onDownload={handleDownloadGame}
+                    onCancelDownload={handleCancelDownload}
+                    onRetry={handleRetryGame}
+                    onOpenFolder={(id) => handleOpenFolder('gameDir', id)}
+                    onUninstall={handleUninstallGame}
+                    onSaveGameSettings={handleSaveGameSettings}
+                    onSelectCustomExe={handleSelectCustomExe}
+                    onAutoPickExe={handleAutoPickExe}
+                    onToggleLibrary={handleToggleLibrary}
+                    globalActionButtons={appData.settings.globalActionButtons || []}
+                  />
+                )}
 
-            {currentTab === 'settings' && (
-              <SettingsView
-                settings={appData.settings}
-                isAdmin={isAdmin}
-                onOpenFolder={handleOpenFolder}
-                onExportData={handleExportData}
-                onImportData={handleImportData}
-                onLoadDemoData={handleLoadDemoData}
-                onChangePin={() => setIsChangeAdminPinOpen(true)}
-                onOpenAdminAuth={() => setIsAdminAuthOpen(true)}
-                onOpenBannerManager={() => setIsBannerManagerOpen(true)}
-                onSaveSettings={handleSaveSettings}
-                cloudSync={cloudSyncSettings}
-                onSaveCloudSync={handleSaveCloudSync}
-                onUpdateTags={async (type, tags) => {
-                  const updatedSettings = {
-                    ...appData.settings,
-                    [type === 'game' ? 'gameTags' : 'mediaTags']: tags,
-                  };
-                  setAppData({ ...appData, settings: updatedSettings });
-                  if (window.api) {
-                    await window.api.saveSettings({
-                      [type === 'game' ? 'gameTags' : 'mediaTags']: tags,
-                    });
-                  }
-                }}
-              />
+                {currentTab === 'media' && (
+                  <MediaView
+                    media={appData.media}
+                    playlists={appData.playlists || []}
+                    bannerSettings={appData.settings.bannerSettings}
+                    isAdmin={isAdmin}
+                    searchQuery={searchQuery}
+                    onPlayAudio={handlePlayAudio}
+                    onSaveMedia={handleSaveMedia}
+                    onDeleteMedia={handleDeleteMedia}
+                    onToggleHide={handleToggleHideMedia}
+                    onOpenAddMedia={() => {
+                      setEditingMedia(null);
+                      setIsMediaFormOpen(true);
+                    }}
+                    onEditMedia={(item) => {
+                      setEditingMedia(item);
+                      setIsMediaFormOpen(true);
+                    }}
+                    onUpdateMediaProgress={handleUpdateMediaProgress}
+                    onSavePlaylist={handleSavePlaylist}
+                    onDeletePlaylist={handleDeletePlaylist}
+                    onDownloadMedia={handleDownloadMedia}
+                    onDeleteDownloaded={handleDeleteDownloadedMedia}
+                  />
+                )}
+
+                {currentTab === 'settings' && (
+                  <SettingsView
+                    settings={appData.settings}
+                    isAdmin={isAdmin}
+                    onOpenFolder={handleOpenFolder}
+                    onExportData={handleExportData}
+                    onImportData={handleImportData}
+                    onLoadDemoData={handleLoadDemoData}
+                    onChangePin={() => setIsChangeAdminPinOpen(true)}
+                    onOpenAdminAuth={() => setIsAdminAuthOpen(true)}
+                    onOpenBannerManager={() => setIsBannerManagerOpen(true)}
+                    onSaveSettings={handleSaveSettings}
+                    cloudSync={cloudSyncSettings}
+                    onSaveCloudSync={handleSaveCloudSync}
+                    onUpdateTags={async (type, tags) => {
+                      const updatedSettings = {
+                        ...appData.settings,
+                        [type === 'game' ? 'gameTags' : 'mediaTags']: tags,
+                      };
+                      setAppData({ ...appData, settings: updatedSettings });
+                      if (window.api) {
+                        await window.api.saveSettings({
+                          [type === 'game' ? 'gameTags' : 'mediaTags']: tags,
+                        });
+                      }
+                    }}
+                  />
+                )}
+              </>
             )}
           </>
         )}
@@ -1098,6 +1272,14 @@ export default function App() {
           onDelete={handleDeleteProfile}
         />
       )}
+
+      {/* Device Incompatibility Notice Modal (PC Game on Mobile / Android TV) */}
+      <DeviceIncompatibleModal
+        isOpen={!!incompatibleGame}
+        gameName={incompatibleGame?.name || ''}
+        deviceType={effectiveDevice}
+        onClose={() => setIncompatibleGame(null)}
+      />
 
       {/* Floating In-App OTA Update Toast */}
       <UpdateToast onGoToSettings={() => setCurrentTab('settings')} />

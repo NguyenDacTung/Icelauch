@@ -43,3 +43,4 @@ ON icelauch_user_data FOR ALL
 TO anon
 USING (true)
 WITH CHECK (true);
+

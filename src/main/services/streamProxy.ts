@@ -80,7 +80,7 @@ export class StreamProxyService {
 <body>
   <iframe
     id="yt-player"
-    src="https://www.youtube.com/embed/${videoId}?autoplay=${autoplay}&mute=${mute}&rel=0&modestbranding=1&playsinline=1&enablejsapi=1&origin=https://www.youtube.com&widget_referrer=https://www.youtube.com${startParam}"
+    src="https://www.youtube-nocookie.com/embed/${videoId}?autoplay=${autoplay}&mute=${mute}&rel=0&modestbranding=1&playsinline=1&enablejsapi=1${startParam}"
     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
     referrerpolicy="strict-origin-when-cross-origin"
     allowfullscreen>

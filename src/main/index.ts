@@ -86,7 +86,7 @@ async function createWindow() {
 
 // App lifecycle
 app.whenReady().then(async () => {
-  // 1. Fix YouTube Error 153: Inject valid Referer, Origin, and standard User-Agent for YouTube embeds
+  // 1. Fix YouTube Trailer Embeds (Bypass Error 152-4 and 153)
   const YOUTUBE_URL_PATTERNS = [
     'https://*.youtube.com/*',
     'https://youtube.com/*',
@@ -112,9 +112,9 @@ app.whenReady().then(async () => {
       }
 
       const requestHeaders = { ...details.requestHeaders };
-      // Always inject valid https://www.youtube.com referer & origin across all YouTube/GoogleVideo endpoints to bypass Error 152-4
-      requestHeaders['Referer'] = 'https://www.youtube.com/';
-      requestHeaders['Origin'] = 'https://www.youtube.com';
+      // Always inject valid nocookie referer & origin across all YouTube/GoogleVideo endpoints to bypass Error 152-4
+      requestHeaders['Referer'] = 'https://www.youtube-nocookie.com/';
+      requestHeaders['Origin'] = 'https://www.youtube-nocookie.com';
       requestHeaders['User-Agent'] =
         'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36';
       callback({ cancel: false, requestHeaders });
