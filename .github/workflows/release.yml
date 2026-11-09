@@ -85,15 +85,17 @@ jobs:
         run: chmod +x ./android/gradlew
 
       - name: Sync Capacitor Android
-        run: npx cap sync android --verbose
+        run: npm run cap:sync
         env:
           ANDROID_HOME: /usr/local/lib/android/sdk
           ANDROID_SDK_ROOT: /usr/local/lib/android/sdk
+          CI: "true"
+          CAPACITOR_TELEMETRY: "false"
 
       - name: Build Android APK via Gradle
         run: |
           cd android
-          ./gradlew assembleDebug --no-daemon
+          ./gradlew assembleDebug --no-daemon --stacktrace
         env:
           ANDROID_HOME: /usr/local/lib/android/sdk
           ANDROID_SDK_ROOT: /usr/local/lib/android/sdk
