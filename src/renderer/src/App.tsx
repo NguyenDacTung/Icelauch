@@ -28,6 +28,9 @@ import { DeviceType, detectHardwareDevice, isMobileOrTV } from './utils/deviceDe
 import { MobileHomeView } from './components/mobile/MobileHomeView';
 import { MobileMediaView } from './components/mobile/MobileMediaView';
 import { MobileLibraryView } from './components/mobile/MobileLibraryView';
+import { MobileGameDetailView } from './components/mobile/MobileGameDetailView';
+import { MobileSettingsView } from './components/mobile/MobileSettingsView';
+import { MobileVinylPlayerModal } from './components/mobile/MobileVinylPlayerModal';
 import { sfx } from './utils/sfx';
 import { registerItemToBanner } from './utils/bannerResolver';
 import type { 
@@ -75,6 +78,7 @@ export default function App() {
   // Audio player state
   const [currentTrack, setCurrentTrack] = useState<MediaItem | null>(null);
   const [isPlayingAudio, setIsPlayingAudio] = useState(false);
+  const [isMobileVinylOpen, setIsMobileVinylOpen] = useState(false);
 
   // Multi-User Profile State
   const [profiles, setProfiles] = useState<UserProfile[]>([]);
@@ -442,6 +446,9 @@ export default function App() {
   const handlePlayAudio = (track: MediaItem) => {
     setCurrentTrack(track);
     setIsPlayingAudio(true);
+    if (effectiveDevice === 'android_mobile') {
+      setIsMobileVinylOpen(true);
+    }
   };
 
   const handleSaveMedia = async (mediaData: Partial<MediaItem>) => {
@@ -774,24 +781,22 @@ export default function App() {
             currentTab={currentTab}
             onTabChange={setCurrentTab}
             onExitSimulation={() => setSimulatedDevice('windows_pc')}
+            isAdmin={isAdmin}
+            adminTimeRemaining={adminTimeRemaining}
+            onOpenAdminAuth={() => setIsAdminAuthOpen(true)}
+            onLockAdmin={handleLockAdmin}
+            activeProfile={activeProfile}
+            onSwitchProfile={handleSwitchProfile}
+            onEditCurrentProfile={() => setIsEditingCurrentProfile(true)}
+            onLogoutProfile={handleLogoutProfile}
           >
             {viewingDetailGame ? (
-              <GameDetailView
+              <MobileGameDetailView
                 game={viewingDetailGame}
                 isAdmin={isAdmin}
-                deviceType={effectiveDevice}
-                onIncompatibleClick={(game) => setIncompatibleGame(game)}
                 onBack={() => setViewingDetailGame(null)}
-                onLaunch={handleLaunchGame}
-                onDownload={handleDownloadGame}
-                onCancelDownload={handleCancelDownload}
-                onRetry={handleRetryGame}
                 onToggleLibrary={handleToggleLibrary}
-                onToggleHide={handleToggleHideGame}
-                onEditGame={(game) => {
-                  setEditingGame(game);
-                  setIsGameFormOpen(true);
-                }}
+                onIncompatibleClick={(game) => setIncompatibleGame(game)}
                 onOpenFolder={(id) => handleOpenFolder('gameDir', id)}
                 globalActionButtons={appData.settings.globalActionButtons || []}
               />
@@ -841,31 +846,14 @@ export default function App() {
                 )}
 
                 {currentTab === 'settings' && (
-                  <SettingsView
+                  <MobileSettingsView
                     settings={appData.settings}
                     isAdmin={isAdmin}
-                    onOpenFolder={handleOpenFolder}
-                    onExportData={handleExportData}
-                    onImportData={handleImportData}
-                    onLoadDemoData={handleLoadDemoData}
+                    cloudSync={cloudSyncSettings}
                     onChangePin={() => setIsChangeAdminPinOpen(true)}
                     onOpenAdminAuth={() => setIsAdminAuthOpen(true)}
-                    onOpenBannerManager={() => setIsBannerManagerOpen(true)}
                     onSaveSettings={handleSaveSettings}
-                    cloudSync={cloudSyncSettings}
                     onSaveCloudSync={handleSaveCloudSync}
-                    onUpdateTags={async (type, tags) => {
-                      const updatedSettings = {
-                        ...appData.settings,
-                        [type === 'game' ? 'gameTags' : 'mediaTags']: tags,
-                      };
-                      setAppData({ ...appData, settings: updatedSettings });
-                      if (window.api) {
-                        await window.api.saveSettings({
-                          [type === 'game' ? 'gameTags' : 'mediaTags']: tags,
-                        });
-                      }
-                    }}
                   />
                 )}
               </>
@@ -1242,6 +1230,31 @@ export default function App() {
         gameName={incompatibleGame?.name || ''}
         deviceType={effectiveDevice}
         onClose={() => setIncompatibleGame(null)}
+      />
+
+      {/* Mobile Fullscreen Vinyl Turntable Player Modal */}
+      <MobileVinylPlayerModal
+        isOpen={isMobileVinylOpen}
+        track={currentTrack}
+        playlist={appData?.media.filter((m) => m.type === 'audio') || []}
+        isPlaying={isPlayingAudio}
+        onClose={() => setIsMobileVinylOpen(false)}
+        onPlayPause={() => setIsPlayingAudio(!isPlayingAudio)}
+        onNext={() => {
+          const audios = appData?.media.filter((m) => m.type === 'audio') || [];
+          if (audios.length <= 1) return;
+          const idx = audios.findIndex((a) => a.id === currentTrack?.id);
+          const next = audios[(idx + 1) % audios.length];
+          setCurrentTrack(next);
+        }}
+        onPrev={() => {
+          const audios = appData?.media.filter((m) => m.type === 'audio') || [];
+          if (audios.length <= 1) return;
+          const idx = audios.findIndex((a) => a.id === currentTrack?.id);
+          const prev = audios[(idx - 1 + audios.length) % audios.length];
+          setCurrentTrack(prev);
+        }}
+        onSelectTrack={(t) => setCurrentTrack(t)}
       />
 
       {/* Floating In-App OTA Update Toast */}

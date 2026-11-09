@@ -137,7 +137,7 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({
   }
 
   return (
-    <div className="relative w-full max-w-[1360px] mx-auto rounded-2xl overflow-hidden border border-ice-border/80 shadow-2xl select-none group bg-ice-card flex flex-col md:flex-row items-stretch md:h-[440px]">
+    <div className="relative w-full max-w-[1240px] mx-auto rounded-2xl overflow-hidden border border-ice-border/80 shadow-2xl select-none group bg-[#111318] flex flex-col md:flex-row items-stretch md:h-[460px] lg:h-[480px]">
       {/* SVG Convolution Filter for true pixel unsharp masking */}
       <svg className="absolute w-0 h-0 overflow-hidden pointer-events-none" aria-hidden="true">
         <defs>
@@ -151,7 +151,7 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({
         </defs>
       </svg>
 
-      {/* 1. LEFT COLUMN: Fixed Exact 16:9 Aspect Ratio (aspect-video) - Large & Cinematic (782px wide at 440px height) */}
+      {/* 1. LEFT COLUMN: Fixed Exact 16:9 Aspect Ratio - Large, Cinematic & Crystal Clear */}
       <div 
         onClick={() => onSelectGame(currentGame)}
         className="relative aspect-video h-[260px] md:h-full overflow-hidden bg-black flex-shrink-0 cursor-pointer"
@@ -167,7 +167,7 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({
             filter: [
               !hoveredScreenshot && currentGame.bannerBlur ? `blur(${currentGame.bannerBlur}px)` : '',
               !hoveredScreenshot && sharpenVal > 10 ? 'url(#svg-sharpen-game-banner)' : '',
-              !hoveredScreenshot && sharpenVal > 0 ? `contrast(${1 + (sharpenVal / 100) * 0.25}) brightness(${1 + (sharpenVal / 100) * 0.04}) saturate(${1 + (sharpenVal / 100) * 0.08})` : 'brightness(0.96)'
+              !hoveredScreenshot && sharpenVal > 0 ? `contrast(${1 + (sharpenVal / 100) * 0.25}) brightness(${1 + (sharpenVal / 100) * 0.04}) saturate(${1 + (sharpenVal / 100) * 0.08})` : undefined
             ].filter(Boolean).join(' ') || undefined,
             imageRendering: sharpenVal > 0 ? '-webkit-optimize-contrast' : 'auto'
           }}
@@ -182,15 +182,13 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({
           />
         )}
 
-        {/* Directional side gradients - only active if edgeDarknessVal > 0, default 0% keeps artwork crystal clear */}
-        {edgeDarknessVal > 0 && (
-          <div 
-            className="absolute inset-0 pointer-events-none hidden md:block" 
-            style={{
-              background: `linear-gradient(to right, rgba(0,0,0,${((edgeDarknessVal) / 100) * 0.35}) 0%, transparent 15%, transparent 85%, rgba(18,20,26,${((edgeDarknessVal) / 100) * 0.75}) 100%)`
-            }}
-          />
-        )}
+        {/* Subtle, gentle side edge shading on left & right borders only (keeps artwork clear & bright without heavy fade) */}
+        <div 
+          className="absolute inset-0 pointer-events-none hidden md:block" 
+          style={{
+            background: `linear-gradient(to right, rgba(0,0,0,${Math.min(0.35, ((edgeDarknessVal || 25) / 100) * 0.4)}) 0%, transparent 8%, transparent 92%, rgba(0,0,0,${Math.min(0.35, ((edgeDarknessVal || 25) / 100) * 0.4)}) 100%)`
+          }}
+        />
         <div className="absolute inset-0 bg-gradient-to-t from-[#12141A]/60 via-transparent to-transparent md:hidden pointer-events-none" />
 
         {/* Top-Left Featured Badge with Expiration / Reason */}
@@ -221,9 +219,9 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({
       </div>
 
       {/* 2. RIGHT COLUMN: Information, Description & Actions (Generous vertical space, zero button clipping) */}
-      <div className="relative flex-1 min-w-[320px] p-6 lg:p-7 flex flex-col justify-between bg-gradient-to-b from-[#171A21] via-[#12141A] to-[#0F1115] border-t md:border-t-0 md:border-l border-ice-border/70 z-20">
+      <div className="relative flex-1 min-w-[320px] p-5 lg:p-6 flex flex-col justify-between bg-gradient-to-b from-[#171A21] via-[#12141A] to-[#0F1115] border-t md:border-t-0 md:border-l border-ice-border/70 z-20 min-h-0 overflow-hidden">
         {/* Top Header & Title */}
-        <div className="space-y-2.5">
+        <div className="space-y-2 min-h-0">
           {/* Tags */}
           <div className="flex flex-wrap items-center gap-1.5">
             {tagsList.slice(0, 4).map((tag) => (
@@ -254,7 +252,7 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({
 
         {/* Middle: Steam-Style 4 Screenshot Thumbnails (Hover to preview on the left!) */}
         {screenshots.length > 0 && (
-          <div className="space-y-1.5 py-2.5">
+          <div className="space-y-1.5 py-2 min-h-0">
             <span className="text-[10px] text-ice-subtext font-medium uppercase tracking-wider">
               Ảnh chụp màn hình (Rê chuột để xem trước):
             </span>

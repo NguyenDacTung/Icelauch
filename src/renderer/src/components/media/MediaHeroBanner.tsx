@@ -67,7 +67,7 @@ export const MediaHeroBanner: React.FC<MediaHeroBannerProps> = ({
   const edgeDarknessVal = (currentItem.bannerEdgeDarkness ?? 0) / 100;
 
   return (
-    <div className="relative w-full max-w-[1360px] mx-auto rounded-2xl overflow-hidden border border-ice-border/80 shadow-2xl select-none group bg-ice-card flex flex-col md:flex-row items-stretch md:h-[440px]">
+    <div className="relative w-full max-w-[1240px] mx-auto rounded-2xl overflow-hidden border border-ice-border/80 shadow-2xl select-none group bg-[#111318] flex flex-col md:flex-row items-stretch md:h-[460px] lg:h-[480px]">
       {/* SVG Convolution Filter for true pixel unsharp masking */}
       <svg className="absolute w-0 h-0 overflow-hidden pointer-events-none" aria-hidden="true">
         <defs>
@@ -81,7 +81,7 @@ export const MediaHeroBanner: React.FC<MediaHeroBannerProps> = ({
         </defs>
       </svg>
 
-      {/* 1. LEFT COLUMN: Exact 16:9 Aspect Ratio (aspect-video) - NEVER stretched horizontally! */}
+      {/* 1. LEFT COLUMN: Exact 16:9 Aspect Ratio (aspect-video) - Large & Cinematic */}
       <div
         onClick={() => onPlayMedia(currentItem)}
         className="relative aspect-video h-[260px] md:h-full overflow-hidden bg-black flex-shrink-0 cursor-pointer group/art"
@@ -97,7 +97,7 @@ export const MediaHeroBanner: React.FC<MediaHeroBannerProps> = ({
             filter: [
               currentItem.bannerBlur ? `blur(${currentItem.bannerBlur}px)` : '',
               sharpenVal > 10 ? `url(#svg-sharpen-media-${type})` : '',
-              sharpenVal > 0 ? `contrast(${1 + (sharpenVal / 100) * 0.25}) brightness(${1 + (sharpenVal / 100) * 0.04}) saturate(${1 + (sharpenVal / 100) * 0.08})` : 'brightness(0.95)'
+              sharpenVal > 0 ? `contrast(${1 + (sharpenVal / 100) * 0.25}) brightness(${1 + (sharpenVal / 100) * 0.04}) saturate(${1 + (sharpenVal / 100) * 0.08})` : undefined
             ].filter(Boolean).join(' ') || undefined,
             imageRendering: sharpenVal > 0 ? '-webkit-optimize-contrast' : 'auto'
           }}
@@ -112,23 +112,19 @@ export const MediaHeroBanner: React.FC<MediaHeroBannerProps> = ({
           />
         )}
 
-        {/* Optional Edge fade (defaults to 0% so anime/character art is crystal clear with zero side fog) */}
-        {edgeDarknessVal > 0 && (
-          <>
-            <div 
-              className="absolute inset-0 hidden md:block pointer-events-none" 
-              style={{
-                background: `linear-gradient(to right, rgba(0,0,0,${edgeDarknessVal * 0.4}) 0%, transparent 20%, transparent 80%, rgba(18,20,26,${edgeDarknessVal}) 100%)`
-              }}
-            />
-            <div 
-              className="absolute inset-0 md:hidden pointer-events-none" 
-              style={{
-                background: `linear-gradient(to top, rgba(18,20,26,${edgeDarknessVal}) 0%, transparent 40%)`
-              }}
-            />
-          </>
-        )}
+        {/* Subtle, gentle side edge shading on left & right borders only */}
+        <div 
+          className="absolute inset-0 hidden md:block pointer-events-none" 
+          style={{
+            background: `linear-gradient(to right, rgba(0,0,0,${Math.min(0.35, edgeDarknessVal * 0.4)}) 0%, transparent 8%, transparent 92%, rgba(0,0,0,${Math.min(0.35, edgeDarknessVal * 0.4)}) 100%)`
+          }}
+        />
+        <div 
+          className="absolute inset-0 md:hidden pointer-events-none" 
+          style={{
+            background: `linear-gradient(to top, rgba(18,20,26,0.6) 0%, transparent 40%)`
+          }}
+        />
 
         {/* Hover Center Play Button */}
         <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover/art:opacity-100 transition-opacity">

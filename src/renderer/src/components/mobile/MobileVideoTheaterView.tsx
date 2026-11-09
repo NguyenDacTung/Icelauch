@@ -100,13 +100,13 @@ export const MobileVideoTheaterView: React.FC<MobileVideoTheaterViewProps> = ({
   return (
     <div ref={containerRef} className="flex-1 w-full h-full flex flex-col bg-[#0A0C10] select-none overflow-y-auto no-scrollbar">
       {/* 1. STICKY TOP 16:9 VIDEO PLAYER */}
-      <div className="sticky top-0 z-30 w-full aspect-video bg-black shadow-xl overflow-hidden flex items-center justify-center relative">
+      <div className="sticky top-0 z-30 w-full aspect-video min-h-[210px] shrink-0 bg-black shadow-2xl overflow-hidden flex items-center justify-center relative">
         {/* Top Floating Mini Back Button & Title */}
-        <div className="absolute top-2 left-2 z-40 flex items-center gap-2">
+        <div className="absolute top-2.5 left-2.5 z-40 flex items-center gap-2">
           <button
             type="button"
             onClick={onBack}
-            className="w-8 h-8 rounded-full bg-black/70 hover:bg-black text-white backdrop-blur-md border border-white/20 flex items-center justify-center shadow-lg active:scale-95 transition-all"
+            className="w-8 h-8 rounded-full bg-black/75 hover:bg-black text-white backdrop-blur-md border border-white/20 flex items-center justify-center shadow-lg active:scale-95 transition-all"
             title="Quay lại danh sách"
           >
             <ArrowLeft className="w-4 h-4" />
@@ -122,7 +122,7 @@ export const MobileVideoTheaterView: React.FC<MobileVideoTheaterViewProps> = ({
             autoPlay
             playsInline
             onTimeUpdate={handleTimeUpdate}
-            className="w-full h-full object-contain"
+            className="w-full h-full object-contain absolute inset-0"
           />
         ) : isYouTube ? (
           <iframe
@@ -130,7 +130,7 @@ export const MobileVideoTheaterView: React.FC<MobileVideoTheaterViewProps> = ({
             title={media.title}
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
             allowFullScreen
-            className="w-full h-full border-0"
+            className="w-full h-full border-0 absolute inset-0"
           />
         ) : isGoogleDrive && playbackMode === 'proxy' && proxyUrl ? (
           <video
@@ -140,7 +140,7 @@ export const MobileVideoTheaterView: React.FC<MobileVideoTheaterViewProps> = ({
             autoPlay
             playsInline
             onTimeUpdate={handleTimeUpdate}
-            className="w-full h-full object-contain"
+            className="w-full h-full object-contain absolute inset-0"
           />
         ) : isGoogleDrive ? (
           <iframe
@@ -148,7 +148,7 @@ export const MobileVideoTheaterView: React.FC<MobileVideoTheaterViewProps> = ({
             title={media.title}
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
             allowFullScreen
-            className="w-full h-full border-0"
+            className="w-full h-full border-0 absolute inset-0"
           />
         ) : (
           <video
@@ -158,7 +158,7 @@ export const MobileVideoTheaterView: React.FC<MobileVideoTheaterViewProps> = ({
             autoPlay
             playsInline
             onTimeUpdate={handleTimeUpdate}
-            className="w-full h-full object-contain"
+            className="w-full h-full object-contain absolute inset-0"
           />
         )}
 

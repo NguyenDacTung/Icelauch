@@ -82,3 +82,4 @@ export const HorizontalScroller: React.FC<HorizontalScrollerProps> = ({
     </div>
   );
 };
+

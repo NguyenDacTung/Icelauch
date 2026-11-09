@@ -43,13 +43,15 @@ export const MobileMediaView: React.FC<MobileMediaViewProps> = ({
   onDownloadMedia,
   onDeleteDownloaded,
 }) => {
-  const [mediaType, setMediaType] = useState<'video' | 'audio'>('video');
+  const [mediaTab, setMediaTab] = useState<'video' | 'music' | 'podcast'>('video');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [activeTheaterMedia, setActiveTheaterMedia] = useState<MediaItem | null>(null);
 
   const videoList = media.filter((m) => m.type === 'video');
-  const audioList = media.filter((m) => m.type === 'audio');
-  const currentList = mediaType === 'video' ? videoList : audioList;
+  const musicList = media.filter((m) => m.type === 'audio' && (m.subType === 'music' || !m.subType));
+  const podcastList = media.filter((m) => m.type === 'audio' && m.subType === 'podcast');
+
+  const currentList = mediaTab === 'video' ? videoList : mediaTab === 'music' ? musicList : podcastList;
 
   // Extract categories
   const categories = Array.from(
@@ -100,33 +102,56 @@ export const MobileMediaView: React.FC<MobileMediaViewProps> = ({
     <div className="flex-1 w-full h-full flex flex-col bg-[#0A0C10] select-none overflow-y-auto no-scrollbar p-3 space-y-3.5">
       {/* 1. TOP SUB-NAV BAR (Active page shows icon + text, others icon only) */}
       <div className="flex items-center justify-between gap-2 shrink-0">
-        <div className="flex items-center gap-1.5 bg-[#14171F] p-1 rounded-xl border border-ice-border/70">
+        <div className="flex items-center gap-1 bg-[#14171F] p-1 rounded-xl border border-ice-border/70">
           <button
             type="button"
-            onClick={() => setMediaType('video')}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
-              mediaType === 'video'
+            onClick={() => {
+              setMediaTab('video');
+              setSelectedCategory('all');
+            }}
+            className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all ${
+              mediaTab === 'video'
                 ? 'bg-amber-500 text-black shadow-md'
                 : 'text-ice-subtext hover:text-white'
             }`}
             title="Phim & Video"
           >
             <Film className="w-4 h-4" />
-            {mediaType === 'video' && <span>Phim & Video</span>}
+            {mediaTab === 'video' && <span>Phim</span>}
           </button>
 
           <button
             type="button"
-            onClick={() => setMediaType('audio')}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
-              mediaType === 'audio'
+            onClick={() => {
+              setMediaTab('music');
+              setSelectedCategory('all');
+            }}
+            className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all ${
+              mediaTab === 'music'
                 ? 'bg-amber-500 text-black shadow-md'
                 : 'text-ice-subtext hover:text-white'
             }`}
-            title="Nhạc & Audio"
+            title="Nhạc"
           >
             <Music className="w-4 h-4" />
-            {mediaType === 'audio' && <span>Nhạc & Audio</span>}
+            {mediaTab === 'music' && <span>Nhạc</span>}
+          </button>
+
+          <button
+            type="button"
+            onClick={() => {
+              setMediaTab('podcast');
+              setSelectedCategory('all');
+            }}
+            className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all ${
+              mediaTab === 'podcast'
+                ? 'bg-amber-500 text-black shadow-md'
+                : 'text-ice-subtext hover:text-white'
+            }`}
+            title="Podcast & Audio"
+          >
+            <Radio className="w-4 h-4" />
+            {mediaTab === 'podcast' && <span>Audio</span>}
           </button>
         </div>
 
@@ -178,7 +203,7 @@ export const MobileMediaView: React.FC<MobileMediaViewProps> = ({
       )}
 
       {/* 4. CONTINUE WATCHING (CAROUSEL WITH CHEVRONS, NO SCROLLBAR) */}
-      {mediaType === 'video' && continueWatching.length > 0 && (
+      {mediaTab === 'video' && continueWatching.length > 0 && (
         <div className="space-y-2 shrink-0">
           <div className="flex items-center justify-between">
             <span className="text-xs font-black text-white flex items-center gap-1.5 uppercase tracking-wide">
@@ -218,7 +243,7 @@ export const MobileMediaView: React.FC<MobileMediaViewProps> = ({
         <div className="flex items-center justify-between">
           <span className="text-xs font-black text-white flex items-center gap-1.5 uppercase tracking-wide">
             <Film className="w-3.5 h-3.5 text-ice-accent" />
-            <span>Kho {mediaType === 'video' ? 'Phim' : 'Nhạc'} Tổng Hợp</span>
+            <span>Kho {mediaTab === 'video' ? 'Phim' : mediaTab === 'music' ? 'Bài Hát' : 'Podcast & Audio'} Tổng Hợp</span>
           </span>
           <span className="text-[10px] text-ice-subtext font-semibold">Lưới 2 cột</span>
         </div>
