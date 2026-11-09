@@ -799,6 +799,78 @@ app.whenReady().then(async () => {
 
   createWindow();
 
+  // --- AUTOMATIC BACKGROUND SUPABASE CLOUD SYNC ---
+  let isAutoSyncing = false;
+  const runAutoCloudSync = async (reason: string = 'interval') => {
+    if (isAutoSyncing) return;
+    const syncSettings = storage.getCloudSyncSettings();
+    if (!syncSettings.enabled || !syncSettings.supabaseUrl || !syncSettings.supabaseAnonKey) {
+      return;
+    }
+
+    try {
+      isAutoSyncing = true;
+      console.log(`[Supabase Auto-Sync] Triggered by ${reason}...`);
+      const res = await SupabaseSyncService.getInstance().syncAll(
+        syncSettings.supabaseUrl,
+        syncSettings.supabaseAnonKey,
+        storage.getProfiles()
+      );
+      storage.setAllProfiles(res.updatedProfiles);
+      storage.saveCloudSyncSettings({
+        lastSyncedAt: new Date().toISOString(),
+        lastSyncStatus: 'success',
+        lastSyncMessage: res.message,
+      });
+      mainWindow?.webContents.send('cloud:synced', {
+        profiles: res.updatedProfiles,
+        message: res.message,
+      });
+      console.log(`[Supabase Auto-Sync] Success: ${res.message}`);
+    } catch (err: any) {
+      console.warn(`[Supabase Auto-Sync] Failed (${reason}):`, err?.message);
+      storage.saveCloudSyncSettings({
+        lastSyncStatus: 'error',
+        lastSyncMessage: err?.message || 'Lỗi tự động đồng bộ',
+      });
+    } finally {
+      isAutoSyncing = false;
+    }
+  };
+
+  // 1. Initial background sync 6s after launch
+  setTimeout(() => runAutoCloudSync('startup'), 6000);
+
+  // 2. Periodic sync check (checks every 60s if interval elapsed)
+  let lastSyncTimestamp = Date.now();
+  setInterval(() => {
+    const syncSettings = storage.getCloudSyncSettings();
+    if (!syncSettings.enabled) return;
+    const intervalMinutes = syncSettings.autoSyncIntervalMinutes || 5;
+    const intervalMs = intervalMinutes * 60 * 1000;
+    if (Date.now() - lastSyncTimestamp >= intervalMs) {
+      lastSyncTimestamp = Date.now();
+      runAutoCloudSync('interval');
+    }
+  }, 60 * 1000);
+
+  // 3. Final sync before quit
+  app.on('before-quit', async () => {
+    const syncSettings = storage.getCloudSyncSettings();
+    if (syncSettings.enabled && syncSettings.supabaseUrl && syncSettings.supabaseAnonKey) {
+      try {
+        console.log('[Supabase Auto-Sync] Final sync before quit...');
+        await SupabaseSyncService.getInstance().syncAll(
+          syncSettings.supabaseUrl,
+          syncSettings.supabaseAnonKey,
+          storage.getProfiles()
+        );
+      } catch (e) {
+        console.warn('Final quit sync error:', e);
+      }
+    }
+  });
+
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) {
       createWindow();

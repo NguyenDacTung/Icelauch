@@ -102,6 +102,11 @@ export const API = {
     ipcRenderer.invoke('cloud:test-connection', { url, key }),
   syncCloud: (options?: { url?: string; key?: string }): Promise<{ success: boolean; message: string; profiles?: UserProfile[] }> =>
     ipcRenderer.invoke('cloud:sync', options || {}),
+  onCloudSynced: (callback: (data: { profiles: UserProfile[]; message: string }) => void) => {
+    const handler = (_event: any, data: any) => callback(data);
+    ipcRenderer.on('cloud:synced', handler);
+    return () => ipcRenderer.removeListener('cloud:synced', handler);
+  },
 
   // Event Listeners
   onGameUpdated: (callback: (game: Game) => void) => {

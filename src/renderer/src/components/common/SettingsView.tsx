@@ -1272,6 +1272,32 @@ CREATE POLICY "Icelauch User Data Anon All" ON icelauch_user_data FOR ALL TO ano
                   🔒 Chỉ cần dùng Anon Key (Public Key), tuyệt đối KHÔNG cần dùng Service Role Key bí mật.
                 </span>
               </div>
+
+              {/* Auto-Sync Interval Selection */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
+                <div className="space-y-1.5">
+                  <label className="text-xs font-semibold text-ice-subtext uppercase tracking-wider">
+                    Chu kỳ Tự Động Đồng Bộ Ngầm
+                  </label>
+                  <select
+                    value={syncInterval}
+                    onChange={(e) => setSyncInterval(Number(e.target.value))}
+                    className="w-full h-10 px-3.5 rounded-xl bg-black/40 border border-ice-border text-xs text-white focus:outline-none focus:border-indigo-400 font-semibold"
+                  >
+                    <option value={3}>Mỗi 3 phút</option>
+                    <option value={5}>Mỗi 5 phút (Khuyên dùng)</option>
+                    <option value={15}>Mỗi 15 phút</option>
+                    <option value={30}>Mỗi 30 phút</option>
+                  </select>
+                </div>
+
+                <div className="space-y-1.5 flex flex-col justify-end">
+                  <div className="text-[11px] text-ice-subtext leading-relaxed p-2.5 rounded-xl bg-indigo-500/10 border border-indigo-500/20">
+                    <span className="text-indigo-300 font-bold block mb-0.5">⚡ Tự động hóa thông minh:</span>
+                    Hệ thống tự động đồng bộ khi mở app, định kỳ mỗi {syncInterval} phút và ngay khi đóng ứng dụng.
+                  </div>
+                </div>
+              </div>
             </div>
 
             {/* Test Connection Result Box */}

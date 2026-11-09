@@ -241,6 +241,18 @@ export default function App() {
         });
       }) : () => {};
 
+      const unsubCloud = (window.api as any).onCloudSynced ? (window.api as any).onCloudSynced((data: { profiles: UserProfile[]; message: string }) => {
+        if (data?.profiles) {
+          setProfiles(data.profiles);
+          setCloudSyncSettings((prev) => ({
+            ...prev,
+            lastSyncedAt: new Date().toISOString(),
+            lastSyncStatus: 'success',
+            lastSyncMessage: data.message,
+          }));
+        }
+      }) : () => {};
+
       return () => {
         unsubGame();
         unsubDownload();
@@ -248,6 +260,7 @@ export default function App() {
         unsubPassword();
         unsubMedia();
         unsubMediaDownload();
+        unsubCloud();
       };
     }
   }, []);
