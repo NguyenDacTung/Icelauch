@@ -441,6 +441,10 @@ app.whenReady().then(async () => {
     return storage.verifyPin(pin);
   });
 
+  ipcMain.handle('admin:change-pin', async (_event, { currentPin, newPin }: { currentPin: string; newPin: string }) => {
+    return storage.changeAdminPin(currentPin, newPin);
+  });
+
   ipcMain.handle('admin:set-pin', async (_event, pin: string) => {
     return storage.setPin(pin);
   });

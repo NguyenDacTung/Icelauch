@@ -65,6 +65,8 @@ export const API = {
 
   // Admin & Security
   verifyPin: (pin: string): Promise<boolean> => ipcRenderer.invoke('admin:verify-pin', pin),
+  changeAdminPin: (currentPin: string, newPin: string): Promise<{ success: boolean; error?: string }> =>
+    ipcRenderer.invoke('admin:change-pin', { currentPin, newPin }),
   setPin: (pin: string): Promise<{ success: boolean; recoveryKey: string }> => ipcRenderer.invoke('admin:set-pin', pin),
   resetPinWithRecoveryKey: (recoveryKey: string, newPin: string): Promise<boolean> => 
     ipcRenderer.invoke('admin:reset-pin', recoveryKey, newPin),

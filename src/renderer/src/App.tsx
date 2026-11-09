@@ -20,6 +20,7 @@ import { FloatingMiniDiscWidget } from './components/media/FloatingMiniDiscWidge
 import { UpdateToast } from './components/common/UpdateToast';
 import { ProfilePickerView } from './components/profile/ProfilePickerView';
 import { ProfileModal } from './components/profile/ProfileModal';
+import { ChangeAdminPinModal } from './components/admin/ChangeAdminPinModal';
 import { sfx } from './utils/sfx';
 import { registerItemToBanner } from './utils/bannerResolver';
 import type { 
@@ -57,6 +58,7 @@ export default function App() {
   const [editingMedia, setEditingMedia] = useState<MediaItem | null>(null);
   const [isBannerManagerOpen, setIsBannerManagerOpen] = useState(false);
   const [isFirstRunOpen, setIsFirstRunOpen] = useState(false);
+  const [isChangeAdminPinOpen, setIsChangeAdminPinOpen] = useState(false);
   const [passwordPromptData, setPasswordPromptData] = useState<{
     gameId: string;
     gameName: string;
@@ -89,9 +91,6 @@ export default function App() {
         if (window.api.getProxyPort) {
           const port = await window.api.getProxyPort();
           if (port) setActiveProxyPort(port);
-        }
-        if (!data.settings?.pinHash) {
-          setIsFirstRunOpen(true);
         }
 
         // Multi-User Profile Auto-Login & Initialization
@@ -138,7 +137,6 @@ export default function App() {
           downloadsPath: 'C:\\Icelauch\\Downloads',
         },
       });
-      setIsFirstRunOpen(true);
     }
   };
 
@@ -853,7 +851,7 @@ export default function App() {
                 onExportData={handleExportData}
                 onImportData={handleImportData}
                 onLoadDemoData={handleLoadDemoData}
-                onChangePin={() => setIsAdminAuthOpen(true)}
+                onChangePin={() => setIsChangeAdminPinOpen(true)}
                 onOpenAdminAuth={() => setIsAdminAuthOpen(true)}
                 onOpenBannerManager={() => setIsBannerManagerOpen(true)}
                 onSaveSettings={handleSaveSettings}
@@ -909,15 +907,25 @@ export default function App() {
       />
 
       {/* 5. Modals */}
-      {/* Admin Auth Modal */}
+      {/* Admin Auth Modal (Always requires PIN verification) */}
       <AdminAuthModal
         isOpen={isAdminAuthOpen}
-        hasPinSet={!!appData.settings.pinHash}
+        hasPinSet={true}
         onClose={() => setIsAdminAuthOpen(false)}
         onSuccess={handleAdminSuccess}
         onSetPin={async (pin) => window.api.setPin(pin)}
         onVerifyPin={async (pin) => window.api.verifyPin(pin)}
         onResetPin={async (key, newPin) => window.api.resetPinWithRecoveryKey(key, newPin)}
+      />
+
+      {/* Change Admin PIN Modal (Requires knowing current PIN_PUB or PIN_PRI) */}
+      <ChangeAdminPinModal
+        isOpen={isChangeAdminPinOpen}
+        onClose={() => setIsChangeAdminPinOpen(false)}
+        onSuccess={() => {
+          setIsChangeAdminPinOpen(false);
+          loadData();
+        }}
       />
 
       {/* Add / Edit Game Modal */}

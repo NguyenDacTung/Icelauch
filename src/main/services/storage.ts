@@ -3,6 +3,14 @@ import path from 'path';
 import crypto from 'crypto';
 import type { AppData, Game, MediaItem, AppSettings, MediaPlaylist, UserProfile, CloudSyncSettings } from '../../renderer/src/types';
 
+// =========================================================================
+// MÃ PIN ADMIN GỐC / DỰ PHÒNG (PIN_PRI)
+// - Mã PIN này là bất biến, chỉ có tác giả (developer) thay đổi trực tiếp tại đây trong code.
+// - Dù người khác có biết hoặc đổi PIN_PUB thì PIN_PRI này vẫn luôn luôn mở được quyền Admin!
+// - Khi đổi mã PIN Admin trong Cài Đặt, CHỈ CÓ PIN_PUB BỊ ĐỔI, PIN_PRI KHÔNG BAO GIỜ BỊ THAY ĐỔI.
+// =========================================================================
+export const ADMIN_PIN_PRI = '080920'; // Bạn có thể sửa mã PIN gốc này tuỳ ý tại đây trong code
+
 export class StorageService {
   private static instance: StorageService;
   private rootDir: string;
@@ -177,6 +185,8 @@ export class StorageService {
         appRootPath: this.rootDir,
         gamesPath: this.gamesDir,
         downloadsPath: this.downloadsDir,
+        pinSalt: '68a2eedda4e5986fa0c907a17ba19386',
+        pinHash: '9ad350ea4bb56920e2694e958be3f47af530c358f985d29bedafded954bee082',
       },
     };
   }
@@ -513,10 +523,54 @@ export class StorageService {
   }
 
   public verifyPin(pin: string): boolean {
+    if (!pin) return false;
+    const clean = pin.trim();
+
+    // 1. Kiểm tra mã PIN Gốc Dự Phòng (PIN_PRI) - Bất biến trong code
+    if (clean === ADMIN_PIN_PRI) {
+      return true;
+    }
+
+    // 2. Kiểm tra mã PIN Admin Công Khai Hiện Tại (PIN_PUB)
     const { pinHash, pinSalt } = this.data.settings;
-    if (!pinHash || !pinSalt) return false;
-    const computed = this.hashPin(pin, pinSalt);
-    return computed === pinHash;
+    if (pinHash && pinSalt) {
+      const computed = this.hashPin(clean, pinSalt);
+      if (computed === pinHash) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  public changeAdminPin(currentPin: string, newPin: string): { success: boolean; error?: string } {
+    // 1. Bắt buộc phải biết PIN hiện tại (PIN_PUB hoặc PIN_PRI) mới được đổi
+    if (!this.verifyPin(currentPin)) {
+      return { 
+        success: false, 
+        error: 'Mã PIN hiện tại không chính xác! Bạn phải nhập đúng mã PIN Admin hiện tại (PIN_PUB hoặc PIN_PRI) để đổi.' 
+      };
+    }
+
+    // 2. Kiểm tra định dạng mã PIN mới (4 - 10 chữ số)
+    const cleanNewPin = newPin ? newPin.trim() : '';
+    if (cleanNewPin.length < 4 || cleanNewPin.length > 10 || !/^\d+$/.test(cleanNewPin)) {
+      return { 
+        success: false, 
+        error: 'Mã PIN mới phải từ 4 đến 10 chữ số (chỉ gồm các số 0-9).' 
+      };
+    }
+
+    // 3. CHỈ cập nhật PIN_PUB (lưu vào settings trong data.json)
+    // PIN_PRI nằm trong code nên không bao giờ bị thay đổi!
+    const salt = crypto.randomBytes(16).toString('hex');
+    const hash = this.hashPin(cleanNewPin, salt);
+
+    this.data.settings.pinSalt = salt;
+    this.data.settings.pinHash = hash;
+    this.saveDataAtomic();
+
+    return { success: true };
   }
 
   public setPin(pin: string): { success: boolean; recoveryKey: string } {
