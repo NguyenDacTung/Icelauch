@@ -30,3 +30,4 @@ export function isAndroidMobile(device: DeviceType): boolean {
 export function isAndroidTV(device: DeviceType): boolean {
   return device === 'android_tv';
 }
+

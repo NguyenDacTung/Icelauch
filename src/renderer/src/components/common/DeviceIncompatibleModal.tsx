@@ -62,3 +62,4 @@ export const DeviceIncompatibleModal: React.FC<DeviceIncompatibleModalProps> = (
     </div>
   );
 };
+

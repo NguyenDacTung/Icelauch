@@ -25,6 +25,9 @@ import { DeviceSimulatorBar } from './components/admin/DeviceSimulatorBar';
 import { DevicePhoneFrame } from './components/common/DevicePhoneFrame';
 import { DeviceIncompatibleModal } from './components/common/DeviceIncompatibleModal';
 import { DeviceType, detectHardwareDevice, isMobileOrTV } from './utils/deviceDetector';
+import { MobileHomeView } from './components/mobile/MobileHomeView';
+import { MobileMediaView } from './components/mobile/MobileMediaView';
+import { MobileLibraryView } from './components/mobile/MobileLibraryView';
 import { sfx } from './utils/sfx';
 import { registerItemToBanner } from './utils/bannerResolver';
 import type { 
@@ -795,83 +798,43 @@ export default function App() {
             ) : (
               <>
                 {currentTab === 'home' && (
-                  <HomeView
+                  <MobileHomeView
                     games={appData.games}
                     allMedia={appData.media}
                     settings={appData.settings}
                     isAdmin={isAdmin}
                     searchQuery={searchQuery}
-                    deviceType={effectiveDevice}
-                    onIncompatibleClick={(game) => setIncompatibleGame(game)}
                     onSelectGame={(game) => setViewingDetailGame(game)}
-                    onSelectMedia={(mediaItem) => {
-                      setCurrentTab('media');
-                    }}
-                    onLaunch={handleLaunchGame}
-                    onDownload={handleDownloadGame}
-                    onCancelDownload={handleCancelDownload}
-                    onRetry={handleRetryGame}
+                    onIncompatibleClick={(game) => setIncompatibleGame(game)}
                     onToggleLibrary={handleToggleLibrary}
-                    onToggleHide={handleToggleHideGame}
-                    onOpenFolder={(id) => handleOpenFolder('gameDir', id)}
-                    onUninstall={handleUninstallGame}
-                    onEditGame={(game) => {
-                      setEditingGame(game);
-                      setIsGameFormOpen(true);
-                    }}
-                    onDeleteGame={handleDeleteGame}
-                    onOpenAddGame={() => {
-                      setEditingGame(null);
-                      setIsGameFormOpen(true);
-                    }}
-                    onLoadDemoData={handleLoadDemoData}
                   />
                 )}
 
                 {currentTab === 'library' && (
-                  <LibraryView
+                  <MobileLibraryView
                     games={appData.games}
                     selectedGameId={selectedGameId}
                     isAdmin={isAdmin}
                     userLibraryIds={activeProfile?.library}
-                    onSelectGame={(game) => setSelectedGameId(game.id)}
-                    onOpenDetail={(game) => setViewingDetailGame(game)}
-                    onLaunch={handleLaunchGame}
-                    onDownload={handleDownloadGame}
-                    onCancelDownload={handleCancelDownload}
-                    onRetry={handleRetryGame}
-                    onOpenFolder={(id) => handleOpenFolder('gameDir', id)}
-                    onUninstall={handleUninstallGame}
-                    onSaveGameSettings={handleSaveGameSettings}
-                    onSelectCustomExe={handleSelectCustomExe}
-                    onAutoPickExe={handleAutoPickExe}
-                    onToggleLibrary={handleToggleLibrary}
                     globalActionButtons={appData.settings.globalActionButtons || []}
+                    onSelectGame={(game) => setSelectedGameId(game.id)}
+                    onIncompatibleClick={(game) => setIncompatibleGame(game)}
+                    onOpenFolder={(id) => handleOpenFolder('gameDir', id)}
+                    onToggleLibrary={handleToggleLibrary}
                   />
                 )}
 
                 {currentTab === 'media' && (
-                  <MediaView
+                  <MobileMediaView
                     media={appData.media}
                     playlists={appData.playlists || []}
-                    bannerSettings={appData.settings.bannerSettings}
+                    bannerSettings={appData.settings.bannerSettings?.videos}
                     isAdmin={isAdmin}
                     searchQuery={searchQuery}
                     onPlayAudio={handlePlayAudio}
                     onSaveMedia={handleSaveMedia}
                     onDeleteMedia={handleDeleteMedia}
-                    onToggleHide={handleToggleHideMedia}
-                    onOpenAddMedia={() => {
-                      setEditingMedia(null);
-                      setIsMediaFormOpen(true);
-                    }}
-                    onEditMedia={(item) => {
-                      setEditingMedia(item);
-                      setIsMediaFormOpen(true);
-                    }}
                     onUpdateMediaProgress={handleUpdateMediaProgress}
-                    onSavePlaylist={handleSavePlaylist}
-                    onDeletePlaylist={handleDeletePlaylist}
                     onDownloadMedia={handleDownloadMedia}
                     onDeleteDownloaded={handleDeleteDownloadedMedia}
                   />

@@ -50,3 +50,14 @@
   -webkit-backdrop-filter: blur(12px);
   border: 1px solid rgba(42, 48, 59, 0.6);
 }
+
+/* Hide scrollbars for mobile carousels */
+.no-scrollbar::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+.no-scrollbar {
+  -ms-overflow-style: none !important;
+  scrollbar-width: none !important;
+}

@@ -79,3 +79,4 @@ export const DeviceSimulatorBar: React.FC<DeviceSimulatorBarProps> = ({
     </div>
   );
 };
+
