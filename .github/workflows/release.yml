@@ -81,16 +81,22 @@ jobs:
       - name: Build Web Application
         run: npm run build
 
-      - name: Sync Capacitor Android
-        run: npx cap sync android
-
       - name: Make Gradle Executable
         run: chmod +x ./android/gradlew
+
+      - name: Sync Capacitor Android
+        run: npx cap sync android --verbose
+        env:
+          ANDROID_HOME: /usr/local/lib/android/sdk
+          ANDROID_SDK_ROOT: /usr/local/lib/android/sdk
 
       - name: Build Android APK via Gradle
         run: |
           cd android
-          ./gradlew assembleDebug
+          ./gradlew assembleDebug --no-daemon
+        env:
+          ANDROID_HOME: /usr/local/lib/android/sdk
+          ANDROID_SDK_ROOT: /usr/local/lib/android/sdk
 
       - name: Rename & Prepare Universal APK
         run: |

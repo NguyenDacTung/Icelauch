@@ -90,3 +90,19 @@ CREATE POLICY "Icelauch Games Anon All" ON icelauch_games FOR ALL TO anon USING 
 CREATE POLICY "Icelauch Media Anon All" ON icelauch_media FOR ALL TO anon USING (true) WITH CHECK (true);
 CREATE POLICY "Icelauch Playlists Anon All" ON icelauch_playlists FOR ALL TO anon USING (true) WITH CHECK (true);
 
+-- ==============================================================================
+-- 7. KHO LƯU TRỮ ẢNH BÌA & BANNER (SUPABASE STORAGE BUCKET: icelauch-assets)
+-- ==============================================================================
+INSERT INTO storage.buckets (id, name, public)
+VALUES ('icelauch-assets', 'icelauch-assets', true)
+ON CONFLICT (id) DO NOTHING;
+
+DROP POLICY IF EXISTS "Public Read Assets" ON storage.objects;
+DROP POLICY IF EXISTS "Public Upload Assets" ON storage.objects;
+DROP POLICY IF EXISTS "Public Update Assets" ON storage.objects;
+
+CREATE POLICY "Public Read Assets" ON storage.objects FOR SELECT TO public USING (bucket_id = 'icelauch-assets');
+CREATE POLICY "Public Upload Assets" ON storage.objects FOR INSERT TO anon WITH CHECK (bucket_id = 'icelauch-assets');
+CREATE POLICY "Public Update Assets" ON storage.objects FOR UPDATE TO anon WITH CHECK (bucket_id = 'icelauch-assets');
+
+
