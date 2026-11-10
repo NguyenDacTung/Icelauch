@@ -9,8 +9,6 @@ import {
   Clock,
   Sparkles,
   ExternalLink,
-  Volume2,
-  VolumeX,
   CheckCircle2,
   Image as ImageIcon,
 } from 'lucide-react';
@@ -40,7 +38,6 @@ export const MobileGameDetailView: React.FC<MobileGameDetailViewProps> = ({
   onOpenFolder,
   globalActionButtons = [],
 }) => {
-  const [isMuted, setIsMuted] = useState(true);
   const [showFullDesc, setShowFullDesc] = useState(false);
   const [selectedScreenshot, setSelectedScreenshot] = useState<string | null>(null);
 
@@ -61,22 +58,43 @@ export const MobileGameDetailView: React.FC<MobileGameDetailViewProps> = ({
 
   return (
     <div className="flex-1 w-full h-full flex flex-col bg-[#0A0C10] select-none overflow-y-auto no-scrollbar">
-      {/* 1. TOP STICKY HERO 16:9 (TRAILER HOẶC BANNER) */}
-      <div className="sticky top-0 z-30 w-full aspect-video min-h-[210px] shrink-0 bg-black shadow-2xl overflow-hidden relative">
-        {/* Floating Back Button */}
+      {/* 1. TOP HEADER BAR (DEDICATED, SAFE FROM NOTCH, NEVER BLOCKS TRAILER) */}
+      <div className="sticky top-0 z-40 w-full bg-[#0D1017]/95 backdrop-blur-md border-b border-white/10 px-3 py-2 flex items-center justify-between pt-[max(0.5rem,env(safe-area-inset-top,0px))] shrink-0 shadow-md">
         <button
           type="button"
           onClick={onBack}
-          className="absolute top-2.5 left-2.5 z-40 w-8 h-8 rounded-full bg-black/75 hover:bg-black text-white backdrop-blur-md border border-white/20 flex items-center justify-center shadow-lg active:scale-95 transition-all"
+          className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-white font-medium text-xs border border-white/10 active:scale-95 transition-all shrink-0"
           title="Quay lại danh sách"
         >
-          <ArrowLeft className="w-4 h-4" />
+          <ArrowLeft className="w-4 h-4 text-cyan-400" />
+          <span>Quay lại</span>
         </button>
 
-        {/* Video Trailer hoặc Banner Image */}
+        <div className="flex-1 min-w-0 mx-2 text-center">
+          <p className="text-xs font-bold text-white truncate">{game.name}</p>
+          <p className="text-[10px] text-slate-400 truncate">{game.genre || 'Game PC'}</p>
+        </div>
+
+        {youtubeVideoId ? (
+          <button
+            type="button"
+            onClick={() => window.open(game.trailerUrl, '_blank')}
+            className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-400 font-semibold text-xs border border-red-500/20 active:scale-95 transition-all shrink-0"
+            title="Mở xem trên YouTube"
+          >
+            <ExternalLink className="w-3.5 h-3.5" />
+            <span className="text-[11px]">YouTube</span>
+          </button>
+        ) : (
+          <div className="w-8 shrink-0" />
+        )}
+      </div>
+
+      {/* 2. MEDIA BANNER OR TRAILER (CLEAN & UNOBSTRUCTED) */}
+      <div className="relative w-full aspect-video min-h-[210px] shrink-0 bg-black shadow-2xl overflow-hidden">
         {youtubeVideoId ? (
           <iframe
-            src={`https://www.youtube-nocookie.com/embed/${youtubeVideoId}?autoplay=1&mute=${isMuted ? 1 : 0}&rel=0&playsinline=1&enablejsapi=1`}
+            src={`https://www.youtube-nocookie.com/embed/${youtubeVideoId}?autoplay=1&mute=1&rel=0&playsinline=1&enablejsapi=1`}
             title={game.name}
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
             allowFullScreen
@@ -91,31 +109,9 @@ export const MobileGameDetailView: React.FC<MobileGameDetailViewProps> = ({
             className="w-full h-full object-cover absolute inset-0"
           />
         )}
-
-        {/* Floating Sound Toggle (for trailer) */}
-        {youtubeVideoId && (
-          <div className="absolute top-2.5 right-2.5 z-40 flex items-center gap-2">
-            <button
-              type="button"
-              onClick={() => setIsMuted(!isMuted)}
-              className="p-1.5 rounded-full bg-black/75 hover:bg-black text-white backdrop-blur-md border border-white/20 shadow-md"
-              title={isMuted ? 'Bật âm thanh' : 'Tắt tiếng'}
-            >
-              {isMuted ? <VolumeX className="w-3.5 h-3.5 text-white/80" /> : <Volume2 className="w-3.5 h-3.5 text-ice-accent" />}
-            </button>
-            <button
-              type="button"
-              onClick={() => window.open(game.trailerUrl, '_blank')}
-              className="p-1.5 rounded-full bg-black/75 hover:bg-black text-white backdrop-blur-md border border-white/20 shadow-md"
-              title="Mở xem trên YouTube"
-            >
-              <ExternalLink className="w-3.5 h-3.5 text-red-400" />
-            </button>
-          </div>
-        )}
       </div>
 
-      {/* 2. BODY CONTENT (TỐI ƯU DỌC 1 CỘT KHÔNG CHỒNG CHÉO) */}
+      {/* 3. BODY CONTENT (TỐI ƯU DỌC 1 CỘT KHÔNG CHỒNG CHÉO) */}
       <div className="p-3.5 space-y-3.5 flex-1">
         {/* Title & Tags */}
         <div className="space-y-1.5">

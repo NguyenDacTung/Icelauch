@@ -12,6 +12,7 @@ import {
   Tv,
   Globe,
   Zap,
+  AlertCircle,
 } from 'lucide-react';
 import { parseMediaUrl, getActiveProxyPort } from '../../utils/mediaUrl';
 import type { MediaItem, MediaPlaylist } from '../../types';
@@ -52,7 +53,7 @@ export const MobileVideoTheaterView: React.FC<MobileVideoTheaterViewProps> = ({
   const isYouTube = parsed.kind === 'youtube' && parsed.id;
   const isGoogleDrive = parsed.kind === 'gdrive' && parsed.id;
 
-  // Playback modes: 'embed' (Drive preview / YouTube), 'direct' (native HTML5 video), 'proxy' (Electron VIP)
+  // Playback modes: 'embed' (Drive player / YouTube), 'direct' (native HTML5 video), 'proxy' (Electron VIP)
   const defaultMode: 'embed' | 'direct' | 'proxy' =
     isGoogleDrive || isYouTube ? 'embed' : 'direct';
 
@@ -106,167 +107,192 @@ export const MobileVideoTheaterView: React.FC<MobileVideoTheaterViewProps> = ({
       ref={containerRef}
       className="flex-1 w-full h-full flex flex-col bg-[#07090E] select-none overflow-y-auto no-scrollbar"
     >
-      {/* 1. STICKY TOP 16:9 VIDEO PLAYER (SAFE FOR NOTCH & STATUS BAR) */}
-      <div className="sticky top-0 z-30 w-full shrink-0 bg-black shadow-2xl flex flex-col pt-[env(safe-area-inset-top,0px)]">
-        <div className="relative w-full aspect-video min-h-[210px] bg-black overflow-hidden flex items-center justify-center">
-          {/* Top Floating Back Button (High Z-Index, Safe Position) */}
-          <div className="absolute top-2.5 left-2.5 z-40 flex items-center gap-2">
-            <button
-              type="button"
-              onClick={() => {
-                sfx.playClick();
-                onBack();
-              }}
-              className="w-9 h-9 rounded-full bg-black/80 hover:bg-black text-white border border-white/20 flex items-center justify-center shadow-lg active:scale-95 transition-all"
-              title="Quay lại danh sách"
-            >
-              <ArrowLeft className="w-5 h-5" />
-            </button>
-          </div>
+      {/* 1. TOP HEADER BAR (DEDICATED, SAFE FROM NOTCH, NEVER BLOCKS VIDEO CONTROLS) */}
+      <div className="sticky top-0 z-40 w-full bg-[#0D1017]/95 backdrop-blur-md border-b border-white/10 px-3 py-2 flex items-center justify-between pt-[max(0.5rem,env(safe-area-inset-top,0px))] shrink-0 shadow-md">
+        <button
+          type="button"
+          onClick={() => {
+            sfx.playClick();
+            onBack();
+          }}
+          className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-white font-medium text-xs border border-white/10 active:scale-95 transition-all shrink-0"
+          title="Quay lại danh sách"
+        >
+          <ArrowLeft className="w-4 h-4 text-cyan-400" />
+          <span>Quay lại</span>
+        </button>
 
-          {/* Video Render Modes */}
-          {playbackMode === 'proxy' && proxyUrl ? (
-            <video
-              ref={videoRef}
-              src={proxyUrl}
-              controls
-              autoPlay
-              playsInline
-              preload="auto"
-              onCanPlay={() => setIsLoadingStream(false)}
-              onWaiting={() => {
-                setIsLoadingStream(true);
-                setLoadingStatus('Đang nạp bộ đệm 16MB...');
-              }}
-              onPlaying={() => setIsLoadingStream(false)}
-              onTimeUpdate={handleTimeUpdate}
-              className="w-full h-full object-contain absolute inset-0"
-            />
-          ) : playbackMode === 'embed' && isYouTube ? (
-            <iframe
-              src={youtubeEmbedUrl}
-              title={media.title}
-              referrerPolicy="strict-origin-when-cross-origin"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-              allowFullScreen
-              onLoad={() => setIsLoadingStream(false)}
-              className="w-full h-full border-0 absolute inset-0"
-            />
-          ) : playbackMode === 'embed' && isGoogleDrive ? (
-            <iframe
-              src={driveEmbedUrl}
-              title={media.title}
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-              allowFullScreen
-              onLoad={() => setIsLoadingStream(false)}
-              className="w-full h-full border-0 absolute inset-0"
-            />
-          ) : (
-            <video
-              ref={videoRef}
-              src={parsed.directUrl || media.link}
-              controls
-              autoPlay
-              playsInline
-              preload="auto"
-              onCanPlay={() => setIsLoadingStream(false)}
-              onWaiting={() => {
-                setIsLoadingStream(true);
-                setLoadingStatus('Đang tải video...');
-              }}
-              onPlaying={() => setIsLoadingStream(false)}
-              onTimeUpdate={handleTimeUpdate}
-              className="w-full h-full object-contain absolute inset-0"
-            />
-          )}
-
-          {/* Loading Overlay */}
-          {isLoadingStream && (
-            <div className="absolute inset-0 bg-black/75 z-30 flex flex-col items-center justify-center gap-2 pointer-events-none transition-opacity duration-300">
-              <div className="w-9 h-9 rounded-full border-2 border-cyan-500/20 border-t-cyan-400 animate-spin" />
-              <span className="text-[11px] font-semibold text-cyan-300 font-mono animate-pulse">
-                {loadingStatus}
-              </span>
-            </div>
-          )}
+        <div className="flex-1 min-w-0 mx-2 text-center">
+          <p className="text-xs font-bold text-white truncate">{media.title}</p>
+          <p className="text-[10px] text-slate-400 truncate">{media.category || 'Phim & Video'}</p>
         </div>
+
+        <button
+          type="button"
+          onClick={() => window.open(media.link, '_blank')}
+          className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 font-semibold text-xs border border-cyan-500/20 active:scale-95 transition-all shrink-0"
+          title="Mở trên ứng dụng hoặc trình duyệt ngoài"
+        >
+          <ExternalLink className="w-3.5 h-3.5" />
+          <span className="text-[11px]">Mở ngoài</span>
+        </button>
       </div>
 
-      {/* 2. PLAYBACK MODE SWITCHER BAR (EXPLICIT ON MOBILE) */}
-      <div className="bg-[#12151F] px-3 py-2 border-b border-white/5 flex items-center justify-between gap-2 overflow-x-auto no-scrollbar shrink-0">
-        <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider shrink-0">
-          Chế độ phát:
-        </span>
+      {/* 2. THEATER VIDEO CONTAINER (HEIGHT 275PX - 320PX SO GOOGLE DRIVE CONTROLS NEVER GET SQUEEZED) */}
+      <div className="relative w-full h-[275px] sm:h-[320px] bg-black flex items-center justify-center shrink-0 shadow-2xl overflow-hidden">
+        {/* Video Render Modes */}
+        {playbackMode === 'proxy' && proxyUrl ? (
+          <video
+            ref={videoRef}
+            src={proxyUrl}
+            controls
+            autoPlay
+            playsInline
+            preload="auto"
+            onCanPlay={() => setIsLoadingStream(false)}
+            onWaiting={() => {
+              setIsLoadingStream(true);
+              setLoadingStatus('Đang nạp bộ đệm 16MB...');
+            }}
+            onPlaying={() => setIsLoadingStream(false)}
+            onTimeUpdate={handleTimeUpdate}
+            className="w-full h-full object-contain absolute inset-0"
+          />
+        ) : playbackMode === 'embed' && isYouTube ? (
+          <iframe
+            src={youtubeEmbedUrl}
+            title={media.title}
+            referrerPolicy="strict-origin-when-cross-origin"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+            allowFullScreen
+            onLoad={() => setIsLoadingStream(false)}
+            className="w-full h-full border-0 absolute inset-0"
+          />
+        ) : playbackMode === 'embed' && isGoogleDrive ? (
+          <iframe
+            src={driveEmbedUrl}
+            title={media.title}
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+            allowFullScreen
+            onLoad={() => setIsLoadingStream(false)}
+            className="w-full h-full border-0 absolute inset-0"
+          />
+        ) : (
+          <video
+            ref={videoRef}
+            src={parsed.directUrl || media.link}
+            controls
+            autoPlay
+            playsInline
+            preload="auto"
+            onCanPlay={() => setIsLoadingStream(false)}
+            onWaiting={() => {
+              setIsLoadingStream(true);
+              setLoadingStatus('Đang tải video...');
+            }}
+            onPlaying={() => setIsLoadingStream(false)}
+            onTimeUpdate={handleTimeUpdate}
+            className="w-full h-full object-contain absolute inset-0"
+          />
+        )}
 
-        <div className="flex items-center gap-1.5 shrink-0">
-          {/* Option 1: Drive / Web Embed */}
-          {(isGoogleDrive || isYouTube) && (
+        {/* Loading Overlay */}
+        {isLoadingStream && (
+          <div className="absolute inset-0 bg-black/75 z-30 flex flex-col items-center justify-center gap-2 pointer-events-none transition-opacity duration-300">
+            <div className="w-9 h-9 rounded-full border-2 border-cyan-500/20 border-t-cyan-400 animate-spin" />
+            <span className="text-[11px] font-semibold text-cyan-300 font-mono animate-pulse">
+              {loadingStatus}
+            </span>
+          </div>
+        )}
+      </div>
+
+      {/* 3. PLAYBACK MODE SWITCHER WITH EXPLANATIONS */}
+      <div className="bg-[#12151F] px-3 py-2.5 border-b border-white/5 flex flex-col gap-1.5 shrink-0">
+        <div className="flex items-center justify-between gap-2 overflow-x-auto no-scrollbar">
+          <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider shrink-0 flex items-center gap-1">
+            <Tv className="w-3.5 h-3.5 text-cyan-400" />
+            Chế độ phát:
+          </span>
+
+          <div className="flex items-center gap-1.5 shrink-0">
+            {/* Option 1: Drive / Web Embed */}
+            {(isGoogleDrive || isYouTube) && (
+              <button
+                type="button"
+                onClick={() => {
+                  sfx.playClick();
+                  setPlaybackMode('embed');
+                }}
+                className={`px-2.5 py-1 rounded-lg text-xs font-bold flex items-center gap-1 transition-all ${
+                  playbackMode === 'embed'
+                    ? 'bg-cyan-500 text-black shadow-md shadow-cyan-500/25'
+                    : 'bg-white/5 text-slate-400 hover:text-white border border-white/10'
+                }`}
+              >
+                <Globe className="w-3.5 h-3.5" />
+                <span>{isGoogleDrive ? '⚡ Drive Player (Nhanh)' : 'YouTube Player'}</span>
+              </button>
+            )}
+
+            {/* Option 2: Native HTML5 Direct Video */}
             <button
               type="button"
               onClick={() => {
                 sfx.playClick();
-                setPlaybackMode('embed');
+                setPlaybackMode('direct');
               }}
               className={`px-2.5 py-1 rounded-lg text-xs font-bold flex items-center gap-1 transition-all ${
-                playbackMode === 'embed'
+                playbackMode === 'direct'
                   ? 'bg-cyan-500 text-black shadow-md shadow-cyan-500/25'
                   : 'bg-white/5 text-slate-400 hover:text-white border border-white/10'
               }`}
             >
-              <Globe className="w-3.5 h-3.5" />
-              <span>{isGoogleDrive ? 'Drive Preview' : 'YouTube Embed'}</span>
+              <Zap className="w-3.5 h-3.5" />
+              <span>Video HTML5</span>
             </button>
-          )}
 
-          {/* Option 2: Native HTML5 Direct Video */}
-          <button
-            type="button"
-            onClick={() => {
-              sfx.playClick();
-              setPlaybackMode('direct');
-            }}
-            className={`px-2.5 py-1 rounded-lg text-xs font-bold flex items-center gap-1 transition-all ${
-              playbackMode === 'direct'
-                ? 'bg-cyan-500 text-black shadow-md shadow-cyan-500/25'
-                : 'bg-white/5 text-slate-400 hover:text-white border border-white/10'
-            }`}
-          >
-            <Zap className="w-3.5 h-3.5" />
-            <span>Video HTML5</span>
-          </button>
+            {/* Option 3: PC Proxy VIP (if running with Electron) */}
+            {hasLocalElectronProxy && isGoogleDrive && (
+              <button
+                type="button"
+                onClick={() => {
+                  sfx.playClick();
+                  setPlaybackMode('proxy');
+                }}
+                className={`px-2.5 py-1 rounded-lg text-xs font-bold flex items-center gap-1 transition-all ${
+                  playbackMode === 'proxy'
+                    ? 'bg-amber-500 text-black shadow-md'
+                    : 'bg-white/5 text-slate-400 hover:text-white border border-white/10'
+                }`}
+              >
+                <span>🚀 Proxy VIP</span>
+              </button>
+            )}
 
-          {/* Option 3: PC Proxy VIP (if running with Electron) */}
-          {hasLocalElectronProxy && isGoogleDrive && (
+            {/* Option 4: Open in External Browser / App (VLC / MX Player / Drive App) */}
             <button
               type="button"
-              onClick={() => {
-                sfx.playClick();
-                setPlaybackMode('proxy');
-              }}
-              className={`px-2.5 py-1 rounded-lg text-xs font-bold flex items-center gap-1 transition-all ${
-                playbackMode === 'proxy'
-                  ? 'bg-amber-500 text-black shadow-md'
-                  : 'bg-white/5 text-slate-400 hover:text-white border border-white/10'
-              }`}
+              onClick={() => window.open(media.link, '_blank')}
+              className="px-2.5 py-1 rounded-lg text-xs font-bold bg-white/10 text-white/90 border border-white/10 flex items-center gap-1 hover:bg-white/20 transition-colors"
+              title="Mở trên trình duyệt hoặc ứng dụng ngoài (VLC, Drive...)"
             >
-              <span>🚀 Proxy VIP</span>
+              <ExternalLink className="w-3.5 h-3.5 text-cyan-400" />
+              <span>Mở ngoài</span>
             </button>
-          )}
-
-          {/* Option 4: Open in External Browser / App */}
-          <button
-            type="button"
-            onClick={() => window.open(media.link, '_blank')}
-            className="px-2.5 py-1 rounded-lg text-xs font-bold bg-white/10 text-white/90 border border-white/10 flex items-center gap-1 hover:bg-white/20 transition-colors"
-            title="Mở trên trình duyệt ngoài hoặc ứng dụng"
-          >
-            <ExternalLink className="w-3.5 h-3.5 text-cyan-400" />
-            <span>Mở ngoài</span>
-          </button>
+          </div>
         </div>
+
+        {/* Guidance tip if HTML5 mode is active on a Google Drive URL */}
+        {isGoogleDrive && playbackMode === 'direct' && (
+          <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-amber-500/10 border border-amber-500/20 text-amber-300 text-[11px] leading-tight">
+            <AlertCircle className="w-3.5 h-3.5 shrink-0 text-amber-400" />
+            <span>Link Google Drive nên dùng <b>Drive Player</b> hoặc <b>Mở ngoài</b> để xem nhanh nhất. Chế độ HTML5 chỉ tối ưu cho file MP4 trực tiếp.</span>
+          </div>
+        )}
       </div>
 
-      {/* 3. MOVIE DETAILS & ACTIONS CONTAINER */}
+      {/* 4. MOVIE DETAILS & ACTIONS CONTAINER */}
       <div className="p-3.5 space-y-3">
         {/* Title & Category */}
         <div className="space-y-1.5">
@@ -345,7 +371,7 @@ export const MobileVideoTheaterView: React.FC<MobileVideoTheaterViewProps> = ({
           </div>
         )}
 
-        {/* 4. PLAYLIST / EPISODES LIST (IF APPLICABLE) */}
+        {/* 5. PLAYLIST / EPISODES LIST (IF APPLICABLE) */}
         {playlistItems.length > 0 && (
           <div className="space-y-2 pt-2 border-t border-white/5">
             <div className="flex items-center justify-between">
@@ -397,7 +423,7 @@ export const MobileVideoTheaterView: React.FC<MobileVideoTheaterViewProps> = ({
           </div>
         )}
 
-        {/* 5. RELATED / DISCOVER MORE VIDEOS */}
+        {/* 6. RELATED / DISCOVER MORE VIDEOS */}
         {relatedVideos.length > 0 && (
           <div className="space-y-2 pt-2 border-t border-white/5">
             <span className="text-xs font-bold text-white flex items-center gap-1.5">
