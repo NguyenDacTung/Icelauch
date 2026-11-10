@@ -44,6 +44,7 @@
       ]
     },
     "nsis": {
+      "artifactName": "${productName}-Setup-${version}.${ext}",
       "oneClick": false,
       "allowToChangeInstallationDirectory": true,
       "createDesktopShortcut": true,
@@ -53,6 +54,9 @@
         "en_US"
       ],
       "deleteAppDataOnUninstall": false
+    },
+    "portable": {
+      "artifactName": "${productName}-Portable-${version}.${ext}"
     }
   },
   "keywords": [
