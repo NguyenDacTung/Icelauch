@@ -861,7 +861,13 @@ export default function App() {
   );
 
   return (
-    <div className="h-screen w-screen bg-ice-bg text-ice-text flex flex-col overflow-hidden">
+    <div className="h-screen w-screen bg-ice-bg text-ice-text flex flex-col overflow-hidden relative">
+      {/* Custom App Wallpaper - Behind everything (-z-10) */}
+      <AppWallpaper
+        config={appData.settings.wallpaperConfig}
+        lowSpecMode={appData.settings.lowSpecMode}
+      />
+
       {/* 1. Top Navbar (56px) - Desktop Windows PC only or Simulator */}
       {!isMobileOrTvNative && (
         <Navbar
@@ -913,7 +919,7 @@ export default function App() {
       )}
 
       {/* 3. Main Page Content View */}
-      <main className="flex-1 flex overflow-hidden relative">
+      <main className="flex-1 flex overflow-hidden relative z-10">
         {effectiveDevice === 'android_tv' ? (
           <DeviceTVFrame
             currentTab={currentTab}
@@ -1372,12 +1378,6 @@ export default function App() {
         onComplete={handleFirstRunComplete}
         onSetPin={async (pin) => window.api.setPin(pin)}
         onOpenFolder={(target) => handleOpenFolder(target)}
-      />
-
-      {/* Custom App Wallpaper */}
-      <AppWallpaper
-        config={appData.settings.wallpaperConfig}
-        lowSpecMode={appData.settings.lowSpecMode}
       />
 
       {/* Seasonal Particle Engine (Winter Snow, Autumn Leaves, Spring Sakura, Summer Fireflies, Cyber Stardust) */}

@@ -1,6 +1,7 @@
 import { registerPlugin } from '@capacitor/core';
 
-export const CURRENT_MOBILE_VERSION = '1.0.2';
+export const CURRENT_MOBILE_VERSION = '1.0.3';
+export const CURRENT_TV_VERSION = '1.0.0';
 const GITHUB_REPO = 'NguyenDacTung/Icelauch';
 
 interface ApkInstallerPluginInterface {
@@ -26,10 +27,10 @@ export interface MobileUpdateInfo {
   apkUrl: string;
 }
 
-// Compare semantic version strings (e.g. "1.0.2" vs "1.0.1")
+// Compare semantic version strings (e.g. "1.0.3" vs "1.0.2")
 function isNewerVersion(remote: string, current: string): boolean {
-  const cleanRemote = remote.replace(/^v/i, '').trim();
-  const cleanCurrent = current.replace(/^v/i, '').trim();
+  const cleanRemote = remote.replace(/^(v|phone-v|tv-v)/i, '').trim();
+  const cleanCurrent = current.replace(/^(v|phone-v|tv-v)/i, '').trim();
 
   const rParts = cleanRemote.split('.').map((n) => parseInt(n, 10) || 0);
   const cParts = cleanCurrent.split('.').map((n) => parseInt(n, 10) || 0);
@@ -45,7 +46,7 @@ function isNewerVersion(remote: string, current: string): boolean {
 
 export async function checkMobileUpdate(): Promise<MobileUpdateInfo> {
   try {
-    const res = await fetch(`https://api.github.com/repos/${GITHUB_REPO}/releases/latest`, {
+    const res = await fetch(`https://api.github.com/repos/${GITHUB_REPO}/releases?per_page=5`, {
       headers: {
         Accept: 'application/vnd.github.v3+json',
       },
@@ -56,29 +57,41 @@ export async function checkMobileUpdate(): Promise<MobileUpdateInfo> {
       throw new Error(`GitHub API HTTP ${res.status}`);
     }
 
-    const data = await res.json();
-    const tag = (data.tag_name || '').replace(/^v/i, '').trim();
+    const releases = await res.json();
+    if (!Array.isArray(releases) || releases.length === 0) {
+      throw new Error('No releases found');
+    }
+
+    // Find the latest release that contains an Android phone APK asset
+    const phoneRelease = releases.find((r: any) =>
+      r.assets?.some((a: any) => a.name === 'Icelauch-phone.apk' || a.name.includes('phone') || a.name.endsWith('.apk'))
+    ) || releases[0];
+
+    const tag = (phoneRelease.tag_name || '')
+      .replace(/^(v|phone-v|tv-v)/i, '')
+      .trim();
+
     const updateAvailable = isNewerVersion(tag, CURRENT_MOBILE_VERSION);
 
     // Look for dedicated Icelauch-phone.apk first, fallback to universal
-    const phoneAsset = data.assets?.find(
+    const phoneAsset = phoneRelease.assets?.find(
       (a: any) => a.name === 'Icelauch-phone.apk' || a.name.includes('-phone.apk')
     );
-    const universalAsset = data.assets?.find(
+    const universalAsset = phoneRelease.assets?.find(
       (a: any) => a.name === 'Icelauch-universal.apk' || a.name.endsWith('.apk')
     );
 
     const apkUrl =
       phoneAsset?.browser_download_url ||
       universalAsset?.browser_download_url ||
-      `https://github.com/${GITHUB_REPO}/releases/download/v${tag}/Icelauch-phone.apk`;
+      `https://github.com/${GITHUB_REPO}/releases/download/${phoneRelease.tag_name}/Icelauch-phone.apk`;
 
     return {
       updateAvailable,
       currentVersion: CURRENT_MOBILE_VERSION,
       latestVersion: tag || CURRENT_MOBILE_VERSION,
-      releaseName: data.name || `Bản Cập Nhật v${tag}`,
-      releaseNotes: data.body || '',
+      releaseName: phoneRelease.name || `Bản Cập Nhật Điện Thoại v${tag}`,
+      releaseNotes: phoneRelease.body || '',
       apkUrl,
     };
   } catch (err: any) {

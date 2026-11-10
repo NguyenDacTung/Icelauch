@@ -22,10 +22,10 @@ export const AppWallpaper: React.FC<AppWallpaperProps> = ({ config, lowSpecMode 
   const darkness = Math.max(0, Math.min(95, config.darkness ?? 30));
 
   return (
-    <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden select-none">
+    <div className="fixed inset-0 pointer-events-none -z-10 overflow-hidden select-none">
       {/* Background Image Container with Zoom & Position */}
       <div
-        className="absolute inset-0 w-full h-full bg-no-repeat bg-cover transition-all duration-300"
+        className="absolute inset-0 w-full h-full bg-no-repeat bg-cover transition-all duration-300 pointer-events-none"
         style={{
           backgroundImage: `url("${bgUrl}")`,
           backgroundPosition: config.position || '50% 50%',
@@ -36,7 +36,7 @@ export const AppWallpaper: React.FC<AppWallpaperProps> = ({ config, lowSpecMode 
       />
       {/* Darkness Tint Overlay */}
       <div
-        className="absolute inset-0 transition-opacity duration-300"
+        className="absolute inset-0 transition-opacity duration-300 pointer-events-none"
         style={{
           backgroundColor: '#07090e',
           opacity: darkness / 100,
