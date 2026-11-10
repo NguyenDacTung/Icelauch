@@ -19,6 +19,8 @@ import { parseMediaUrl } from '../../utils/mediaUrl';
 import { GameActionsWidget } from '../common/GameActionsWidget';
 import { HorizontalScroller } from '../common/HorizontalScroller';
 
+import { SafeImage } from '../common/SafeImage';
+
 interface MobileGameDetailViewProps {
   game: Game;
   isAdmin: boolean;
@@ -81,9 +83,11 @@ export const MobileGameDetailView: React.FC<MobileGameDetailViewProps> = ({
             className="w-full h-full border-0 absolute inset-0"
           />
         ) : (
-          <img
+          <SafeImage
             src={selectedScreenshot || game.bannerPath || game.coverPath || ''}
             alt={game.name}
+            title={game.name}
+            fallbackType="game"
             className="w-full h-full object-cover absolute inset-0"
           />
         )}
@@ -237,7 +241,12 @@ export const MobileGameDetailView: React.FC<MobileGameDetailViewProps> = ({
                   onClick={() => setSelectedScreenshot(img)}
                   className="w-36 aspect-video rounded-xl overflow-hidden bg-black border border-ice-border/80 shrink-0 cursor-pointer shadow-md hover:border-ice-accent transition-all"
                 >
-                  <img src={img} alt={`Screenshot ${idx + 1}`} className="w-full h-full object-cover" />
+                  <SafeImage
+                    src={img}
+                    alt={`Screenshot ${idx + 1}`}
+                    fallbackType="game"
+                    className="w-full h-full object-cover"
+                  />
                 </div>
               ))}
             </HorizontalScroller>

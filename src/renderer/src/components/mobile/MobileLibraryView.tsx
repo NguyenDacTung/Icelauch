@@ -1,268 +1,325 @@
 import React, { useState } from 'react';
 import {
-  List,
-  Search,
-  X,
   Bookmark,
-  BookmarkCheck,
-  FolderOpen,
-  Monitor,
-  ExternalLink,
-  HardDrive,
-  Clock,
-  Sparkles,
   Gamepad2,
+  Film,
+  Search,
+  Plus,
+  Trash2,
+  ExternalLink,
+  Sparkles,
+  User,
+  LogIn,
   ChevronRight,
 } from 'lucide-react';
-import type { Game, AppActionButton } from '../../types';
-import { GameActionsWidget } from '../common/GameActionsWidget';
+import type { Game, MediaItem, AppActionButton, UserProfile, NavigationTab } from '../../types';
+import { SafeImage } from '../common/SafeImage';
+import { sfx } from '../../utils/sfx';
 
 interface MobileLibraryViewProps {
   games: Game[];
-  selectedGameId: string | null;
+  allMedia?: MediaItem[];
+  selectedGameId?: string | null;
   isAdmin: boolean;
+  activeProfile?: UserProfile | null;
   userLibraryIds?: string[];
   globalActionButtons?: AppActionButton[];
   onSelectGame: (game: Game) => void;
   onIncompatibleClick?: (game: Game) => void;
   onOpenFolder?: (id: string) => void;
   onToggleLibrary?: (id: string) => void;
+  onSelectMedia?: (media: MediaItem) => void;
+  onSwitchProfile?: () => void;
+  onNavigateTab?: (tab: NavigationTab) => void;
 }
 
 export const MobileLibraryView: React.FC<MobileLibraryViewProps> = ({
   games,
-  selectedGameId,
+  allMedia = [],
   isAdmin,
+  activeProfile,
   userLibraryIds = [],
-  globalActionButtons = [],
   onSelectGame,
   onIncompatibleClick,
-  onOpenFolder,
   onToggleLibrary,
+  onSelectMedia,
+  onSwitchProfile,
+  onNavigateTab,
 }) => {
-  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-  const [drawerSearch, setDrawerSearch] = useState('');
+  const [activeSubTab, setActiveSubTab] = useState<'games' | 'media'>('games');
+  const [searchQuery, setSearchQuery] = useState('');
 
-  // Filter games in user library unless empty or admin
-  const userGames = games.filter((g) => (userLibraryIds.length > 0 ? userLibraryIds.includes(g.id) : g.inLibrary));
-  const displayGames = userGames.length > 0 ? userGames : games;
+  // 1. Resolve Personal User Library (Strict: DO NOT fallback to all games!)
+  const profileLibraryIds = activeProfile?.library || userLibraryIds;
+  const profileMediaIds = activeProfile?.favoriteMedia || [];
 
-  const activeGame = games.find((g) => g.id === selectedGameId) || displayGames[0] || games[0];
+  const libraryGames = games.filter((g) => profileLibraryIds.includes(g.id));
+  const libraryMedia = allMedia.filter((m) => profileMediaIds.includes(m.id));
 
-  const drawerFilteredGames = displayGames.filter((g) =>
-    g.name.toLowerCase().includes(drawerSearch.toLowerCase().trim())
+  // Filtered by search
+  const filteredGames = libraryGames.filter((g) =>
+    g.name.toLowerCase().includes(searchQuery.toLowerCase().trim())
   );
 
-  const formatBytes = (bytes?: number) => {
-    if (!bytes || bytes === 0) return 'Chưa rõ';
-    const mb = bytes / (1024 * 1024);
-    if (mb > 1024) return `${(mb / 1024).toFixed(1)} GB`;
-    return `${Math.round(mb)} MB`;
-  };
+  const filteredMedia = libraryMedia.filter((m) =>
+    m.title.toLowerCase().includes(searchQuery.toLowerCase().trim())
+  );
 
   return (
-    <div className="flex-1 w-full h-full flex bg-[#0A0C10] select-none overflow-hidden relative">
-      {/* 1. LEFT ICON-RAIL (SLIM 56px BAR) */}
-      <div className="w-14 bg-[#12141A] border-r border-ice-border flex flex-col items-center py-2 shrink-0 z-20">
-        {/* Top Drawer Menu Toggle Button */}
-        <button
-          type="button"
-          onClick={() => setIsDrawerOpen(true)}
-          className="relative w-10 h-10 rounded-xl bg-ice-accent/20 hover:bg-ice-accent/30 text-ice-accent border border-ice-accent/40 flex items-center justify-center transition-all shadow-md active:scale-95 mb-2"
-          title="Mở toàn bộ danh sách game"
-        >
-          <List className="w-5 h-5" />
-          {displayGames.length > 0 && (
-            <span className="absolute -bottom-1 -right-1 px-1 min-w-[16px] h-4 rounded-full bg-ice-accent text-white text-[9px] font-black flex items-center justify-center">
-              {displayGames.length}
-            </span>
-          )}
-        </button>
-
-        <div className="w-8 h-px bg-ice-border/60 mb-2" />
-
-        {/* Vertical Game Icon Rail */}
-        <div className="flex-1 w-full overflow-y-auto no-scrollbar flex flex-col items-center gap-2 px-1">
-          {displayGames.map((game) => {
-            const isActive = activeGame && activeGame.id === game.id;
-            return (
-              <button
-                key={game.id}
-                type="button"
-                onClick={() => onSelectGame(game)}
-                className={`relative w-10 h-10 rounded-xl overflow-hidden border transition-all shrink-0 ${
-                  isActive
-                    ? 'border-ice-accent ring-2 ring-ice-accent/50 scale-105 shadow-lg shadow-blue-500/20'
-                    : 'border-white/10 opacity-70 hover:opacity-100'
-                }`}
-                title={game.name}
-              >
-                {game.coverPath ? (
-                  <img src={game.coverPath} alt={game.name} className="w-full h-full object-cover" />
-                ) : (
-                  <div className="w-full h-full bg-slate-800 flex items-center justify-center text-[10px] font-bold text-white">
-                    {game.name.substring(0, 2).toUpperCase()}
-                  </div>
-                )}
-              </button>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* 2. MAIN ACTIVE GAME DETAIL PANEL (~320px) */}
-      <div className="flex-1 h-full overflow-y-auto no-scrollbar flex flex-col p-3.5 space-y-3.5 bg-gradient-to-b from-[#12141A] to-[#0A0C10]">
-        {activeGame ? (
-          <>
-            {/* Poster / Artwork (Aspect 16:9 for compact mobile fit) */}
-            <div className="relative w-full aspect-video rounded-2xl overflow-hidden border border-ice-border shadow-xl bg-black">
-              <img
-                src={activeGame.bannerPath || activeGame.coverPath || ''}
-                alt={activeGame.name}
-                className="w-full h-full object-cover"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-transparent" />
-              <div className="absolute bottom-2.5 left-3 right-3 flex items-center justify-between">
-                <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-white/20 text-white backdrop-blur-xs">
-                  {activeGame.genre || 'Game PC'}
-                </span>
-                <span className="text-[10px] font-bold text-emerald-400 bg-black/60 px-2 py-0.5 rounded-full border border-emerald-500/30">
-                  {formatBytes(activeGame.expectedSize)}
-                </span>
-              </div>
+    <div className="flex-1 w-full h-full flex flex-col bg-[#0A0C10] select-none overflow-hidden relative">
+      {/* 1. TOP MOBILE HEADER */}
+      <header className="px-4 pt-3 pb-2.5 bg-[#10131B]/80 backdrop-blur-md border-b border-white/5 flex flex-col gap-2 shrink-0">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded-xl bg-cyan-500/15 border border-cyan-500/30 flex items-center justify-center text-cyan-400">
+              <Bookmark className="w-4 h-4 fill-cyan-400/20" />
             </div>
-
-            {/* Title & Description */}
-            <div className="space-y-1">
-              <h2 className="text-base font-black text-white leading-snug">
-                {activeGame.name}
-              </h2>
-              {activeGame.description && (
-                <p className="text-xs text-ice-subtext leading-relaxed line-clamp-3">
-                  {activeGame.description}
-                </p>
-              )}
+            <div>
+              <h1 className="text-base font-black text-white tracking-wide">Thư Viện</h1>
+              <p className="text-[10px] text-slate-400">
+                {activeProfile ? `Hồ sơ: ${activeProfile.nickname}` : 'Chế độ Khách'}
+              </p>
             </div>
+          </div>
 
-            {/* Incompatible Mobile CTA */}
+          {/* Sub-tab pills */}
+          <div className="flex items-center bg-black/40 p-1 rounded-xl border border-white/5">
             <button
               type="button"
-              onClick={() => onIncompatibleClick?.(activeGame)}
-              className="w-full h-11 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/40 text-amber-300 text-xs font-bold tracking-wider uppercase flex items-center justify-center gap-2 shadow-lg transition-all"
+              onClick={() => {
+                sfx.playClick();
+                setActiveSubTab('games');
+              }}
+              className={`flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-bold transition-all ${activeSubTab === 'games'
+                  ? 'bg-cyan-500 text-black shadow-md'
+                  : 'text-slate-400 hover:text-white'
+                }`}
             >
-              <Monitor className="w-4 h-4 text-amber-400" />
-              <span>🚫 Chỉ hỗ trợ Windows PC</span>
+              <Gamepad2 className="w-3.5 h-3.5" />
+              <span>Game ({libraryGames.length})</span>
             </button>
+            <button
+              type="button"
+              onClick={() => {
+                sfx.playClick();
+                setActiveSubTab('media');
+              }}
+              className={`flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-bold transition-all ${activeSubTab === 'media'
+                  ? 'bg-cyan-500 text-black shadow-md'
+                  : 'text-slate-400 hover:text-white'
+                }`}
+            >
+              <Film className="w-3.5 h-3.5" />
+              <span>Phim ({libraryMedia.length})</span>
+            </button>
+          </div>
+        </div>
 
-            {/* Action Buttons / Requirements (Steam, Discord, etc.) */}
-            <div className="pt-2 border-t border-ice-border/60">
-              <GameActionsWidget
-                variant="compact"
-                requirementsText={activeGame.requirementsText}
-                buttons={activeGame.actionButtonIds && activeGame.actionButtonIds.length > 0
-                  ? globalActionButtons.filter((b) => activeGame.actionButtonIds?.includes(b.id))
-                  : globalActionButtons}
-              />
-            </div>
-
-            {/* Additional Game Info */}
-            <div className="p-3 rounded-xl bg-white/5 border border-white/5 text-xs text-ice-subtext space-y-1.5">
-              <div className="flex items-center justify-between">
-                <span className="flex items-center gap-1">
-                  <HardDrive className="w-3 h-3 text-ice-accent" />
-                  <span>Dung lượng cài đặt:</span>
-                </span>
-                <span className="text-white font-semibold">{formatBytes(activeGame.expectedSize)}</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="flex items-center gap-1">
-                  <Clock className="w-3 h-3 text-amber-400" />
-                  <span>Chơi lần cuối:</span>
-                </span>
-                <span className="text-white font-semibold">{activeGame.lastPlayed || 'Chưa chơi'}</span>
-              </div>
-            </div>
-          </>
-        ) : (
-          <div className="flex-1 flex flex-col items-center justify-center text-center p-6 text-ice-subtext">
-            <Gamepad2 className="w-10 h-10 mb-2 opacity-40" />
-            <p className="text-xs">Chưa có game nào trong thư viện</p>
+        {/* Search input (only when there are items) */}
+        {(libraryGames.length > 0 || libraryMedia.length > 0) && (
+          <div className="relative w-full">
+            <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Tìm kiếm trong thư viện của bạn..."
+              className="w-full h-8 pl-8 pr-3 rounded-lg bg-black/30 border border-white/10 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500/50"
+            />
           </div>
         )}
-      </div>
+      </header>
 
-      {/* 3. SLIDE DRAWER / BOTTOM SHEET FOR FULL GAME LIST */}
-      {isDrawerOpen && (
-        <div className="absolute inset-0 z-40 bg-black/80 backdrop-blur-sm flex">
-          <div className="w-[300px] h-full bg-[#14171F] border-r border-ice-border p-3 flex flex-col space-y-3 animate-fade-in shadow-2xl">
-            {/* Header */}
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-black text-white uppercase tracking-wider flex items-center gap-1.5">
-                <List className="w-4 h-4 text-ice-accent" />
-                <span>Toàn bộ thư viện ({displayGames.length})</span>
-              </span>
+      {/* 2. BODY CONTENT */}
+      <div className="flex-1 w-full overflow-y-auto p-4 space-y-4">
+        {/* CASE A: Guest Mode Prompt */}
+        {!activeProfile && (
+          <div className="p-4 rounded-2xl bg-gradient-to-br from-cyan-950/30 via-[#10141E] to-[#0D1017] border border-cyan-500/30 shadow-lg flex flex-col items-center text-center space-y-3">
+            <div className="w-12 h-12 rounded-2xl bg-cyan-500/20 text-cyan-400 flex items-center justify-center border border-cyan-500/30">
+              <User className="w-6 h-6" />
+            </div>
+            <div className="space-y-1">
+              <h2 className="text-sm font-black text-white">Bạn Đang Ở Chế Độ Khách</h2>
+              <p className="text-xs text-slate-300 max-w-[280px]">
+                Hãy đăng nhập hoặc chọn hồ sơ để lưu trữ và đồng bộ Thư viện Game & Phim yêu thích của riêng bạn.
+              </p>
+            </div>
+            {onSwitchProfile && (
               <button
                 type="button"
-                onClick={() => setIsDrawerOpen(false)}
-                className="w-7 h-7 rounded-lg bg-white/10 hover:bg-white/20 text-white flex items-center justify-center"
+                onClick={() => {
+                  sfx.playClick();
+                  onSwitchProfile();
+                }}
+                className="px-5 py-2 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-black text-xs font-black uppercase tracking-wider flex items-center gap-1.5 shadow-lg shadow-cyan-500/20 active:scale-95 transition-all"
               >
-                <X className="w-4 h-4" />
+                <LogIn className="w-4 h-4" />
+                <span>Chọn Hoặc Tạo Hồ Sơ</span>
               </button>
-            </div>
+            )}
+          </div>
+        )}
 
-            {/* Search */}
-            <div className="relative w-full">
-              <Search className="w-3.5 h-3.5 text-ice-subtext absolute left-2.5 top-1/2 -translate-y-1/2" />
-              <input
-                type="text"
-                value={drawerSearch}
-                onChange={(e) => setDrawerSearch(e.target.value)}
-                placeholder="Tìm game trong thư viện..."
-                className="w-full h-8 pl-8 pr-3 rounded-lg bg-black/50 border border-ice-border text-xs text-white placeholder-ice-subtext focus:outline-none focus:border-ice-accent"
-              />
-            </div>
-
-            {/* Game List Items */}
-            <div className="flex-1 overflow-y-auto no-scrollbar space-y-1.5">
-              {drawerFilteredGames.map((game) => {
-                const isSelected = activeGame && activeGame.id === game.id;
-                return (
+        {/* CASE B: GAMES TAB */}
+        {activeSubTab === 'games' && (
+          <>
+            {filteredGames.length > 0 ? (
+              <div className="grid grid-cols-2 gap-3 pb-6">
+                {filteredGames.map((game) => (
                   <div
                     key={game.id}
-                    onClick={() => {
-                      onSelectGame(game);
-                      setIsDrawerOpen(false);
-                    }}
-                    className={`flex items-center gap-2.5 p-2 rounded-xl cursor-pointer transition-all border ${
-                      isSelected
-                        ? 'bg-ice-accent/20 border-ice-accent text-white'
-                        : 'bg-white/5 hover:bg-white/10 border-white/5 text-ice-text'
-                    }`}
+                    className="group relative rounded-2xl bg-[#12151D] border border-white/10 overflow-hidden flex flex-col shadow-md active:scale-98 transition-all"
                   >
-                    <div className="w-9 h-9 rounded-lg overflow-hidden bg-black shrink-0">
-                      {game.coverPath ? (
-                        <img src={game.coverPath} alt={game.name} className="w-full h-full object-cover" />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center text-[9px] font-bold">
-                          {game.name.substring(0, 2)}
-                        </div>
-                      )}
+                    {/* Game Cover Aspect 3:4 */}
+                    <div
+                      onClick={() => {
+                        sfx.playClick();
+                        onSelectGame(game);
+                      }}
+                      className="relative w-full aspect-[3/4] bg-black/60 overflow-hidden cursor-pointer"
+                    >
+                      <SafeImage
+                        src={game.coverPath || game.bannerPath}
+                        alt={game.name}
+                        title={game.name}
+                        fallbackType="game"
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
+                      <div className="absolute top-2 right-2">
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            sfx.playClick();
+                            onToggleLibrary?.(game.id);
+                          }}
+                          className="w-7 h-7 rounded-full bg-black/70 hover:bg-rose-600/80 text-cyan-400 hover:text-white backdrop-blur-md flex items-center justify-center transition-all border border-white/10"
+                          title="Bỏ khỏi thư viện"
+                        >
+                          <Bookmark className="w-3.5 h-3.5 fill-current" />
+                        </button>
+                      </div>
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-xs font-bold line-clamp-1">{game.name}</p>
-                      <span className="text-[10px] text-ice-subtext">{formatBytes(game.expectedSize)}</span>
-                    </div>
-                    <ChevronRight className="w-3.5 h-3.5 text-ice-subtext shrink-0" />
-                  </div>
-                );
-              })}
-            </div>
-          </div>
 
-          {/* Click outside to close */}
-          <div className="flex-1 h-full" onClick={() => setIsDrawerOpen(false)} />
-        </div>
-      )}
+                    {/* Game Info & Details */}
+                    <div
+                      onClick={() => {
+                        sfx.playClick();
+                        onSelectGame(game);
+                      }}
+                      className="p-2.5 flex flex-col justify-between flex-1 cursor-pointer"
+                    >
+                      <div>
+                        <h3 className="text-xs font-bold text-white line-clamp-1 group-hover:text-cyan-400 transition-colors">
+                          {game.name}
+                        </h3>
+                        <p className="text-[10px] text-slate-400 line-clamp-1 mt-0.5">
+                          {game.genre || 'Game PC'}
+                        </p>
+                      </div>
+                      <div className="mt-2 pt-2 border-t border-white/5 flex items-center justify-between text-[10px]">
+                        <span className="text-cyan-400 font-bold flex items-center gap-0.5">
+                          Chi tiết <ChevronRight className="w-3 h-3" />
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="py-12 flex flex-col items-center justify-center text-center space-y-3">
+                <div className="w-14 h-14 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-slate-500">
+                  <Gamepad2 className="w-7 h-7" />
+                </div>
+                <div className="space-y-1">
+                  <h3 className="text-sm font-bold text-white">Thư Viện Game Đang Trống</h3>
+                  <p className="text-xs text-slate-400 max-w-[260px]">
+                    Bạn chưa lưu game nào vào thư viện cá nhân. Hãy khám phá và thêm game bạn thích!
+                  </p>
+                </div>
+                {onNavigateTab && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      sfx.playClick();
+                      onNavigateTab('home');
+                    }}
+                    className="px-4 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-bold flex items-center gap-1.5 transition-all"
+                  >
+                    <Plus className="w-3.5 h-3.5" />
+                    <span>Khám Phá Danh Mục Game</span>
+                  </button>
+                )}
+              </div>
+            )}
+          </>
+        )}
+
+        {/* CASE C: MEDIA TAB */}
+        {activeSubTab === 'media' && (
+          <>
+            {filteredMedia.length > 0 ? (
+              <div className="grid grid-cols-2 gap-3 pb-6">
+                {filteredMedia.map((item) => (
+                  <div
+                    key={item.id}
+                    onClick={() => {
+                      sfx.playClick();
+                      onSelectMedia?.(item);
+                    }}
+                    className="group relative rounded-2xl bg-[#12151D] border border-white/10 overflow-hidden flex flex-col shadow-md active:scale-98 transition-all cursor-pointer"
+                  >
+                    <div className="relative w-full aspect-video bg-black/60 overflow-hidden">
+                      <SafeImage
+                        src={item.coverPath || item.bannerPath}
+                        alt={item.title}
+                        title={item.title}
+                        fallbackType="video"
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
+                    </div>
+                    <div className="p-2.5 flex flex-col justify-between flex-1">
+                      <h3 className="text-xs font-bold text-white line-clamp-1 group-hover:text-cyan-400 transition-colors">
+                        {item.title}
+                      </h3>
+                      <p className="text-[10px] text-slate-400 line-clamp-1 mt-0.5">
+                        {item.category || 'Video'}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="py-12 flex flex-col items-center justify-center text-center space-y-3">
+                <div className="w-14 h-14 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-slate-500">
+                  <Film className="w-7 h-7" />
+                </div>
+                <div className="space-y-1">
+                  <h3 className="text-sm font-bold text-white">Chưa Có Phim Yêu Thích</h3>
+                  <p className="text-xs text-slate-400 max-w-[260px]">
+                    Hãy vào mục Giải Trí và chọn xem các bộ phim, trailer hấp dẫn!
+                  </p>
+                </div>
+                {onNavigateTab && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      sfx.playClick();
+                      onNavigateTab('media');
+                    }}
+                    className="px-4 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-bold flex items-center gap-1.5 transition-all"
+                  >
+                    <Plus className="w-3.5 h-3.5" />
+                    <span>Duyệt Mục Giải Trí</span>
+                  </button>
+                )}
+              </div>
+            )}
+          </>
+        )}
+      </div>
     </div>
   );
 };

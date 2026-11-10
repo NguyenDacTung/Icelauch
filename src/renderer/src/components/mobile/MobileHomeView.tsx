@@ -12,6 +12,7 @@ import {
 import type { Game, MediaItem, AppSettings, SectionBannerSettings } from '../../types';
 import { MobileHeroBanner } from './MobileHeroBanner';
 import { HorizontalScroller } from '../common/HorizontalScroller';
+import { SafeImage } from '../common/SafeImage';
 
 interface MobileHomeViewProps {
   games: Game[];
@@ -83,9 +84,11 @@ export const MobileHomeView: React.FC<MobileHomeViewProps> = ({
                 onClick={() => onSelectGame(game)}
                 className="w-44 aspect-video rounded-xl overflow-hidden bg-black border border-ice-border/70 relative shrink-0 cursor-pointer group shadow-md"
               >
-                <img
+                <SafeImage
                   src={game.bannerPath || game.coverPath || ''}
                   alt={game.name}
+                  title={game.name}
+                  fallbackType="game"
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-transparent to-transparent flex flex-col justify-end p-2">
@@ -117,9 +120,11 @@ export const MobileHomeView: React.FC<MobileHomeViewProps> = ({
               >
                 {/* 16:9 Thumbnail Cover */}
                 <div className="relative aspect-video w-full bg-black overflow-hidden">
-                  <img
+                  <SafeImage
                     src={game.coverPath || game.bannerPath || ''}
                     alt={game.name}
+                    title={game.name}
+                    fallbackType="game"
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                   />
                   <div className="absolute top-1.5 right-1.5 flex items-center gap-1">

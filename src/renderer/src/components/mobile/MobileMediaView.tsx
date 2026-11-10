@@ -15,6 +15,7 @@ import type { MediaItem, MediaPlaylist, SectionBannerSettings } from '../../type
 import { MobileHeroBanner } from './MobileHeroBanner';
 import { HorizontalScroller } from '../common/HorizontalScroller';
 import { MobileVideoTheaterView } from './MobileVideoTheaterView';
+import { SafeImage } from '../common/SafeImage';
 
 interface MobileMediaViewProps {
   media: MediaItem[];
@@ -22,6 +23,8 @@ interface MobileMediaViewProps {
   bannerSettings?: SectionBannerSettings;
   isAdmin: boolean;
   searchQuery: string;
+  activeTheaterMedia?: MediaItem | null;
+  onSelectTheaterMedia?: (item: MediaItem | null) => void;
   onPlayAudio?: (item: MediaItem) => void;
   onSaveMedia?: (item: Partial<MediaItem>) => void;
   onDeleteMedia?: (id: string) => void;
@@ -36,6 +39,8 @@ export const MobileMediaView: React.FC<MobileMediaViewProps> = ({
   bannerSettings,
   isAdmin,
   searchQuery,
+  activeTheaterMedia: propActiveTheaterMedia,
+  onSelectTheaterMedia,
   onPlayAudio,
   onSaveMedia,
   onDeleteMedia,
@@ -45,7 +50,13 @@ export const MobileMediaView: React.FC<MobileMediaViewProps> = ({
 }) => {
   const [mediaTab, setMediaTab] = useState<'video' | 'music' | 'podcast'>('video');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
-  const [activeTheaterMedia, setActiveTheaterMedia] = useState<MediaItem | null>(null);
+  const [localActiveTheaterMedia, setLocalActiveTheaterMedia] = useState<MediaItem | null>(null);
+
+  const activeMedia = propActiveTheaterMedia !== undefined ? propActiveTheaterMedia : localActiveTheaterMedia;
+  const handleSetActiveMedia = (item: MediaItem | null) => {
+    setLocalActiveTheaterMedia(item);
+    onSelectTheaterMedia?.(item);
+  };
 
   const videoList = media.filter((m) => m.type === 'video');
   const musicList = media.filter((m) => m.type === 'audio' && (m.subType === 'music' || !m.subType));
@@ -82,15 +93,15 @@ export const MobileMediaView: React.FC<MobileMediaViewProps> = ({
   );
 
   // If currently watching in Mobile Theater
-  if (activeTheaterMedia) {
+  if (activeMedia) {
     return (
       <MobileVideoTheaterView
-        media={activeTheaterMedia}
+        media={activeMedia}
         allVideos={videoList}
         playlists={playlists}
         isAdmin={isAdmin}
-        onBack={() => setActiveTheaterMedia(null)}
-        onSelectVideo={(item) => setActiveTheaterMedia(item)}
+        onBack={() => handleSetActiveMedia(null)}
+        onSelectVideo={(item) => handleSetActiveMedia(item)}
         onUpdateProgress={onUpdateMediaProgress}
         onDownloadMedia={onDownloadMedia}
         onDeleteDownloaded={onDeleteDownloaded}
@@ -166,7 +177,7 @@ export const MobileMediaView: React.FC<MobileMediaViewProps> = ({
         type="media"
         bannerSettings={bannerSettings}
         onPlayMedia={(item) => {
-          if (item.type === 'video') setActiveTheaterMedia(item);
+          if (item.type === 'video') handleSetActiveMedia(item);
           else onPlayAudio?.(item);
         }}
       />
@@ -216,12 +227,14 @@ export const MobileMediaView: React.FC<MobileMediaViewProps> = ({
             {continueWatching.map((item) => (
               <div
                 key={item.id}
-                onClick={() => setActiveTheaterMedia(item)}
+                onClick={() => handleSetActiveMedia(item)}
                 className="w-44 aspect-video rounded-xl overflow-hidden bg-black border border-ice-border/70 relative shrink-0 cursor-pointer group shadow-md"
               >
-                <img
+                <SafeImage
                   src={item.coverPath || item.bannerPath || ''}
                   alt={item.title}
+                  title={item.title}
+                  fallbackType="video"
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-transparent to-transparent flex flex-col justify-end p-2">
@@ -254,16 +267,18 @@ export const MobileMediaView: React.FC<MobileMediaViewProps> = ({
               <div
                 key={item.id}
                 onClick={() => {
-                  if (item.type === 'video') setActiveTheaterMedia(item);
+                  if (item.type === 'video') handleSetActiveMedia(item);
                   else onPlayAudio?.(item);
                 }}
                 className="rounded-xl overflow-hidden bg-[#14171F] border border-ice-border/70 cursor-pointer group hover:border-amber-400/50 transition-all shadow-md flex flex-col"
               >
                 {/* 16:9 Thumbnail Poster */}
                 <div className="relative aspect-video w-full bg-black overflow-hidden">
-                  <img
+                  <SafeImage
                     src={item.coverPath || item.bannerPath || ''}
                     alt={item.title}
+                    title={item.title}
+                    fallbackType="video"
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                   />
                   <div className="absolute top-1.5 right-1.5 flex items-center gap-1">

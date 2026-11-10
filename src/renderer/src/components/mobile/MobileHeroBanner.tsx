@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { ChevronLeft, ChevronRight, Play, Info, Monitor, Sparkles, Bookmark, BookmarkCheck } from 'lucide-react';
 import type { Game, MediaItem, SectionBannerSettings } from '../../types';
 import { resolveBannerItems } from '../../utils/bannerResolver';
+import { SafeImage } from '../common/SafeImage';
 
 interface MobileHeroBannerProps {
   items: (Game | MediaItem)[];
@@ -61,10 +62,12 @@ export const MobileHeroBanner: React.FC<MobileHeroBannerProps> = ({
   return (
     <div className="relative w-full aspect-video rounded-2xl overflow-hidden border border-ice-border shadow-xl select-none group bg-black shrink-0 my-2">
       {/* Background Image - Strict 16:9 Aspect Ratio */}
-      <img
+      <SafeImage
         key={image}
         src={image}
         alt={title}
+        title={title}
+        fallbackType={type === 'game' ? 'game' : 'video'}
         className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-102"
         style={{
           objectPosition: currentItem.bannerPosition || currentItem.coverPosition || '50% 50%',
@@ -197,9 +200,8 @@ export const MobileHeroBanner: React.FC<MobileHeroBannerProps> = ({
           {displayItems.slice(0, 5).map((_, idx) => (
             <div
               key={idx}
-              className={`h-1 rounded-full transition-all duration-300 ${
-                idx === currentIndex % 5 ? 'w-3 bg-ice-accent' : 'w-1 bg-white/40'
-              }`}
+              className={`h-1 rounded-full transition-all duration-300 ${idx === currentIndex % 5 ? 'w-3 bg-ice-accent' : 'w-1 bg-white/40'
+                }`}
             />
           ))}
         </div>

@@ -125,6 +125,26 @@ export default function App() {
     ? simulatedDevice
     : (devicePreference || detectHardwareDevice());
 
+  const isSimulating = detectHardwareDevice() === 'windows_pc' && effectiveDevice !== 'windows_pc';
+  const isMobileOrTvNative = !isSimulating && (effectiveDevice === 'android_mobile' || effectiveDevice === 'android_tv');
+
+  const [mobileTheaterMedia, setMobileTheaterMedia] = useState<MediaItem | null>(null);
+
+  const handleMobileTabChange = (tab: NavigationTab) => {
+    setViewingDetailGame(null);
+    setMobileTheaterMedia(null);
+    setCurrentTab(tab);
+  };
+
+  const handleMobileTabReTap = (_tab: NavigationTab) => {
+    if (mobileTheaterMedia) {
+      setMobileTheaterMedia(null);
+    }
+    if (viewingDetailGame) {
+      setViewingDetailGame(null);
+    }
+  };
+
   const handleSelectDevice = (chosenDevice: DeviceType) => {
     setDevicePreference(chosenDevice);
     setStoredDevicePreference(chosenDevice);
@@ -818,40 +838,44 @@ export default function App() {
 
   return (
     <div className="h-screen w-screen bg-ice-bg text-ice-text flex flex-col overflow-hidden">
-      {/* 1. Top Navbar (56px) */}
-      <Navbar
-        currentTab={currentTab}
-        onTabChange={(tab) => {
-          setViewingDetailGame(null);
-          setCurrentTab(tab);
-        }}
-        searchQuery={searchQuery}
-        onSearchChange={setSearchQuery}
-        activeDownloadsCount={activeDownloads.length}
-        isDownloadTrayOpen={isDownloadTrayOpen}
-        onToggleDownloadTray={() => setIsDownloadTrayOpen(!isDownloadTrayOpen)}
-        isAdmin={isAdmin}
-        adminTimeRemaining={adminTimeRemaining}
-        onOpenAdminAuth={() => setIsAdminAuthOpen(true)}
-        onLockAdmin={handleLockAdmin}
-        onOpenBannerManager={() => setIsBannerManagerOpen(true)}
-        activeProfile={activeProfile}
-        onSwitchProfile={handleSwitchProfile}
-        onEditCurrentProfile={() => setIsEditingCurrentProfile(true)}
-        onLogoutProfile={handleLogoutProfile}
-      />
+      {/* 1. Top Navbar (56px) - Desktop Windows PC only or Simulator */}
+      {!isMobileOrTvNative && (
+        <Navbar
+          currentTab={currentTab}
+          onTabChange={(tab) => {
+            setViewingDetailGame(null);
+            setCurrentTab(tab);
+          }}
+          searchQuery={searchQuery}
+          onSearchChange={setSearchQuery}
+          activeDownloadsCount={activeDownloads.length}
+          isDownloadTrayOpen={isDownloadTrayOpen}
+          onToggleDownloadTray={() => setIsDownloadTrayOpen(!isDownloadTrayOpen)}
+          isAdmin={isAdmin}
+          adminTimeRemaining={adminTimeRemaining}
+          onOpenAdminAuth={() => setIsAdminAuthOpen(true)}
+          onLockAdmin={handleLockAdmin}
+          onOpenBannerManager={() => setIsBannerManagerOpen(true)}
+          activeProfile={activeProfile}
+          onSwitchProfile={handleSwitchProfile}
+          onEditCurrentProfile={() => setIsEditingCurrentProfile(true)}
+          onLogoutProfile={handleLogoutProfile}
+        />
+      )}
 
       {/* 2. Download Tray Floating Panel */}
-      <DownloadTray
-        isOpen={isDownloadTrayOpen}
-        onClose={() => setIsDownloadTrayOpen(false)}
-        games={appData.games}
-        onCancelDownload={handleCancelDownload}
-        onRetry={handleRetryGame}
-      />
+      {!isMobileOrTvNative && (
+        <DownloadTray
+          isOpen={isDownloadTrayOpen}
+          onClose={() => setIsDownloadTrayOpen(false)}
+          games={appData.games}
+          onCancelDownload={handleCancelDownload}
+          onRetry={handleRetryGame}
+        />
+      )}
 
-      {/* Admin Device Simulator Switcher Toolbar */}
-      {isAdmin && (
+      {/* Admin Device Simulator Switcher Toolbar (Desktop only) */}
+      {isAdmin && !isMobileOrTvNative && (
         <DeviceSimulatorBar
           currentDevice={simulatedDevice}
           onChangeDevice={(dev) => {
@@ -938,7 +962,9 @@ export default function App() {
         ) : effectiveDevice === 'android_mobile' ? (
           <DevicePhoneFrame
             currentTab={currentTab}
-            onTabChange={setCurrentTab}
+            onTabChange={handleMobileTabChange}
+            onTabReTap={handleMobileTabReTap}
+            isSimulated={isSimulating}
             onExitSimulation={() => setSimulatedDevice('windows_pc')}
             isAdmin={isAdmin}
             adminTimeRemaining={adminTimeRemaining}
@@ -949,7 +975,7 @@ export default function App() {
             onEditCurrentProfile={() => setIsEditingCurrentProfile(true)}
             onLogoutProfile={handleLogoutProfile}
           >
-            {viewingDetailGame ? (
+            {viewingDetailGame && currentTab === 'home' ? (
               <MobileGameDetailView
                 game={viewingDetailGame}
                 isAdmin={isAdmin}
@@ -977,14 +1003,22 @@ export default function App() {
                 {currentTab === 'library' && (
                   <MobileLibraryView
                     games={appData.games}
-                    selectedGameId={selectedGameId}
+                    allMedia={appData.media}
                     isAdmin={isAdmin}
+                    activeProfile={activeProfile}
                     userLibraryIds={activeProfile?.library}
-                    globalActionButtons={appData.settings.globalActionButtons || []}
-                    onSelectGame={(game) => setSelectedGameId(game.id)}
+                    onSelectGame={(game) => {
+                      setViewingDetailGame(game);
+                      setCurrentTab('home');
+                    }}
+                    onSelectMedia={(item) => {
+                      setMobileTheaterMedia(item);
+                      setCurrentTab('media');
+                    }}
                     onIncompatibleClick={(game) => setIncompatibleGame(game)}
-                    onOpenFolder={(id) => handleOpenFolder('gameDir', id)}
                     onToggleLibrary={handleToggleLibrary}
+                    onSwitchProfile={handleSwitchProfile}
+                    onNavigateTab={handleMobileTabChange}
                   />
                 )}
 
@@ -995,6 +1029,8 @@ export default function App() {
                     bannerSettings={appData.settings.bannerSettings?.videos}
                     isAdmin={isAdmin}
                     searchQuery={searchQuery}
+                    activeTheaterMedia={mobileTheaterMedia}
+                    onSelectTheaterMedia={setMobileTheaterMedia}
                     onPlayAudio={handlePlayAudio}
                     onSaveMedia={handleSaveMedia}
                     onDeleteMedia={handleDeleteMedia}

@@ -122,16 +122,19 @@ jobs:
           ANDROID_HOME: /usr/local/lib/android/sdk
           ANDROID_SDK_ROOT: /usr/local/lib/android/sdk
 
-      - name: Rename & Prepare Universal APK
+      - name: Rename & Prepare Universal & Phone APKs
         run: |
           mkdir -p android-artifacts
           cp android/app/build/outputs/apk/debug/app-debug.apk android-artifacts/Icelauch-universal.apk
+          cp android/app/build/outputs/apk/debug/app-debug.apk android-artifacts/Icelauch-phone.apk
 
       - name: Upload Android Artifact
         uses: actions/upload-artifact@v4
         with:
           name: android-release
-          path: android-artifacts/Icelauch-universal.apk
+          path: |
+            android-artifacts/Icelauch-universal.apk
+            android-artifacts/Icelauch-phone.apk
           if-no-files-found: error
 
   # ============================================================================
@@ -179,7 +182,8 @@ jobs:
             ### 📦 Danh Sách File Tải Về:
             - **Windows Cài Đặt (NSIS Setup):** `Icelauch-Setup-*.exe` (Tự động tạo shortcut Desktop & Start Menu).
             - **Windows Bản Portable:** `Icelauch-*.exe` (Chạy trực tiếp không cần cài đặt, thích hợp lưu trên USB/ổ cứng rời).
-            - **Android Phổ Quát (APK):** `Icelauch-universal.apk` (Dùng chung cho cả **Điện thoại Android** và **Android TV / Smart TV / TV Box**).
+            - **Android Điện Thoại (Native Mobile APK):** `Icelauch-phone.apk` (Bản tối ưu tràn viền Edge-to-Edge cho Smartphone Android).
+            - **Android Phổ Quát (APK):** `Icelauch-universal.apk` (Dùng chung cho cả Android TV & Điện thoại).
 
             ---
             ### ✨ Tính Năng Nổi Bật:
