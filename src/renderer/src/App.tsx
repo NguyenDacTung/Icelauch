@@ -31,6 +31,8 @@ import { MobileLibraryView } from './components/mobile/MobileLibraryView';
 import { MobileGameDetailView } from './components/mobile/MobileGameDetailView';
 import { MobileSettingsView } from './components/mobile/MobileSettingsView';
 import { MobileVinylPlayerModal } from './components/mobile/MobileVinylPlayerModal';
+import { MobileUpdateModal } from './components/mobile/MobileUpdateModal';
+import { checkMobileUpdate, type MobileUpdateInfo } from './utils/apkUpdater';
 import { DeviceTVFrame } from './components/tv/DeviceTVFrame';
 import { TVHomeMediaView } from './components/tv/TVHomeMediaView';
 import { TVGameView } from './components/tv/TVGameView';
@@ -129,6 +131,26 @@ export default function App() {
   const isMobileOrTvNative = !isSimulating && (effectiveDevice === 'android_mobile' || effectiveDevice === 'android_tv');
 
   const [mobileTheaterMedia, setMobileTheaterMedia] = useState<MediaItem | null>(null);
+  const [mobileUpdateInfo, setMobileUpdateInfo] = useState<MobileUpdateInfo | null>(null);
+  const [isMobileUpdateModalOpen, setIsMobileUpdateModalOpen] = useState(false);
+
+  useEffect(() => {
+    // Check mobile APK update silently on startup if on Android
+    if (isMobileOrTvNative || effectiveDevice === 'android_mobile') {
+      const timer = setTimeout(async () => {
+        try {
+          const info = await checkMobileUpdate();
+          if (info.updateAvailable) {
+            setMobileUpdateInfo(info);
+            setIsMobileUpdateModalOpen(true);
+          }
+        } catch (e) {
+          console.warn('[App] Auto mobile update check error:', e);
+        }
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [isMobileOrTvNative, effectiveDevice]);
 
   const handleMobileTabChange = (tab: NavigationTab) => {
     setViewingDetailGame(null);
@@ -1463,8 +1485,15 @@ export default function App() {
         onClose={() => setIsDeviceModalOpen(false)}
       />
 
-      {/* Floating In-App OTA Update Toast */}
-      <UpdateToast onGoToSettings={() => setCurrentTab('settings')} />
+      {/* Mobile Native APK In-App Auto-Update Modal */}
+      <MobileUpdateModal
+        isOpen={isMobileUpdateModalOpen}
+        updateInfo={mobileUpdateInfo}
+        onClose={() => setIsMobileUpdateModalOpen(false)}
+      />
+
+      {/* Floating In-App OTA Update Toast (PC) */}
+      {!isMobileOrTvNative && <UpdateToast onGoToSettings={() => setCurrentTab('settings')} />}
     </div>
   );
 }

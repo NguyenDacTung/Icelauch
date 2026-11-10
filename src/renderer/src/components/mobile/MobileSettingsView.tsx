@@ -18,10 +18,17 @@ import {
   AlertCircle,
   Clock,
   Smartphone,
+  Download,
 } from 'lucide-react';
 import type { AppSettings, CloudSyncSettings, SeasonTheme, UserProfile } from '../../types';
 import { AvatarBadge } from '../common/AvatarBadge';
 import { sfx } from '../../utils/sfx';
+import {
+  checkMobileUpdate,
+  triggerApkDownloadAndInstall,
+  type MobileUpdateInfo,
+  CURRENT_MOBILE_VERSION,
+} from '../../utils/apkUpdater';
 
 export interface MobileSettingsViewProps {
   settings: AppSettings;
@@ -63,6 +70,9 @@ export const MobileSettingsView: React.FC<MobileSettingsViewProps> = ({
 
   // OTA Update state
   const [isCheckingUpdate, setIsCheckingUpdate] = useState(false);
+  const [mobileUpdateInfo, setMobileUpdateInfo] = useState<MobileUpdateInfo | null>(null);
+  const [isDownloadingApk, setIsDownloadingApk] = useState(false);
+  const [downloadProgress, setDownloadProgress] = useState(0);
   const [updateResult, setUpdateResult] = useState<{
     status: 'idle' | 'checking' | 'latest' | 'available' | 'error';
     msg: string;
@@ -138,6 +148,7 @@ export const MobileSettingsView: React.FC<MobileSettingsViewProps> = ({
   const handleCheckUpdate = async () => {
     sfx.playClick();
     setIsCheckingUpdate(true);
+    setMobileUpdateInfo(null);
     setUpdateResult({ status: 'checking', msg: 'Đang kiểm tra từ máy chủ...' });
     try {
       if (window.api?.checkUpdates) {
@@ -152,24 +163,31 @@ export const MobileSettingsView: React.FC<MobileSettingsViewProps> = ({
           } else {
             setUpdateResult({
               status: 'latest',
-              msg: 'Tuyệt vời! Bạn đang ở phiên bản mới nhất v1.0.0.',
+              msg: `Bạn đang ở phiên bản mới nhất v${CURRENT_MOBILE_VERSION}.`,
             });
           }
         } else {
           setUpdateResult({
             status: 'latest',
-            msg: res?.error || 'Bạn đang ở phiên bản mới nhất v1.0.0.',
+            msg: res?.error || `Bạn đang ở phiên bản mới nhất v${CURRENT_MOBILE_VERSION}.`,
           });
         }
       } else {
-        setTimeout(() => {
+        // Mobile / Android native update check
+        const info = await checkMobileUpdate();
+        setMobileUpdateInfo(info);
+        if (info.updateAvailable) {
+          setUpdateResult({
+            status: 'available',
+            msg: `Phát hiện bản cập nhật mới v${info.latestVersion}!`,
+            version: info.latestVersion,
+          });
+        } else {
           setUpdateResult({
             status: 'latest',
-            msg: 'Bạn đang sử dụng phiên bản di động mới nhất (v1.0.0).',
+            msg: `Tuyệt vời! Bạn đang ở phiên bản di động mới nhất (v${CURRENT_MOBILE_VERSION}).`,
           });
-          setIsCheckingUpdate(false);
-        }, 1200);
-        return;
+        }
       }
     } catch (err: any) {
       setUpdateResult({
@@ -178,6 +196,25 @@ export const MobileSettingsView: React.FC<MobileSettingsViewProps> = ({
       });
     } finally {
       setIsCheckingUpdate(false);
+    }
+  };
+
+  const handleDownloadAndInstallMobile = async () => {
+    if (!mobileUpdateInfo?.apkUrl) return;
+    sfx.playClick();
+    setIsDownloadingApk(true);
+    setDownloadProgress(5);
+    try {
+      const res = await triggerApkDownloadAndInstall(mobileUpdateInfo.apkUrl, (progress) => {
+        setDownloadProgress(progress);
+      });
+      if (!res.success && res.message) {
+        setUpdateResult({ status: 'error', msg: res.message });
+      }
+    } catch (e: any) {
+      setUpdateResult({ status: 'error', msg: e?.message || 'Lỗi tải cập nhật' });
+    } finally {
+      setIsDownloadingApk(false);
     }
   };
 
@@ -525,7 +562,7 @@ export const MobileSettingsView: React.FC<MobileSettingsViewProps> = ({
               <h3 className="text-xs font-bold text-white uppercase tracking-wider">
                 Phiên Bản & Cập Nhật (OTA)
               </h3>
-              <p className="text-[10px] text-ice-subtext">Icelauch Android Edition v1.0.0</p>
+              <p className="text-[10px] text-ice-subtext">Icelauch Android Edition v{CURRENT_MOBILE_VERSION}</p>
             </div>
           </div>
         </div>
@@ -540,6 +577,33 @@ export const MobileSettingsView: React.FC<MobileSettingsViewProps> = ({
           }`}>
             <Sparkles className="w-4 h-4 shrink-0 mt-0.5" />
             <span className="flex-1 font-medium">{updateResult.msg}</span>
+          </div>
+        )}
+
+        {/* When update is available on mobile: Big Direct Install Button */}
+        {mobileUpdateInfo?.updateAvailable && !isDownloadingApk && (
+          <button
+            type="button"
+            onClick={handleDownloadAndInstallMobile}
+            className="w-full h-11 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-black text-xs font-black uppercase tracking-wider flex items-center justify-center gap-2 shadow-lg shadow-cyan-500/25 active:scale-98 transition-all animate-pulse"
+          >
+            <Download className="w-4 h-4 text-black fill-black" />
+            <span>Tải & Cài Đặt Bản v{mobileUpdateInfo.latestVersion} Ngay</span>
+          </button>
+        )}
+
+        {isDownloadingApk && (
+          <div className="space-y-1.5 p-3 rounded-xl bg-black/40 border border-cyan-500/30">
+            <div className="flex items-center justify-between text-xs">
+              <span className="text-slate-300 font-semibold">Đang tải file APK vào máy...</span>
+              <span className="text-cyan-400 font-mono font-bold">{downloadProgress}%</span>
+            </div>
+            <div className="w-full h-2 rounded-full bg-white/10 overflow-hidden">
+              <div
+                className="h-full bg-gradient-to-r from-cyan-500 to-blue-500 rounded-full transition-all duration-200"
+                style={{ width: `${downloadProgress}%` }}
+              />
+            </div>
           </div>
         )}
 

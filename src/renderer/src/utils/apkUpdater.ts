@@ -1,0 +1,127 @@
+import { registerPlugin } from '@capacitor/core';
+
+export const CURRENT_MOBILE_VERSION = '1.0.1';
+const GITHUB_REPO = 'NguyenDacTung/Icelauch';
+
+interface ApkInstallerPluginInterface {
+  downloadAndInstall(options: { url: string }): Promise<{ success: boolean; filePath?: string }>;
+  addListener(
+    eventName: 'downloadProgress',
+    listenerFunc: (info: { progress: number }) => void
+  ): Promise<{ remove: () => void }>;
+  addListener(
+    eventName: 'downloadError',
+    listenerFunc: (info: { error: string }) => void
+  ): Promise<{ remove: () => void }>;
+}
+
+export const ApkInstaller = registerPlugin<ApkInstallerPluginInterface>('ApkInstaller');
+
+export interface MobileUpdateInfo {
+  updateAvailable: boolean;
+  currentVersion: string;
+  latestVersion: string;
+  releaseName: string;
+  releaseNotes: string;
+  apkUrl: string;
+}
+
+// Compare semantic version strings (e.g. "1.0.2" vs "1.0.1")
+function isNewerVersion(remote: string, current: string): boolean {
+  const cleanRemote = remote.replace(/^v/i, '').trim();
+  const cleanCurrent = current.replace(/^v/i, '').trim();
+
+  const rParts = cleanRemote.split('.').map((n) => parseInt(n, 10) || 0);
+  const cParts = cleanCurrent.split('.').map((n) => parseInt(n, 10) || 0);
+
+  for (let i = 0; i < Math.max(rParts.length, cParts.length); i++) {
+    const r = rParts[i] || 0;
+    const c = cParts[i] || 0;
+    if (r > c) return true;
+    if (r < c) return false;
+  }
+  return false;
+}
+
+export async function checkMobileUpdate(): Promise<MobileUpdateInfo> {
+  try {
+    const res = await fetch(`https://api.github.com/repos/${GITHUB_REPO}/releases/latest`, {
+      headers: {
+        Accept: 'application/vnd.github.v3+json',
+      },
+      cache: 'no-store',
+    });
+
+    if (!res.ok) {
+      throw new Error(`GitHub API HTTP ${res.status}`);
+    }
+
+    const data = await res.json();
+    const tag = (data.tag_name || '').replace(/^v/i, '').trim();
+    const updateAvailable = isNewerVersion(tag, CURRENT_MOBILE_VERSION);
+
+    // Look for dedicated Icelauch-phone.apk first, fallback to universal
+    const phoneAsset = data.assets?.find(
+      (a: any) => a.name === 'Icelauch-phone.apk' || a.name.includes('-phone.apk')
+    );
+    const universalAsset = data.assets?.find(
+      (a: any) => a.name === 'Icelauch-universal.apk' || a.name.endsWith('.apk')
+    );
+
+    const apkUrl =
+      phoneAsset?.browser_download_url ||
+      universalAsset?.browser_download_url ||
+      `https://github.com/${GITHUB_REPO}/releases/download/v${tag}/Icelauch-phone.apk`;
+
+    return {
+      updateAvailable,
+      currentVersion: CURRENT_MOBILE_VERSION,
+      latestVersion: tag || CURRENT_MOBILE_VERSION,
+      releaseName: data.name || `Bản Cập Nhật v${tag}`,
+      releaseNotes: data.body || '',
+      apkUrl,
+    };
+  } catch (err: any) {
+    console.warn('[ApkUpdater] Check update error:', err);
+    return {
+      updateAvailable: false,
+      currentVersion: CURRENT_MOBILE_VERSION,
+      latestVersion: CURRENT_MOBILE_VERSION,
+      releaseName: '',
+      releaseNotes: '',
+      apkUrl: '',
+    };
+  }
+}
+
+export async function triggerApkDownloadAndInstall(
+  apkUrl: string,
+  onProgress?: (progress: number) => void
+): Promise<{ success: boolean; message?: string }> {
+  const isCapacitor = typeof (window as any).Capacitor !== 'undefined';
+
+  if (isCapacitor) {
+    try {
+      let progressListener: any = null;
+      if (onProgress) {
+        progressListener = await ApkInstaller.addListener('downloadProgress', (info) => {
+          onProgress(info.progress);
+        });
+      }
+
+      const result = await ApkInstaller.downloadAndInstall({ url: apkUrl });
+      if (progressListener && progressListener.remove) {
+        progressListener.remove();
+      }
+      return { success: result.success };
+    } catch (e: any) {
+      console.warn('[ApkUpdater] Native install error, falling back to browser download:', e);
+      window.open(apkUrl, '_blank');
+      return { success: true, message: 'Đang mở liên kết tải trực tiếp...' };
+    }
+  } else {
+    // Fallback on web/browser
+    window.open(apkUrl, '_blank');
+    return { success: true, message: 'Đang tải file APK qua trình duyệt...' };
+  }
+}
