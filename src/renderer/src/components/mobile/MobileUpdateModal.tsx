@@ -143,3 +143,4 @@ export const MobileUpdateModal: React.FC<MobileUpdateModalProps> = ({
     </div>
   );
 };
+

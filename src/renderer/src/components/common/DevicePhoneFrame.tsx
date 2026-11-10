@@ -44,34 +44,35 @@ export const DevicePhoneFrame: React.FC<DevicePhoneFrameProps> = ({
   };
 
   const renderBottomNav = () => (
-    <nav className="h-16 w-full bg-[#10131B]/95 backdrop-blur-2xl border-t border-white/10 flex items-center justify-around px-3 shrink-0 z-40 select-none shadow-[0_-4px_20px_rgba(0,0,0,0.5)]">
-      {mobileNavItems.map((item) => {
-        const isActive = currentTab === item.id;
-        const Icon = item.icon;
-        return (
-          <button
-            key={item.id}
-            type="button"
-            onClick={() => handleTabClick(item.id)}
-            className={`flex-1 flex flex-col items-center justify-center py-1.5 rounded-xl transition-all duration-200 active:scale-95 ${isActive
-                ? 'text-cyan-400 font-bold'
-                : 'text-slate-400 hover:text-white font-medium'
+    <div className="w-full px-4 pb-2 pt-1 shrink-0 z-40 select-none bg-transparent">
+      <nav className="h-15 w-full max-w-md mx-auto rounded-full bg-[#151822]/95 backdrop-blur-xl border border-white/10 shadow-[0_10px_35px_rgba(0,0,0,0.85)] flex items-center justify-around px-2 py-1">
+        {mobileNavItems.map((item) => {
+          const isActive = currentTab === item.id;
+          const Icon = item.icon;
+          return (
+            <button
+              key={item.id}
+              type="button"
+              onClick={() => handleTabClick(item.id)}
+              className={`flex-1 flex flex-col items-center justify-center py-1.5 px-1 rounded-full transition-all duration-200 active:scale-95 ${
+                isActive
+                  ? 'bg-white/10 text-cyan-400 font-bold shadow-sm'
+                  : 'text-slate-400 hover:text-white font-medium'
               }`}
-          >
-            <div className="relative">
+            >
               <Icon
-                className={`w-5 h-5 transition-transform duration-200 ${isActive ? 'scale-110 drop-shadow-[0_0_8px_rgba(34,211,238,0.6)]' : ''
-                  }`}
+                className={`w-5 h-5 transition-transform duration-200 ${
+                  isActive ? 'scale-110 drop-shadow-[0_0_6px_rgba(34,211,238,0.6)]' : ''
+                }`}
               />
-              {isActive && (
-                <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-cyan-400 shadow-[0_0_6px_#22d3ee]" />
-              )}
-            </div>
-            <span className="text-[11px] mt-1 tracking-tight">{item.label}</span>
-          </button>
-        );
-      })}
-    </nav>
+              <span className={`text-[10px] mt-0.5 tracking-tight ${isActive ? 'text-cyan-300 font-bold' : ''}`}>
+                {item.label}
+              </span>
+            </button>
+          );
+        })}
+      </nav>
+    </div>
   );
 
   // 1. SIMULATOR MODE (Only when Admin is previewing phone on PC Electron)

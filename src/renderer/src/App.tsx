@@ -67,7 +67,9 @@ import type {
 
 export default function App() {
   const [appData, setAppData] = useState<AppData | null>(null);
-  const [currentTab, setCurrentTab] = useState<NavigationTab>('home');
+  const [currentTab, setCurrentTab] = useState<NavigationTab>(() => {
+    return detectHardwareDevice() === 'android_mobile' ? 'media' : 'home';
+  });
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedGameId, setSelectedGameId] = useState<string | null>(null);
   const [viewingDetailGame, setViewingDetailGame] = useState<Game | null>(null);
@@ -1040,6 +1042,7 @@ export default function App() {
                     onIncompatibleClick={(game) => setIncompatibleGame(game)}
                     onToggleLibrary={handleToggleLibrary}
                     onSwitchProfile={handleSwitchProfile}
+                    onPlayAudio={handlePlayAudio}
                     onNavigateTab={handleMobileTabChange}
                   />
                 )}
@@ -1381,6 +1384,7 @@ export default function App() {
       <SeasonalParticleEngine
         config={appData.settings.particleConfig}
         enabled={
+          !isMobileOrTvNative &&
           appData.settings.ambientSnowEnabled !== false &&
           (!appData.settings.wallpaperConfig?.enabled || appData.settings.wallpaperConfig?.showWithParticles !== false)
         }

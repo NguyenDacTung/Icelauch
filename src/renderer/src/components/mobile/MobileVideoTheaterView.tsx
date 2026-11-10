@@ -9,6 +9,9 @@ import {
   ListVideo,
   Flame,
   CheckCircle2,
+  Tv,
+  Globe,
+  Zap,
 } from 'lucide-react';
 import { parseMediaUrl, getActiveProxyPort } from '../../utils/mediaUrl';
 import type { MediaItem, MediaPlaylist } from '../../types';
@@ -45,20 +48,25 @@ export const MobileVideoTheaterView: React.FC<MobileVideoTheaterViewProps> = ({
 
   const hasLocalElectronProxy = typeof window !== 'undefined' && Boolean((window as any).electron);
 
-  const [currentTime, setCurrentTime] = useState(media.lastPosition || 0);
-  const [duration, setDuration] = useState(0);
-  const [playbackMode, setPlaybackMode] = useState<'proxy' | 'direct'>(
-    hasLocalElectronProxy ? 'proxy' : 'direct'
-  );
+  const parsed = parseMediaUrl(media.link);
+  const isYouTube = parsed.kind === 'youtube' && parsed.id;
+  const isGoogleDrive = parsed.kind === 'gdrive' && parsed.id;
+
+  // Playback modes: 'embed' (Drive preview / YouTube), 'direct' (native HTML5 video), 'proxy' (Electron VIP)
+  const defaultMode: 'embed' | 'direct' | 'proxy' =
+    isGoogleDrive || isYouTube ? 'embed' : 'direct';
+
+  const [playbackMode, setPlaybackMode] = useState<'embed' | 'direct' | 'proxy'>(defaultMode);
   const [showFullDesc, setShowFullDesc] = useState(false);
   const [isLoadingStream, setIsLoadingStream] = useState(true);
   const [loadingStatus, setLoadingStatus] = useState('Đang nạp video...');
 
-  const parsed = parseMediaUrl(media.link);
-  const isYouTube = parsed.kind === 'youtube' && parsed.id;
-  const isGoogleDrive = parsed.kind === 'gdrive' && parsed.id;
   const driveEmbedUrl = parsed.id
     ? `https://drive.google.com/file/d/${parsed.id}/preview`
+    : parsed.embedUrl || media.link;
+
+  const youtubeEmbedUrl = parsed.id
+    ? `https://www.youtube-nocookie.com/embed/${parsed.id}?autoplay=1&rel=0&playsinline=1&enablejsapi=1`
     : parsed.embedUrl || media.link;
 
   const proxyUrl =
@@ -69,10 +77,9 @@ export const MobileVideoTheaterView: React.FC<MobileVideoTheaterViewProps> = ({
   useEffect(() => {
     setIsLoadingStream(true);
     setLoadingStatus('Đang nạp video...');
-    // Auto-dismiss loading overlay after 2.5s maximum to avoid blocking
     const timer = setTimeout(() => {
       setIsLoadingStream(false);
-    }, 2500);
+    }, 2000);
     return () => clearTimeout(timer);
   }, [media.id, playbackMode]);
 
@@ -81,8 +88,6 @@ export const MobileVideoTheaterView: React.FC<MobileVideoTheaterViewProps> = ({
     if (!videoRef.current) return;
     const cur = videoRef.current.currentTime;
     const dur = videoRef.current.duration || 0;
-    setCurrentTime(cur);
-    setDuration(dur);
     if (Math.floor(cur) % 5 === 0 && dur > 0) {
       onUpdateProgress?.(media.id, cur, cur / dur > 0.9);
     }
@@ -99,154 +104,163 @@ export const MobileVideoTheaterView: React.FC<MobileVideoTheaterViewProps> = ({
   return (
     <div
       ref={containerRef}
-      className="flex-1 w-full h-full flex flex-col bg-[#0A0C10] select-none overflow-y-auto no-scrollbar"
+      className="flex-1 w-full h-full flex flex-col bg-[#07090E] select-none overflow-y-auto no-scrollbar"
     >
-      {/* 1. STICKY TOP 16:9 VIDEO PLAYER */}
-      <div className="sticky top-0 z-30 w-full aspect-video min-h-[210px] shrink-0 bg-black shadow-2xl overflow-hidden flex items-center justify-center relative">
-        {/* Top Floating Mini Back Button */}
-        <div className="absolute top-2.5 left-2.5 z-40 flex items-center gap-2">
+      {/* 1. STICKY TOP 16:9 VIDEO PLAYER (SAFE FOR NOTCH & STATUS BAR) */}
+      <div className="sticky top-0 z-30 w-full shrink-0 bg-black shadow-2xl flex flex-col pt-[env(safe-area-inset-top,0px)]">
+        <div className="relative w-full aspect-video min-h-[210px] bg-black overflow-hidden flex items-center justify-center">
+          {/* Top Floating Back Button (High Z-Index, Safe Position) */}
+          <div className="absolute top-2.5 left-2.5 z-40 flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => {
+                sfx.playClick();
+                onBack();
+              }}
+              className="w-9 h-9 rounded-full bg-black/80 hover:bg-black text-white border border-white/20 flex items-center justify-center shadow-lg active:scale-95 transition-all"
+              title="Quay lại danh sách"
+            >
+              <ArrowLeft className="w-5 h-5" />
+            </button>
+          </div>
+
+          {/* Video Render Modes */}
+          {playbackMode === 'proxy' && proxyUrl ? (
+            <video
+              ref={videoRef}
+              src={proxyUrl}
+              controls
+              autoPlay
+              playsInline
+              preload="auto"
+              onCanPlay={() => setIsLoadingStream(false)}
+              onWaiting={() => {
+                setIsLoadingStream(true);
+                setLoadingStatus('Đang nạp bộ đệm 16MB...');
+              }}
+              onPlaying={() => setIsLoadingStream(false)}
+              onTimeUpdate={handleTimeUpdate}
+              className="w-full h-full object-contain absolute inset-0"
+            />
+          ) : playbackMode === 'embed' && isYouTube ? (
+            <iframe
+              src={youtubeEmbedUrl}
+              title={media.title}
+              referrerPolicy="strict-origin-when-cross-origin"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              allowFullScreen
+              onLoad={() => setIsLoadingStream(false)}
+              className="w-full h-full border-0 absolute inset-0"
+            />
+          ) : playbackMode === 'embed' && isGoogleDrive ? (
+            <iframe
+              src={driveEmbedUrl}
+              title={media.title}
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+              onLoad={() => setIsLoadingStream(false)}
+              className="w-full h-full border-0 absolute inset-0"
+            />
+          ) : (
+            <video
+              ref={videoRef}
+              src={parsed.directUrl || media.link}
+              controls
+              autoPlay
+              playsInline
+              preload="auto"
+              onCanPlay={() => setIsLoadingStream(false)}
+              onWaiting={() => {
+                setIsLoadingStream(true);
+                setLoadingStatus('Đang tải video...');
+              }}
+              onPlaying={() => setIsLoadingStream(false)}
+              onTimeUpdate={handleTimeUpdate}
+              className="w-full h-full object-contain absolute inset-0"
+            />
+          )}
+
+          {/* Loading Overlay */}
+          {isLoadingStream && (
+            <div className="absolute inset-0 bg-black/75 z-30 flex flex-col items-center justify-center gap-2 pointer-events-none transition-opacity duration-300">
+              <div className="w-9 h-9 rounded-full border-2 border-cyan-500/20 border-t-cyan-400 animate-spin" />
+              <span className="text-[11px] font-semibold text-cyan-300 font-mono animate-pulse">
+                {loadingStatus}
+              </span>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* 2. PLAYBACK MODE SWITCHER BAR (EXPLICIT ON MOBILE) */}
+      <div className="bg-[#12151F] px-3 py-2 border-b border-white/5 flex items-center justify-between gap-2 overflow-x-auto no-scrollbar shrink-0">
+        <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider shrink-0">
+          Chế độ phát:
+        </span>
+
+        <div className="flex items-center gap-1.5 shrink-0">
+          {/* Option 1: Drive / Web Embed */}
+          {(isGoogleDrive || isYouTube) && (
+            <button
+              type="button"
+              onClick={() => {
+                sfx.playClick();
+                setPlaybackMode('embed');
+              }}
+              className={`px-2.5 py-1 rounded-lg text-xs font-bold flex items-center gap-1 transition-all ${
+                playbackMode === 'embed'
+                  ? 'bg-cyan-500 text-black shadow-md shadow-cyan-500/25'
+                  : 'bg-white/5 text-slate-400 hover:text-white border border-white/10'
+              }`}
+            >
+              <Globe className="w-3.5 h-3.5" />
+              <span>{isGoogleDrive ? 'Drive Preview' : 'YouTube Embed'}</span>
+            </button>
+          )}
+
+          {/* Option 2: Native HTML5 Direct Video */}
           <button
             type="button"
             onClick={() => {
               sfx.playClick();
-              onBack();
+              setPlaybackMode('direct');
             }}
-            className="w-9 h-9 rounded-full bg-black/80 hover:bg-black text-white backdrop-blur-md border border-white/20 flex items-center justify-center shadow-lg active:scale-95 transition-all"
-            title="Quay lại danh sách"
+            className={`px-2.5 py-1 rounded-lg text-xs font-bold flex items-center gap-1 transition-all ${
+              playbackMode === 'direct'
+                ? 'bg-cyan-500 text-black shadow-md shadow-cyan-500/25'
+                : 'bg-white/5 text-slate-400 hover:text-white border border-white/10'
+            }`}
           >
-            <ArrowLeft className="w-5 h-5" />
+            <Zap className="w-3.5 h-3.5" />
+            <span>Video HTML5</span>
           </button>
-        </div>
 
-        {/* Video Render Logic */}
-        {media.localFilePath && hasLocalElectronProxy ? (
-          <video
-            ref={videoRef}
-            src={`atom://${media.localFilePath}`}
-            controls
-            autoPlay
-            playsInline
-            preload="auto"
-            onCanPlay={() => setIsLoadingStream(false)}
-            onWaiting={() => {
-              setIsLoadingStream(true);
-              setLoadingStatus('Đang nạp thêm dữ liệu...');
-            }}
-            onPlaying={() => setIsLoadingStream(false)}
-            onTimeUpdate={handleTimeUpdate}
-            className="w-full h-full object-contain absolute inset-0"
-          />
-        ) : isYouTube ? (
-          <iframe
-            src={
-              parsed.embedUrl ||
-              `https://www.youtube-nocookie.com/embed/${parsed.id}?autoplay=1&rel=0&playsinline=1&enablejsapi=1`
-            }
-            title={media.title}
-            referrerPolicy="strict-origin-when-cross-origin"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-            allowFullScreen
-            onLoad={() => setIsLoadingStream(false)}
-            className="w-full h-full border-0 absolute inset-0"
-          />
-        ) : isGoogleDrive && playbackMode === 'proxy' && proxyUrl ? (
-          <video
-            ref={videoRef}
-            src={proxyUrl}
-            controls
-            autoPlay
-            playsInline
-            preload="auto"
-            onCanPlay={() => setIsLoadingStream(false)}
-            onWaiting={() => {
-              setIsLoadingStream(true);
-              setLoadingStatus('Đang nạp bộ đệm 16MB...');
-            }}
-            onPlaying={() => setIsLoadingStream(false)}
-            onTimeUpdate={handleTimeUpdate}
-            className="w-full h-full object-contain absolute inset-0"
-          />
-        ) : isGoogleDrive ? (
-          <iframe
-            src={driveEmbedUrl}
-            title={media.title}
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-            allowFullScreen
-            onLoad={() => setIsLoadingStream(false)}
-            className="w-full h-full border-0 absolute inset-0"
-          />
-        ) : (
-          <video
-            ref={videoRef}
-            src={parsed.directUrl || media.link}
-            controls
-            autoPlay
-            playsInline
-            preload="auto"
-            onCanPlay={() => setIsLoadingStream(false)}
-            onWaiting={() => {
-              setIsLoadingStream(true);
-              setLoadingStatus('Đang nạp thêm dữ liệu...');
-            }}
-            onPlaying={() => setIsLoadingStream(false)}
-            onTimeUpdate={handleTimeUpdate}
-            className="w-full h-full object-contain absolute inset-0"
-          />
-        )}
-
-        {/* Cinematic Loading Overlay (< 1.5s) */}
-        {isLoadingStream && (
-          <div className="absolute inset-0 bg-black/70 backdrop-blur-sm z-30 flex flex-col items-center justify-center gap-2.5 transition-opacity duration-300 pointer-events-none">
-            <div className="relative flex items-center justify-center">
-              <div className="w-10 h-10 rounded-full border-2 border-cyan-500/20 border-t-cyan-400 animate-spin" />
-              <Flame className="w-4 h-4 text-cyan-400 absolute animate-pulse" />
-            </div>
-            <span className="text-[11px] font-semibold text-cyan-300/90 tracking-wide font-mono animate-pulse">
-              {loadingStatus}
-            </span>
-          </div>
-        )}
-      </div>
-
-      {/* 2. PLAYBACK INFO BAR */}
-      <div className="bg-[#12141A] px-3.5 py-2 border-b border-white/5 flex items-center justify-between gap-2 shrink-0">
-        <span className="text-[11px] text-slate-400 font-semibold truncate">
-          {isGoogleDrive ? 'Google Drive Video' : isYouTube ? 'YouTube Streaming' : 'Direct Video'}
-        </span>
-
-        <div className="flex items-center gap-1.5 shrink-0">
+          {/* Option 3: PC Proxy VIP (if running with Electron) */}
           {hasLocalElectronProxy && isGoogleDrive && (
-            <>
-              <button
-                type="button"
-                onClick={() => setPlaybackMode('proxy')}
-                className={`px-2.5 py-1 rounded-md text-[10px] font-bold transition-all ${playbackMode === 'proxy'
-                    ? 'bg-amber-500 text-black shadow-sm'
-                    : 'bg-white/5 text-slate-400 hover:text-white border border-white/10'
-                  }`}
-              >
-                🚀 Proxy VIP
-              </button>
-              <button
-                type="button"
-                onClick={() => setPlaybackMode('direct')}
-                className={`px-2.5 py-1 rounded-md text-[10px] font-bold transition-all ${playbackMode === 'direct'
-                    ? 'bg-cyan-500 text-black shadow-sm'
-                    : 'bg-white/5 text-slate-400 hover:text-white border border-white/10'
-                  }`}
-              >
-                🌐 Drive Preview
-              </button>
-            </>
+            <button
+              type="button"
+              onClick={() => {
+                sfx.playClick();
+                setPlaybackMode('proxy');
+              }}
+              className={`px-2.5 py-1 rounded-lg text-xs font-bold flex items-center gap-1 transition-all ${
+                playbackMode === 'proxy'
+                  ? 'bg-amber-500 text-black shadow-md'
+                  : 'bg-white/5 text-slate-400 hover:text-white border border-white/10'
+              }`}
+            >
+              <span>🚀 Proxy VIP</span>
+            </button>
           )}
 
+          {/* Option 4: Open in External Browser / App */}
           <button
             type="button"
             onClick={() => window.open(media.link, '_blank')}
-            className="px-2.5 py-1 rounded-md text-[10px] font-bold bg-white/10 text-white/90 border border-white/10 flex items-center gap-1 hover:bg-white/20 transition-colors"
-            title="Mở trên trình duyệt ngoài"
+            className="px-2.5 py-1 rounded-lg text-xs font-bold bg-white/10 text-white/90 border border-white/10 flex items-center gap-1 hover:bg-white/20 transition-colors"
+            title="Mở trên trình duyệt ngoài hoặc ứng dụng"
           >
-            <ExternalLink className="w-3 h-3 text-cyan-400" />
+            <ExternalLink className="w-3.5 h-3.5 text-cyan-400" />
             <span>Mở ngoài</span>
           </button>
         </div>
@@ -352,10 +366,11 @@ export const MobileVideoTheaterView: React.FC<MobileVideoTheaterViewProps> = ({
                       sfx.playClick();
                       onSelectVideo(item);
                     }}
-                    className={`flex items-center gap-3 p-2 rounded-xl cursor-pointer transition-all border ${isCurrent
+                    className={`flex items-center gap-3 p-2 rounded-xl cursor-pointer transition-all border ${
+                      isCurrent
                         ? 'bg-cyan-500/20 border-cyan-500/50 text-white font-bold'
                         : 'bg-[#12151D] hover:bg-white/5 border-white/5 text-slate-300'
-                      }`}
+                    }`}
                   >
                     <div className="relative w-16 aspect-video rounded-lg overflow-hidden bg-black shrink-0">
                       <SafeImage

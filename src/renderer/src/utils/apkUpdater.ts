@@ -1,6 +1,6 @@
 import { registerPlugin } from '@capacitor/core';
 
-export const CURRENT_MOBILE_VERSION = '1.0.1';
+export const CURRENT_MOBILE_VERSION = '1.0.2';
 const GITHUB_REPO = 'NguyenDacTung/Icelauch';
 
 interface ApkInstallerPluginInterface {
@@ -125,3 +125,4 @@ export async function triggerApkDownloadAndInstall(
     return { success: true, message: 'Đang tải file APK qua trình duyệt...' };
   }
 }
+

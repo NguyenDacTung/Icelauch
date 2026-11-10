@@ -6,16 +6,16 @@ import {
   Search,
   X,
   Play,
-  Clock,
   Sparkles,
-  Plus,
-  Filter,
+  ChevronRight,
+  Flame,
 } from 'lucide-react';
 import type { MediaItem, MediaPlaylist, SectionBannerSettings } from '../../types';
 import { MobileHeroBanner } from './MobileHeroBanner';
 import { HorizontalScroller } from '../common/HorizontalScroller';
 import { MobileVideoTheaterView } from './MobileVideoTheaterView';
 import { SafeImage } from '../common/SafeImage';
+import { sfx } from '../../utils/sfx';
 
 interface MobileMediaViewProps {
   media: MediaItem[];
@@ -50,6 +50,7 @@ export const MobileMediaView: React.FC<MobileMediaViewProps> = ({
 }) => {
   const [mediaTab, setMediaTab] = useState<'video' | 'music' | 'podcast'>('video');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const [localSearch, setLocalSearch] = useState<string>('');
   const [localActiveTheaterMedia, setLocalActiveTheaterMedia] = useState<MediaItem | null>(null);
 
   const activeMedia = propActiveTheaterMedia !== undefined ? propActiveTheaterMedia : localActiveTheaterMedia;
@@ -64,7 +65,7 @@ export const MobileMediaView: React.FC<MobileMediaViewProps> = ({
 
   const currentList = mediaTab === 'video' ? videoList : mediaTab === 'music' ? musicList : podcastList;
 
-  // Extract categories
+  // Extract all categories
   const categories = Array.from(
     new Set(
       currentList
@@ -73,12 +74,14 @@ export const MobileMediaView: React.FC<MobileMediaViewProps> = ({
     )
   );
 
-  // Filtered by category and search
+  const effectiveSearch = (localSearch || searchQuery).trim().toLowerCase();
+
+  // Filtered list by category and search
   const filteredList = currentList.filter((m) => {
     const matchesSearch =
-      !searchQuery ||
-      m.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (m.category && m.category.toLowerCase().includes(searchQuery.toLowerCase()));
+      !effectiveSearch ||
+      m.title.toLowerCase().includes(effectiveSearch) ||
+      (m.category && m.category.toLowerCase().includes(effectiveSearch));
 
     const matchesCat =
       selectedCategory === 'all' ||
@@ -110,88 +113,117 @@ export const MobileMediaView: React.FC<MobileMediaViewProps> = ({
   }
 
   return (
-    <div className="flex-1 w-full h-full flex flex-col bg-[#0A0C10] select-none overflow-y-auto no-scrollbar p-3 space-y-3.5">
-      {/* 1. TOP SUB-NAV BAR (Active page shows icon + text, others icon only) */}
-      <div className="flex items-center justify-between gap-2 shrink-0">
-        <div className="flex items-center gap-1 bg-[#14171F] p-1 rounded-xl border border-ice-border/70">
-          <button
-            type="button"
-            onClick={() => {
-              setMediaTab('video');
-              setSelectedCategory('all');
-            }}
-            className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all ${
-              mediaTab === 'video'
-                ? 'bg-amber-500 text-black shadow-md'
-                : 'text-ice-subtext hover:text-white'
-            }`}
-            title="Phim & Video"
-          >
-            <Film className="w-4 h-4" />
-            {mediaTab === 'video' && <span>Phim</span>}
-          </button>
-
-          <button
-            type="button"
-            onClick={() => {
-              setMediaTab('music');
-              setSelectedCategory('all');
-            }}
-            className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all ${
-              mediaTab === 'music'
-                ? 'bg-amber-500 text-black shadow-md'
-                : 'text-ice-subtext hover:text-white'
-            }`}
-            title="Nhạc"
-          >
-            <Music className="w-4 h-4" />
-            {mediaTab === 'music' && <span>Nhạc</span>}
-          </button>
-
-          <button
-            type="button"
-            onClick={() => {
-              setMediaTab('podcast');
-              setSelectedCategory('all');
-            }}
-            className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all ${
-              mediaTab === 'podcast'
-                ? 'bg-amber-500 text-black shadow-md'
-                : 'text-ice-subtext hover:text-white'
-            }`}
-            title="Podcast & Audio"
-          >
-            <Radio className="w-4 h-4" />
-            {mediaTab === 'podcast' && <span>Audio</span>}
-          </button>
+    <div className="flex-1 w-full h-full flex flex-col bg-[#07090E] select-none overflow-y-auto no-scrollbar p-3.5 space-y-4">
+      {/* 1. TOP MOBILE SEARCH BAR & SUB-TABS */}
+      <div className="space-y-2.5 shrink-0 pt-1">
+        {/* Search Input */}
+        <div className="relative w-full">
+          <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+          <input
+            type="text"
+            value={localSearch}
+            onChange={(e) => setLocalSearch(e.target.value)}
+            placeholder={`Tìm kiếm ${mediaTab === 'video' ? 'phim & video' : mediaTab === 'music' ? 'bài hát' : 'podcast'}...`}
+            className="w-full h-10 pl-9.5 pr-8 rounded-2xl bg-[#141722] border border-white/10 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500/50 shadow-inner"
+          />
+          {localSearch && (
+            <button
+              type="button"
+              onClick={() => setLocalSearch('')}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white"
+            >
+              <X className="w-3.5 h-3.5" />
+            </button>
+          )}
         </div>
 
-        <span className="text-[11px] text-ice-subtext font-semibold">
-          {filteredList.length} mục
-        </span>
+        {/* Media Sub-Tabs (Phim, Nhạc, Audio) */}
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex items-center gap-1 bg-[#12151F] p-1 rounded-2xl border border-white/5">
+            <button
+              type="button"
+              onClick={() => {
+                sfx.playClick();
+                setMediaTab('video');
+                setSelectedCategory('all');
+              }}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
+                mediaTab === 'video'
+                  ? 'bg-cyan-500 text-black shadow-md'
+                  : 'text-slate-400 hover:text-white'
+              }`}
+            >
+              <Film className="w-3.5 h-3.5" />
+              <span>Phim</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                sfx.playClick();
+                setMediaTab('music');
+                setSelectedCategory('all');
+              }}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
+                mediaTab === 'music'
+                  ? 'bg-cyan-500 text-black shadow-md'
+                  : 'text-slate-400 hover:text-white'
+              }`}
+            >
+              <Music className="w-3.5 h-3.5" />
+              <span>Nhạc</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                sfx.playClick();
+                setMediaTab('podcast');
+                setSelectedCategory('all');
+              }}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
+                mediaTab === 'podcast'
+                  ? 'bg-cyan-500 text-black shadow-md'
+                  : 'text-slate-400 hover:text-white'
+              }`}
+            >
+              <Radio className="w-3.5 h-3.5" />
+              <span>Audio</span>
+            </button>
+          </div>
+
+          <span className="text-[11px] text-slate-400 font-semibold px-2">
+            {filteredList.length} mục
+          </span>
+        </div>
       </div>
 
-      {/* 2. MOBILE HERO BANNER (EXACT 16:9 CINEMATIC) */}
-      <MobileHeroBanner
-        items={currentList}
-        type="media"
-        bannerSettings={bannerSettings}
-        onPlayMedia={(item) => {
-          if (item.type === 'video') handleSetActiveMedia(item);
-          else onPlayAudio?.(item);
-        }}
-      />
+      {/* 2. MOBILE HERO BANNER (Only when not searching) */}
+      {!effectiveSearch && (
+        <MobileHeroBanner
+          items={currentList}
+          type="media"
+          bannerSettings={bannerSettings}
+          onPlayMedia={(item) => {
+            if (item.type === 'video') handleSetActiveMedia(item);
+            else onPlayAudio?.(item);
+          }}
+        />
+      )}
 
       {/* 3. CATEGORY FILTER CHIPS ROW */}
       {categories.length > 0 && (
         <HorizontalScroller className="gap-1.5 shrink-0" showButtons={false}>
           <button
             type="button"
-            onClick={() => setSelectedCategory('all')}
-            className={`px-3 py-1 rounded-full text-xs font-bold shrink-0 transition-all ${
+            onClick={() => {
+              sfx.playClick();
+              setSelectedCategory('all');
+            }}
+            className={`px-3 py-1.5 rounded-xl text-xs font-bold shrink-0 transition-all ${
               selectedCategory === 'all'
-                ? 'bg-white text-black shadow-sm'
-                : 'bg-white/5 text-ice-subtext hover:text-white border border-white/10'
+                ? 'bg-cyan-500 text-black shadow-sm'
+                : 'bg-white/5 text-slate-400 hover:text-white border border-white/5'
             }`}
           >
             Tất cả
@@ -200,11 +232,14 @@ export const MobileMediaView: React.FC<MobileMediaViewProps> = ({
             <button
               key={cat}
               type="button"
-              onClick={() => setSelectedCategory(cat)}
-              className={`px-3 py-1 rounded-full text-xs font-semibold shrink-0 transition-all ${
+              onClick={() => {
+                sfx.playClick();
+                setSelectedCategory(cat);
+              }}
+              className={`px-3 py-1.5 rounded-xl text-xs font-semibold shrink-0 transition-all ${
                 selectedCategory === cat
-                  ? 'bg-white text-black shadow-sm'
-                  : 'bg-white/5 text-ice-subtext hover:text-white border border-white/10'
+                  ? 'bg-cyan-500 text-black shadow-sm'
+                  : 'bg-white/5 text-slate-400 hover:text-white border border-white/5'
               }`}
             >
               {cat}
@@ -213,13 +248,16 @@ export const MobileMediaView: React.FC<MobileMediaViewProps> = ({
         </HorizontalScroller>
       )}
 
-      {/* 4. CONTINUE WATCHING (CAROUSEL WITH CHEVRONS, NO SCROLLBAR) */}
-      {mediaTab === 'video' && continueWatching.length > 0 && (
+      {/* 4. CONTINUE WATCHING (IF APPLICABLE) */}
+      {mediaTab === 'video' && !effectiveSearch && continueWatching.length > 0 && (
         <div className="space-y-2 shrink-0">
           <div className="flex items-center justify-between">
             <span className="text-xs font-black text-white flex items-center gap-1.5 uppercase tracking-wide">
-              <Clock className="w-3.5 h-3.5 text-amber-400" />
-              <span>Tiếp tục xem dở</span>
+              <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
+              <span>Tiếp Tục Xem</span>
+            </span>
+            <span className="text-[10px] text-slate-400 font-semibold">
+              {continueWatching.length} video
             </span>
           </div>
 
@@ -227,21 +265,24 @@ export const MobileMediaView: React.FC<MobileMediaViewProps> = ({
             {continueWatching.map((item) => (
               <div
                 key={item.id}
-                onClick={() => handleSetActiveMedia(item)}
-                className="w-44 aspect-video rounded-xl overflow-hidden bg-black border border-ice-border/70 relative shrink-0 cursor-pointer group shadow-md"
+                onClick={() => {
+                  sfx.playClick();
+                  handleSetActiveMedia(item);
+                }}
+                className="w-44 aspect-video rounded-2xl overflow-hidden bg-black border border-white/10 relative shrink-0 cursor-pointer group shadow-md active:scale-98 transition-all"
               >
                 <SafeImage
-                  src={item.coverPath || item.bannerPath || ''}
+                  src={item.coverPath || item.bannerPath}
                   alt={item.title}
                   title={item.title}
                   fallbackType="video"
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-transparent to-transparent flex flex-col justify-end p-2">
-                  <p className="text-[11px] font-bold text-white line-clamp-1">{item.title}</p>
+                <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-transparent to-transparent flex flex-col justify-end p-2.5">
+                  <p className="text-xs font-bold text-white line-clamp-1">{item.title}</p>
                 </div>
                 <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/40">
-                  <div className="w-8 h-8 rounded-full bg-amber-500 text-black flex items-center justify-center shadow-lg">
+                  <div className="w-9 h-9 rounded-full bg-cyan-500 text-black flex items-center justify-center shadow-lg">
                     <Play className="w-4 h-4 fill-black" />
                   </div>
                 </div>
@@ -251,14 +292,80 @@ export const MobileMediaView: React.FC<MobileMediaViewProps> = ({
         </div>
       )}
 
-      {/* 5. KHO PHIM / NHẠC TỔNG HỢP (LƯỚI 2 CỘT CHUẨN DI ĐỘNG) */}
-      <div className="space-y-2">
+      {/* 5. NETFLIX-STYLE GENRE ROWS (When tab is video & not searching & "all" category) */}
+      {mediaTab === 'video' && !effectiveSearch && selectedCategory === 'all' && categories.length > 0 && (
+        <div className="space-y-5">
+          {categories.slice(0, 4).map((cat) => {
+            const catVideos = videoList.filter(
+              (m) => m.category && m.category.toLowerCase().includes(cat.toLowerCase())
+            );
+            if (catVideos.length === 0) return null;
+
+            return (
+              <div key={cat} className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-black text-white flex items-center gap-1.5 uppercase tracking-wide">
+                    <Flame className="w-3.5 h-3.5 text-cyan-400" />
+                    <span>{cat}</span>
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      sfx.playClick();
+                      setSelectedCategory(cat);
+                    }}
+                    className="text-[10px] text-cyan-400 font-bold flex items-center gap-0.5 hover:underline"
+                  >
+                    Xem tất cả ({catVideos.length}) <ChevronRight className="w-3 h-3" />
+                  </button>
+                </div>
+
+                <HorizontalScroller className="gap-2.5" scrollStep={200}>
+                  {catVideos.map((item) => (
+                    <div
+                      key={item.id}
+                      onClick={() => {
+                        sfx.playClick();
+                        handleSetActiveMedia(item);
+                      }}
+                      className="w-36 aspect-[2/3] rounded-2xl overflow-hidden bg-[#12151F] border border-white/10 relative shrink-0 cursor-pointer group shadow-md active:scale-98 transition-all flex flex-col"
+                    >
+                      <div className="relative w-full h-full bg-black">
+                        <SafeImage
+                          src={item.coverPath || item.bannerPath}
+                          alt={item.title}
+                          title={item.title}
+                          fallbackType="video"
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-transparent to-transparent flex flex-col justify-end p-2">
+                          <p className="text-xs font-bold text-white line-clamp-1">{item.title}</p>
+                          <span className="text-[9px] text-cyan-300/80">{cat}</span>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </HorizontalScroller>
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      {/* 6. TOÀN BỘ KHO PHIM / NHẠC (LƯỚI 2 CỘT CHUẨN DI ĐỘNG) */}
+      <div className="space-y-2 pb-6">
         <div className="flex items-center justify-between">
           <span className="text-xs font-black text-white flex items-center gap-1.5 uppercase tracking-wide">
-            <Film className="w-3.5 h-3.5 text-ice-accent" />
-            <span>Kho {mediaTab === 'video' ? 'Phim' : mediaTab === 'music' ? 'Bài Hát' : 'Podcast & Audio'} Tổng Hợp</span>
+            <Film className="w-3.5 h-3.5 text-cyan-400" />
+            <span>
+              {effectiveSearch
+                ? `Kết quả tìm kiếm (${filteredList.length})`
+                : selectedCategory !== 'all'
+                ? `Danh Mục: ${selectedCategory} (${filteredList.length})`
+                : `Toàn Bộ Kho ${mediaTab === 'video' ? 'Phim' : mediaTab === 'music' ? 'Bài Hát' : 'Audio'}`}
+            </span>
           </span>
-          <span className="text-[10px] text-ice-subtext font-semibold">Lưới 2 cột</span>
+          <span className="text-[10px] text-slate-400 font-semibold">Lưới 2 cột</span>
         </div>
 
         {filteredList.length > 0 ? (
@@ -267,49 +374,54 @@ export const MobileMediaView: React.FC<MobileMediaViewProps> = ({
               <div
                 key={item.id}
                 onClick={() => {
+                  sfx.playClick();
                   if (item.type === 'video') handleSetActiveMedia(item);
                   else onPlayAudio?.(item);
                 }}
-                className="rounded-xl overflow-hidden bg-[#14171F] border border-ice-border/70 cursor-pointer group hover:border-amber-400/50 transition-all shadow-md flex flex-col"
+                className="rounded-2xl overflow-hidden bg-[#12151F] border border-white/10 cursor-pointer group hover:border-cyan-500/50 transition-all shadow-md flex flex-col active:scale-98"
               >
                 {/* 16:9 Thumbnail Poster */}
                 <div className="relative aspect-video w-full bg-black overflow-hidden">
                   <SafeImage
-                    src={item.coverPath || item.bannerPath || ''}
+                    src={item.coverPath || item.bannerPath}
                     alt={item.title}
                     title={item.title}
-                    fallbackType="video"
+                    fallbackType={item.type === 'audio' ? 'audio' : 'video'}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                   />
                   <div className="absolute top-1.5 right-1.5 flex items-center gap-1">
                     {item.tags && item.tags.length > 0 && (
-                      <span className="px-1.5 py-0.2 rounded text-[8px] font-black bg-black/75 text-amber-300 border border-amber-400/30">
+                      <span className="px-1.5 py-0.2 rounded text-[8px] font-black bg-black/75 text-cyan-300 border border-cyan-400/30">
                         {item.tags[0]}
                       </span>
                     )}
                   </div>
-                  <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                    <div className="w-7 h-7 rounded-full bg-amber-500 text-black flex items-center justify-center shadow-lg">
-                      <Play className="w-3.5 h-3.5 fill-black" />
-                    </div>
-                  </div>
                 </div>
 
-                {/* Card Info */}
-                <div className="p-2 space-y-0.5 flex-1 flex flex-col justify-between">
-                  <h4 className="text-xs font-bold text-white line-clamp-1 group-hover:text-amber-400 transition-colors">
-                    {item.title}
-                  </h4>
-                  <div className="flex items-center justify-between text-[10px] text-ice-subtext">
-                    <span className="line-clamp-1">{item.category || 'Giải trí'}</span>
+                {/* Info */}
+                <div className="p-2.5 flex-1 flex flex-col justify-between space-y-1">
+                  <div>
+                    <h4 className="text-xs font-bold text-white line-clamp-1 group-hover:text-cyan-400 transition-colors">
+                      {item.title}
+                    </h4>
+                    <span className="text-[10px] text-slate-400 line-clamp-1">
+                      {item.category || (item.type === 'video' ? 'Phim' : 'Nhạc')}
+                    </span>
+                  </div>
+                  <div className="pt-1 flex items-center justify-between text-[10px] text-cyan-400 font-semibold">
+                    <span>{item.type === 'video' ? 'Xem ngay' : 'Phát nhạc'}</span>
+                    <Play className="w-3 h-3 fill-current" />
                   </div>
                 </div>
               </div>
             ))}
           </div>
         ) : (
-          <div className="p-8 text-center text-xs text-ice-subtext">
-            Không tìm thấy phim hoặc bài hát phù hợp
+          <div className="py-12 flex flex-col items-center justify-center text-center space-y-2">
+            <span className="text-sm font-bold text-white">Không tìm thấy nội dung phù hợp</span>
+            <p className="text-xs text-slate-400 max-w-[240px]">
+              Vui lòng thử từ khóa khác hoặc chọn &quot;Tất cả&quot; thể loại.
+            </p>
           </div>
         )}
       </div>

@@ -3,11 +3,10 @@ import {
   Bookmark,
   Gamepad2,
   Film,
+  Music,
   Search,
   Plus,
-  Trash2,
-  ExternalLink,
-  Sparkles,
+  Play,
   User,
   LogIn,
   ChevronRight,
@@ -29,6 +28,7 @@ interface MobileLibraryViewProps {
   onOpenFolder?: (id: string) => void;
   onToggleLibrary?: (id: string) => void;
   onSelectMedia?: (media: MediaItem) => void;
+  onPlayAudio?: (track: MediaItem) => void;
   onSwitchProfile?: () => void;
   onNavigateTab?: (tab: NavigationTab) => void;
 }
@@ -36,17 +36,16 @@ interface MobileLibraryViewProps {
 export const MobileLibraryView: React.FC<MobileLibraryViewProps> = ({
   games,
   allMedia = [],
-  isAdmin,
   activeProfile,
   userLibraryIds = [],
   onSelectGame,
-  onIncompatibleClick,
   onToggleLibrary,
   onSelectMedia,
+  onPlayAudio,
   onSwitchProfile,
   onNavigateTab,
 }) => {
-  const [activeSubTab, setActiveSubTab] = useState<'games' | 'media'>('games');
+  const [activeSubTab, setActiveSubTab] = useState<'games' | 'videos' | 'audio'>('games');
   const [searchQuery, setSearchQuery] = useState('');
 
   // 1. Resolve Personal User Library (Strict: DO NOT fallback to all games!)
@@ -54,21 +53,23 @@ export const MobileLibraryView: React.FC<MobileLibraryViewProps> = ({
   const profileMediaIds = activeProfile?.favoriteMedia || [];
 
   const libraryGames = games.filter((g) => profileLibraryIds.includes(g.id));
-  const libraryMedia = allMedia.filter((m) => profileMediaIds.includes(m.id));
-
-  // Filtered by search
-  const filteredGames = libraryGames.filter((g) =>
-    g.name.toLowerCase().includes(searchQuery.toLowerCase().trim())
+  const libraryVideos = allMedia.filter(
+    (m) => m.type === 'video' && profileMediaIds.includes(m.id)
+  );
+  const libraryAudios = allMedia.filter(
+    (m) => m.type === 'audio' && (profileMediaIds.includes(m.id) || profileLibraryIds.includes(m.id))
   );
 
-  const filteredMedia = libraryMedia.filter((m) =>
-    m.title.toLowerCase().includes(searchQuery.toLowerCase().trim())
-  );
+  const q = searchQuery.toLowerCase().trim();
+
+  const filteredGames = libraryGames.filter((g) => g.name.toLowerCase().includes(q));
+  const filteredVideos = libraryVideos.filter((m) => m.title.toLowerCase().includes(q));
+  const filteredAudios = libraryAudios.filter((m) => m.title.toLowerCase().includes(q));
 
   return (
-    <div className="flex-1 w-full h-full flex flex-col bg-[#0A0C10] select-none overflow-hidden relative">
+    <div className="flex-1 w-full h-full flex flex-col bg-[#07090E] select-none overflow-hidden relative">
       {/* 1. TOP MOBILE HEADER */}
-      <header className="px-4 pt-3 pb-2.5 bg-[#10131B]/80 backdrop-blur-md border-b border-white/5 flex flex-col gap-2 shrink-0">
+      <header className="px-4 pt-3 pb-2.5 bg-[#12151F] border-b border-white/5 flex flex-col gap-2.5 shrink-0">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-xl bg-cyan-500/15 border border-cyan-500/30 flex items-center justify-center text-cyan-400">
@@ -82,7 +83,7 @@ export const MobileLibraryView: React.FC<MobileLibraryViewProps> = ({
             </div>
           </div>
 
-          {/* Sub-tab pills */}
+          {/* Sub-tab pills: Game, Phim, Nhạc */}
           <div className="flex items-center bg-black/40 p-1 rounded-xl border border-white/5">
             <button
               type="button"
@@ -90,33 +91,52 @@ export const MobileLibraryView: React.FC<MobileLibraryViewProps> = ({
                 sfx.playClick();
                 setActiveSubTab('games');
               }}
-              className={`flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-bold transition-all ${activeSubTab === 'games'
+              className={`flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-bold transition-all ${
+                activeSubTab === 'games'
                   ? 'bg-cyan-500 text-black shadow-md'
                   : 'text-slate-400 hover:text-white'
-                }`}
+              }`}
             >
               <Gamepad2 className="w-3.5 h-3.5" />
               <span>Game ({libraryGames.length})</span>
             </button>
+
             <button
               type="button"
               onClick={() => {
                 sfx.playClick();
-                setActiveSubTab('media');
+                setActiveSubTab('videos');
               }}
-              className={`flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-bold transition-all ${activeSubTab === 'media'
+              className={`flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-bold transition-all ${
+                activeSubTab === 'videos'
                   ? 'bg-cyan-500 text-black shadow-md'
                   : 'text-slate-400 hover:text-white'
-                }`}
+              }`}
             >
               <Film className="w-3.5 h-3.5" />
-              <span>Phim ({libraryMedia.length})</span>
+              <span>Phim ({libraryVideos.length})</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                sfx.playClick();
+                setActiveSubTab('audio');
+              }}
+              className={`flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-bold transition-all ${
+                activeSubTab === 'audio'
+                  ? 'bg-cyan-500 text-black shadow-md'
+                  : 'text-slate-400 hover:text-white'
+              }`}
+            >
+              <Music className="w-3.5 h-3.5" />
+              <span>Nhạc ({libraryAudios.length})</span>
             </button>
           </div>
         </div>
 
         {/* Search input (only when there are items) */}
-        {(libraryGames.length > 0 || libraryMedia.length > 0) && (
+        {(libraryGames.length > 0 || libraryVideos.length > 0 || libraryAudios.length > 0) && (
           <div className="relative w-full">
             <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
             <input
@@ -124,7 +144,7 @@ export const MobileLibraryView: React.FC<MobileLibraryViewProps> = ({
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Tìm kiếm trong thư viện của bạn..."
-              className="w-full h-8 pl-8 pr-3 rounded-lg bg-black/30 border border-white/10 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500/50"
+              className="w-full h-8 pl-8 pr-3 rounded-xl bg-black/40 border border-white/10 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500/50"
             />
           </div>
         )}
@@ -141,7 +161,7 @@ export const MobileLibraryView: React.FC<MobileLibraryViewProps> = ({
             <div className="space-y-1">
               <h2 className="text-sm font-black text-white">Bạn Đang Ở Chế Độ Khách</h2>
               <p className="text-xs text-slate-300 max-w-[280px]">
-                Hãy đăng nhập hoặc chọn hồ sơ để lưu trữ và đồng bộ Thư viện Game & Phim yêu thích của riêng bạn.
+                Hãy đăng nhập hoặc chọn hồ sơ để lưu trữ và đồng bộ Thư viện Game, Phim & Nhạc yêu thích của riêng bạn.
               </p>
             </div>
             {onSwitchProfile && (
@@ -256,12 +276,12 @@ export const MobileLibraryView: React.FC<MobileLibraryViewProps> = ({
           </>
         )}
 
-        {/* CASE C: MEDIA TAB */}
-        {activeSubTab === 'media' && (
+        {/* CASE C: VIDEOS TAB */}
+        {activeSubTab === 'videos' && (
           <>
-            {filteredMedia.length > 0 ? (
+            {filteredVideos.length > 0 ? (
               <div className="grid grid-cols-2 gap-3 pb-6">
-                {filteredMedia.map((item) => (
+                {filteredVideos.map((item) => (
                   <div
                     key={item.id}
                     onClick={() => {
@@ -285,7 +305,7 @@ export const MobileLibraryView: React.FC<MobileLibraryViewProps> = ({
                         {item.title}
                       </h3>
                       <p className="text-[10px] text-slate-400 line-clamp-1 mt-0.5">
-                        {item.category || 'Video'}
+                        {item.category || 'Phim & Video'}
                       </p>
                     </div>
                   </div>
@@ -313,6 +333,70 @@ export const MobileLibraryView: React.FC<MobileLibraryViewProps> = ({
                   >
                     <Plus className="w-3.5 h-3.5" />
                     <span>Duyệt Mục Giải Trí</span>
+                  </button>
+                )}
+              </div>
+            )}
+          </>
+        )}
+
+        {/* CASE D: AUDIO TAB */}
+        {activeSubTab === 'audio' && (
+          <>
+            {filteredAudios.length > 0 ? (
+              <div className="space-y-2 pb-6">
+                {filteredAudios.map((item) => (
+                  <div
+                    key={item.id}
+                    onClick={() => {
+                      sfx.playClick();
+                      onPlayAudio?.(item);
+                    }}
+                    className="flex items-center gap-3 p-3 rounded-2xl bg-[#12151D] hover:bg-[#181B26] border border-white/5 cursor-pointer transition-all active:scale-98"
+                  >
+                    <div className="w-12 h-12 rounded-xl overflow-hidden bg-black shrink-0 relative">
+                      <SafeImage
+                        src={item.coverPath || item.bannerPath}
+                        alt={item.title}
+                        title={item.title}
+                        fallbackType="audio"
+                        className="w-full h-full object-cover"
+                      />
+                      <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+                        <Play className="w-4 h-4 fill-cyan-400 text-cyan-400" />
+                      </div>
+                    </div>
+                    <div className="flex-1 min-w-0 space-y-0.5">
+                      <h4 className="text-xs font-bold text-white line-clamp-1">{item.title}</h4>
+                      <p className="text-[10px] text-slate-400 line-clamp-1">
+                        {item.category || item.subType || 'Audio'}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="py-12 flex flex-col items-center justify-center text-center space-y-3">
+                <div className="w-14 h-14 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-slate-500">
+                  <Music className="w-7 h-7" />
+                </div>
+                <div className="space-y-1">
+                  <h3 className="text-sm font-bold text-white">Chưa Có Bài Hát Yêu Thích</h3>
+                  <p className="text-xs text-slate-400 max-w-[260px]">
+                    Hãy vào mục Giải Trí và chọn tab Nhạc để thưởng thức các bản nhạc phong phú!
+                  </p>
+                </div>
+                {onNavigateTab && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      sfx.playClick();
+                      onNavigateTab('media');
+                    }}
+                    className="px-4 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-bold flex items-center gap-1.5 transition-all"
+                  >
+                    <Plus className="w-3.5 h-3.5" />
+                    <span>Duyệt Nhạc & Podcast</span>
                   </button>
                 )}
               </div>

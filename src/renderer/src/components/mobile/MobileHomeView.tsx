@@ -1,9 +1,10 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   Gamepad2,
   Sparkles,
   Monitor,
   Search,
+  X,
   Shuffle,
   Bookmark,
   BookmarkCheck,
@@ -37,12 +38,14 @@ export const MobileHomeView: React.FC<MobileHomeViewProps> = ({
   onToggleLibrary,
   onOpenSurprise,
 }) => {
+  const [localSearch, setLocalSearch] = useState('');
   const visibleGames = games.filter((g) => !g.hidden);
 
+  const effectiveSearch = (localSearch || searchQuery).trim().toLowerCase();
+
   const filteredGames = visibleGames.filter((g) => {
-    if (!searchQuery) return true;
-    const q = searchQuery.toLowerCase();
-    return g.name.toLowerCase().includes(q) || (g.genre && g.genre.toLowerCase().includes(q));
+    if (!effectiveSearch) return true;
+    return g.name.toLowerCase().includes(effectiveSearch) || (g.genre && g.genre.toLowerCase().includes(effectiveSearch));
   });
 
   const featuredGames = visibleGames.filter((g) => g.featured || g.status === 'ready');
@@ -55,16 +58,39 @@ export const MobileHomeView: React.FC<MobileHomeViewProps> = ({
   };
 
   return (
-    <div className="flex-1 w-full h-full flex flex-col bg-[#0A0C10] select-none overflow-y-auto no-scrollbar p-3 space-y-3.5">
-      {/* 1. MOBILE HERO BANNER (EXACT 16:9 CINEMATIC) */}
-      <MobileHeroBanner
-        items={visibleGames}
-        type="game"
-        bannerSettings={settings?.bannerSettings?.games}
-        onSelectGame={onSelectGame}
-        onIncompatibleClick={onIncompatibleClick}
-        onToggleLibrary={onToggleLibrary}
-      />
+    <div className="flex-1 w-full h-full flex flex-col bg-[#07090E] select-none overflow-y-auto no-scrollbar p-3.5 space-y-4">
+      {/* 0. TOP MOBILE SEARCH INPUT */}
+      <div className="relative w-full pt-1">
+        <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+        <input
+          type="text"
+          value={localSearch}
+          onChange={(e) => setLocalSearch(e.target.value)}
+          placeholder="Tìm kiếm trong kho Game PC..."
+          className="w-full h-10 pl-9.5 pr-8 rounded-2xl bg-[#141722] border border-white/10 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500/50 shadow-inner"
+        />
+        {localSearch && (
+          <button
+            type="button"
+            onClick={() => setLocalSearch('')}
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white"
+          >
+            <X className="w-3.5 h-3.5" />
+          </button>
+        )}
+      </div>
+
+      {/* 1. MOBILE HERO BANNER (EXACT 16:9 CINEMATIC) - Only when not searching */}
+      {!effectiveSearch && (
+        <MobileHeroBanner
+          items={visibleGames}
+          type="game"
+          bannerSettings={settings?.bannerSettings?.games}
+          onSelectGame={onSelectGame}
+          onIncompatibleClick={onIncompatibleClick}
+          onToggleLibrary={onToggleLibrary}
+        />
+      )}
 
       {/* 2. FEATURED GAMES (CAROUSEL WITH CHEVRONS, NO SCROLLBAR) */}
       {featuredGames.length > 0 && (
