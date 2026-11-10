@@ -27,6 +27,15 @@ export interface MobileUpdateInfo {
   apkUrl: string;
 }
 
+export interface TVUpdateInfo {
+  updateAvailable: boolean;
+  currentVersion: string;
+  latestVersion: string;
+  releaseName: string;
+  releaseNotes: string;
+  apkUrl: string;
+}
+
 // Compare semantic version strings (e.g. "1.0.3" vs "1.0.2")
 function isNewerVersion(remote: string, current: string): boolean {
   const cleanRemote = remote.replace(/^(v|phone-v|tv-v)/i, '').trim();
@@ -100,6 +109,83 @@ export async function checkMobileUpdate(): Promise<MobileUpdateInfo> {
       updateAvailable: false,
       currentVersion: CURRENT_MOBILE_VERSION,
       latestVersion: CURRENT_MOBILE_VERSION,
+      releaseName: '',
+      releaseNotes: '',
+      apkUrl: '',
+    };
+  }
+}
+
+export async function checkTVUpdate(): Promise<TVUpdateInfo> {
+  try {
+    const res = await fetch(`https://api.github.com/repos/${GITHUB_REPO}/releases?per_page=10`, {
+      headers: {
+        Accept: 'application/vnd.github.v3+json',
+      },
+      cache: 'no-store',
+    });
+
+    if (!res.ok) {
+      throw new Error(`GitHub API HTTP ${res.status}`);
+    }
+
+    const releases = await res.json();
+    if (!Array.isArray(releases) || releases.length === 0) {
+      throw new Error('No releases found');
+    }
+
+    // 1. Look for releases with dedicated TV tag first (e.g. tv-v1.0.1)
+    let tvRelease = releases.find((r: any) =>
+      (r.tag_name || '').toLowerCase().includes('tv')
+    );
+
+    // 2. If no dedicated tv tag, look for any release containing Icelauch-tv.apk
+    if (!tvRelease) {
+      tvRelease = releases.find((r: any) =>
+        r.assets?.some((a: any) => a.name === 'Icelauch-tv.apk' || a.name.includes('-tv.apk'))
+      );
+    }
+
+    // 3. Fallback to latest release if it contains any apk
+    if (!tvRelease) {
+      tvRelease = releases.find((r: any) =>
+        r.assets?.some((a: any) => a.name.endsWith('.apk'))
+      ) || releases[0];
+    }
+
+    const tag = (tvRelease.tag_name || '')
+      .replace(/^(v|phone-v|tv-v)/i, '')
+      .trim();
+
+    const updateAvailable = isNewerVersion(tag, CURRENT_TV_VERSION);
+
+    // Look for dedicated Icelauch-tv.apk first, fallback to universal
+    const tvAsset = tvRelease.assets?.find(
+      (a: any) => a.name === 'Icelauch-tv.apk' || a.name.includes('-tv.apk')
+    );
+    const universalAsset = tvRelease.assets?.find(
+      (a: any) => a.name === 'Icelauch-universal.apk' || a.name.endsWith('.apk')
+    );
+
+    const apkUrl =
+      tvAsset?.browser_download_url ||
+      universalAsset?.browser_download_url ||
+      `https://github.com/${GITHUB_REPO}/releases/download/${tvRelease.tag_name}/Icelauch-tv.apk`;
+
+    return {
+      updateAvailable,
+      currentVersion: CURRENT_TV_VERSION,
+      latestVersion: tag || CURRENT_TV_VERSION,
+      releaseName: tvRelease.name || `Bản Cập Nhật Android TV v${tag}`,
+      releaseNotes: tvRelease.body || '',
+      apkUrl,
+    };
+  } catch (err: any) {
+    console.warn('[ApkUpdater] Check TV update error:', err);
+    return {
+      updateAvailable: false,
+      currentVersion: CURRENT_TV_VERSION,
+      latestVersion: CURRENT_TV_VERSION,
       releaseName: '',
       releaseNotes: '',
       apkUrl: '',

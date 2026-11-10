@@ -19,6 +19,8 @@ import {
 import type { AppSettings, CloudSyncSettings, UserProfile } from '../../types';
 import { AvatarBadge } from '../common/AvatarBadge';
 import { sfx } from '../../utils/sfx';
+import { checkTVUpdate, CURRENT_TV_VERSION, type TVUpdateInfo } from '../../utils/apkUpdater';
+import { TVUpdateModal } from './TVUpdateModal';
 
 export interface TVSettingsViewProps {
   settings: AppSettings;
@@ -55,6 +57,8 @@ export const TVSettingsView: React.FC<TVSettingsViewProps> = ({
   // OTA Update state
   const [isCheckingUpdate, setIsCheckingUpdate] = useState(false);
   const [updateMsg, setUpdateMsg] = useState<string | null>(null);
+  const [tvUpdateInfo, setTvUpdateInfo] = useState<TVUpdateInfo | null>(null);
+  const [showTVUpdateModal, setShowTVUpdateModal] = useState(false);
 
   const handleSyncNow = async () => {
     sfx.playClick();
@@ -107,7 +111,7 @@ export const TVSettingsView: React.FC<TVSettingsViewProps> = ({
   const handleCheckUpdate = async () => {
     sfx.playClick();
     setIsCheckingUpdate(true);
-    setUpdateMsg('Đang kiểm tra từ máy chủ...');
+    setUpdateMsg('Đang kiểm tra từ máy chủ GitHub Release...');
     try {
       if (window.api?.checkUpdates) {
         const res = await window.api.checkUpdates();
@@ -115,17 +119,20 @@ export const TVSettingsView: React.FC<TVSettingsViewProps> = ({
           if (res.version) {
             setUpdateMsg(`Có bản mới v${res.version}!`);
           } else {
-            setUpdateMsg('Bạn đang ở phiên bản mới nhất v1.0.0.');
+            setUpdateMsg(`Bạn đang ở phiên bản mới nhất v${CURRENT_TV_VERSION}.`);
           }
         } else {
           setUpdateMsg(res?.error || 'Bạn đang ở phiên bản mới nhất.');
         }
       } else {
-        setTimeout(() => {
-          setUpdateMsg('Bạn đang ở phiên bản TV mới nhất (v1.0.0).');
-          setIsCheckingUpdate(false);
-        }, 1200);
-        return;
+        const info = await checkTVUpdate();
+        if (info.updateAvailable) {
+          setTvUpdateInfo(info);
+          setShowTVUpdateModal(true);
+          setUpdateMsg(`Đã tìm thấy bản cập nhật TV v${info.latestVersion}!`);
+        } else {
+          setUpdateMsg(`Bạn đang ở phiên bản TV mới nhất (v${CURRENT_TV_VERSION}). Không có bản cập nhật mới.`);
+        }
       }
     } catch (err: any) {
       setUpdateMsg(`Lỗi kết nối: ${err?.message || 'Lỗi mạng'}`);
@@ -454,6 +461,13 @@ export const TVSettingsView: React.FC<TVSettingsViewProps> = ({
           <span>{isCheckingUpdate ? 'Đang kiểm tra...' : 'Kiểm Tra Cập Nhật OTA'}</span>
         </button>
       </div>
+
+      {/* TV OTA Update Modal */}
+      <TVUpdateModal
+        isOpen={showTVUpdateModal}
+        updateInfo={tvUpdateInfo}
+        onClose={() => setShowTVUpdateModal(false)}
+      />
     </div>
   );
 };

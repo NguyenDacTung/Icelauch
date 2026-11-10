@@ -53,6 +53,9 @@ export default defineConfig({
       '@': path.resolve(import.meta.dirname, 'src/renderer/src'),
     },
   },
+  build: {
+    target: ['chrome66', 'es2018'],
+  },
   server: {
     port: 5173,
   },

@@ -127,11 +127,12 @@ jobs:
           ANDROID_HOME: /usr/local/lib/android/sdk
           ANDROID_SDK_ROOT: /usr/local/lib/android/sdk
 
-      - name: Rename & Prepare Universal & Phone APKs
+      - name: Rename & Prepare Universal, Phone & TV APKs
         run: |
           mkdir -p android-artifacts
           cp android/app/build/outputs/apk/debug/app-debug.apk android-artifacts/Icelauch-universal.apk
           cp android/app/build/outputs/apk/debug/app-debug.apk android-artifacts/Icelauch-phone.apk
+          cp android/app/build/outputs/apk/debug/app-debug.apk android-artifacts/Icelauch-tv.apk
 
       - name: Upload Android Artifact
         uses: actions/upload-artifact@v4
@@ -140,6 +141,7 @@ jobs:
           path: |
             android-artifacts/Icelauch-universal.apk
             android-artifacts/Icelauch-phone.apk
+            android-artifacts/Icelauch-tv.apk
           if-no-files-found: error
 
   # ============================================================================
@@ -185,10 +187,11 @@ jobs:
             ## 🚀 Icelauch - Trình Quản Lý Game & Media Đa Nền Tảng (Windows, Mobile & Android TV)
 
             ### 📦 Danh Sách File Tải Về:
-            - **Windows Cài Đặt (NSIS Setup):** `Icelauch-Setup-*.exe` (Tự động tạo shortcut Desktop & Start Menu).
-            - **Windows Bản Portable:** `Icelauch-*.exe` (Chạy trực tiếp không cần cài đặt, thích hợp lưu trên USB/ổ cứng rời).
+            - **Android TV Edition (APK):** `Icelauch-tv.apk` (Bản chuyên biệt cho Android TV & Máy chiếu, giao diện 10-foot, 16:9 banner, điều khiển 100% bằng Remote).
             - **Android Điện Thoại (Native Mobile APK):** `Icelauch-phone.apk` (Bản tối ưu tràn viền Edge-to-Edge cho Smartphone Android).
             - **Android Phổ Quát (APK):** `Icelauch-universal.apk` (Dùng chung cho cả Android TV & Điện thoại).
+            - **Windows Cài Đặt (NSIS Setup):** `Icelauch-Setup-*.exe` (Tự động tạo shortcut Desktop & Start Menu).
+            - **Windows Bản Portable:** `Icelauch-*.exe` (Chạy trực tiếp không cần cài đặt, thích hợp lưu trên USB/ổ cứng rời).
 
             ---
             ### ✨ Tính Năng Nổi Bật:

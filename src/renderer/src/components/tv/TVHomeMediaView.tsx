@@ -94,9 +94,9 @@ export const TVHomeMediaView: React.FC<TVHomeMediaViewProps> = ({
 
   return (
     <div className="flex-1 overflow-y-auto no-scrollbar p-6 space-y-8 select-none">
-      {/* 1. EXACT 16:9 NETFLIX-STYLE TV HERO BANNER (Height ~52% screen for peek-through) */}
+      {/* 1. EXACT 16:9 NETFLIX-STYLE TV HERO BANNER */}
       {activeHero && (
-        <div className="relative w-full aspect-video max-h-[52vh] rounded-3xl overflow-hidden border border-white/10 shadow-2xl bg-[#0E1118] group/banner flex items-end p-8">
+        <div className="relative w-full aspect-video rounded-3xl overflow-hidden border border-white/10 shadow-2xl bg-[#0E1118] group/banner flex items-end p-8 sm:p-10">
           {/* Background: Auto-preview Trailer (Muted) or 16:9 Artwork */}
           {showTrailerPreview && isYouTubeHero ? (
             <iframe

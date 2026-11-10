@@ -2,6 +2,7 @@
   "appId": "com.icelauch.app",
   "appName": "Icelauch",
   "webDir": "dist",
+  "backgroundColor": "#07090e",
   "server": {
     "androidScheme": "https",
     "cleartext": true
@@ -9,7 +10,8 @@
   "android": {
     "allowMixedContent": true,
     "captureInput": true,
-    "webContentsDebuggingEnabled": false
+    "webContentsDebuggingEnabled": false,
+    "backgroundColor": "#07090e"
   }
 }
 

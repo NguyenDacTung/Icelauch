@@ -32,12 +32,13 @@ import { MobileGameDetailView } from './components/mobile/MobileGameDetailView';
 import { MobileSettingsView } from './components/mobile/MobileSettingsView';
 import { MobileVinylPlayerModal } from './components/mobile/MobileVinylPlayerModal';
 import { MobileUpdateModal } from './components/mobile/MobileUpdateModal';
-import { checkMobileUpdate, type MobileUpdateInfo } from './utils/apkUpdater';
+import { checkMobileUpdate, checkTVUpdate, type MobileUpdateInfo, type TVUpdateInfo } from './utils/apkUpdater';
 import { DeviceTVFrame } from './components/tv/DeviceTVFrame';
 import { TVHomeMediaView } from './components/tv/TVHomeMediaView';
 import { TVGameView } from './components/tv/TVGameView';
 import { TVVideoTheaterView } from './components/tv/TVVideoTheaterView';
 import { TVSettingsView } from './components/tv/TVSettingsView';
+import { TVUpdateModal } from './components/tv/TVUpdateModal';
 import { DeviceSelectionModal } from './components/common/DeviceSelectionModal';
 import {
   isElectron,
@@ -117,12 +118,8 @@ export default function App() {
   // Cross-Platform & Device Simulator State
   const [simulatedDevice, setSimulatedDevice] = useState<DeviceType>('windows_pc');
   const [devicePreference, setDevicePreference] = useState<DeviceType | null>(() => getStoredDevicePreference());
-  const [isDeviceModalOpen, setIsDeviceModalOpen] = useState<boolean>(() => {
-    if (!isElectron() && isAndroidPlatform() && !hasPromptedDeviceChoice()) {
-      return true;
-    }
-    return false;
-  });
+  // Never block startup with device selection modal
+  const [isDeviceModalOpen, setIsDeviceModalOpen] = useState<boolean>(false);
   const [incompatibleGame, setIncompatibleGame] = useState<Game | null>(null);
 
   const effectiveDevice: DeviceType = isAdmin
@@ -135,10 +132,25 @@ export default function App() {
   const [mobileTheaterMedia, setMobileTheaterMedia] = useState<MediaItem | null>(null);
   const [mobileUpdateInfo, setMobileUpdateInfo] = useState<MobileUpdateInfo | null>(null);
   const [isMobileUpdateModalOpen, setIsMobileUpdateModalOpen] = useState(false);
+  const [tvUpdateInfo, setTvUpdateInfo] = useState<TVUpdateInfo | null>(null);
+  const [isTVUpdateModalOpen, setIsTVUpdateModalOpen] = useState(false);
 
   useEffect(() => {
-    // Check mobile APK update silently on startup if on Android
-    if (isMobileOrTvNative || effectiveDevice === 'android_mobile') {
+    // Check update silently on startup
+    if (effectiveDevice === 'android_tv') {
+      const timer = setTimeout(async () => {
+        try {
+          const info = await checkTVUpdate();
+          if (info.updateAvailable) {
+            setTvUpdateInfo(info);
+            setIsTVUpdateModalOpen(true);
+          }
+        } catch (e) {
+          console.warn('[App] Auto TV update check error:', e);
+        }
+      }, 3000);
+      return () => clearTimeout(timer);
+    } else if (effectiveDevice === 'android_mobile') {
       const timer = setTimeout(async () => {
         try {
           const info = await checkMobileUpdate();
@@ -152,7 +164,7 @@ export default function App() {
       }, 3000);
       return () => clearTimeout(timer);
     }
-  }, [isMobileOrTvNative, effectiveDevice]);
+  }, [effectiveDevice]);
 
   const handleMobileTabChange = (tab: NavigationTab) => {
     setViewingDetailGame(null);
@@ -1494,6 +1506,13 @@ export default function App() {
         isOpen={isMobileUpdateModalOpen}
         updateInfo={mobileUpdateInfo}
         onClose={() => setIsMobileUpdateModalOpen(false)}
+      />
+
+      {/* Android TV In-App Auto-Update Modal */}
+      <TVUpdateModal
+        isOpen={isTVUpdateModalOpen}
+        updateInfo={tvUpdateInfo}
+        onClose={() => setIsTVUpdateModalOpen(false)}
       />
 
       {/* Floating In-App OTA Update Toast (PC) */}
