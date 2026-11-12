@@ -118,18 +118,32 @@ export default function App() {
   });
 
   // Cross-Platform & Device Simulator State
+  const isDesktopElectron = isElectron();
   const [simulatedDevice, setSimulatedDevice] = useState<DeviceType>('windows_pc');
   const [devicePreference, setDevicePreference] = useState<DeviceType | null>(() => getStoredDevicePreference());
   // Never block startup with device selection modal
   const [isDeviceModalOpen, setIsDeviceModalOpen] = useState<boolean>(false);
   const [incompatibleGame, setIncompatibleGame] = useState<Game | null>(null);
 
-  const effectiveDevice: DeviceType = isAdmin
-    ? simulatedDevice
-    : (devicePreference || detectHardwareDevice());
+  // Desktop Electron MUST ALWAYS be native windows_pc unless Admin actively toggles simulator
+  const effectiveDevice: DeviceType = isDesktopElectron
+    ? (isAdmin ? simulatedDevice : 'windows_pc')
+    : (isAdmin ? simulatedDevice : (devicePreference || detectHardwareDevice()));
 
-  const isSimulating = detectHardwareDevice() === 'windows_pc' && effectiveDevice !== 'windows_pc';
+  const isSimulating = isDesktopElectron && effectiveDevice !== 'windows_pc';
   const isMobileOrTvNative = !isSimulating && (effectiveDevice === 'android_mobile' || effectiveDevice === 'android_tv');
+
+  // Purge any stale mobile/tv preferences on Desktop Electron
+  useEffect(() => {
+    if (isDesktopElectron) {
+      try {
+        const stored = localStorage.getItem('icelauch_device_preference');
+        if (stored === 'android_tv' || stored === 'android_mobile') {
+          localStorage.removeItem('icelauch_device_preference');
+        }
+      } catch {}
+    }
+  }, [isDesktopElectron]);
 
   const [mobileTheaterMedia, setMobileTheaterMedia] = useState<MediaItem | null>(null);
   const [mobileUpdateInfo, setMobileUpdateInfo] = useState<MobileUpdateInfo | null>(null);
@@ -283,7 +297,7 @@ export default function App() {
         }
 
         // Version update check: require re-login on new app version update; keep auto-login on same version
-        const CURRENT_APP_VERSION = '1.0.4';
+        const CURRENT_APP_VERSION = '1.0.5';
         const lastVersion = localStorage.getItem('icelauch_installed_version');
         const isNewVersion = Boolean(lastVersion && lastVersion !== CURRENT_APP_VERSION);
         localStorage.setItem('icelauch_installed_version', CURRENT_APP_VERSION);

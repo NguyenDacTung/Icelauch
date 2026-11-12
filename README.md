@@ -1,8 +1,8 @@
 # Icelauch - Trình Quản Lý Game & Rạp Giải Trí Đa Nền Tảng (Windows, Mobile & Android TV)
 
 **Phiên bản phát hành:** 
-- 🖥️ **Windows PC:** `v1.0.4`
-- 📱 **Android Điện Thoại:** `v1.0.4`
+- 🖥️ **Windows PC:** `v1.0.5`
+- 📱 **Android Điện Thoại:** `v1.0.5`
 - 📺 **Android TV Edition:** `v1.0.0` (Bản chuyên biệt điều khiển 100% bằng Remote)
 
 **Hệ điều hành hỗ trợ:** 
@@ -28,7 +28,14 @@ Tại trang Releases, bạn sẽ có các file cài đặt tương ứng với t
 
 ---
 
-## 2. Các Nâng Cấp Nổi Bật Trong Phiên Bản v1.0.4
+## 2. Các Nâng Cấp Nổi Bật Trong Phiên Bản v1.0.5
+### 2.0 Khắc Phục Lỗi Nhận Diện Thiết Bị Trên Windows PC
+- **Khắc phục triệt để:** Sửa lỗi logic nhận diện thiết bị khiến bản Windows PC trên một số màn hình độ phân giải cao (1080p, 2K, 4K không cảm ứng) bị nhận diện nhầm thành Android TV và hiển thị khung TV Remote.
+- **Khóa cứng nền tảng Native:** Electron trên Windows Desktop luôn hiển thị giao diện Desktop PC chuẩn (`Navbar`, danh sách game, tab đầy đủ), loại bỏ hoàn toàn khả năng bị rò rỉ layout TV trên máy tính.
+
+---
+
+## 3. Các Nâng Cấp Trong Phiên Bản v1.0.4
 
 ### 2.1 Hệ Thống Tài Khoản & Bảo Mật Mới
 - **Tài khoản Admin (Quản Trị Viên):** Bảo vệ bằng **Mã PIN Admin** như cơ chế bảo mật hiện tại, có phím số ảo và hỗ trợ phím vật lý.

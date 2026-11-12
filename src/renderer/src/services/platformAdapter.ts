@@ -23,6 +23,10 @@ export function isAndroidPlatform(): boolean {
 }
 
 export function getStoredDevicePreference(): DeviceType | null {
+  // If running in Desktop Electron, ALWAYS return windows_pc
+  if (isElectron()) {
+    return 'windows_pc';
+  }
   try {
     const val = localStorage.getItem(STORAGE_KEY_DEVICE_PREF);
     if (val === 'android_tv' || val === 'android_mobile' || val === 'windows_pc') {
@@ -35,6 +39,8 @@ export function getStoredDevicePreference(): DeviceType | null {
 }
 
 export function setStoredDevicePreference(device: DeviceType): void {
+  // Do not store mobile/tv preferences on Desktop Electron
+  if (isElectron()) return;
   try {
     localStorage.setItem(STORAGE_KEY_DEVICE_PREF, device);
     localStorage.setItem(STORAGE_KEY_DEVICE_PROMPTED, 'true');
