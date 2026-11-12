@@ -1,10 +1,14 @@
 # Icelauch - Trình Quản Lý Game & Rạp Giải Trí Đa Nền Tảng (Windows, Mobile & Android TV)
 
-**Phiên bản:** 2.0.0 Multi-Platform Edition  
+**Phiên bản phát hành:** 
+- 🖥️ **Windows PC:** `v1.0.4`
+- 📱 **Android Điện Thoại:** `v1.0.4`
+- 📺 **Android TV Edition:** `v1.0.0` (Bản chuyên biệt điều khiển 100% bằng Remote)
+
 **Hệ điều hành hỗ trợ:** 
 - 🖥️ **Windows 10 / 11 (64-bit)** (Bản Cài Đặt NSIS Setup & Bản Di Động Portable)
-- 📱 **Android Smartphone & Tablet** (File cài đặt `.apk` cảm ứng chạm)
-- 📺 **Android TV / Smart TV / TV Box** (File cài đặt `.apk` chuẩn 10-Foot Leanback, hỗ trợ 100% Remote TV)  
+- 📱 **Android Smartphone & Tablet** (Bản APK tối ưu tràn viền Edge-to-Edge)
+- 📺 **Android TV / Smart TV / TV Box** (Bản APK 10-Foot Leanback, 16:9 banner, hỗ trợ 100% Remote D-pad)  
 **Công nghệ nền tảng:** Electron 40 + Capacitor 8 + React 19 + TypeScript + Vite + Tailwind CSS v4 + Supabase BaaS Cloud + 7-Zip Engine
 
 ---
@@ -16,52 +20,49 @@ Bạn chỉ cần truy cập trang GitHub Releases của dự án để tải fi
 👉 **[Tải Bản Cài Đặt Icelauch Mới Nhất Trên GitHub Releases](https://github.com/NguyenDacTung/Icelauch/releases)**
 
 Tại trang Releases, bạn sẽ có các file cài đặt tương ứng với thiết bị của mình:
-- **`Icelauch-Setup-*.exe` (Dành cho Windows PC):** Bộ cài đặt thông minh, tự động tạo biểu tượng trên Màn hình chính (Desktop) và Start Menu, hỗ trợ tùy chọn thư mục cài đặt.
-- **`Icelauch-*.exe` (Bản Portable cho Windows):** 1 file duy nhất chạy ngay không cần cài đặt, có thể chép vào USB hoặc ổ cứng di động mang sang máy tính khác cắm là chạy.
-- **`Icelauch-universal.apk` (Dành cho Điện thoại Android & Android TV):** 1 file APK duy nhất tương thích phổ quát:
-  - Cài trên điện thoại: Tự động kích hoạt giao diện cảm ứng chạm 1 tay.
-  - Cài trên Android TV / Smart TV Box (Sony, Xiaomi, TCL, Casper...): Tự động hiển thị trên màn hình chính TV (Leanback Launcher) và kích hoạt giao diện điều khiển 100% bằng phím Remote.
+- **`Icelauch-Setup-*.exe` (Dành cho Windows PC):** Bộ cài đặt thông minh, tự động tạo shortcut Desktop và Start Menu.
+- **`Icelauch-*.exe` (Bản Portable cho Windows):** 1 file duy nhất chạy ngay không cần cài đặt, thích hợp lưu trên USB/ổ cứng ngoài.
+- **`Icelauch-phone.apk` (Dành cho Điện thoại Android):** File APK tối ưu cho thao tác chạm 1 tay, cử chỉ vuốt quay lại và tìm kiếm tức thì.
+- **`Icelauch-tv.apk` (Dành cho Android TV / TV Box):** Bản chuyên biệt cho TV phòng khách (Sony, Xiaomi, TCL, Casper...), banner 16:9, điều khiển 100% bằng Remote TV (D-pad).
+- **`Icelauch-universal.apk` (Bản Phổ Quát):** File APK dùng chung cho cả điện thoại và Android TV.
 
 ---
 
-### Cách 2: Tự biên dịch (Build) file cài đặt cục bộ trên máy tính cá nhân
+## 2. Các Nâng Cấp Nổi Bật Trong Phiên Bản v1.0.4
 
-#### 🖥️ Biên dịch gói Windows (.exe):
-Mở PowerShell tại thư mục `C:\Icelauch` và chạy:
-```powershell
-npm run dist:win
-```
-File cài đặt hoàn thiện sẽ được xuất tại thư mục: `C:\Icelauch\release\`
+### 2.1 Hệ Thống Tài Khoản & Bảo Mật Mới
+- **Tài khoản Admin (Quản Trị Viên):** Bảo vệ bằng **Mã PIN Admin** như cơ chế bảo mật hiện tại, có phím số ảo và hỗ trợ phím vật lý.
+- **Tài khoản Người Dùng (Client):** Sử dụng **Tên đăng nhập (Username)** + **Mật khẩu** (chữ & số, mã hóa an toàn SHA-256 kèm Salt bảo mật, hỗ trợ nút icon mắt ẩn/hiện mật khẩu).
+- **Tính năng Quên Mật Khẩu:** Người dùng có thể gửi yêu cầu đặt lại mật khẩu tới Admin để được phê duyệt nhanh chóng.
+- **Tự động đăng nhập & Cập nhật:** Ghi nhớ đăng nhập (Remember Login) ở các lần mở app bình thường; tự động yêu cầu đăng nhập lại an toàn khi nâng cấp app lên phiên bản mới.
 
-#### 📱 / 📺 Biên dịch gói Android APK (.apk):
-Nhấp đúp chuột vào file:
-```
-C:\Icelauch\scripts\build-android.bat
-```
-Hoặc chạy lệnh từ terminal:
-```powershell
-npx cap build android
-```
-File APK xuất xưởng sẽ nằm tại: `android\app\build\outputs\apk\debug\app-debug.apk`
+### 2.2 Tái Cấu Trúc Cơ Chế Đồng Bộ Cloud (Admin Upload vs User Safe Sync)
+- **Dành riêng cho Admin:**
+  - Nút **`[☁️ Tải Lên Cloud (Publish)]`**: Xuất bản toàn bộ Game, Phim và Gói mở rộng từ máy Admin lên Supabase làm phiên bản nguồn chuẩn cho toàn bộ người dùng (không lo bị dữ liệu cũ trên Cloud đè mất).
+  - Nút **`[📥 Tải Danh Mục Mới (Pull)]`**: Kéo danh mục chuẩn từ Cloud về máy khi cần.
+- **Dành cho Người Dùng:** Nút **`[🔄 Đồng Bộ Ngay]`** chỉ tải danh mục mới nhất và đẩy tiến độ xem phim/danh sách game cá nhân của người dùng lên Cloud, bảo vệ toàn vẹn dữ liệu của Admin.
 
----
+### 2.3 Gói Mở Rộng Game (DLC / Patch Việt Hóa / Patches)
+- Thêm nút **`[🧩 Gói Mở Rộng]`** tại trang chi tiết Game (cả PC và Điện thoại).
+- Cho phép Admin thêm tên gói, phân loại (`Việt Hóa`, `DLC`, `Update`, `Mod`), viết hướng dẫn cài đặt và thêm danh sách link tải (Link chính + Link dự phòng).
 
-## 2. Các Nâng Cấp Nổi Bật Mới Nhất (v2.0.0)
+### 2.4 Hệ Thống Link Dự Phòng (Fallback Mirrors)
+- Hỗ trợ nhiều link tải cho Game và nhiều link phát cho Phim/Video.
+- Tự động chuyển sang link dự phòng tiếp theo khi link chính gặp lỗi mạng, HTTP 404, hoặc Google Drive quota limits.
 
-### 2.1 Hệ Thống Đóng Gói Đa Nền Tảng & Tự Động Hóa CI/CD GitHub Actions
-- **Kịch bản CI/CD đám mây (`.github/workflows/release.yml`):**
-  - Mỗi khi bạn tạo một bản phát hành (Release) hoặc đẩy Git tag (ví dụ: `v2.0.0`), máy chủ GitHub Runners sẽ tự động biên dịch đồng thời file `.exe` cho Windows và file `.apk` cho Android.
-  - Tự động đóng gói và đính kèm vào phần Tải về mà không yêu cầu máy tính cá nhân phải cài đặt Android Studio nặng nề.
-- **Hộp thoại chọn thiết bị lần đầu trên Android (`DeviceSelectionModal`):**
-  - Khi mở app lần đầu trên Android, ứng dụng xuất hiện màn hình trực quan hỏi bạn đang sử dụng **Điện Thoại Di Động** hay **Android TV / Smart TV** để kích hoạt chế độ phù hợp nhất.
-  - Lựa chọn được ghi nhớ tự động và có thể đổi lại bất cứ khi nào trong Cài Đặt.
-- **Bộ chuyển đổi nền tảng không dây (`platformAdapter`):**
-  - Trên Windows: Ứng dụng chạy trên nền tảng Electron với toàn quyền truy cập file hệ thống, 7z CLI và tiến trình nền.
-  - Trên Android / Web: Ứng dụng tự động kết nối trực tiếp với Supabase Cloud REST API và bộ đệm `localStorage` để xem phim, duyệt game và đồng bộ tiến độ mượt mà.
+### 2.5 Tối Ưu Trải Nghiệm Mobile (Tìm Kiếm & Điều Hướng Cử Chỉ)
+- **Khử giật lag ô tìm kiếm:** Tách biệt luồng gõ chữ với tiến trình lọc danh sách bằng `useDeferredValue`, phản hồi tức thì 60fps khi gõ bàn phím.
+- **Bàn phím Android thông minh:** Tích hợp thuộc tính `enterKeyHint="search"`, chuyển phím "Xuống dòng" trên bàn phím ảo thành nút icon kính lúp "Tìm kiếm" màu xanh; bổ sung nút `[🔍 Tìm]` vật lý cạnh ô nhập.
+- **Cử chỉ vuốt cạnh / Phím Back:** Tích hợp `@capacitor/app` chặn việc văng app, cho phép vuốt từ cạnh màn hình hoặc bấm phím Back để tuần tự đóng modal, quay lại trang trước và chỉ thoát app khi đang ở trang chủ gốc.
+
+### 2.6 Khắc Phục Lỗi Hình Nền PC & Checksum CI/CD
+- **Sửa lỗi hình nền che nút trên PC:** Cố định `AppWallpaper` với `pointerEvents: 'none'`, `zIndex: 0` và thiết lập `isolation: isolate`, đảm bảo chuột luôn xuyên thấu 100% qua hình nền, nội dung và nút bấm luôn nằm phía trên.
+- **Sửa lỗi Checksum `latest.yml` 404:** Tinh chỉnh kịch bản phát hành GitHub Actions để các bản TV (`tv-v*`) không cướp nhãn `Latest` của bản Windows PC, loại bỏ triệt để lỗi 404 Checksum khi kiểm tra cập nhật trên máy tính.
+- **Hiển thị Release Notes Rich Text:** Chuyển đổi mã HTML thô thành giao diện xem trước tính năng mới sang trọng với thanh cuộn mượt mà.
 
 ---
 
-### 2.2 Thiết Kế Lại Giao Diện Cài Đặt Tối Ưu Riêng Cho Cả 3 Thiết Bị
+## 3. Kiến Trúc Cài Đặt Đa Nền Tảng
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────────┐
@@ -71,10 +72,10 @@ File APK xuất xưởng sẽ nằm tại: `android\app\build\outputs\apk\debug\
 │   (SettingsView.tsx)  │ (MobileSettingsView.tsx)│    (TVSettingsView.tsx)   │
 ├───────────────────────┼─────────────────────────┼───────────────────────────┤
 │ • Căn giữa cân đối    │ • Danh sách thẻ cuộn    │ • Giao diện 10-foot       │
-│ • User: Chỉ xem sync  │ • Thẻ đồng bộ chạm 1-tap│ • 100% Remote D-pad       │
-│   & đổi chu kỳ ngầm   │ • Bỏ thư mục ổ đĩa PC   │ • Hào quang vàng neon     │
-│ • Admin: Mở khóa mới  │ • Bỏ nhập key/URL SQL   │ • Không cần gõ phím text  │
-│   hiện URL/Key/SQL    │ • Chọn hiệu ứng & SFX   │ • Toggle trailer & SFX    │
+│ • Admin: Nút Publish  │ • Thẻ đồng bộ chạm 1-tap│ • 100% Remote D-pad       │
+│   & kéo dữ liệu Cloud │ • Bỏ thư mục ổ đĩa PC   │ • Hào quang vàng neon     │
+│ • User: Đồng bộ an    │ • Bỏ nhập key/URL SQL   │ • Không cần gõ phím text  │
+│   toàn & chu kỳ ngầm  │ • Chọn hiệu ứng & SFX   │ • Toggle trailer & SFX    │
 └───────────────────────┴─────────────────────────┴───────────────────────────┘
 ```
 
