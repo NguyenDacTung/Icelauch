@@ -21,12 +21,14 @@ import {
   CheckCircle2,
   AlertCircle,
   Film,
-  Monitor
+  Monitor,
+  Puzzle,
 } from 'lucide-react';
 import { parseMediaUrl, getActiveProxyPort } from '../../utils/mediaUrl';
-import type { Game, AppActionButton } from '../../types';
+import type { Game, AppActionButton, GameExtension } from '../../types';
 import { GameActionsWidget } from '../common/GameActionsWidget';
 import { DeviceType, isMobileOrTV } from '../../utils/deviceDetector';
+import { GameExtensionsModal } from './GameExtensionsModal';
 
 interface GameDetailViewProps {
   game: Game;
@@ -42,6 +44,7 @@ interface GameDetailViewProps {
   onToggleHide?: (id: string) => void;
   onEditGame?: (game: Game) => void;
   onOpenFolder?: (id: string) => void;
+  onSaveExtensions?: (gameId: string, extensions: GameExtension[]) => Promise<void>;
   globalActionButtons?: AppActionButton[];
 }
 
@@ -59,8 +62,10 @@ export const GameDetailView: React.FC<GameDetailViewProps> = ({
   onToggleHide,
   onEditGame,
   onOpenFolder,
+  onSaveExtensions,
   globalActionButtons = [],
 }) => {
+  const [isExtensionsModalOpen, setIsExtensionsModalOpen] = useState(false);
   // Media showcase state
   const hasTrailer = Boolean(game.trailerUrl && game.trailerUrl.trim());
   const [activeMediaIndex, setActiveMediaIndex] = useState<number>(0); // 0 = trailer (if hasTrailer) or first screenshot
@@ -445,6 +450,16 @@ export const GameDetailView: React.FC<GameDetailViewProps> = ({
                 </button>
               )}
 
+              {/* Nút Gói Mở Rộng (DLC, Việt Hóa, Update) */}
+              <button
+                type="button"
+                onClick={() => setIsExtensionsModalOpen(true)}
+                className="w-full h-10 rounded-xl bg-purple-500/15 hover:bg-purple-500/25 border border-purple-500/40 text-purple-300 text-xs font-bold flex items-center justify-center gap-2 transition-all active:scale-98 shadow-md"
+              >
+                <Puzzle className="w-4 h-4 text-purple-400" />
+                <span>🧩 Gói Mở Rộng & Việt Hóa ({game.extensions?.length || 0})</span>
+              </button>
+
               {/* Bookmark In Library Button */}
               <button
                 onClick={() => onToggleLibrary(game.id)}
@@ -554,6 +569,15 @@ export const GameDetailView: React.FC<GameDetailViewProps> = ({
           />
         </div>
       )}
+
+      {/* Game Extensions Modal */}
+      <GameExtensionsModal
+        isOpen={isExtensionsModalOpen}
+        game={game}
+        isAdmin={isAdmin}
+        onClose={() => setIsExtensionsModalOpen(false)}
+        onSaveExtensions={onSaveExtensions}
+      />
     </div>
   );
 };

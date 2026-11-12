@@ -61,3 +61,47 @@
   -ms-overflow-style: none !important;
   scrollbar-width: none !important;
 }
+
+/* Rich Release Notes Formatting */
+.release-notes-content h2 {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #38bdf8;
+  margin-top: 0.6rem;
+  margin-bottom: 0.3rem;
+}
+.release-notes-content h3 {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #fbbf24;
+  margin-top: 0.5rem;
+  margin-bottom: 0.25rem;
+}
+.release-notes-content ul {
+  list-style-type: disc;
+  padding-left: 1.25rem;
+  margin-top: 0.3rem;
+  margin-bottom: 0.3rem;
+}
+.release-notes-content li {
+  margin-bottom: 0.25rem;
+  line-height: 1.5;
+}
+.release-notes-content strong {
+  color: #ffffff;
+}
+.release-notes-content code {
+  background-color: rgba(255, 255, 255, 0.12);
+  padding: 0.1rem 0.35rem;
+  border-radius: 0.25rem;
+  font-family: monospace;
+  font-size: 0.75rem;
+}
+.release-notes-content a {
+  color: #38bdf8;
+  text-decoration: underline;
+}
+.release-notes-content hr {
+  border-color: rgba(255, 255, 255, 0.1);
+  margin: 0.6rem 0;
+}

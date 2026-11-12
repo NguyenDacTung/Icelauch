@@ -51,6 +51,18 @@ export function hasPromptedDeviceChoice(): boolean {
   }
 }
 
+export function cleanQuestionMarks(text?: string): string {
+  if (!text) return '';
+  return text
+    .replace(/Chiếu R\?+p/gi, 'Chiếu Rạp')
+    .replace(/Hành đ\?+ng/gi, 'Hành động')
+    .replace(/Hoạt h\?+nh/gi, 'Hoạt hình')
+    .replace(/Thủ ph\?+m/gi, 'Thủ phạm')
+    .replace(/Lồng Ti\?+ng/gi, 'Lồng Tiếng')
+    .replace(/Trinh Th\?+m/gi, 'Trinh Thám')
+    .replace(/Vi\?+t/gi, 'Việt');
+}
+
 /**
  * Direct REST API fetch from Supabase Cloud for Android & Web clients
  */
@@ -84,16 +96,16 @@ export async function fetchDirectCloudCatalog(
     // Map database snake_case to frontend camelCase
     const games: Game[] = (rawGames || []).map((row: any) => ({
       id: row.id,
-      name: row.name,
+      name: cleanQuestionMarks(row.name),
       driveUrl: row.drive_url || '',
       downloadLinks: row.drive_url ? [{ name: 'Google Drive', url: row.drive_url, speedRating: 'fast' }] : [],
       trailerUrl: row.trailer_url,
       bannerPath: row.banner_url,
       coverPath: row.cover_url,
-      description: row.description,
-      category: row.category,
-      genre: row.genre,
-      tags: Array.isArray(row.tags) ? row.tags : [],
+      description: cleanQuestionMarks(row.description),
+      category: cleanQuestionMarks(row.category),
+      genre: cleanQuestionMarks(row.genre),
+      tags: Array.isArray(row.tags) ? row.tags.map((t: string) => cleanQuestionMarks(t)) : [],
       actionButtonIds: Array.isArray(row.action_buttons) ? row.action_buttons : [],
       featured: row.featured ?? false,
       releaseYear: row.release_year,
@@ -104,14 +116,14 @@ export async function fetchDirectCloudCatalog(
 
     const media: MediaItem[] = (rawMedia || []).map((row: any) => ({
       id: row.id,
-      title: row.title,
+      title: cleanQuestionMarks(row.title),
       type: (row.type as 'video' | 'audio') || 'video',
       link: row.link || '',
       coverPath: row.cover_path,
       bannerPath: row.banner_path,
-      description: row.description,
-      category: row.category,
-      tags: Array.isArray(row.tags) ? row.tags : [],
+      description: cleanQuestionMarks(row.description),
+      category: cleanQuestionMarks(row.category),
+      tags: Array.isArray(row.tags) ? row.tags.map((t: string) => cleanQuestionMarks(t)) : [],
       duration: row.duration || 0,
       isBannerPinned: row.is_banner_pinned ?? false,
       watched: false,

@@ -30,6 +30,7 @@ export const MediaFormModal: React.FC<MediaFormModalProps> = ({
   const [aspectRatioMode, setAspectRatioMode] = useState<'16:9' | '9:16' | 'auto'>('16:9');
   const [title, setTitle] = useState('');
   const [link, setLink] = useState('');
+  const [backupLinksText, setBackupLinksText] = useState('');
   const [coverPath, setCoverPath] = useState('');
   const [bannerPath, setBannerPath] = useState('');
   const [coverPosition, setCoverPosition] = useState('50% 50%');
@@ -60,6 +61,7 @@ export const MediaFormModal: React.FC<MediaFormModalProps> = ({
         setAspectRatioMode(media.aspectRatioMode || '16:9');
         setTitle(media.title || '');
         setLink(media.link || '');
+        setBackupLinksText(media.backupLinks ? media.backupLinks.join('\n') : '');
         setCoverPath(media.coverPath || '');
         setBannerPath(media.bannerPath || '');
         setCoverPosition(media.coverPosition || '50% 50%');
@@ -93,6 +95,7 @@ export const MediaFormModal: React.FC<MediaFormModalProps> = ({
         setAspectRatioMode('16:9');
         setTitle('');
         setLink('');
+        setBackupLinksText('');
         setCoverPath('');
         setBannerPath('');
         setCoverPosition('50% 50%');
@@ -201,6 +204,11 @@ export const MediaFormModal: React.FC<MediaFormModalProps> = ({
       bannerFeaturedUntil = new Date(Date.now() + bannerExpiryDays * 24 * 60 * 60 * 1000).toISOString();
     }
 
+    const bLinks = backupLinksText
+      .split('\n')
+      .map((l) => l.trim())
+      .filter(Boolean);
+
     onSave({
       id: media?.id,
       type,
@@ -209,6 +217,7 @@ export const MediaFormModal: React.FC<MediaFormModalProps> = ({
       aspectRatioMode,
       title: title.trim(),
       link: link.trim(),
+      backupLinks: bLinks.length > 0 ? bLinks : undefined,
       coverPath: finalCover,
       bannerPath: bannerPath.trim() || undefined,
       coverPosition: coverPosition || undefined,
@@ -421,6 +430,23 @@ export const MediaFormModal: React.FC<MediaFormModalProps> = ({
                 <span>{testResult}</span>
               </p>
             )}
+          </div>
+
+          {/* Backup Links */}
+          <div className="space-y-1.5">
+            <label className="font-semibold text-white flex items-center gap-2">
+              <span>Link phát dự phòng (Tùy chọn)</span>
+              <span className="text-[10px] text-ice-subtext font-normal">
+                (Mỗi dòng 1 link - tự động chuyển khi link chính bị giới hạn hoặc lỗi)
+              </span>
+            </label>
+            <textarea
+              rows={2}
+              value={backupLinksText}
+              onChange={(e) => setBackupLinksText(e.target.value)}
+              placeholder="https://drive.google.com/file/d/... (Link dự phòng 1)\nhttps://... (Link dự phòng 2)"
+              className="w-full rounded bg-ice-bg border border-ice-border p-2.5 text-white font-mono text-[11px] focus:outline-none focus:border-amber-400 resize-none"
+            />
           </div>
 
           {/* Tag Selector */}

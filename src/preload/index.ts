@@ -82,7 +82,7 @@ export const API = {
   getRememberedProfileId: (): Promise<string | null> => ipcRenderer.invoke('profile:get-remembered'),
   saveProfile: (profile: Partial<UserProfile>): Promise<UserProfile> => ipcRenderer.invoke('profile:save', profile),
   deleteProfile: (id: string): Promise<boolean> => ipcRenderer.invoke('profile:delete', id),
-  loginProfile: (data: { id: string; pin: string; remember?: boolean }): Promise<{ success: boolean; profile?: UserProfile; error?: string }> =>
+  loginProfile: (data: { id: string; pin?: string; password?: string; remember?: boolean }): Promise<{ success: boolean; profile?: UserProfile; error?: string }> =>
     ipcRenderer.invoke('profile:login', data),
   switchProfile: (): Promise<{ success: boolean }> => ipcRenderer.invoke('profile:switch'),
   logoutProfile: (): Promise<{ success: boolean }> => ipcRenderer.invoke('profile:logout'),
@@ -93,6 +93,8 @@ export const API = {
   updateProfileFavorite: (profileId: string, mediaId: string, isFav: boolean): Promise<{ success: boolean }> =>
     ipcRenderer.invoke('profile:update-favorite', { profileId, mediaId, isFav }),
   hashPin: (pin: string): Promise<string> => ipcRenderer.invoke('profile:hash-pin', pin),
+  hashPassword: (data: { password: string; salt?: string }): Promise<{ hash: string; salt: string }> =>
+    ipcRenderer.invoke('profile:hash-password', data),
 
   // Cloud Sync Settings & Action
   getCloudSyncSettings: (): Promise<CloudSyncSettings> => ipcRenderer.invoke('cloud:get-settings'),
@@ -102,6 +104,10 @@ export const API = {
     ipcRenderer.invoke('cloud:test-connection', { url, key }),
   syncCloud: (options?: { url?: string; key?: string }): Promise<{ success: boolean; message: string; profiles?: UserProfile[]; games?: Game[]; media?: MediaItem[]; playlists?: MediaPlaylist[] }> =>
     ipcRenderer.invoke('cloud:sync', options || {}),
+  publishCloudCatalog: (options?: { url?: string; key?: string }): Promise<{ success: boolean; message: string; count?: number }> =>
+    ipcRenderer.invoke('cloud:publish-catalog', options || {}),
+  pullCloudCatalog: (options?: { url?: string; key?: string }): Promise<{ success: boolean; message: string; games?: Game[]; media?: MediaItem[]; playlists?: MediaPlaylist[] }> =>
+    ipcRenderer.invoke('cloud:pull-catalog', options || {}),
   onCloudSynced: (callback: (data: { profiles: UserProfile[]; games?: Game[]; media?: MediaItem[]; playlists?: MediaPlaylist[]; message: string }) => void) => {
     const handler = (_event: any, data: any) => callback(data);
     ipcRenderer.on('cloud:synced', handler);

@@ -57,7 +57,11 @@ export const MobileVideoTheaterView: React.FC<MobileVideoTheaterViewProps> = ({
 
   const hasLocalElectronProxy = typeof window !== 'undefined' && Boolean((window as any).electron);
 
-  const parsed = parseMediaUrl(media.link);
+  const allMediaLinks = [media.link, ...(media.backupLinks || [])].filter(Boolean);
+  const [activeLinkIndex, setActiveLinkIndex] = useState(0);
+  const currentActiveLink = allMediaLinks[activeLinkIndex] || media.link;
+
+  const parsed = parseMediaUrl(currentActiveLink);
   const isYouTube = parsed.kind === 'youtube' && parsed.id;
   const isGoogleDrive = parsed.kind === 'gdrive' && parsed.id;
 
@@ -68,6 +72,17 @@ export const MobileVideoTheaterView: React.FC<MobileVideoTheaterViewProps> = ({
   const [showFullDesc, setShowFullDesc] = useState(false);
   const [isLoadingStream, setIsLoadingStream] = useState(false);
   const [loadingStatus, setLoadingStatus] = useState('Đang nạp video...');
+
+  // Auto fallback to next backup link when error occurs
+  const handleTriggerBackupLink = () => {
+    if (activeLinkIndex < allMediaLinks.length - 1) {
+      const nextIdx = activeLinkIndex + 1;
+      setActiveLinkIndex(nextIdx);
+      setLoadingStatus(`Link lỗi! Đang chuyển sang Nguồn dự phòng ${nextIdx}...`);
+      setIsLoadingStream(true);
+      setTimeout(() => setIsLoadingStream(false), 2000);
+    }
+  };
 
   // Custom Desktop/HTML5 player controls state
   const [isPlaying, setIsPlaying] = useState(false);
@@ -327,6 +342,7 @@ export const MobileVideoTheaterView: React.FC<MobileVideoTheaterViewProps> = ({
               onPause={() => setIsPlaying(false)}
               onTimeUpdate={handleTimeUpdate}
               onClick={handleTogglePlay}
+              onError={handleTriggerBackupLink}
               className="w-full h-full object-contain absolute inset-0"
             />
 
@@ -491,6 +507,32 @@ export const MobileVideoTheaterView: React.FC<MobileVideoTheaterViewProps> = ({
           <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-cyan-500/10 border border-cyan-500/20 text-cyan-300 text-[11px] leading-tight">
             <Sparkles className="w-3.5 h-3.5 shrink-0 text-cyan-400" />
             <span>Chế độ Rạp Desktop: Thanh tua luôn nằm cố định ở đáy, không có nút viên thuốc nổi. Nếu file nặng tải chậm, bạn có thể bấm <b>App Ngoài</b> để xem tức thì.</span>
+          </div>
+        )}
+
+        {/* Source Mirror Selector (If multiple links exist) */}
+        {allMediaLinks.length > 1 && (
+          <div className="flex items-center gap-1.5 pt-1 border-t border-white/5 overflow-x-auto no-scrollbar">
+            <span className="text-[10px] text-amber-300 font-bold uppercase tracking-wider shrink-0">
+              Nguồn phát:
+            </span>
+            {allMediaLinks.map((_, idx) => (
+              <button
+                key={idx}
+                type="button"
+                onClick={() => {
+                  sfx.playClick();
+                  setActiveLinkIndex(idx);
+                }}
+                className={`px-2 py-0.5 rounded text-[10px] font-bold transition-all ${
+                  activeLinkIndex === idx
+                    ? 'bg-amber-400 text-black shadow-sm'
+                    : 'bg-white/5 text-slate-400 hover:text-white'
+                }`}
+              >
+                {idx === 0 ? 'Nguồn 1 (Chính)' : `Nguồn ${idx + 1} (Dự phòng)`}
+              </button>
+            ))}
           </div>
         )}
       </div>

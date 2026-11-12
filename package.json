@@ -1,6 +1,6 @@
 {
   "name": "icelauch",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Trình quản lý game và giải trí cá nhân cho Windows 10",
   "main": "dist-electron/main/index.js",
   "scripts": {
@@ -68,6 +68,7 @@
   "author": "Icelauch Team",
   "license": "MIT",
   "dependencies": {
+    "@capacitor/app": "^8.1.2",
     "@capacitor/core": "^8.6.0",
     "clsx": "^2.1.1",
     "electron-updater": "^6.8.11",

@@ -683,15 +683,25 @@ app.whenReady().then(async () => {
     return storage.deleteProfile(id);
   });
 
-  ipcMain.handle('profile:login', (_event, { id, pin, remember }: { id: string; pin: string; remember?: boolean }) => {
+  ipcMain.handle('profile:login', (_event, { id, pin, password, remember }: { id: string; pin?: string; password?: string; remember?: boolean }) => {
     const p = storage.getProfile(id);
     if (!p) {
       return { success: false, error: 'Không tìm thấy hồ sơ người dùng' };
     }
 
-    const hashedInput = crypto.createHash('sha256').update(pin || '').digest('hex');
-    if (p.pinHash && p.pinHash !== hashedInput) {
-      return { success: false, error: 'Mã PIN không chính xác' };
+    // Admin account or legacy PIN check
+    if (p.role === 'admin' || (p.pinHash && !p.passwordHash)) {
+      const hashedPin = crypto.createHash('sha256').update(pin || '').digest('hex');
+      if (p.pinHash && p.pinHash !== hashedPin) {
+        return { success: false, error: 'Mã PIN Admin không chính xác' };
+      }
+    } else if (p.passwordHash) {
+      // User account with password check
+      const salt = p.passwordSalt || '';
+      const hashedPass = crypto.createHash('sha256').update((password || '') + salt).digest('hex');
+      if (p.passwordHash !== hashedPass) {
+        return { success: false, error: 'Mật khẩu tài khoản không chính xác' };
+      }
     }
 
     storage.setActiveProfileId(id);
@@ -702,6 +712,12 @@ app.whenReady().then(async () => {
     }
 
     return { success: true, profile: p };
+  });
+
+  ipcMain.handle('profile:hash-password', (_event, { password, salt }: { password: string; salt?: string }) => {
+    const targetSalt = salt || crypto.randomBytes(16).toString('hex');
+    const hash = crypto.createHash('sha256').update((password || '') + targetSalt).digest('hex');
+    return { hash, salt: targetSalt };
   });
 
   ipcMain.handle('profile:switch', () => {
@@ -797,6 +813,72 @@ app.whenReady().then(async () => {
         lastSyncMessage: err?.message || 'Lỗi đồng bộ',
       });
       return { success: false, message: err?.message || 'Lỗi đồng bộ đám mây' };
+    }
+  });
+
+  // Admin Publish Catalog to Supabase (Upload without overwrite)
+  ipcMain.handle('cloud:publish-catalog', async (_event, { url, key }: { url?: string; key?: string } = {}) => {
+    const syncSettings = storage.getCloudSyncSettings();
+    const targetUrl = (url && url.trim()) || syncSettings.supabaseUrl || DEFAULT_SUPABASE_URL;
+    const targetKey = (key && key.trim()) || syncSettings.supabaseAnonKey || DEFAULT_SUPABASE_ANON_KEY;
+
+    if (!targetUrl || !targetKey) {
+      return { success: false, message: 'Chưa cấu hình Supabase Project URL hoặc Anon Key' };
+    }
+
+    try {
+      const res = await SupabaseSyncService.getInstance().publishCatalog(
+        targetUrl,
+        targetKey,
+        storage.getGames(),
+        storage.getMedia(),
+        storage.getPlaylists()
+      );
+
+      storage.saveCloudSyncSettings({
+        lastSyncedAt: new Date().toISOString(),
+        lastSyncStatus: 'success',
+        lastSyncMessage: res.message,
+      });
+
+      return { success: true, message: res.message, count: res.count };
+    } catch (err: any) {
+      return { success: false, message: err?.message || 'Lỗi xuất bản catalog lên Cloud' };
+    }
+  });
+
+  // Client Pull Catalog from Supabase
+  ipcMain.handle('cloud:pull-catalog', async (_event, { url, key }: { url?: string; key?: string } = {}) => {
+    const syncSettings = storage.getCloudSyncSettings();
+    const targetUrl = (url && url.trim()) || syncSettings.supabaseUrl || DEFAULT_SUPABASE_URL;
+    const targetKey = (key && key.trim()) || syncSettings.supabaseAnonKey || DEFAULT_SUPABASE_ANON_KEY;
+
+    if (!targetUrl || !targetKey) {
+      return { success: false, message: 'Chưa cấu hình Supabase Project URL hoặc Anon Key' };
+    }
+
+    try {
+      const res = await SupabaseSyncService.getInstance().pullCatalog(targetUrl, targetKey);
+      storage.setAllGames(res.games);
+      storage.setAllMedia(res.media);
+      storage.setAllPlaylists(res.playlists);
+
+      storage.saveCloudSyncSettings({
+        lastSyncedAt: new Date().toISOString(),
+        lastSyncStatus: 'success',
+        lastSyncMessage: res.message,
+      });
+
+      mainWindow?.webContents.send('cloud:synced', {
+        games: res.games,
+        media: res.media,
+        playlists: res.playlists,
+        message: res.message,
+      });
+
+      return { success: true, message: res.message, games: res.games, media: res.media };
+    } catch (err: any) {
+      return { success: false, message: err?.message || 'Lỗi tải dữ liệu từ Cloud' };
     }
   });
 

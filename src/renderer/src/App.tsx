@@ -40,6 +40,7 @@ import { TVVideoTheaterView } from './components/tv/TVVideoTheaterView';
 import { TVSettingsView } from './components/tv/TVSettingsView';
 import { TVUpdateModal } from './components/tv/TVUpdateModal';
 import { DeviceSelectionModal } from './components/common/DeviceSelectionModal';
+import { App as CapApp } from '@capacitor/app';
 import {
   isElectron,
   isAndroidPlatform,
@@ -63,7 +64,8 @@ import type {
   AppSettings, 
   AppBannerSettings,
   UserProfile,
-  CloudSyncSettings
+  CloudSyncSettings,
+  PasswordResetRequest
 } from './types';
 
 export default function App() {
@@ -166,6 +168,88 @@ export default function App() {
     }
   }, [effectiveDevice]);
 
+  // Android Hardware & Gesture Back Button Handling (Swipe back without quitting app)
+  useEffect(() => {
+    let backListener: any = null;
+
+    const setupBackHandler = async () => {
+      try {
+        backListener = await CapApp.addListener('backButton', () => {
+          // 1. If any modal is open, close it
+          if (isEditingCurrentProfile) {
+            setIsEditingCurrentProfile(false);
+            return;
+          }
+          if (isAdminAuthOpen) {
+            setIsAdminAuthOpen(false);
+            return;
+          }
+          if (isProfilePickerOpen && activeProfile) {
+            setIsProfilePickerOpen(false);
+            return;
+          }
+          if (isMobileUpdateModalOpen) {
+            setIsMobileUpdateModalOpen(false);
+            return;
+          }
+          if (isMobileVinylOpen) {
+            setIsMobileVinylOpen(false);
+            return;
+          }
+          if (incompatibleGame) {
+            setIncompatibleGame(null);
+            return;
+          }
+
+          // 2. If viewing detail game or video theater, back to list
+          if (viewingDetailGame) {
+            setViewingDetailGame(null);
+            return;
+          }
+          if (mobileTheaterMedia) {
+            setMobileTheaterMedia(null);
+            return;
+          }
+          if (tvPlayingMedia) {
+            setTvPlayingMedia(null);
+            return;
+          }
+
+          // 3. If on other tab, go back to main tab
+          if (currentTab !== 'media') {
+            setCurrentTab('media');
+            return;
+          }
+
+          // 4. If already at root of main tab, exit app
+          CapApp.exitApp();
+        });
+      } catch (e) {
+        console.warn('Capacitor BackButton listener not active');
+      }
+    };
+
+    setupBackHandler();
+
+    return () => {
+      if (backListener && backListener.remove) {
+        backListener.remove();
+      }
+    };
+  }, [
+    isEditingCurrentProfile,
+    isAdminAuthOpen,
+    isProfilePickerOpen,
+    activeProfile,
+    isMobileUpdateModalOpen,
+    isMobileVinylOpen,
+    incompatibleGame,
+    viewingDetailGame,
+    mobileTheaterMedia,
+    tvPlayingMedia,
+    currentTab,
+  ]);
+
   const handleMobileTabChange = (tab: NavigationTab) => {
     setViewingDetailGame(null);
     setMobileTheaterMedia(null);
@@ -198,13 +282,24 @@ export default function App() {
           if (port) setActiveProxyPort(port);
         }
 
+        // Version update check: require re-login on new app version update; keep auto-login on same version
+        const CURRENT_APP_VERSION = '1.0.4';
+        const lastVersion = localStorage.getItem('icelauch_installed_version');
+        const isNewVersion = Boolean(lastVersion && lastVersion !== CURRENT_APP_VERSION);
+        localStorage.setItem('icelauch_installed_version', CURRENT_APP_VERSION);
+
+        if (isNewVersion && window.api?.logoutProfile) {
+          console.log(`[Version Upgrade] From ${lastVersion} to ${CURRENT_APP_VERSION}: Requiring re-login.`);
+          await window.api.logoutProfile();
+        }
+
         // Multi-User Profile Auto-Login & Initialization
         if (window.api.getProfiles) {
           const loadedProfiles = await window.api.getProfiles();
           setProfiles(loadedProfiles || []);
 
-          const active = await window.api.getActiveProfile();
-          const rememberedId = await window.api.getRememberedProfileId();
+          const active = !isNewVersion ? await window.api.getActiveProfile() : null;
+          const rememberedId = !isNewVersion ? await window.api.getRememberedProfileId() : null;
 
           if (active) {
             setActiveProfile(active);
@@ -537,6 +632,22 @@ export default function App() {
     }
   };
 
+  const handleSaveGameExtensions = async (gameId: string, extensions: any[]) => {
+    if (window.api) {
+      await window.api.saveGame({ id: gameId, extensions });
+      await loadData();
+    } else {
+      setAppData((prev) => {
+        if (!prev) return prev;
+        const newGames = prev.games.map((g) => (g.id === gameId ? { ...g, extensions } : g));
+        return { ...prev, games: newGames };
+      });
+      if (viewingDetailGame && viewingDetailGame.id === gameId) {
+        setViewingDetailGame((prev) => (prev ? { ...prev, extensions } : null));
+      }
+    }
+  };
+
   const handleSelectCustomExe = async (gameId: string) => {
     if (window.api) {
       const filePath = await window.api.browseFile({
@@ -677,17 +788,23 @@ export default function App() {
   // Profile Management Handlers
   const handleSelectProfile = async (
     profile: UserProfile,
+    credentials: { pin?: string; password?: string },
     remember: boolean
   ): Promise<{ success: boolean; error?: string }> => {
     if (window.api?.loginProfile) {
-      const res = await window.api.loginProfile({ id: profile.id, pin: (profile as any).enteredPin || '', remember });
+      const res = await window.api.loginProfile({
+        id: profile.id,
+        pin: credentials.pin,
+        password: credentials.password,
+        remember,
+      });
       if (res.success && res.profile) {
         setActiveProfile(res.profile);
         setIsProfilePickerOpen(false);
         sfx.playSuccess();
         return { success: true };
       }
-      return { success: false, error: res.error || 'Mã PIN không đúng' };
+      return { success: false, error: res.error || 'Xác thực không chính xác' };
     }
     setActiveProfile(profile);
     setIsProfilePickerOpen(false);
@@ -702,9 +819,12 @@ export default function App() {
 
   const handleSaveProfile = async (data: {
     id?: string;
+    username?: string;
     nickname: string;
+    role?: 'admin' | 'user';
     avatar: string;
-    pin: string;
+    pin?: string;
+    password?: string;
     remember: boolean;
   }) => {
     if (window.api?.saveProfile) {
@@ -713,12 +833,25 @@ export default function App() {
         pinHash = await window.api.hashPin(data.pin);
       }
 
+      let passwordHash = '';
+      let passwordSalt = '';
+      if (data.password && window.api.hashPassword) {
+        const hashRes = await window.api.hashPassword({ password: data.password });
+        passwordHash = hashRes.hash;
+        passwordSalt = hashRes.salt;
+      }
+
       const existing = profiles.find((p) => p.id === data.id);
       const toSave: UserProfile = {
         id: data.id || `user-${Date.now()}`,
+        username: data.username || existing?.username || data.nickname.toLowerCase().replace(/\s+/g, ''),
+        role: data.role || existing?.role || 'user',
         nickname: data.nickname,
         avatar: data.avatar,
         pinHash: pinHash || existing?.pinHash || '',
+        passwordHash: passwordHash || existing?.passwordHash || '',
+        passwordSalt: passwordSalt || existing?.passwordSalt || '',
+        requiresPasswordReset: false,
         createdDate: existing?.createdDate || new Date().toISOString(),
         lastActiveDate: new Date().toISOString(),
         library: existing?.library || [],
@@ -734,10 +867,36 @@ export default function App() {
       setIsProfilePickerOpen(false);
 
       if (data.remember && window.api.loginProfile) {
-        await window.api.loginProfile({ id: saved.id, pin: data.pin, remember: true });
+        await window.api.loginProfile({
+          id: saved.id,
+          pin: data.pin,
+          password: data.password,
+          remember: true,
+        });
       }
 
       sfx.playSuccess();
+    }
+  };
+
+  const handleRequestPasswordReset = async (profile: UserProfile): Promise<{ success: boolean; message: string }> => {
+    try {
+      const request: PasswordResetRequest = {
+        id: `reset-${Date.now()}`,
+        profileId: profile.id,
+        username: profile.username || profile.nickname,
+        nickname: profile.nickname,
+        requestedAt: new Date().toISOString(),
+        status: 'pending',
+      };
+      if (appData) {
+        const existingResets = appData.passwordResets || [];
+        const updatedResets = [...existingResets.filter((r) => r.profileId !== profile.id), request];
+        setAppData({ ...appData, passwordResets: updatedResets });
+      }
+      return { success: true, message: `Đã gửi yêu cầu đặt lại mật khẩu cho tài khoản "${profile.nickname}"!` };
+    } catch (err: any) {
+      return { success: false, message: err?.message || 'Không thể gửi yêu cầu' };
     }
   };
 
@@ -873,8 +1032,8 @@ export default function App() {
   );
 
   return (
-    <div className="h-screen w-screen bg-ice-bg text-ice-text flex flex-col overflow-hidden relative">
-      {/* Custom App Wallpaper - Behind everything (-z-10) */}
+    <div className={`h-screen w-screen ${appData.settings.wallpaperConfig?.enabled ? 'bg-transparent' : 'bg-ice-bg'} text-ice-text flex flex-col overflow-hidden relative isolate`}>
+      {/* Custom App Wallpaper - Background Layer (zIndex 0, pointer-events none) */}
       <AppWallpaper
         config={appData.settings.wallpaperConfig}
         lowSpecMode={appData.settings.lowSpecMode}
@@ -1025,6 +1184,7 @@ export default function App() {
                 onToggleLibrary={handleToggleLibrary}
                 onIncompatibleClick={(game) => setIncompatibleGame(game)}
                 onOpenFolder={(id) => handleOpenFolder('gameDir', id)}
+                onSaveExtensions={handleSaveGameExtensions}
                 globalActionButtons={appData.settings.globalActionButtons || []}
               />
             ) : (
@@ -1121,6 +1281,7 @@ export default function App() {
                   setIsGameFormOpen(true);
                 }}
                 onOpenFolder={(id) => handleOpenFolder('gameDir', id)}
+                onSaveExtensions={handleSaveGameExtensions}
                 globalActionButtons={appData.settings.globalActionButtons || []}
               />
             ) : (
@@ -1444,6 +1605,7 @@ export default function App() {
           onSelectGuest={handleSelectGuest}
           onSaveProfile={handleSaveProfile}
           onDeleteProfile={handleDeleteProfile}
+          onRequestPasswordReset={handleRequestPasswordReset}
         />
       )}
 

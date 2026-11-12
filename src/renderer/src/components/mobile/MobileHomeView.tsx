@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useDeferredValue } from 'react';
 import {
   Gamepad2,
   Sparkles,
@@ -39,9 +39,10 @@ export const MobileHomeView: React.FC<MobileHomeViewProps> = ({
   onOpenSurprise,
 }) => {
   const [localSearch, setLocalSearch] = useState('');
+  const deferredSearch = useDeferredValue(localSearch);
   const visibleGames = games.filter((g) => !g.hidden);
 
-  const effectiveSearch = (localSearch || searchQuery).trim().toLowerCase();
+  const effectiveSearch = (deferredSearch || searchQuery).trim().toLowerCase();
 
   const filteredGames = visibleGames.filter((g) => {
     if (!effectiveSearch) return true;
@@ -59,26 +60,50 @@ export const MobileHomeView: React.FC<MobileHomeViewProps> = ({
 
   return (
     <div className="flex-1 w-full h-full flex flex-col bg-[#07090E] select-none overflow-y-auto no-scrollbar p-3.5 space-y-4">
-      {/* 0. TOP MOBILE SEARCH INPUT */}
-      <div className="relative w-full pt-1">
-        <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
-        <input
-          type="text"
-          value={localSearch}
-          onChange={(e) => setLocalSearch(e.target.value)}
-          placeholder="Tìm kiếm trong kho Game PC..."
-          className="w-full h-10 pl-9.5 pr-8 rounded-2xl bg-[#141722] border border-white/10 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500/50 shadow-inner"
-        />
-        {localSearch && (
-          <button
-            type="button"
-            onClick={() => setLocalSearch('')}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white"
-          >
-            <X className="w-3.5 h-3.5" />
-          </button>
-        )}
-      </div>
+      {/* 0. TOP MOBILE SEARCH FORM */}
+      <form
+        action=""
+        onSubmit={(e) => {
+          e.preventDefault();
+          (document.activeElement as HTMLElement)?.blur();
+        }}
+        className="flex items-center gap-2 w-full pt-1"
+      >
+        <div className="relative flex-1">
+          <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+          <input
+            type="search"
+            enterKeyHint="search"
+            inputMode="search"
+            autoComplete="off"
+            autoCorrect="off"
+            autoCapitalize="off"
+            spellCheck="false"
+            value={localSearch}
+            onChange={(e) => setLocalSearch(e.target.value)}
+            placeholder="Tìm kiếm trong kho Game PC..."
+            className="w-full h-10 pl-9.5 pr-8 rounded-2xl bg-[#141722] border border-white/10 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500/50 shadow-inner"
+          />
+          {localSearch && (
+            <button
+              type="button"
+              onClick={() => setLocalSearch('')}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white p-1"
+              title="Xóa tìm kiếm"
+            >
+              <X className="w-3.5 h-3.5" />
+            </button>
+          )}
+        </div>
+
+        <button
+          type="submit"
+          className="h-10 px-3.5 rounded-2xl bg-cyan-500/15 hover:bg-cyan-500/25 active:scale-95 text-cyan-400 font-bold text-xs border border-cyan-500/30 flex items-center gap-1.5 transition-all shrink-0"
+        >
+          <Search className="w-3.5 h-3.5" />
+          <span>Tìm</span>
+        </button>
+      </form>
 
       {/* 1. MOBILE HERO BANNER (EXACT 16:9 CINEMATIC) - Only when not searching */}
       {!effectiveSearch && (

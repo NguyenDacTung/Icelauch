@@ -9,7 +9,11 @@ import {
   User, 
   KeyRound,
   Sparkles,
-  AlertCircle
+  AlertCircle,
+  Eye,
+  EyeOff,
+  Lock,
+  ShieldAlert
 } from 'lucide-react';
 import { AVATAR_PRESETS } from '../../utils/avatars';
 import { AvatarBadge } from '../common/AvatarBadge';
@@ -21,9 +25,12 @@ interface ProfileModalProps {
   onClose: () => void;
   onSave: (profileData: {
     id?: string;
+    username?: string;
     nickname: string;
+    role?: 'admin' | 'user';
     avatar: string;
-    pin: string;
+    pin?: string;
+    password?: string;
     remember: boolean;
   }) => Promise<void>;
   onDelete?: (id: string) => Promise<void>;
@@ -38,10 +45,16 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
 }) => {
   const isEditing = Boolean(profile?.id);
 
+  const [username, setUsername] = useState('');
   const [nickname, setNickname] = useState('');
+  const [role, setRole] = useState<'admin' | 'user'>('user');
   const [selectedAvatar, setSelectedAvatar] = useState('avatar_cyber_ninja');
   const [customAvatarUrl, setCustomAvatarUrl] = useState('');
   const [avatarTab, setAvatarTab] = useState<'presets' | 'custom'>('presets');
+
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
 
   const [pin, setPin] = useState('');
   const [confirmPin, setConfirmPin] = useState('');
@@ -52,7 +65,9 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
 
   useEffect(() => {
     if (profile) {
+      setUsername(profile.username || '');
       setNickname(profile.nickname || '');
+      setRole(profile.role || (profile.pinHash && !profile.passwordHash ? 'admin' : 'user'));
       setSelectedAvatar(profile.avatar || 'avatar_cyber_ninja');
       if (
         profile.avatar?.startsWith('http') ||
@@ -65,13 +80,19 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
       } else {
         setAvatarTab('presets');
       }
+      setPassword('');
+      setConfirmPassword('');
       setPin('');
       setConfirmPin('');
     } else {
+      setUsername('');
       setNickname('');
+      setRole('user');
       setSelectedAvatar('avatar_cyber_ninja');
       setCustomAvatarUrl('');
       setAvatarTab('presets');
+      setPassword('');
+      setConfirmPassword('');
       setPin('');
       setConfirmPin('');
       setRemember(true);
@@ -98,25 +119,49 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
     e.preventDefault();
     setError(null);
 
+    const trimmedUsername = username.trim().toLowerCase();
+    if (!trimmedUsername || trimmedUsername.length < 3 || trimmedUsername.length > 25) {
+      setError('Tên tài khoản đăng nhập phải từ 3 đến 25 ký tự');
+      return;
+    }
+    if (!/^[a-zA-Z0-9_.-]+$/.test(trimmedUsername)) {
+      setError('Tên tài khoản chỉ được chứa chữ cái, số, dấu gạch dưới (_) hoặc gạch ngang (-)');
+      return;
+    }
+
     const trimmedName = nickname.trim();
     if (!trimmedName || trimmedName.length < 2 || trimmedName.length > 20) {
       setError('Tên hiển thị phải có từ 2 đến 20 ký tự');
       return;
     }
 
-    // PIN validation
-    if (!isEditing || pin.length > 0) {
-      if (pin.length < 4 || pin.length > 10) {
-        setError('Mã PIN phải từ 4 đến 10 chữ số');
-        return;
+    // Role-specific validation
+    if (role === 'admin') {
+      if (!isEditing || pin.length > 0) {
+        if (pin.length < 4 || pin.length > 10) {
+          setError('Mã PIN Admin phải từ 4 đến 10 chữ số');
+          return;
+        }
+        if (!/^\d+$/.test(pin)) {
+          setError('Mã PIN Admin chỉ được chứa chữ số (0-9)');
+          return;
+        }
+        if (pin !== confirmPin) {
+          setError('Mã PIN xác nhận không trùng khớp');
+          return;
+        }
       }
-      if (!/^\d+$/.test(pin)) {
-        setError('Mã PIN chỉ được chứa các chữ số (0-9)');
-        return;
-      }
-      if (pin !== confirmPin) {
-        setError('Mã PIN xác nhận không trùng khớp');
-        return;
+    } else {
+      // User account password validation
+      if (!isEditing || password.length > 0) {
+        if (password.length < 4) {
+          setError('Mật khẩu tài khoản phải có tối thiểu 4 ký tự');
+          return;
+        }
+        if (password !== confirmPassword) {
+          setError('Mật khẩu xác nhận không trùng khớp');
+          return;
+        }
       }
     }
 
@@ -128,9 +173,12 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
       setLoading(true);
       await onSave({
         id: profile?.id,
+        username: trimmedUsername,
         nickname: trimmedName,
+        role,
         avatar: effectiveAvatar,
-        pin,
+        pin: role === 'admin' ? pin : undefined,
+        password: role === 'user' ? password : undefined,
         remember,
       });
       onClose();
@@ -176,26 +224,76 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
             </div>
           )}
 
-          {/* Current Avatar Preview & Name Input */}
-          <div className="flex items-center gap-5 p-4 rounded-xl bg-white/5 border border-white/5">
-            <AvatarBadge
-              avatar={avatarTab === 'custom' && customAvatarUrl ? customAvatarUrl : selectedAvatar}
-              nickname={nickname || 'User'}
-              size="lg"
-            />
-            <div className="flex-1 space-y-1.5">
-              <label className="text-xs font-semibold text-ice-subtext uppercase tracking-wider">
-                Tên hiển thị (Nickname) *
-              </label>
-              <input
-                type="text"
-                value={nickname}
-                onChange={(e) => setNickname(e.target.value)}
-                placeholder="VD: GamerPro, Ba Mẹ, Anh Hai..."
-                maxLength={20}
-                required
-                className="w-full h-10 px-3 rounded-lg bg-black/40 border border-ice-border text-sm text-white placeholder-ice-subtext/60 focus:outline-none focus:border-ice-accent transition-colors font-medium"
+          {/* Account Credentials: Username & Nickname */}
+          <div className="p-4 rounded-xl bg-white/5 border border-white/5 space-y-4">
+            <div className="flex items-center gap-4">
+              <AvatarBadge
+                avatar={avatarTab === 'custom' && customAvatarUrl ? customAvatarUrl : selectedAvatar}
+                nickname={nickname || 'User'}
+                size="lg"
               />
+              <div className="flex-1 space-y-3">
+                <div className="space-y-1">
+                  <label className="text-[11px] font-bold text-ice-subtext uppercase tracking-wider">
+                    Tên đăng nhập (Username) *
+                  </label>
+                  <input
+                    type="text"
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value.toLowerCase().replace(/\s+/g, ''))}
+                    placeholder="VD: gamerpro, dactung..."
+                    maxLength={25}
+                    required
+                    className="w-full h-9 px-3 rounded-lg bg-black/40 border border-ice-border text-xs text-cyan-300 font-mono placeholder-ice-subtext/60 focus:outline-none focus:border-ice-accent transition-colors"
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-[11px] font-bold text-ice-subtext uppercase tracking-wider">
+                    Tên hiển thị (Nickname) *
+                  </label>
+                  <input
+                    type="text"
+                    value={nickname}
+                    onChange={(e) => setNickname(e.target.value)}
+                    placeholder="VD: Gamer Pro, Đắc Tùng, Ba Mẹ..."
+                    maxLength={20}
+                    required
+                    className="w-full h-9 px-3 rounded-lg bg-black/40 border border-ice-border text-xs text-white placeholder-ice-subtext/60 focus:outline-none focus:border-ice-accent transition-colors font-medium"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Role Selector */}
+            <div className="pt-2 border-t border-white/5 flex items-center justify-between">
+              <span className="text-[11px] font-bold text-ice-subtext uppercase tracking-wider">
+                Loại tài khoản:
+              </span>
+              <div className="flex items-center gap-1.5 p-0.5 rounded-lg bg-black/40 border border-ice-border">
+                <button
+                  type="button"
+                  onClick={() => setRole('user')}
+                  className={`px-3 py-1 rounded text-xs font-bold transition-all ${
+                    role === 'user'
+                      ? 'bg-ice-accent text-white shadow'
+                      : 'text-ice-subtext hover:text-white'
+                  }`}
+                >
+                  👤 Người Dùng
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setRole('admin')}
+                  className={`px-3 py-1 rounded text-xs font-bold transition-all ${
+                    role === 'admin'
+                      ? 'bg-amber-400 text-black shadow'
+                      : 'text-ice-subtext hover:text-white'
+                  }`}
+                >
+                  🛡️ Quản Trị Viên (Admin)
+                </button>
+              </div>
             </div>
           </div>
 
@@ -286,49 +384,101 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
             )}
           </div>
 
-          {/* PIN Setup (4-10 digits) */}
-          <div className="space-y-3 p-4 rounded-xl bg-amber-500/5 border border-amber-500/20">
-            <div className="flex items-center gap-2 text-amber-300 text-xs font-bold uppercase tracking-wider">
-              <KeyRound className="w-4 h-4 text-amber-400" />
-              <span>{isEditing ? 'Mã PIN Bảo Vệ (Để trống nếu không muốn đổi)' : 'Cài Đặt Mã PIN Bảo Vệ (4 - 10 Chữ Số) *'}</span>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div className="space-y-1">
-                <label className="text-[11px] text-ice-subtext font-medium">
-                  {isEditing ? 'Mã PIN Mới' : 'Nhập mã PIN'}
-                </label>
-                <input
-                  type="password"
-                  inputMode="numeric"
-                  value={pin}
-                  onChange={(e) => setPin(e.target.value.replace(/\D/g, '').slice(0, 10))}
-                  placeholder="Từ 4 đến 10 số"
-                  required={!isEditing}
-                  className="w-full h-10 px-3 rounded-lg bg-black/50 border border-ice-border text-sm text-white tracking-widest focus:outline-none focus:border-amber-400 font-mono transition-colors"
-                />
+          {/* Credentials: User Password VS Admin PIN */}
+          {role === 'user' ? (
+            <div className="space-y-3 p-4 rounded-xl bg-blue-500/5 border border-blue-500/20">
+              <div className="flex items-center gap-2 text-cyan-400 text-xs font-bold uppercase tracking-wider">
+                <Lock className="w-4 h-4" />
+                <span>{isEditing ? 'Mật Khẩu Tài Khoản (Để trống nếu không muốn đổi)' : 'Cài Đặt Mật Khẩu Đăng Nhập (Chữ & Số) *'}</span>
               </div>
 
-              <div className="space-y-1">
-                <label className="text-[11px] text-ice-subtext font-medium">
-                  Xác nhận mã PIN
-                </label>
-                <input
-                  type="password"
-                  inputMode="numeric"
-                  value={confirmPin}
-                  onChange={(e) => setConfirmPin(e.target.value.replace(/\D/g, '').slice(0, 10))}
-                  placeholder="Nhập lại mã PIN"
-                  required={!isEditing || pin.length > 0}
-                  className="w-full h-10 px-3 rounded-lg bg-black/50 border border-ice-border text-sm text-white tracking-widest focus:outline-none focus:border-amber-400 font-mono transition-colors"
-                />
-              </div>
-            </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <label className="text-[11px] text-ice-subtext font-medium">
+                    {isEditing ? 'Mật khẩu mới' : 'Mật khẩu'}
+                  </label>
+                  <div className="relative">
+                    <input
+                      type={showPassword ? 'text' : 'password'}
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      placeholder="Tối thiểu 4 ký tự"
+                      required={!isEditing}
+                      className="w-full h-10 pl-3 pr-9 rounded-lg bg-black/50 border border-ice-border text-xs text-white focus:outline-none focus:border-ice-accent transition-colors font-medium"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-2.5 top-1/2 -translate-y-1/2 text-ice-subtext hover:text-white p-1"
+                    >
+                      {showPassword ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                    </button>
+                  </div>
+                </div>
 
-            <p className="text-[11px] text-ice-subtext">
-              🔒 Mã PIN bảo vệ tính riêng tư của kho game và lịch sử xem video của bạn.
-            </p>
-          </div>
+                <div className="space-y-1">
+                  <label className="text-[11px] text-ice-subtext font-medium">
+                    Xác nhận mật khẩu
+                  </label>
+                  <input
+                    type={showPassword ? 'text' : 'password'}
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    placeholder="Nhập lại mật khẩu"
+                    required={!isEditing || password.length > 0}
+                    className="w-full h-10 px-3 rounded-lg bg-black/50 border border-ice-border text-xs text-white focus:outline-none focus:border-ice-accent transition-colors font-medium"
+                  />
+                </div>
+              </div>
+
+              <p className="text-[11px] text-ice-subtext">
+                🔒 Mật khẩu được mã hóa an toàn SHA-256 kèm salt bảo vệ tài khoản của bạn.
+              </p>
+            </div>
+          ) : (
+            <div className="space-y-3 p-4 rounded-xl bg-amber-500/5 border border-amber-500/20">
+              <div className="flex items-center gap-2 text-amber-300 text-xs font-bold uppercase tracking-wider">
+                <KeyRound className="w-4 h-4 text-amber-400" />
+                <span>{isEditing ? 'Mã PIN Admin (Để trống nếu không đổi)' : 'Cài Đặt Mã PIN Admin (4 - 10 Chữ Số) *'}</span>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <label className="text-[11px] text-ice-subtext font-medium">
+                    {isEditing ? 'Mã PIN Admin Mới' : 'Nhập mã PIN Admin'}
+                  </label>
+                  <input
+                    type="password"
+                    inputMode="numeric"
+                    value={pin}
+                    onChange={(e) => setPin(e.target.value.replace(/\D/g, '').slice(0, 10))}
+                    placeholder="Từ 4 đến 10 số"
+                    required={!isEditing}
+                    className="w-full h-10 px-3 rounded-lg bg-black/50 border border-ice-border text-sm text-white tracking-widest focus:outline-none focus:border-amber-400 font-mono transition-colors"
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-[11px] text-ice-subtext font-medium">
+                    Xác nhận mã PIN Admin
+                  </label>
+                  <input
+                    type="password"
+                    inputMode="numeric"
+                    value={confirmPin}
+                    onChange={(e) => setConfirmPin(e.target.value.replace(/\D/g, '').slice(0, 10))}
+                    placeholder="Nhập lại mã PIN"
+                    required={!isEditing || pin.length > 0}
+                    className="w-full h-10 px-3 rounded-lg bg-black/50 border border-ice-border text-sm text-white tracking-widest focus:outline-none focus:border-amber-400 font-mono transition-colors"
+                  />
+                </div>
+              </div>
+
+              <p className="text-[11px] text-ice-subtext">
+                🛡️ Tài khoản Quản Trị Viên sử dụng mã PIN để đăng nhập nhanh chóng và bảo mật cao.
+              </p>
+            </div>
+          )}
 
           {/* Remember / Auto-Login Checkbox */}
           <label className="flex items-center gap-3 p-3 rounded-xl bg-white/5 border border-white/5 cursor-pointer hover:bg-white/10 transition-colors">

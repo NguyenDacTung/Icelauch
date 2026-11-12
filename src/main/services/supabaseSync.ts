@@ -6,6 +6,18 @@ import crypto from 'crypto';
 import { URL } from 'url';
 import type { UserProfile, Game, MediaItem, MediaPlaylist } from '../../renderer/src/types';
 
+function cleanQuestionMarks(text?: string): string {
+  if (!text) return '';
+  return text
+    .replace(/Chiếu R\?+p/gi, 'Chiếu Rạp')
+    .replace(/Hành đ\?+ng/gi, 'Hành động')
+    .replace(/Hoạt h\?+nh/gi, 'Hoạt hình')
+    .replace(/Thủ ph\?+m/gi, 'Thủ phạm')
+    .replace(/Lồng Ti\?+ng/gi, 'Lồng Tiếng')
+    .replace(/Trinh Th\?+m/gi, 'Trinh Thám')
+    .replace(/Vi\?+t/gi, 'Việt');
+}
+
 export class SupabaseSyncService {
   private static instance: SupabaseSyncService;
 
@@ -41,13 +53,13 @@ export class SupabaseSyncService {
         const reqHeaders: Record<string, string> = {
           'apikey': anonKey,
           'Authorization': `Bearer ${anonKey}`,
-          'Accept': 'application/json',
-          'Content-Type': 'application/json',
+          'Accept': 'application/json; charset=utf-8',
+          'Content-Type': 'application/json; charset=utf-8',
           ...(options.headers || {}),
         };
 
         if (bodyStr) {
-          reqHeaders['Content-Length'] = Buffer.byteLength(bodyStr).toString();
+          reqHeaders['Content-Length'] = Buffer.byteLength(bodyStr, 'utf8').toString();
         }
 
         const req = client.request(
@@ -58,18 +70,24 @@ export class SupabaseSyncService {
             timeout: 15000,
           },
           (res) => {
-            let resBody = '';
+            const chunks: Buffer[] = [];
             res.on('data', (chunk) => {
-              resBody += chunk;
+              chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
             });
             res.on('end', () => {
               let parsedData = null;
               try {
+                const fullBuffer = Buffer.concat(chunks);
+                const resBody = fullBuffer.toString('utf8');
                 if (resBody) {
                   parsedData = JSON.parse(resBody);
                 }
               } catch {
-                parsedData = resBody;
+                try {
+                  parsedData = Buffer.concat(chunks).toString('utf8');
+                } catch {
+                  parsedData = null;
+                }
               }
               resolve({ status: res.statusCode || 500, data: parsedData });
             });
@@ -86,7 +104,7 @@ export class SupabaseSyncService {
         });
 
         if (bodyStr) {
-          req.write(bodyStr);
+          req.write(bodyStr, 'utf8');
         }
         req.end();
       } catch (err) {
@@ -124,14 +142,19 @@ export class SupabaseSyncService {
             timeout: 25000,
           },
           (res) => {
-            let resBody = '';
-            res.on('data', (c) => (resBody += c));
+            const chunks: Buffer[] = [];
+            res.on('data', (c) => chunks.push(Buffer.isBuffer(c) ? c : Buffer.from(c)));
             res.on('end', () => {
               let parsedData = null;
               try {
+                const resBody = Buffer.concat(chunks).toString('utf8');
                 parsedData = JSON.parse(resBody);
               } catch {
-                parsedData = resBody;
+                try {
+                  parsedData = Buffer.concat(chunks).toString('utf8');
+                } catch {
+                  parsedData = null;
+                }
               }
               resolve({ status: res.statusCode || 500, data: parsedData });
             });
@@ -347,15 +370,17 @@ export class SupabaseSyncService {
     const rows: any[] = Array.isArray(res.data) ? res.data : [];
     return rows.map((r) => ({
       id: r.id,
-      name: r.name,
+      name: cleanQuestionMarks(r.name),
       coverPath: r.cover_url || '',
       bannerPath: r.banner_url || undefined,
       trailerUrl: r.trailer_url || undefined,
-      description: r.description || '',
-      genre: r.genre || '',
-      tags: r.tags || [],
+      description: cleanQuestionMarks(r.description),
+      genre: cleanQuestionMarks(r.genre),
+      tags: Array.isArray(r.tags) ? r.tags.map((t: string) => cleanQuestionMarks(t)) : [],
       actionButtonIds: r.action_buttons || [],
-      downloadLinks: r.drive_url ? [r.drive_url] : [],
+      downloadLinks: r.drive_url ? r.drive_url.split('\n').map((s: string) => s.trim()).filter(Boolean) : [],
+      backupLinks: r.drive_url ? r.drive_url.split('\n').map((s: string) => s.trim()).filter(Boolean).slice(1) : [],
+      extensions: Array.isArray(r.extensions) ? r.extensions : [],
       expectedSize: r.file_size ? Number(r.file_size) : undefined,
       featured: Boolean(r.featured),
       runAsAdmin: false,
@@ -372,7 +397,7 @@ export class SupabaseSyncService {
     const payload = {
       id: game.id,
       name: game.name,
-      drive_url: game.downloadLinks && game.downloadLinks.length > 0 ? game.downloadLinks[0] : null,
+      drive_url: game.downloadLinks && game.downloadLinks.length > 0 ? game.downloadLinks.join('\n') : null,
       trailer_url: game.trailerUrl || null,
       banner_url: game.bannerPath || null,
       cover_url: game.coverPath || null,
@@ -403,22 +428,26 @@ export class SupabaseSyncService {
       return [];
     }
     const rows: any[] = Array.isArray(res.data) ? res.data : [];
-    return rows.map((r) => ({
-      id: r.id,
-      title: r.title,
-      type: r.type || 'video',
-      link: r.link,
-      coverPath: r.cover_path || undefined,
-      bannerPath: r.banner_path || undefined,
-      description: r.description || '',
-      category: r.category || '',
-      tags: r.tags || [],
-      duration: r.duration || 0,
-      isBannerPinned: Boolean(r.is_banner_pinned),
-      lastPosition: 0,
-      watched: false,
-      addedAt: r.updated_at || new Date().toISOString(),
-    }));
+    return rows.map((r) => {
+      const links = r.link ? r.link.split('\n').map((s: string) => s.trim()).filter(Boolean) : [];
+      return {
+        id: r.id,
+        title: cleanQuestionMarks(r.title),
+        type: r.type || 'video',
+        link: links[0] || '',
+        backupLinks: links.slice(1),
+        coverPath: r.cover_path || undefined,
+        bannerPath: r.banner_path || undefined,
+        description: cleanQuestionMarks(r.description),
+        category: cleanQuestionMarks(r.category),
+        tags: Array.isArray(r.tags) ? r.tags.map((t: string) => cleanQuestionMarks(t)) : [],
+        duration: r.duration || 0,
+        isBannerPinned: Boolean(r.is_banner_pinned),
+        lastPosition: 0,
+        watched: false,
+        addedAt: r.updated_at || new Date().toISOString(),
+      };
+    });
   }
 
   public async upsertMediaItem(supabaseUrl: string, anonKey: string, item: MediaItem): Promise<boolean> {
@@ -428,7 +457,7 @@ export class SupabaseSyncService {
       id: item.id,
       title: item.title,
       type: item.type || 'video',
-      link: item.link,
+      link: [item.link, ...(item.backupLinks || [])].filter(Boolean).join('\n'),
       cover_path: item.coverPath || null,
       banner_path: item.bannerPath || null,
       description: item.description || '',
@@ -483,6 +512,86 @@ export class SupabaseSyncService {
       headers: { 'Prefer': 'resolution=merge-duplicates' },
     });
     return res.status >= 200 && res.status < 300;
+  }
+
+  // --- 4.5. ADMIN PUBLISH CATALOG & CLIENT PULL CATALOG ---
+
+  public async publishCatalog(
+    supabaseUrl: string,
+    anonKey: string,
+    games: Game[],
+    media: MediaItem[],
+    playlists: MediaPlaylist[] = []
+  ): Promise<{ success: boolean; message: string; count: number }> {
+    const test = await this.testConnection(supabaseUrl, anonKey);
+    if (!test.success) {
+      throw new Error(test.message);
+    }
+
+    let gameCount = 0;
+    for (const game of games) {
+      if (game.coverPath && !game.coverPath.startsWith('http')) {
+        game.coverPath = (await this.uploadLocalImage(supabaseUrl, anonKey, game.coverPath, 'covers')) || game.coverPath;
+      }
+      if (game.bannerPath && !game.bannerPath.startsWith('http')) {
+        game.bannerPath = (await this.uploadLocalImage(supabaseUrl, anonKey, game.bannerPath, 'banners')) || game.bannerPath;
+      }
+      const ok = await this.upsertGame(supabaseUrl, anonKey, game);
+      if (ok) gameCount++;
+    }
+
+    let mediaCount = 0;
+    for (const item of media) {
+      if (item.coverPath && !item.coverPath.startsWith('http')) {
+        item.coverPath = (await this.uploadLocalImage(supabaseUrl, anonKey, item.coverPath, 'covers')) || item.coverPath;
+      }
+      if (item.bannerPath && !item.bannerPath.startsWith('http')) {
+        item.bannerPath = (await this.uploadLocalImage(supabaseUrl, anonKey, item.bannerPath, 'banners')) || item.bannerPath;
+      }
+      const ok = await this.upsertMediaItem(supabaseUrl, anonKey, item);
+      if (ok) mediaCount++;
+    }
+
+    for (const playlist of playlists) {
+      if (playlist.coverPath && !playlist.coverPath.startsWith('http')) {
+        playlist.coverPath = (await this.uploadLocalImage(supabaseUrl, anonKey, playlist.coverPath, 'covers')) || playlist.coverPath;
+      }
+      await this.upsertPlaylist(supabaseUrl, anonKey, playlist);
+    }
+
+    return {
+      success: true,
+      message: `Đã xuất bản thành công ${gameCount} game và ${mediaCount} phim & video lên Cloud!`,
+      count: gameCount + mediaCount,
+    };
+  }
+
+  public async pullCatalog(
+    supabaseUrl: string,
+    anonKey: string
+  ): Promise<{
+    games: Game[];
+    media: MediaItem[];
+    playlists: MediaPlaylist[];
+    message: string;
+  }> {
+    const test = await this.testConnection(supabaseUrl, anonKey);
+    if (!test.success) {
+      throw new Error(test.message);
+    }
+
+    const [remoteGames, remoteMedia, remotePlaylists] = await Promise.all([
+      this.pullGames(supabaseUrl, anonKey),
+      this.pullMedia(supabaseUrl, anonKey),
+      this.pullPlaylists(supabaseUrl, anonKey),
+    ]);
+
+    return {
+      games: remoteGames,
+      media: remoteMedia,
+      playlists: remotePlaylists,
+      message: `Đã tải về thành công ${remoteGames.length} game và ${remoteMedia.length} phim từ Cloud!`,
+    };
   }
 
   // --- 5. COMPREHENSIVE 2-WAY FULL CATALOG & PROFILES SYNC ---

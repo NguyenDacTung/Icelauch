@@ -89,7 +89,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   ];
 
   return (
-    <header className="flex-shrink-0 z-40 select-none">
+    <header className="relative flex-shrink-0 z-30 select-none">
       {/* Top Admin banner if active */}
       {isAdmin && (
         <div className="h-6 bg-amber-500/15 border-b border-amber-500/30 px-4 flex items-center justify-between text-xs text-amber-300">

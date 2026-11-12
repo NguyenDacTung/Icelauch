@@ -22,7 +22,11 @@ export const AppWallpaper: React.FC<AppWallpaperProps> = ({ config, lowSpecMode 
   const darkness = Math.max(0, Math.min(95, config.darkness ?? 30));
 
   return (
-    <div className="fixed inset-0 pointer-events-none -z-10 overflow-hidden select-none">
+    <div
+      className="fixed inset-0 pointer-events-none select-none overflow-hidden"
+      style={{ zIndex: 0, pointerEvents: 'none' }}
+      aria-hidden="true"
+    >
       {/* Background Image Container with Zoom & Position */}
       <div
         className="absolute inset-0 w-full h-full bg-no-repeat bg-cover transition-all duration-300 pointer-events-none"
@@ -32,6 +36,7 @@ export const AppWallpaper: React.FC<AppWallpaperProps> = ({ config, lowSpecMode 
           transform: `scale(${zoom}) translateZ(0)`,
           filter: blur > 0 ? `blur(${blur}px)` : undefined,
           willChange: 'transform, filter',
+          pointerEvents: 'none',
         }}
       />
       {/* Darkness Tint Overlay */}
@@ -40,6 +45,7 @@ export const AppWallpaper: React.FC<AppWallpaperProps> = ({ config, lowSpecMode 
         style={{
           backgroundColor: '#07090e',
           opacity: darkness / 100,
+          pointerEvents: 'none',
         }}
       />
     </div>

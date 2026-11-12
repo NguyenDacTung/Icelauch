@@ -23,6 +23,17 @@ export interface InstallProgress {
   statusText: string;
 }
 
+export interface GameExtension {
+  id: string;
+  name: string;             // Ví dụ: "Bản Việt Hóa v1.2", "DLC Blood & Wine", "Update 1.0.5"
+  category: 'viethoa' | 'dlc' | 'update' | 'mod' | 'other';
+  description?: string;     // Hướng dẫn cài đặt, chép đè file...
+  links: string[];          // [Link chính, Link dự phòng 1, Link dự phòng 2]
+  version?: string;
+  fileSize?: number;
+  createdAt: string;
+}
+
 export interface Game {
   id: string;
   name: string;
@@ -49,6 +60,8 @@ export interface Game {
   requirementsText?: string;
   actionButtonIds?: string[];
   downloadLinks: string[];
+  backupLinks?: string[];
+  extensions?: GameExtension[];
   expectedSize?: number;
   archivePassword?: string;
   installPath?: string;
@@ -89,6 +102,7 @@ export interface MediaItem {
   title: string;
   artist?: string;
   link: string;
+  backupLinks?: string[];
   downloadStatus?: 'idle' | 'downloading' | 'downloaded' | 'error';
   downloadProgress?: number;
   localFilePath?: string;
@@ -213,11 +227,26 @@ export interface WallpaperConfig {
   showWithParticles?: boolean;
 }
 
+export interface PasswordResetRequest {
+  id: string;
+  profileId?: string;
+  username: string;
+  nickname: string;
+  requestedAt: string;
+  status: 'pending' | 'approved' | 'rejected';
+  resolvedAt?: string;
+}
+
 export interface UserProfile {
   id: string;                      // Unique UUID or slug
+  username?: string;               // Tên tài khoản đăng nhập
   nickname: string;                // Display name (2 - 20 chars)
   avatar: string;                  // Built-in avatar id ('cyber_1', 'game_1', etc.) or local file / URL
-  pinHash: string;                 // SHA-256 hash of PIN (4-10 digits)
+  role?: 'admin' | 'user';         // Phân quyền
+  passwordHash?: string;           // SHA-256 hash của mật khẩu (cho User)
+  passwordSalt?: string;           // Salt bảo mật
+  pinHash?: string;                // SHA-256 hash of PIN (cho Admin)
+  requiresPasswordReset?: boolean; // Cờ yêu cầu đổi mật khẩu khi đăng nhập
   createdDate: string;             // ISO 8601
   lastActiveDate: string;          // ISO 8601
   library: string[];               // game IDs in personal library
@@ -249,6 +278,7 @@ export interface AppData {
   media: MediaItem[];
   playlists?: MediaPlaylist[];
   profiles?: UserProfile[];
+  passwordResets?: PasswordResetRequest[];
   activeProfileId?: string | null;
   rememberedProfileId?: string | null;
   cloudSync?: CloudSyncSettings;

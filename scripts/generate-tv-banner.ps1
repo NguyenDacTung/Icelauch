@@ -47,3 +47,4 @@ foreach ($b in $bannerConfigs) {
 
 $sourceImg.Dispose()
 Write-Output "Android TV Banner and Icon update completed successfully!"
+

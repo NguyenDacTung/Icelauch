@@ -402,6 +402,9 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
     });
   };
 
+  const [isPublishingCloud, setIsPublishingCloud] = useState(false);
+  const [isPullingCloud, setIsPullingCloud] = useState(false);
+
   const handleManualCloudSync = async () => {
     sfx.playClick();
     setIsSyncingCloud(true);
@@ -429,6 +432,55 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
       setSyncMessage(`✕ ${err?.message || 'Lỗi đồng bộ'}`);
     } finally {
       setIsSyncingCloud(false);
+    }
+  };
+
+  const handlePublishCloudCatalog = async () => {
+    if (!window.confirm('Hành động này sẽ xuất bản toàn bộ danh mục Game, Phim và Gói mở rộng từ máy này lên Cloud làm phiên bản chuẩn cho toàn bộ người dùng. Tiếp tục?')) {
+      return;
+    }
+    sfx.playClick();
+    setIsPublishingCloud(true);
+    setSyncMessage(null);
+    try {
+      const targetUrl = (supabaseUrl && supabaseUrl.trim()) || DEFAULT_SUPABASE_URL;
+      const targetKey = (supabaseAnonKey && supabaseAnonKey.trim()) || DEFAULT_SUPABASE_ANON_KEY;
+      const res = await window.api.publishCloudCatalog?.({ url: targetUrl, key: targetKey });
+      if (res?.success) {
+        sfx.playSuccess();
+        setSyncMessage(`✓ ${res.message || 'Đã xuất bản danh mục lên Cloud thành công!'}`);
+      } else {
+        sfx.playError();
+        setSyncMessage(`✕ Lỗi xuất bản: ${res?.message || 'Không thể kết nối'}`);
+      }
+    } catch (err: any) {
+      sfx.playError();
+      setSyncMessage(`✕ Lỗi xuất bản: ${err?.message || 'Thao tác thất bại'}`);
+    } finally {
+      setIsPublishingCloud(false);
+    }
+  };
+
+  const handlePullCloudCatalog = async () => {
+    sfx.playClick();
+    setIsPullingCloud(true);
+    setSyncMessage(null);
+    try {
+      const targetUrl = (supabaseUrl && supabaseUrl.trim()) || DEFAULT_SUPABASE_URL;
+      const targetKey = (supabaseAnonKey && supabaseAnonKey.trim()) || DEFAULT_SUPABASE_ANON_KEY;
+      const res = await window.api.pullCloudCatalog?.({ url: targetUrl, key: targetKey });
+      if (res?.success) {
+        sfx.playSuccess();
+        setSyncMessage(`✓ ${res.message || 'Đã tải danh mục mới nhất từ Cloud thành công!'}`);
+      } else {
+        sfx.playError();
+        setSyncMessage(`✕ Lỗi tải dữ liệu: ${res?.message || 'Không thể kết nối'}`);
+      }
+    } catch (err: any) {
+      sfx.playError();
+      setSyncMessage(`✕ Lỗi tải dữ liệu: ${err?.message || 'Thao tác thất bại'}`);
+    } finally {
+      setIsPullingCloud(false);
     }
   };
 
@@ -1281,19 +1333,50 @@ CREATE POLICY "Public Update Assets" ON storage.objects FOR UPDATE TO anon WITH 
               </div>
             </div>
 
-            <div className="flex items-center gap-2 shrink-0">
+            <div className="flex flex-wrap items-center gap-2 shrink-0">
+              {isAdmin ? (
+                <>
+                  <button
+                    type="button"
+                    onClick={handlePublishCloudCatalog}
+                    disabled={isPublishingCloud || isSyncingCloud}
+                    title="Xuất bản danh mục Game, Phim và Gói mở rộng từ máy này lên Cloud cho toàn bộ người dùng"
+                    className={`px-4 py-2 rounded-xl text-xs font-black flex items-center gap-1.5 transition-all ${
+                      isPublishingCloud
+                        ? 'bg-white/10 text-white/50 cursor-not-allowed'
+                        : 'bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white shadow-lg shadow-indigo-950/50 transform hover:-translate-y-0.5 active:scale-95'
+                    }`}
+                  >
+                    <Cloud className={`w-3.5 h-3.5 ${isPublishingCloud ? 'animate-bounce' : ''}`} />
+                    <span>{isPublishingCloud ? 'Đang xuất bản...' : '☁️ Tải Lên Cloud (Publish)'}</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={handlePullCloudCatalog}
+                    disabled={isPullingCloud || isSyncingCloud}
+                    title="Tải danh mục chuẩn mới nhất từ Cloud về máy này"
+                    className={`px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all bg-white/10 hover:bg-white/20 text-white border border-white/15 active:scale-95`}
+                  >
+                    <FileDown className={`w-3.5 h-3.5 ${isPullingCloud ? 'animate-bounce' : ''}`} />
+                    <span>{isPullingCloud ? 'Đang tải...' : '📥 Tải Danh Mục Mới'}</span>
+                  </button>
+                </>
+              ) : null}
+
               <button
                 type="button"
                 onClick={handleManualCloudSync}
-                disabled={isSyncingCloud}
+                disabled={isSyncingCloud || isPublishingCloud || isPullingCloud}
+                title={isAdmin ? "Đồng bộ 2 chiều dữ liệu cá nhân" : "Đồng bộ an toàn: Tải danh mục mới nhất và lưu dữ liệu cá nhân của bạn"}
                 className={`px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all ${
                   isSyncingCloud
                     ? 'bg-white/10 text-white/50 cursor-not-allowed'
-                    : 'bg-indigo-600 hover:bg-indigo-500 text-white shadow-md shadow-indigo-950/40 transform hover:-translate-y-0.5'
+                    : 'bg-indigo-600 hover:bg-indigo-500 text-white shadow-md shadow-indigo-950/40 transform hover:-translate-y-0.5 active:scale-95'
                 }`}
               >
                 <RefreshCw className={`w-3.5 h-3.5 ${isSyncingCloud ? 'animate-spin' : ''}`} />
-                <span>{isSyncingCloud ? 'Đang đồng bộ...' : 'Đồng Bộ Ngay'}</span>
+                <span>{isSyncingCloud ? 'Đang đồng bộ...' : isAdmin ? 'Đồng Bộ Hồ Sơ' : 'Đồng Bộ Ngay'}</span>
               </button>
             </div>
           </div>
@@ -1820,9 +1903,29 @@ CREATE POLICY "Public Update Assets" ON storage.objects FOR UPDATE TO anon WITH 
 
             {/* Error notice if any */}
             {updateError && (
-              <div className="mt-4 p-3 rounded-xl bg-red-500/15 border border-red-500/30 text-red-400 text-xs flex items-center gap-2">
-                <AlertCircle className="w-4 h-4 shrink-0" />
-                <span>{updateError}</span>
+              <div className="mt-4 p-4 rounded-xl bg-red-500/15 border border-red-500/30 text-red-300 text-xs flex flex-col gap-2.5">
+                <div className="flex items-start gap-2.5">
+                  <AlertCircle className="w-4 h-4 shrink-0 text-red-400 mt-0.5" />
+                  <div className="space-y-1">
+                    <p className="font-bold text-red-200">
+                      {updateError.includes('checksum') || updateError.includes('sha512')
+                        ? 'Lỗi kiểm tra tính toàn vẹn (Checksum Hash) khi tải tự động'
+                        : 'Không thể cập nhật tự động'}
+                    </p>
+                    <p className="text-[11px] text-red-300/80 font-mono break-all">{updateError}</p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    sfx.playClick();
+                    window.api?.openExternal?.('https://github.com/NguyenDacTung/Icelauch/releases');
+                  }}
+                  className="self-start px-3.5 py-1.5 rounded-lg bg-red-500/20 hover:bg-red-500/30 text-white border border-red-500/40 text-xs font-bold flex items-center gap-1.5 transition-all active:scale-95 shadow-sm"
+                >
+                  <ExternalLink className="w-3.5 h-3.5 text-amber-400" />
+                  <span>Tải Bộ Cài Đặt Trực Tiếp Từ GitHub Releases</span>
+                </button>
               </div>
             )}
           </section>
@@ -1845,9 +1948,19 @@ CREATE POLICY "Public Update Assets" ON storage.objects FOR UPDATE TO anon WITH 
               </div>
 
               {newVersionInfo.releaseNotes ? (
-                <div className="text-xs text-ice-text bg-black/40 p-4 rounded-xl border border-ice-border whitespace-pre-wrap leading-relaxed font-mono">
-                  {newVersionInfo.releaseNotes}
-                </div>
+                newVersionInfo.releaseNotes.includes('<h') ||
+                newVersionInfo.releaseNotes.includes('<ul') ||
+                newVersionInfo.releaseNotes.includes('<li') ||
+                newVersionInfo.releaseNotes.includes('<p>') ? (
+                  <div
+                    className="text-xs text-ice-text bg-black/40 p-4 rounded-xl border border-ice-border/70 overflow-y-auto max-h-72 space-y-2 leading-relaxed release-notes-content"
+                    dangerouslySetInnerHTML={{ __html: newVersionInfo.releaseNotes }}
+                  />
+                ) : (
+                  <div className="text-xs text-ice-text bg-black/40 p-4 rounded-xl border border-ice-border whitespace-pre-wrap leading-relaxed max-h-72 overflow-y-auto">
+                    {newVersionInfo.releaseNotes}
+                  </div>
+                )
               ) : (
                 <p className="text-xs text-ice-subtext">
                   Bản cập nhật bao gồm các cải tiến hiệu năng và sửa lỗi hệ thống.
