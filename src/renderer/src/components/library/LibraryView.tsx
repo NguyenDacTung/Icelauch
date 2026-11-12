@@ -15,7 +15,8 @@ import {
   Gamepad2,
   BookmarkCheck,
   Search,
-  Sparkles
+  Sparkles,
+  Settings2
 } from 'lucide-react';
 import { GameSettingsModal } from './GameSettingsModal';
 import type { Game, AppActionButton } from '../../types';
@@ -33,6 +34,7 @@ interface LibraryViewProps {
   onCancelDownload: (id: string) => void;
   onRetry: (id: string) => void;
   onOpenFolder: (id: string) => void;
+  onOpenInstallSettings?: (game: Game) => void;
   onUninstall: (id: string) => void;
   onSaveGameSettings: (gameId: string, updates: Partial<Game>) => void;
   onSelectCustomExe: (gameId: string) => void;
@@ -53,6 +55,7 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
   onCancelDownload,
   onRetry,
   onOpenFolder,
+  onOpenInstallSettings,
   onUninstall,
   onSaveGameSettings,
   onSelectCustomExe,
@@ -311,13 +314,25 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
               )}
 
               {selectedGame.status === 'uninstalled' && (
-                <button
-                  onClick={() => onDownload(selectedGame.id)}
-                  className="h-11 px-8 rounded-md bg-ice-accent hover:bg-ice-accentHover text-white text-sm font-bold tracking-wider uppercase flex items-center gap-2.5 shadow-lg hover:shadow-ice-accent/20 transition-all transform active:scale-95"
-                >
-                  <Download className="w-5 h-5" />
-                  <span>TẢI GAME VỀ MÁY</span>
-                </button>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => onDownload(selectedGame.id)}
+                    className="h-11 px-8 rounded-md bg-ice-accent hover:bg-ice-accentHover text-white text-sm font-bold tracking-wider uppercase flex items-center gap-2.5 shadow-lg hover:shadow-ice-accent/20 transition-all transform active:scale-95"
+                  >
+                    <Download className="w-5 h-5" />
+                    <span>TẢI GAME VỀ MÁY</span>
+                  </button>
+                  {onOpenInstallSettings && (
+                    <button
+                      type="button"
+                      onClick={() => onOpenInstallSettings(selectedGame)}
+                      className="w-11 h-11 rounded-md bg-white/10 hover:bg-white/20 border border-white/20 text-white flex items-center justify-center transition-all shadow-md active:scale-95 shrink-0"
+                      title="Cài đặt nơi lưu file game & xem dung lượng ổ đĩa"
+                    >
+                      <Settings2 className="w-5 h-5 text-amber-400" />
+                    </button>
+                  )}
+                </div>
               )}
 
               {(selectedGame.status === 'downloading' || selectedGame.status === 'installing') && (

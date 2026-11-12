@@ -1,4 +1,4 @@
-import React, { useState, useDeferredValue } from 'react';
+import React, { useState, useEffect, useDeferredValue } from 'react';
 import {
   Gamepad2,
   Sparkles,
@@ -9,6 +9,7 @@ import {
   Bookmark,
   BookmarkCheck,
   CheckCircle2,
+  Plus,
 } from 'lucide-react';
 import type { Game, MediaItem, AppSettings, SectionBannerSettings } from '../../types';
 import { MobileHeroBanner } from './MobileHeroBanner';
@@ -40,6 +41,7 @@ export const MobileHomeView: React.FC<MobileHomeViewProps> = ({
 }) => {
   const [localSearch, setLocalSearch] = useState('');
   const deferredSearch = useDeferredValue(localSearch);
+  const [visibleCount, setVisibleCount] = useState<number>(10);
   const visibleGames = games.filter((g) => !g.hidden);
 
   const effectiveSearch = (deferredSearch || searchQuery).trim().toLowerCase();
@@ -48,6 +50,10 @@ export const MobileHomeView: React.FC<MobileHomeViewProps> = ({
     if (!effectiveSearch) return true;
     return g.name.toLowerCase().includes(effectiveSearch) || (g.genre && g.genre.toLowerCase().includes(effectiveSearch));
   });
+
+  useEffect(() => {
+    setVisibleCount(10);
+  }, [effectiveSearch]);
 
   const featuredGames = visibleGames.filter((g) => g.featured || g.status === 'ready');
 
@@ -162,59 +168,75 @@ export const MobileHomeView: React.FC<MobileHomeViewProps> = ({
         </div>
 
         {filteredGames.length > 0 ? (
-          <div className="grid grid-cols-2 gap-2.5">
-            {filteredGames.map((game) => (
-              <div
-                key={game.id}
-                onClick={() => onSelectGame(game)}
-                className="rounded-xl overflow-hidden bg-[#14171F] border border-ice-border/70 cursor-pointer group hover:border-ice-accent/60 transition-all shadow-md flex flex-col"
-              >
-                {/* 16:9 Thumbnail Cover */}
-                <div className="relative aspect-video w-full bg-black overflow-hidden">
-                  <SafeImage
-                    src={game.coverPath || game.bannerPath || ''}
-                    alt={game.name}
-                    title={game.name}
-                    fallbackType="game"
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                  />
-                  <div className="absolute top-1.5 right-1.5 flex items-center gap-1">
-                    {game.expectedSize && (
-                      <span className="px-1.5 py-0.2 rounded text-[8px] font-black bg-black/75 text-emerald-400 border border-emerald-400/30">
-                        {formatBytes(game.expectedSize)}
+          <>
+            <div className="grid grid-cols-2 gap-2.5">
+              {filteredGames.slice(0, visibleCount).map((game) => (
+                <div
+                  key={game.id}
+                  onClick={() => onSelectGame(game)}
+                  className="rounded-xl overflow-hidden bg-[#14171F] border border-ice-border/70 cursor-pointer group hover:border-ice-accent/60 transition-all shadow-md flex flex-col"
+                >
+                  {/* 16:9 Thumbnail Cover */}
+                  <div className="relative aspect-video w-full bg-black overflow-hidden">
+                    <SafeImage
+                      src={game.coverPath || game.bannerPath || ''}
+                      alt={game.name}
+                      title={game.name}
+                      fallbackType="game"
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                    />
+                    <div className="absolute top-1.5 right-1.5 flex items-center gap-1">
+                      {game.expectedSize && (
+                        <span className="px-1.5 py-0.2 rounded text-[8px] font-black bg-black/75 text-emerald-400 border border-emerald-400/30">
+                          {formatBytes(game.expectedSize)}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Card Info & Mobile Incompatible CTA */}
+                  <div className="p-2 space-y-1.5 flex-1 flex flex-col justify-between">
+                    <div>
+                      <h4 className="text-xs font-bold text-white line-clamp-1 group-hover:text-ice-accent transition-colors">
+                        {game.name}
+                      </h4>
+                      <span className="text-[10px] text-ice-subtext line-clamp-1">
+                        {game.genre || 'Game PC'}
                       </span>
-                    )}
+                    </div>
+
+                    {/* Mobile CTA */}
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onIncompatibleClick?.(game);
+                      }}
+                      className="w-full h-7 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/30 text-amber-300 text-[10px] font-bold flex items-center justify-center gap-1 shadow-sm active:scale-95"
+                      title="Trò chơi dành cho máy tính Windows"
+                    >
+                      <Monitor className="w-3 h-3 text-amber-400" />
+                      <span>🚫 Chỉ PC</span>
+                    </button>
                   </div>
                 </div>
+              ))}
+            </div>
 
-                {/* Card Info & Mobile Incompatible CTA */}
-                <div className="p-2 space-y-1.5 flex-1 flex flex-col justify-between">
-                  <div>
-                    <h4 className="text-xs font-bold text-white line-clamp-1 group-hover:text-ice-accent transition-colors">
-                      {game.name}
-                    </h4>
-                    <span className="text-[10px] text-ice-subtext line-clamp-1">
-                      {game.genre || 'Game PC'}
-                    </span>
-                  </div>
-
-                  {/* Mobile CTA */}
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onIncompatibleClick?.(game);
-                    }}
-                    className="w-full h-7 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/30 text-amber-300 text-[10px] font-bold flex items-center justify-center gap-1 shadow-sm active:scale-95"
-                    title="Trò chơi dành cho máy tính Windows"
-                  >
-                    <Monitor className="w-3 h-3 text-amber-400" />
-                    <span>🚫 Chỉ PC</span>
-                  </button>
-                </div>
+            {/* Load More Button for Mobile (10 items = 5 rows x 2 cols) */}
+            {visibleCount < filteredGames.length && (
+              <div className="pt-2 pb-4 flex justify-center">
+                <button
+                  type="button"
+                  onClick={() => setVisibleCount((prev) => prev + 10)}
+                  className="w-full py-2.5 rounded-xl bg-white/10 hover:bg-white/15 border border-white/10 text-white font-bold text-xs tracking-wide transition-all shadow-sm active:scale-98 flex items-center justify-center gap-1.5"
+                >
+                  <Plus className="w-4 h-4 text-cyan-400" />
+                  <span>Xem Thêm (+10 Game • Còn lại {filteredGames.length - visibleCount})</span>
+                </button>
               </div>
-            ))}
-          </div>
+            )}
+          </>
         ) : (
           <div className="p-8 text-center text-xs text-ice-subtext">
             Không tìm thấy tựa game nào phù hợp

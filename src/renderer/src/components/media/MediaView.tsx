@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Film, 
   Music, 
@@ -49,6 +49,7 @@ interface MediaViewProps {
   onDeletePlaylist?: (id: string) => void;
   onDownloadMedia?: (id: string) => void;
   onDeleteDownloaded?: (id: string) => void;
+  onMinimizeToMiniPlayer?: (media: MediaItem) => void;
 }
 
 export const MediaView: React.FC<MediaViewProps> = ({
@@ -68,6 +69,7 @@ export const MediaView: React.FC<MediaViewProps> = ({
   onDeletePlaylist,
   onDownloadMedia,
   onDeleteDownloaded,
+  onMinimizeToMiniPlayer,
 }) => {
   // 3 Sub-Tabs: 'video' | 'music' | 'podcast'
   const [activeTab, setActiveTab] = useState<'video' | 'music' | 'podcast'>('video');
@@ -76,6 +78,11 @@ export const MediaView: React.FC<MediaViewProps> = ({
   const [activeVideo, setActiveVideo] = useState<MediaItem | null>(null);
   const [activeAudioTrack, setActiveAudioTrack] = useState<MediaItem | null>(null);
   const [showHiddenOnly, setShowHiddenOnly] = useState(false);
+  const [visibleCount, setVisibleCount] = useState<number>(24);
+
+  useEffect(() => {
+    setVisibleCount(24);
+  }, [activeTab, selectedTag, filterOfflineOnly, searchQuery, showHiddenOnly]);
 
   // Playlist Form Modal state
   const [isPlaylistModalOpen, setIsPlaylistModalOpen] = useState(false);
@@ -157,6 +164,10 @@ export const MediaView: React.FC<MediaViewProps> = ({
         playlists={playlists}
         isAdmin={isAdmin}
         onBack={() => setActiveVideo(null)}
+        onMinimizeToMiniPlayer={(m) => {
+          setActiveVideo(null);
+          onMinimizeToMiniPlayer?.(m);
+        }}
         onSelectVideo={(item) => setActiveVideo(item)}
         onEditMedia={onEditMedia}
         onUpdateProgress={onUpdateMediaProgress}
@@ -610,8 +621,9 @@ export const MediaView: React.FC<MediaViewProps> = ({
         </div>
 
         {filteredMedia.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-            {filteredMedia.map((item) => {
+          <>
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4">
+            {filteredMedia.slice(0, visibleCount).map((item) => {
               const parsed = parseMediaUrl(item.link);
               const coverImg =
                 item.coverPath ||
@@ -747,6 +759,24 @@ export const MediaView: React.FC<MediaViewProps> = ({
               );
             })}
           </div>
+
+          {/* Load More Button for PC Media (24 items per batch) */}
+          {visibleCount < filteredMedia.length && (
+            <div className="pt-4 flex justify-center">
+              <button
+                type="button"
+                onClick={() => {
+                  sfx.playClick();
+                  setVisibleCount((prev) => prev + 24);
+                }}
+                className="px-8 py-3 rounded-2xl bg-white/10 hover:bg-white/20 border border-white/20 text-white font-bold text-xs tracking-wider uppercase transition-all shadow-lg active:scale-95 flex items-center gap-2 hover:border-amber-400"
+              >
+                <Plus className="w-4 h-4 text-amber-400" />
+                <span>Xem Thêm Phim & Video (+24 Mục • Còn lại {filteredMedia.length - visibleCount})</span>
+              </button>
+            </div>
+          )}
+        </>
         ) : (
           <div className="py-20 flex flex-col items-center justify-center text-center space-y-3 rounded-2xl border border-dashed border-ice-border bg-ice-card/40">
             <Film className="w-10 h-10 text-ice-subtext opacity-50" />

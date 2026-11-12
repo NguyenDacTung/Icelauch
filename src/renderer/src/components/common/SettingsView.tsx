@@ -32,7 +32,8 @@ import {
   Cloud,
   Database,
   CheckCircle2,
-  Copy
+  Copy,
+  Users
 } from 'lucide-react';
 import type { 
   AppSettings, 
@@ -57,6 +58,7 @@ interface SettingsViewProps {
   onChangePin: () => void;
   onOpenAdminAuth?: () => void;
   onOpenBannerManager?: () => void;
+  onOpenUserManagement?: () => void;
   onUpdateTags?: (type: 'game' | 'media', tags: string[]) => void;
   onSaveSettings?: (settings: Partial<AppSettings>) => void;
   cloudSync?: CloudSyncSettings;
@@ -73,6 +75,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
   onChangePin,
   onOpenAdminAuth,
   onOpenBannerManager,
+  onOpenUserManagement,
   onUpdateTags,
   onSaveSettings,
   cloudSync,
@@ -1651,6 +1654,30 @@ CREATE POLICY "Public Update Assets" ON storage.objects FOR UPDATE TO anon WITH 
                   Mã PIN bảo vệ các quyền thêm/sửa/xoá game, quản lý video và cấu hình hệ thống. Có thể sử dụng từ 4 đến 10 chữ số.
                 </p>
               </section>
+
+              {/* User Accounts Management */}
+              {onOpenUserManagement && (
+                <section className="bg-ice-card rounded-2xl border border-ice-border p-6 space-y-4">
+                  <div className="flex items-center justify-between border-b border-ice-border/60 pb-3">
+                    <div className="flex items-center gap-2">
+                      <Users className="w-5 h-5 text-blue-400" />
+                      <h3 className="text-sm font-bold text-white uppercase tracking-wider">
+                        Quản Trị Người Dùng & Tài Khoản
+                      </h3>
+                    </div>
+                    <button
+                      onClick={onOpenUserManagement}
+                      className="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold transition-all shadow-md flex items-center gap-1.5"
+                    >
+                      <Users className="w-3.5 h-3.5" />
+                      <span>Mở Danh Sách Tài Khoản</span>
+                    </button>
+                  </div>
+                  <p className="text-xs text-ice-subtext leading-relaxed">
+                    Xem toàn bộ hồ sơ khách hàng, tìm kiếm, sửa thông tin, đặt lại mật khẩu hoặc cấm tài khoản có thời hạn (1h, 1 ngày, 7 ngày, 30 ngày, vĩnh viễn).
+                  </p>
+                </section>
+              )}
 
               {/* Centralized Banner Manager */}
               <section className="bg-ice-card rounded-2xl border border-ice-border p-6 space-y-4">

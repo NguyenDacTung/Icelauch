@@ -95,6 +95,28 @@ export const API = {
   hashPin: (pin: string): Promise<string> => ipcRenderer.invoke('profile:hash-pin', pin),
   hashPassword: (data: { password: string; salt?: string }): Promise<{ hash: string; salt: string }> =>
     ipcRenderer.invoke('profile:hash-password', data),
+  banProfile: (data: { id: string; bannedUntil: string | null; reason?: string }): Promise<boolean> =>
+    ipcRenderer.invoke('profile:ban', data),
+
+  // IceDrop P2P & Cloud Sharing
+  getIceDropShares: (): Promise<any[]> => ipcRenderer.invoke('icedrop:get-shares'),
+  addIceDropShare: (item: any): Promise<any> => ipcRenderer.invoke('icedrop:add-share', item),
+  deleteIceDropShare: (id: string): Promise<boolean> => ipcRenderer.invoke('icedrop:delete-share', id),
+
+  // IceController Server
+  getControllerStatus: (): Promise<{ isRunning: boolean; port: number; localIps: string[]; connectedClients: number }> =>
+    ipcRenderer.invoke('controller:get-status'),
+  startControllerServer: (): Promise<boolean> => ipcRenderer.invoke('controller:start'),
+  stopControllerServer: (): Promise<boolean> => ipcRenderer.invoke('controller:stop'),
+  onControllerMessage: (callback: (msg: any) => void) => {
+    const handler = (_event: any, data: any) => callback(data);
+    ipcRenderer.on('controller:message', handler);
+    return () => ipcRenderer.removeListener('controller:message', handler);
+  },
+
+  // Drives Storage Space
+  getDrivesSpace: (): Promise<{ drive: string; freeGB: number; totalGB: number }[]> =>
+    ipcRenderer.invoke('system:get-drives-space'),
 
   // Cloud Sync Settings & Action
   getCloudSyncSettings: (): Promise<CloudSyncSettings> => ipcRenderer.invoke('cloud:get-settings'),

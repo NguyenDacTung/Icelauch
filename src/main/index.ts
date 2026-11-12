@@ -14,6 +14,7 @@ import { GameRunnerService } from './services/gameRunner';
 import { MediaDownloadManager } from './services/mediaDownloader';
 import { UpdateManager } from './services/updateManager';
 import { SupabaseSyncService } from './services/supabaseSync';
+import { controllerServer } from './services/controllerServer';
 import crypto from 'crypto';
 import type { Game, MediaItem, AppSettings, MediaPlaylist, UserProfile, CloudSyncSettings } from '../renderer/src/types';
 
@@ -251,6 +252,14 @@ app.whenReady().then(async () => {
     await streamProxy.start();
   } catch (err) {
     console.error('Failed to start streaming proxy:', err);
+  }
+
+  try {
+    controllerServer.start((msg) => {
+      mainWindow?.webContents.send('controller:message', msg);
+    });
+  } catch (err) {
+    console.error('Failed to start controller server:', err);
   }
 
   // Register IPC Handlers
@@ -683,10 +692,27 @@ app.whenReady().then(async () => {
     return storage.deleteProfile(id);
   });
 
+  ipcMain.handle('profile:ban', (_event, { id, bannedUntil, reason }: { id: string; bannedUntil: string | null; reason?: string }) => {
+    return storage.banProfile(id, bannedUntil, reason);
+  });
+
   ipcMain.handle('profile:login', (_event, { id, pin, password, remember }: { id: string; pin?: string; password?: string; remember?: boolean }) => {
     const p = storage.getProfile(id);
     if (!p) {
       return { success: false, error: 'Không tìm thấy hồ sơ người dùng' };
+    }
+
+    // Check if account is banned
+    if (p.bannedUntil) {
+      const banEnd = new Date(p.bannedUntil);
+      if (banEnd > new Date()) {
+        const timeStr = banEnd.toLocaleString('vi-VN');
+        const reasonMsg = p.banReason ? ` vì lý do: "${p.banReason}"` : '';
+        return {
+          success: false,
+          error: `Tài khoản của bạn đã bị tạm khóa đến ${timeStr}${reasonMsg}. Vui lòng liên hệ Admin.`
+        };
+      }
     }
 
     // Admin account or legacy PIN check
@@ -712,6 +738,52 @@ app.whenReady().then(async () => {
     }
 
     return { success: true, profile: p };
+  });
+
+  // IceDrop Handlers
+  ipcMain.handle('icedrop:get-shares', () => {
+    return storage.getIceDropShares();
+  });
+
+  ipcMain.handle('icedrop:add-share', (_event, item: any) => {
+    return storage.addIceDropShare(item);
+  });
+
+  ipcMain.handle('icedrop:delete-share', (_event, id: string) => {
+    return storage.deleteIceDropShare(id);
+  });
+
+  // Controller Server Handlers
+  ipcMain.handle('controller:get-status', () => {
+    return controllerServer.getStatus();
+  });
+
+  ipcMain.handle('controller:start', () => {
+    return controllerServer.start((msg) => {
+      mainWindow?.webContents.send('controller:message', msg);
+    });
+  });
+
+  ipcMain.handle('controller:stop', () => {
+    controllerServer.stop();
+    return true;
+  });
+
+  // System Drive Free Space
+  ipcMain.handle('system:get-drives-space', () => {
+    const letters = ['C:\\', 'D:\\', 'E:\\', 'F:\\', 'G:\\'];
+    const drives: { drive: string; freeGB: number; totalGB: number }[] = [];
+    for (const letter of letters) {
+      try {
+        if (fs.existsSync(letter)) {
+          const stat = fs.statfsSync(letter);
+          const freeGB = Math.round((stat.bavail * stat.bsize) / (1024 * 1024 * 1024));
+          const totalGB = Math.round((stat.blocks * stat.bsize) / (1024 * 1024 * 1024));
+          drives.push({ drive: letter, freeGB, totalGB });
+        }
+      } catch {}
+    }
+    return drives;
   });
 
   ipcMain.handle('profile:hash-password', (_event, { password, salt }: { password: string; salt?: string }) => {

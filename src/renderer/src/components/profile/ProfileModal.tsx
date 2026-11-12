@@ -169,16 +169,18 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
       ? customAvatarUrl.trim()
       : selectedAvatar;
 
+    const effectiveRole = isEditing && (profile?.role === 'admin' || (profile?.pinHash && !profile?.passwordHash)) ? 'admin' : 'user';
+
     try {
       setLoading(true);
       await onSave({
         id: profile?.id,
         username: trimmedUsername,
         nickname: trimmedName,
-        role,
+        role: effectiveRole,
         avatar: effectiveAvatar,
-        pin: role === 'admin' ? pin : undefined,
-        password: role === 'user' ? password : undefined,
+        pin: effectiveRole === 'admin' ? pin : undefined,
+        password: effectiveRole === 'user' ? password : undefined,
         remember,
       });
       onClose();
@@ -265,36 +267,18 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
               </div>
             </div>
 
-            {/* Role Selector */}
-            <div className="pt-2 border-t border-white/5 flex items-center justify-between">
-              <span className="text-[11px] font-bold text-ice-subtext uppercase tracking-wider">
-                Loại tài khoản:
-              </span>
-              <div className="flex items-center gap-1.5 p-0.5 rounded-lg bg-black/40 border border-ice-border">
-                <button
-                  type="button"
-                  onClick={() => setRole('user')}
-                  className={`px-3 py-1 rounded text-xs font-bold transition-all ${
-                    role === 'user'
-                      ? 'bg-ice-accent text-white shadow'
-                      : 'text-ice-subtext hover:text-white'
-                  }`}
-                >
-                  👤 Người Dùng
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setRole('admin')}
-                  className={`px-3 py-1 rounded text-xs font-bold transition-all ${
-                    role === 'admin'
-                      ? 'bg-amber-400 text-black shadow'
-                      : 'text-ice-subtext hover:text-white'
-                  }`}
-                >
-                  🛡️ Quản Trị Viên (Admin)
-                </button>
+            {/* Role Badge (Only shown when editing the existing Master Admin) */}
+            {isEditing && (profile?.role === 'admin' || (profile?.pinHash && !profile?.passwordHash)) ? (
+              <div className="pt-2 border-t border-white/5 flex items-center justify-between">
+                <span className="text-[11px] font-bold text-ice-subtext uppercase tracking-wider">
+                  Loại tài khoản:
+                </span>
+                <span className="px-3 py-1 rounded text-xs font-bold bg-amber-400 text-black shadow flex items-center gap-1.5">
+                  <ShieldAlert className="w-3.5 h-3.5" />
+                  <span>Quản Trị Viên (Master Admin)</span>
+                </span>
               </div>
-            </div>
+            ) : null}
           </div>
 
           {/* Avatar Chooser */}

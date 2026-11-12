@@ -124,6 +124,17 @@ export const ProfilePickerView: React.FC<ProfilePickerViewProps> = ({
   const handleSubmitAuth = async () => {
     if (!promptProfile) return;
 
+    if (promptProfile.bannedUntil) {
+      const banEnd = new Date(promptProfile.bannedUntil);
+      if (banEnd > new Date()) {
+        const timeStr = banEnd.toLocaleString('vi-VN');
+        const reasonMsg = promptProfile.banReason ? ` vì lý do: "${promptProfile.banReason}"` : '';
+        setAuthError(`Tài khoản này đã bị tạm khóa đến ${timeStr}${reasonMsg}. Vui lòng liên hệ Admin.`);
+        triggerShake();
+        return;
+      }
+    }
+
     if (isAdminProfile) {
       if (pinInput.length < 4) {
         setAuthError('Vui lòng nhập tối thiểu 4 chữ số PIN Admin');
@@ -231,9 +242,15 @@ export const ProfilePickerView: React.FC<ProfilePickerViewProps> = ({
                 <span className="font-bold text-base sm:text-lg text-white group-hover:text-ice-accent transition-colors block">
                   {profile.nickname}
                 </span>
-                <span className="text-[11px] text-ice-subtext block">
-                  {profile.library?.length || 0} Game • {Object.keys(profile.watchProgress || {}).length} Phim
-                </span>
+                {profile.bannedUntil && new Date(profile.bannedUntil) > new Date() ? (
+                  <span className="inline-block px-1.5 py-0.5 rounded text-[10px] font-bold bg-red-500/20 text-red-400 border border-red-500/30">
+                    🚫 Tạm Khóa
+                  </span>
+                ) : (
+                  <span className="text-[11px] text-ice-subtext block">
+                    {profile.library?.length || 0} Game • {Object.keys(profile.watchProgress || {}).length} Phim
+                  </span>
+                )}
               </div>
             </div>
           ))}

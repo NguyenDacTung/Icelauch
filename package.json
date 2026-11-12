@@ -1,6 +1,6 @@
 {
   "name": "icelauch",
-  "version": "1.0.5",
+  "version": "1.1.0",
   "description": "Trình quản lý game và giải trí cá nhân cho Windows 10",
   "main": "dist-electron/main/index.js",
   "scripts": {
@@ -75,7 +75,8 @@
     "lucide-react": "^1.16.0",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
-    "tailwind-merge": "^3.5.0"
+    "tailwind-merge": "^3.5.0",
+    "ws": "^8.22.2"
   },
   "devDependencies": {
     "@capacitor/android": "^8.6.0",
@@ -84,6 +85,7 @@
     "@types/node": "^25.2.0",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
+    "@types/ws": "^8.18.2",
     "@vitejs/plugin-react": "^6.0.0",
     "autoprefixer": "^10.4.24",
     "cross-env": "^10.1.0",

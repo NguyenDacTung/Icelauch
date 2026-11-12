@@ -34,6 +34,7 @@ interface VideoTheaterViewProps {
   playlists?: MediaPlaylist[];
   isAdmin: boolean;
   onBack: () => void;
+  onMinimizeToMiniPlayer?: (media: MediaItem) => void;
   onSelectVideo: (item: MediaItem) => void;
   onEditMedia?: (item: MediaItem) => void;
   onUpdateProgress?: (id: string, position: number, watched: boolean) => void;
@@ -47,6 +48,7 @@ export const VideoTheaterView: React.FC<VideoTheaterViewProps> = ({
   playlists = [],
   isAdmin,
   onBack,
+  onMinimizeToMiniPlayer,
   onSelectVideo,
   onEditMedia,
   onUpdateProgress,
@@ -220,6 +222,17 @@ export const VideoTheaterView: React.FC<VideoTheaterViewProps> = ({
 
         {/* Quick Top Actions */}
         <div className="flex items-center gap-2">
+          {onMinimizeToMiniPlayer && (
+            <button
+              onClick={() => onMinimizeToMiniPlayer(media)}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-ice-accent/20 hover:bg-ice-accent/30 text-cyan-300 border border-ice-accent/40 text-xs font-semibold transition-colors shadow-sm"
+              title="Thu nhỏ video xuống góc màn hình (Picture-in-Picture)"
+            >
+              <Minimize className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">Thu nhỏ PiP</span>
+            </button>
+          )}
+
           <button
             onClick={() => window.open(media.link, '_blank')}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-ice-card hover:bg-ice-hover text-ice-text hover:text-white border border-ice-border text-xs transition-colors"

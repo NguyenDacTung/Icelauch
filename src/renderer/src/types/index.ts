@@ -247,6 +247,10 @@ export interface UserProfile {
   passwordSalt?: string;           // Salt bảo mật
   pinHash?: string;                // SHA-256 hash of PIN (cho Admin)
   requiresPasswordReset?: boolean; // Cờ yêu cầu đổi mật khẩu khi đăng nhập
+  bannedUntil?: string;            // ISO timestamp nếu bị cấm (null/undefined nếu bình thường)
+  banReason?: string;              // Lý do bị cấm
+  customGameTags?: Record<string, string[]>; // Game ID -> danh sách tags cá nhân
+  friendCode?: string;             // Mã kết bạn (ví dụ: ICE-4921)
   createdDate: string;             // ISO 8601
   lastActiveDate: string;          // ISO 8601
   library: string[];               // game IDs in personal library
@@ -261,6 +265,17 @@ export interface UserProfile {
     totalPlayMinutes: number;
     lastPlayedAt: number;
   }>;
+}
+
+export interface IceDropShareItem {
+  id: string;
+  senderProfileId?: string;
+  senderName?: string;
+  type: 'text' | 'link';
+  content: string;
+  pinCode: string;                 // Mã 4 số nhận chéo tài khoản
+  createdAt: string;
+  expiresAt: string;               // Hết hạn sau 10 phút
 }
 
 export interface CloudSyncSettings {
@@ -279,11 +294,12 @@ export interface AppData {
   playlists?: MediaPlaylist[];
   profiles?: UserProfile[];
   passwordResets?: PasswordResetRequest[];
+  iceDropShares?: IceDropShareItem[];
   activeProfileId?: string | null;
   rememberedProfileId?: string | null;
   cloudSync?: CloudSyncSettings;
   settings: AppSettings;
 }
 
-export type NavigationTab = 'home' | 'library' | 'media' | 'settings';
+export type NavigationTab = 'home' | 'library' | 'media' | 'extras' | 'settings';
 

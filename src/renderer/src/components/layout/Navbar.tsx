@@ -11,7 +11,8 @@ import {
   Sparkles,
   Minus,
   Square,
-  Copy
+  Copy,
+  Users
 } from 'lucide-react';
 import { UserMenuWidget } from '../profile/UserMenuWidget';
 import type { NavigationTab, UserProfile } from '../../types';
@@ -29,6 +30,7 @@ interface NavbarProps {
   onOpenAdminAuth: () => void;
   onLockAdmin: () => void;
   onOpenBannerManager?: () => void;
+  onOpenUserManagement?: () => void;
   activeProfile?: UserProfile | null;
   onSwitchProfile?: () => void;
   onEditCurrentProfile?: () => void;
@@ -48,6 +50,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   onOpenAdminAuth,
   onLockAdmin,
   onOpenBannerManager,
+  onOpenUserManagement,
   activeProfile = null,
   onSwitchProfile,
   onEditCurrentProfile,
@@ -85,6 +88,7 @@ export const Navbar: React.FC<NavbarProps> = ({
     { id: 'home', label: 'TRANG CHỦ' },
     { id: 'library', label: 'THƯ VIỆN' },
     { id: 'media', label: 'GIẢI TRÍ' },
+    { id: 'extras', label: 'TIỆN ÍCH' },
     { id: 'settings', label: 'CÀI ĐẶT' },
   ];
 
@@ -231,6 +235,18 @@ export const Navbar: React.FC<NavbarProps> = ({
             >
               <Sparkles className="w-3.5 h-3.5 text-amber-400" />
               <span className="hidden sm:inline">Quản Lý Banner</span>
+            </button>
+          )}
+
+          {/* Admin User Management Shortcut */}
+          {isAdmin && onOpenUserManagement && (
+            <button
+              onClick={onOpenUserManagement}
+              className="flex items-center gap-1.5 h-8 px-2.5 rounded text-xs font-semibold bg-blue-500/15 hover:bg-blue-500/25 text-blue-300 border border-blue-500/40 transition-colors shadow-sm"
+              title="Quản lý người dùng & phân quyền"
+            >
+              <Users className="w-3.5 h-3.5 text-blue-400" />
+              <span className="hidden md:inline">Người Dùng</span>
             </button>
           )}
 

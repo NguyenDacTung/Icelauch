@@ -1,15 +1,15 @@
 # Icelauch - Trình Quản Lý Game & Rạp Giải Trí Đa Nền Tảng (Windows, Mobile & Android TV)
 
 **Phiên bản phát hành:** 
-- 🖥️ **Windows PC:** `v1.0.5`
-- 📱 **Android Điện Thoại:** `v1.0.5`
+- 🖥️ **Windows PC:** `v1.1.0`
+- 📱 **Android Điện Thoại:** `v1.1.0`
 - 📺 **Android TV Edition:** `v1.0.0` (Bản chuyên biệt điều khiển 100% bằng Remote)
 
 **Hệ điều hành hỗ trợ:** 
 - 🖥️ **Windows 10 / 11 (64-bit)** (Bản Cài Đặt NSIS Setup & Bản Di Động Portable)
 - 📱 **Android Smartphone & Tablet** (Bản APK tối ưu tràn viền Edge-to-Edge)
 - 📺 **Android TV / Smart TV / TV Box** (Bản APK 10-Foot Leanback, 16:9 banner, hỗ trợ 100% Remote D-pad)  
-**Công nghệ nền tảng:** Electron 40 + Capacitor 8 + React 19 + TypeScript + Vite + Tailwind CSS v4 + Supabase BaaS Cloud + 7-Zip Engine
+**Công nghệ nền tảng:** Electron 40 + Capacitor 8 + React 19 + TypeScript + Vite + Tailwind CSS v4 + Supabase BaaS Cloud + 7-Zip Engine + WebSocket Host Controller
 
 ---
 
@@ -28,10 +28,36 @@ Tại trang Releases, bạn sẽ có các file cài đặt tương ứng với t
 
 ---
 
-## 2. Các Nâng Cấp Nổi Bật Trong Phiên Bản v1.0.5
-### 2.0 Khắc Phục Lỗi Nhận Diện Thiết Bị Trên Windows PC
-- **Khắc phục triệt để:** Sửa lỗi logic nhận diện thiết bị khiến bản Windows PC trên một số màn hình độ phân giải cao (1080p, 2K, 4K không cảm ứng) bị nhận diện nhầm thành Android TV và hiển thị khung TV Remote.
-- **Khóa cứng nền tảng Native:** Electron trên Windows Desktop luôn hiển thị giao diện Desktop PC chuẩn (`Navbar`, danh sách game, tab đầy đủ), loại bỏ hoàn toàn khả năng bị rò rỉ layout TV trên máy tính.
+## 2. Các Nâng Cấp Nổi Bật Trong Phiên Bản v1.1.0 (Extras Hub & Core Refinements)
+
+### 2.1 Tab Mới: [✨ Tiện Ích] (Extras Hub)
+- 🎮 **IceController (Tay Cầm Ảo & Điều Khiển PC):**
+  - Biến điện thoại thành tay cầm chơi game chuyên nghiệp (D-pad, Analog Stick 360°, ABXY, LB/RB/LT/RT) hoặc Trackpad chuột + bàn phím ảo.
+  - Kết nối không dây trực tiếp tới PC qua WiFi nội bộ (WebSocket cổng `18999`) với độ trễ siêu thấp (<5ms), tự động quét IP máy tính, phản hồi rung cảm ứng (Haptic feedback) chân thực.
+- ⚡ **IceDrop (Chia Sẻ Dữ Liệu Tức Thì):**
+  - **Chia sẻ qua Đám Mây (Cloud Drop):** Gửi văn bản, liên kết nhanh giữa các thiết bị với cơ chế tự hủy (TTL) sau 10 phút, tối đa 5 mục, sinh mã PIN 4 số ngẫu nhiên giúp nhận chéo dữ liệu giữa các tài khoản khác nhau.
+  - **Chia sẻ Bluetooth / P2P nội bộ:** Chia sẻ trực tiếp file, ảnh, video không qua máy chủ đám mây, ghép nối nhanh qua mã 4 số bảo mật.
+- 📺 **Floating Mini Player (Picture-in-Picture):** Cửa sổ video thu nhỏ nổi ở góc dưới màn hình giúp người dùng vừa xem phim/trailer vừa lướt tìm game khác.
+
+### 2.2 Quản Lý Vị Trí Cài Đặt Game & Bộ Nhớ Ổ Đĩa
+- Thêm nút bánh răng `⚙️` cạnh nút `[Tải Game]` tại Thư Viện và Trang Chi Tiết Game.
+- Hiển thị trực quan toàn bộ ổ đĩa trên máy tính (`C:\`, `D:\`), dung lượng trống còn lại, tiến độ % ổ đĩa.
+- Cho phép người dùng duyệt thư mục cài đặt tùy chọn và tùy chọn "Đặt làm vị trí mặc định cho các game sau".
+
+### 2.3 Quản Lý Tài Khoản Người Dùng (Admin Management Panel)
+- Bảng quản trị người dùng chuyên sâu dành riêng cho Master Admin: xem danh sách, tìm kiếm theo tên, sửa thông tin, đặt lại mật khẩu nhanh.
+- **Cơ chế kỷ luật & Cấm tài khoản:** Cho phép cấm tài khoản theo khoảng thời gian (`1 Giờ`, `1 Ngày`, `7 Ngày`, `30 Ngày`, `Vĩnh Viễn`) kèm lý do cụ thể. Chặn đăng nhập tức thì kèm thông báo thời hạn cấm rõ ràng.
+- Khóa chặt cơ chế đăng ký: Loại bỏ hoàn toàn tùy chọn tạo tài khoản Admin từ giao diện đăng ký của người dùng; tài khoản Admin chỉ có một và quản trị bằng mã PIN bảo mật.
+
+### 2.4 Sửa Lỗi Xác Thực Admin Trên Điện Thoại
+- Sử dụng thuật toán Web Crypto SHA-256 an toàn giúp người dùng điện thoại Android mở khóa Admin mượt mà không còn bị đơ hoặc lỗi do thiếu `window.api`.
+
+### 2.5 Phân Trang Kho Game & Giải Trí Tối Ưu
+- **Trên Điện Thoại:** Hiển thị danh mục dưới cùng 10 mục (5 hàng x 2 cột), có nút `[Xem Thêm]` giúp cuộn trang siêu mượt mà không bị giật lag.
+- **Trên Máy Tính:** Hiển thị danh mục dưới cùng 24 mục (4 hàng x 6 cột), kèm nút `[Xem Thêm]` mở rộng tức thì.
+
+### 2.6 Yêu Cầu Đăng Nhập Trước Khi Lưu & Tải Về
+- Mở popup yêu cầu đăng nhập thân thiện khi người dùng khách (Guest) bấm Lưu game/phim vào thư viện hoặc bấm Tải game, đảm bảo dữ liệu cá nhân được lưu trữ đúng vào tài khoản cá nhân.
 
 ---
 

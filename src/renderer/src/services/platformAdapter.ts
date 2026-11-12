@@ -191,3 +191,62 @@ export async function fetchDirectCloudCatalog(
   }
 }
 
+/**
+ * Cross-platform Admin PIN verification (Electron + Mobile Capacitor/Web)
+ */
+export async function verifyAdminPin(pin: string): Promise<boolean> {
+  if (isElectron() && (window as any).api?.verifyPin) {
+    return (window as any).api.verifyPin(pin);
+  }
+
+  // Mobile / Web fallback
+  try {
+    const cachedProfilesStr = localStorage.getItem(STORAGE_KEY_PROFILES);
+    let targetPinHash: string | undefined;
+
+    if (cachedProfilesStr) {
+      const profiles: UserProfile[] = JSON.parse(cachedProfilesStr);
+      const adminProf = profiles.find((p) => p.role === 'admin' || (p.pinHash && !p.passwordHash));
+      if (adminProf?.pinHash) {
+        targetPinHash = adminProf.pinHash;
+      }
+    }
+
+    if (!targetPinHash) {
+      targetPinHash = localStorage.getItem('icelauch_admin_pin_hash') || undefined;
+    }
+
+    const encoder = new TextEncoder();
+    const data = encoder.encode(pin || '');
+    const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    const inputHash = hashArray.map((b) => b.toString(16).padStart(2, '0')).join('');
+
+    if (targetPinHash) {
+      return inputHash === targetPinHash;
+    }
+
+    // Default fallback: accept PIN '1234' or '123456'
+    const default1234 = '03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4';
+    const default123456 = '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92';
+    return inputHash === default1234 || inputHash === default123456;
+  } catch (err) {
+    console.error('Error in mobile verifyAdminPin:', err);
+    return pin === '1234' || pin === '123456';
+  }
+}
+
+export async function setAdminPinMobile(pin: string): Promise<{ success: boolean; recoveryKey: string }> {
+  try {
+    const encoder = new TextEncoder();
+    const hashBuffer = await crypto.subtle.digest('SHA-256', encoder.encode(pin));
+    const inputHash = Array.from(new Uint8Array(hashBuffer)).map((b) => b.toString(16).padStart(2, '0')).join('');
+    localStorage.setItem('icelauch_admin_pin_hash', inputHash);
+    const recoveryKey = `ICE-KEY-${Math.floor(1000 + Math.random() * 9000)}-${Math.floor(1000 + Math.random() * 9000)}`;
+    localStorage.setItem('icelauch_admin_recovery_key', recoveryKey);
+    return { success: true, recoveryKey };
+  } catch (e) {
+    return { success: false, recoveryKey: '' };
+  }
+}
+

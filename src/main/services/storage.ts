@@ -104,6 +104,7 @@ export class StorageService {
       media: [],
       playlists: [],
       profiles: [],
+      iceDropShares: [],
       activeProfileId: null,
       rememberedProfileId: null,
       cloudSync: {
@@ -203,6 +204,7 @@ export class StorageService {
         parsed.media = parsed.media || [];
         parsed.playlists = parsed.playlists || [];
         parsed.profiles = parsed.profiles || [];
+        parsed.iceDropShares = parsed.iceDropShares || [];
         parsed.activeProfileId = parsed.activeProfileId || null;
         parsed.rememberedProfileId = parsed.rememberedProfileId || null;
         parsed.cloudSync = parsed.cloudSync || {
@@ -847,6 +849,9 @@ export class StorageService {
       if (!profile.id) {
         profile.id = `user-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`;
       }
+      if (!profile.friendCode) {
+        profile.friendCode = `ICE-${Math.floor(1000 + Math.random() * 9000)}`;
+      }
       profile.createdDate = profile.createdDate || new Date().toISOString();
       profile.lastActiveDate = new Date().toISOString();
       profile.library = profile.library || [];
@@ -874,6 +879,47 @@ export class StorageService {
 
     this.saveDataAtomic();
     return this.data.profiles.length < initialLen;
+  }
+
+  public banProfile(id: string, bannedUntil: string | null, reason?: string): boolean {
+    const prof = this.getProfile(id);
+    if (!prof) return false;
+    prof.bannedUntil = bannedUntil || undefined;
+    prof.banReason = reason;
+    this.saveDataAtomic();
+    return true;
+  }
+
+  public getIceDropShares(): any[] {
+    const now = new Date().toISOString();
+    this.data.iceDropShares = (this.data.iceDropShares || []).filter((s) => s.expiresAt > now);
+    return this.data.iceDropShares;
+  }
+
+  public addIceDropShare(item: any): any {
+    const now = new Date();
+    const expires = new Date(now.getTime() + 10 * 60 * 1000);
+    const newShare = {
+      ...item,
+      id: `share-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
+      createdAt: now.toISOString(),
+      expiresAt: expires.toISOString(),
+    };
+    this.data.iceDropShares = (this.data.iceDropShares || []).filter((s) => s.expiresAt > now.toISOString());
+    this.data.iceDropShares.unshift(newShare);
+    if (this.data.iceDropShares.length > 10) {
+      this.data.iceDropShares = this.data.iceDropShares.slice(0, 10);
+    }
+    this.saveDataAtomic();
+    return newShare;
+  }
+
+  public deleteIceDropShare(id: string): boolean {
+    if (!this.data.iceDropShares) return false;
+    const len = this.data.iceDropShares.length;
+    this.data.iceDropShares = this.data.iceDropShares.filter((s) => s.id !== id);
+    this.saveDataAtomic();
+    return this.data.iceDropShares.length < len;
   }
 
   public setAllProfiles(profiles: UserProfile[]): void {

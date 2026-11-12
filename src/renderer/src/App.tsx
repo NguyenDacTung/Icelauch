@@ -13,7 +13,7 @@ import { MediaFormModal } from './components/admin/MediaFormModal';
 import { BannerManagerModal } from './components/admin/BannerManagerModal';
 import { PasswordPromptModal } from './components/common/PasswordPromptModal';
 import { FirstRunModal } from './components/common/FirstRunModal';
-import { setActiveProxyPort } from './utils/mediaUrl';
+import { setActiveProxyPort, getActiveProxyPort } from './utils/mediaUrl';
 import { SeasonalParticleEngine } from './components/common/SeasonalParticleEngine';
 import { AppWallpaper } from './components/common/AppWallpaper';
 import { FloatingMiniDiscWidget } from './components/media/FloatingMiniDiscWidget';
@@ -40,6 +40,11 @@ import { TVVideoTheaterView } from './components/tv/TVVideoTheaterView';
 import { TVSettingsView } from './components/tv/TVSettingsView';
 import { TVUpdateModal } from './components/tv/TVUpdateModal';
 import { DeviceSelectionModal } from './components/common/DeviceSelectionModal';
+import { ExtrasView } from './components/extras/ExtrasView';
+import { AdminUserManagementModal } from './components/admin/AdminUserManagementModal';
+import { GameInstallModal } from './components/home/GameInstallModal';
+import { RequireLoginModal } from './components/common/RequireLoginModal';
+import { FloatingMiniPlayer } from './components/media/FloatingMiniPlayer';
 import { App as CapApp } from '@capacitor/app';
 import {
   isElectron,
@@ -48,6 +53,8 @@ import {
   setStoredDevicePreference,
   hasPromptedDeviceChoice,
   fetchDirectCloudCatalog,
+  verifyAdminPin,
+  setAdminPinMobile,
   DEFAULT_SUPABASE_URL,
   DEFAULT_SUPABASE_ANON_KEY
 } from './services/platformAdapter';
@@ -150,6 +157,16 @@ export default function App() {
   const [isMobileUpdateModalOpen, setIsMobileUpdateModalOpen] = useState(false);
   const [tvUpdateInfo, setTvUpdateInfo] = useState<TVUpdateInfo | null>(null);
   const [isTVUpdateModalOpen, setIsTVUpdateModalOpen] = useState(false);
+
+  // Extras Hub & New Feature States
+  const [isAdminUserMgmtOpen, setIsAdminUserMgmtOpen] = useState(false);
+  const [installSettingsGame, setInstallSettingsGame] = useState<Game | null>(null);
+  const [requireLoginModal, setRequireLoginModal] = useState<{
+    isOpen: boolean;
+    actionText: string;
+    pendingAction?: () => void;
+  }>({ isOpen: false, actionText: '' });
+  const [miniPlayerMedia, setMiniPlayerMedia] = useState<MediaItem | null>(null);
 
   useEffect(() => {
     // Check update silently on startup
@@ -297,7 +314,7 @@ export default function App() {
         }
 
         // Version update check: require re-login on new app version update; keep auto-login on same version
-        const CURRENT_APP_VERSION = '1.0.5';
+        const CURRENT_APP_VERSION = '1.1.0';
         const lastVersion = localStorage.getItem('icelauch_installed_version');
         const isNewVersion = Boolean(lastVersion && lastVersion !== CURRENT_APP_VERSION);
         localStorage.setItem('icelauch_installed_version', CURRENT_APP_VERSION);
@@ -538,6 +555,15 @@ export default function App() {
   };
 
   const handleDownloadGame = async (id: string) => {
+    if (!activeProfile) {
+      setRequireLoginModal({
+        isOpen: true,
+        actionText: 'tải game vào máy tính cá nhân',
+        pendingAction: () => handleDownloadGame(id),
+      });
+      return;
+    }
+
     if (!window.api) return;
     const game = appData?.games.find((g) => g.id === id);
     if (!game) return;
@@ -560,6 +586,46 @@ export default function App() {
     await window.api.downloadGame(id);
   };
 
+  const handleSaveGameInstallPath = async (targetFolder: string, setAsDefault: boolean, startDownloadImmediately: boolean) => {
+    if (!installSettingsGame) return;
+    const g = { ...installSettingsGame, installPath: targetFolder };
+
+    if (setAsDefault && appData) {
+      const updatedSettings = { ...appData.settings, defaultGamesInstallPath: targetFolder };
+      setAppData({ ...appData, settings: updatedSettings });
+      if (window.api?.saveSettings) {
+        await window.api.saveSettings({ defaultGamesInstallPath: targetFolder });
+      }
+    }
+
+    if (window.api?.saveGame) {
+      await window.api.saveGame(g);
+    }
+
+    setAppData((prev) => (prev ? {
+      ...prev,
+      games: prev.games.map((item) => (item.id === g.id ? g : item)),
+    } : null));
+
+    if (startDownloadImmediately) {
+      handleDownloadGame(g.id);
+    }
+  };
+
+  const handleBanProfile = async (id: string, bannedUntil: string | null, reason?: string) => {
+    if (window.api?.banProfile) {
+      await window.api.banProfile({ id, bannedUntil, reason });
+    }
+    setProfiles((prev) =>
+      prev.map((p) => {
+        if (p.id === id) {
+          return { ...p, bannedUntil: bannedUntil || undefined, banReason: reason };
+        }
+        return p;
+      })
+    );
+  };
+
   const handleCancelDownload = async (id: string) => {
     if (confirm('Bạn có chắc muốn huỷ tiến trình tải/cài đặt này?')) {
       if (window.api) await window.api.cancelDownload(id, true);
@@ -571,6 +637,15 @@ export default function App() {
   };
 
   const handleToggleLibrary = async (id: string) => {
+    if (!activeProfile) {
+      setRequireLoginModal({
+        isOpen: true,
+        actionText: 'lưu trữ game vào Thư Viện cá nhân',
+        pendingAction: () => handleToggleLibrary(id),
+      });
+      return;
+    }
+
     if (activeProfile && window.api?.updateProfileLibrary) {
       const isNowInLibrary = !activeProfile.library?.includes(id);
       await window.api.updateProfileLibrary(activeProfile.id, id, isNowInLibrary);
@@ -1071,6 +1146,7 @@ export default function App() {
           onOpenAdminAuth={() => setIsAdminAuthOpen(true)}
           onLockAdmin={handleLockAdmin}
           onOpenBannerManager={() => setIsBannerManagerOpen(true)}
+          onOpenUserManagement={() => setIsAdminUserMgmtOpen(true)}
           activeProfile={activeProfile}
           onSwitchProfile={handleSwitchProfile}
           onEditCurrentProfile={() => setIsEditingCurrentProfile(true)}
@@ -1158,6 +1234,10 @@ export default function App() {
                 )}
 
                 {/* TV Tab 4: Cài Đặt */}
+                {currentTab === 'extras' && (
+                  <ExtrasView activeProfile={activeProfile} isAdmin={isAdmin} />
+                )}
+
                 {currentTab === 'settings' && (
                   <TVSettingsView
                     settings={appData.settings}
@@ -1254,7 +1334,12 @@ export default function App() {
                     onUpdateMediaProgress={handleUpdateMediaProgress}
                     onDownloadMedia={handleDownloadMedia}
                     onDeleteDownloaded={handleDeleteDownloadedMedia}
+                    onMinimizeToMiniPlayer={(m: any) => setMiniPlayerMedia(m)}
                   />
+                )}
+
+                {currentTab === 'extras' && (
+                  <ExtrasView activeProfile={activeProfile} isAdmin={isAdmin} />
                 )}
 
                 {currentTab === 'settings' && (
@@ -1295,6 +1380,7 @@ export default function App() {
                   setIsGameFormOpen(true);
                 }}
                 onOpenFolder={(id) => handleOpenFolder('gameDir', id)}
+                onOpenInstallSettings={(game) => setInstallSettingsGame(game)}
                 onSaveExtensions={handleSaveGameExtensions}
                 globalActionButtons={appData.settings.globalActionButtons || []}
               />
@@ -1347,6 +1433,7 @@ export default function App() {
                     onCancelDownload={handleCancelDownload}
                     onRetry={handleRetryGame}
                     onOpenFolder={(id) => handleOpenFolder('gameDir', id)}
+                    onOpenInstallSettings={(game) => setInstallSettingsGame(game)}
                     onUninstall={handleUninstallGame}
                     onSaveGameSettings={handleSaveGameSettings}
                     onSelectCustomExe={handleSelectCustomExe}
@@ -1380,7 +1467,12 @@ export default function App() {
                     onDeletePlaylist={handleDeletePlaylist}
                     onDownloadMedia={handleDownloadMedia}
                     onDeleteDownloaded={handleDeleteDownloadedMedia}
+                    onMinimizeToMiniPlayer={(m: any) => setMiniPlayerMedia(m)}
                   />
+                )}
+
+                {currentTab === 'extras' && (
+                  <ExtrasView activeProfile={activeProfile} isAdmin={isAdmin} />
                 )}
 
                 {currentTab === 'settings' && (
@@ -1394,6 +1486,7 @@ export default function App() {
                     onChangePin={() => setIsChangeAdminPinOpen(true)}
                     onOpenAdminAuth={() => setIsAdminAuthOpen(true)}
                     onOpenBannerManager={() => setIsBannerManagerOpen(true)}
+                    onOpenUserManagement={() => setIsAdminUserMgmtOpen(true)}
                     onSaveSettings={handleSaveSettings}
                     cloudSync={cloudSyncSettings}
                     onSaveCloudSync={handleSaveCloudSync}
@@ -1455,9 +1548,72 @@ export default function App() {
         hasPinSet={true}
         onClose={() => setIsAdminAuthOpen(false)}
         onSuccess={handleAdminSuccess}
-        onSetPin={async (pin) => window.api.setPin(pin)}
-        onVerifyPin={async (pin) => window.api.verifyPin(pin)}
-        onResetPin={async (key, newPin) => window.api.resetPinWithRecoveryKey(key, newPin)}
+        onSetPin={async (pin) => {
+          if (window.api?.setPin) return window.api.setPin(pin);
+          return setAdminPinMobile(pin);
+        }}
+        onVerifyPin={async (pin) => verifyAdminPin(pin)}
+        onResetPin={async (key, newPin) => {
+          if (window.api?.resetPinWithRecoveryKey) return window.api.resetPinWithRecoveryKey(key, newPin);
+          return true;
+        }}
+      />
+
+      {/* Admin User Management Modal */}
+      <AdminUserManagementModal
+        isOpen={isAdminUserMgmtOpen}
+        profiles={profiles}
+        onClose={() => setIsAdminUserMgmtOpen(false)}
+        onEditProfile={(p) => {
+          setIsAdminUserMgmtOpen(false);
+          setIsEditingCurrentProfile(true);
+        }}
+        onDeleteProfile={async (id) => {
+          if (window.api?.deleteProfile) {
+            await window.api.deleteProfile(id);
+          }
+          setProfiles((prev) => prev.filter((p) => p.id !== id));
+        }}
+        onBanProfile={handleBanProfile}
+      />
+
+      {/* Game Install Location Picker Modal */}
+      {installSettingsGame && (
+        <GameInstallModal
+          isOpen={Boolean(installSettingsGame)}
+          game={installSettingsGame}
+          currentInstallPath={installSettingsGame.installPath}
+          defaultGamesPath={appData.settings.defaultGamesInstallPath || appData.settings.gamesPath}
+          onClose={() => setInstallSettingsGame(null)}
+          onSaveInstallPath={handleSaveGameInstallPath}
+        />
+      )}
+
+      {/* Require Login Modal */}
+      <RequireLoginModal
+        isOpen={requireLoginModal.isOpen}
+        actionText={requireLoginModal.actionText}
+        onClose={() => setRequireLoginModal({ isOpen: false, actionText: '' })}
+        onGoToLogin={() => {
+          setRequireLoginModal({ isOpen: false, actionText: '' });
+          setIsProfilePickerOpen(true);
+        }}
+      />
+
+      {/* Floating Mini Player (Picture-in-Picture) */}
+      <FloatingMiniPlayer
+        media={miniPlayerMedia}
+        proxyPort={getActiveProxyPort() || 18989}
+        onClose={() => setMiniPlayerMedia(null)}
+        onMaximize={(m) => {
+          setMiniPlayerMedia(null);
+          if (effectiveDevice === 'android_mobile') {
+            setMobileTheaterMedia(m);
+            setCurrentTab('media');
+          } else {
+            setCurrentTab('media');
+          }
+        }}
       />
 
       {/* Change Admin PIN Modal (Requires knowing current PIN_PUB or PIN_PRI) */}

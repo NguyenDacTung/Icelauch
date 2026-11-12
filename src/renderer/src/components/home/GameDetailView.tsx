@@ -23,6 +23,8 @@ import {
   Film,
   Monitor,
   Puzzle,
+  Settings2,
+  Tag,
 } from 'lucide-react';
 import { parseMediaUrl, getActiveProxyPort } from '../../utils/mediaUrl';
 import type { Game, AppActionButton, GameExtension } from '../../types';
@@ -44,6 +46,7 @@ interface GameDetailViewProps {
   onToggleHide?: (id: string) => void;
   onEditGame?: (game: Game) => void;
   onOpenFolder?: (id: string) => void;
+  onOpenInstallSettings?: (game: Game) => void;
   onSaveExtensions?: (gameId: string, extensions: GameExtension[]) => Promise<void>;
   globalActionButtons?: AppActionButton[];
 }
@@ -62,6 +65,7 @@ export const GameDetailView: React.FC<GameDetailViewProps> = ({
   onToggleHide,
   onEditGame,
   onOpenFolder,
+  onOpenInstallSettings,
   onSaveExtensions,
   globalActionButtons = [],
 }) => {
@@ -428,13 +432,25 @@ export const GameDetailView: React.FC<GameDetailViewProps> = ({
 
                   {/* Uninstalled CTA */}
                   {game.status === 'uninstalled' && (
-                    <button
-                      onClick={() => onDownload(game.id)}
-                      className="w-full h-12 rounded-xl bg-gradient-to-r from-ice-accent to-blue-600 hover:from-ice-accentHover hover:to-blue-500 text-white text-sm font-black tracking-wider uppercase flex items-center justify-center gap-2.5 shadow-xl shadow-blue-950/40 transition-all transform hover:-translate-y-0.5 active:translate-y-0"
-                    >
-                      <Download className="w-5 h-5" />
-                      <span>TẢI GAME VỀ MÁY</span>
-                    </button>
+                    <div className="flex items-center gap-2 w-full">
+                      <button
+                        onClick={() => onDownload(game.id)}
+                        className="flex-1 h-12 rounded-xl bg-gradient-to-r from-ice-accent to-blue-600 hover:from-ice-accentHover hover:to-blue-500 text-white text-sm font-black tracking-wider uppercase flex items-center justify-center gap-2.5 shadow-xl shadow-blue-950/40 transition-all transform hover:-translate-y-0.5 active:translate-y-0"
+                      >
+                        <Download className="w-5 h-5" />
+                        <span>TẢI GAME VỀ MÁY</span>
+                      </button>
+                      {onOpenInstallSettings && (
+                        <button
+                          type="button"
+                          onClick={() => onOpenInstallSettings(game)}
+                          className="w-12 h-12 rounded-xl bg-white/10 hover:bg-white/20 border border-white/20 text-white flex items-center justify-center transition-all shadow-md active:scale-95 shrink-0"
+                          title="Cài đặt nơi lưu file game & xem dung lượng ổ đĩa"
+                        >
+                          <Settings2 className="w-5 h-5 text-amber-400" />
+                        </button>
+                      )}
+                    </div>
                   )}
                 </>
               )}

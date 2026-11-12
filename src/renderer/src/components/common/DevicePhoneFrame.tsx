@@ -1,5 +1,5 @@
 import React from 'react';
-import { Film, Gamepad2, Bookmark, Sliders, X } from 'lucide-react';
+import { Film, Gamepad2, Bookmark, Sliders, X, Sparkles } from 'lucide-react';
 import type { NavigationTab, UserProfile } from '../../types';
 
 interface DevicePhoneFrameProps {
@@ -27,11 +27,12 @@ export const DevicePhoneFrame: React.FC<DevicePhoneFrameProps> = ({
   onExitSimulation,
   isSimulated = false,
 }) => {
-  // 4 Primary Mobile Navigation Tabs
+  // 5 Primary Mobile Navigation Tabs
   const mobileNavItems: { id: NavigationTab; label: string; icon: any }[] = [
     { id: 'media', label: 'Giải Trí', icon: Film },
     { id: 'home', label: 'Game', icon: Gamepad2 },
     { id: 'library', label: 'Thư Viện', icon: Bookmark },
+    { id: 'extras', label: 'Tiện Ích', icon: Sparkles },
     { id: 'settings', label: 'Cài Đặt', icon: Sliders },
   ];
 

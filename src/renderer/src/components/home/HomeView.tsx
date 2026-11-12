@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { HeroBanner } from './HeroBanner';
 import { GameCard } from './GameCard';
 import { SurpriseGameModal } from './SurpriseGameModal';
@@ -77,6 +77,11 @@ export const HomeView: React.FC<HomeViewProps> = ({
   const [sortBy, setSortBy] = useState<'newest' | 'name'>('newest');
   const [showHiddenOnly, setShowHiddenOnly] = useState(false);
   const [isSurpriseOpen, setIsSurpriseOpen] = useState(false);
+  const [visibleCount, setVisibleCount] = useState<number>(24);
+
+  useEffect(() => {
+    setVisibleCount(24);
+  }, [searchQuery, selectedGenre, selectedMood, sortBy, showHiddenOnly]);
 
   // Filter out hidden games for normal users; apply admin hidden filter if active
   const baseGames = games.filter((g) => {
@@ -470,32 +475,51 @@ export const HomeView: React.FC<HomeViewProps> = ({
 
         {/* Game Cards Grid */}
         {filteredGames.length > 0 ? (
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
-            {filteredGames.map((game) => (
-              <GameCard
-                key={game.id}
-                game={game}
-                isAdmin={isAdmin}
-                onSelectGame={() => {
-                  sfx.playClick();
-                  onSelectGame(game);
-                }}
-                onLaunch={() => {
-                  sfx.playLaunch();
-                  onLaunch(game.id);
-                }}
-                onDownload={() => onDownload(game.id)}
-                onCancelDownload={() => onCancelDownload(game.id)}
-                onRetry={() => onRetry(game.id)}
-                onToggleLibrary={() => onToggleLibrary(game.id)}
-                onToggleHide={onToggleHide ? () => onToggleHide(game.id) : undefined}
-                onOpenFolder={() => onOpenFolder(game.id)}
-                onUninstall={() => onUninstall(game.id)}
-                onEditGame={() => onEditGame(game)}
-                onDeleteGame={() => onDeleteGame(game.id)}
-              />
-            ))}
-          </div>
+          <>
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
+              {filteredGames.slice(0, visibleCount).map((game) => (
+                <GameCard
+                  key={game.id}
+                  game={game}
+                  isAdmin={isAdmin}
+                  onSelectGame={() => {
+                    sfx.playClick();
+                    onSelectGame(game);
+                  }}
+                  onLaunch={() => {
+                    sfx.playLaunch();
+                    onLaunch(game.id);
+                  }}
+                  onDownload={() => onDownload(game.id)}
+                  onCancelDownload={() => onCancelDownload(game.id)}
+                  onRetry={() => onRetry(game.id)}
+                  onToggleLibrary={() => onToggleLibrary(game.id)}
+                  onToggleHide={onToggleHide ? () => onToggleHide(game.id) : undefined}
+                  onOpenFolder={() => onOpenFolder(game.id)}
+                  onUninstall={() => onUninstall(game.id)}
+                  onEditGame={() => onEditGame(game)}
+                  onDeleteGame={() => onDeleteGame(game.id)}
+                />
+              ))}
+            </div>
+
+            {/* Load More Button for PC (24 items per batch) */}
+            {visibleCount < filteredGames.length && (
+              <div className="pt-4 flex justify-center">
+                <button
+                  type="button"
+                  onClick={() => {
+                    sfx.playClick();
+                    setVisibleCount((prev) => prev + 24);
+                  }}
+                  className="px-8 py-3 rounded-2xl bg-white/10 hover:bg-white/20 border border-white/20 text-white font-bold text-xs tracking-wider uppercase transition-all shadow-lg active:scale-95 flex items-center gap-2 hover:border-amber-400"
+                >
+                  <Plus className="w-4 h-4 text-amber-400" />
+                  <span>Xem Thêm Trò Chơi (+24 Game • Còn lại {filteredGames.length - visibleCount})</span>
+                </button>
+              </div>
+            )}
+          </>
         ) : (
           <div className="py-16 flex flex-col items-center justify-center text-center space-y-3 rounded-2xl border border-dashed border-ice-border bg-ice-card/40">
             <Gamepad2 className="w-10 h-10 text-ice-subtext opacity-50" />
