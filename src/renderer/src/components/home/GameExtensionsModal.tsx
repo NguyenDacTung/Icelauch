@@ -402,3 +402,4 @@ export const GameExtensionsModal: React.FC<GameExtensionsModalProps> = ({
     </div>
   );
 };
+
