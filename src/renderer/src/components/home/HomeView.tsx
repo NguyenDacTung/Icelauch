@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { HeroBanner } from './HeroBanner';
 import { GameCard } from './GameCard';
 import { SurpriseGameModal } from './SurpriseGameModal';
+import { GenreShelfScroller } from '../common/GenreShelfScroller';
 import { 
   Plus, 
   Filter, 
@@ -406,6 +407,55 @@ export const HomeView: React.FC<HomeViewProps> = ({
             ))}
           </div>
         </section>
+      )}
+
+      {/* 6.5 Horizontal Genre Shelves (Netflix-style, max 10 shelves, no scrollbar) */}
+      {selectedGenre === 'Tất cả' && !searchQuery && (
+        <div className="space-y-6 pt-1">
+          {genres.filter((g) => g !== 'Tất cả').slice(0, 10).map((genre) => {
+            const genreGames = games.filter(
+              (g) => (g.tags && g.tags.includes(genre)) || (g.genre && g.genre.toLowerCase().includes(genre.toLowerCase()))
+            );
+            if (genreGames.length === 0) return null;
+
+            return (
+              <GenreShelfScroller
+                key={genre}
+                title={genre}
+                count={genreGames.length}
+                onViewAll={() => {
+                  setSelectedGenre(genre);
+                }}
+              >
+                {genreGames.map((game) => (
+                  <div key={game.id} className="w-[190px] shrink-0">
+                    <GameCard
+                      game={game}
+                      isAdmin={isAdmin}
+                      onSelectGame={() => {
+                        sfx.playClick();
+                        onSelectGame(game);
+                      }}
+                      onLaunch={() => {
+                        sfx.playLaunch();
+                        onLaunch(game.id);
+                      }}
+                      onDownload={() => onDownload(game.id)}
+                      onCancelDownload={() => onCancelDownload(game.id)}
+                      onRetry={() => onRetry(game.id)}
+                      onToggleLibrary={() => onToggleLibrary(game.id)}
+                      onToggleHide={onToggleHide ? () => onToggleHide(game.id) : undefined}
+                      onOpenFolder={() => onOpenFolder(game.id)}
+                      onUninstall={() => onUninstall(game.id)}
+                      onEditGame={() => onEditGame(game)}
+                      onDeleteGame={() => onDeleteGame(game.id)}
+                    />
+                  </div>
+                ))}
+              </GenreShelfScroller>
+            );
+          })}
+        </div>
       )}
 
       {/* 7. All Games Grid Section */}

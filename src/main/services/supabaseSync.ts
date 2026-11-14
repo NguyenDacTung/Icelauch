@@ -307,6 +307,7 @@ export class SupabaseSyncService {
         library: row.library || [],
         watchProgress: row.watch_progress || {},
         favoriteMedia: row.favorite_media || [],
+        favoritePlaylists: row.game_stats?.favoritePlaylists || [],
         gameStats: row.game_stats || {},
       };
     }
@@ -343,7 +344,10 @@ export class SupabaseSyncService {
       library: profile.library || [],
       watch_progress: profile.watchProgress || {},
       favorite_media: profile.favoriteMedia || [],
-      game_stats: profile.gameStats || {},
+      game_stats: {
+        ...(profile.gameStats || {}),
+        favoritePlaylists: profile.favoritePlaylists || [],
+      },
       updated_at: new Date().toISOString(),
     };
 
@@ -704,6 +708,7 @@ export class SupabaseSyncService {
           library: userData?.library || [],
           watchProgress: userData?.watchProgress || {},
           favoriteMedia: userData?.favoriteMedia || [],
+          favoritePlaylists: userData?.favoritePlaylists || [],
           gameStats: userData?.gameStats || {},
         });
       } else {
@@ -719,6 +724,7 @@ export class SupabaseSyncService {
             local.library = userData.library || local.library;
             local.watchProgress = { ...local.watchProgress, ...(userData.watchProgress || {}) };
             local.favoriteMedia = userData.favoriteMedia || local.favoriteMedia;
+            local.favoritePlaylists = userData.favoritePlaylists || local.favoritePlaylists;
             local.gameStats = { ...local.gameStats, ...(userData.gameStats || {}) };
           }
         }

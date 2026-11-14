@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { Navbar } from './components/layout/Navbar';
 import { DownloadTray } from './components/layout/DownloadTray';
 import { MiniPlayer } from './components/layout/MiniPlayer';
@@ -161,7 +161,9 @@ export default function App() {
   const [isTVUpdateModalOpen, setIsTVUpdateModalOpen] = useState(false);
 
   // Extras Hub & New Feature States
+  const isInitialLoadDoneRef = useRef(false);
   const [isAdminUserMgmtOpen, setIsAdminUserMgmtOpen] = useState(false);
+  const [editingTargetProfile, setEditingTargetProfile] = useState<UserProfile | null>(null);
   const [installSettingsGame, setInstallSettingsGame] = useState<Game | null>(null);
   const [requireLoginModal, setRequireLoginModal] = useState<{
     isOpen: boolean;
@@ -370,7 +372,7 @@ export default function App() {
         }
 
         // Version update check: require re-login on new app version update; keep auto-login on same version
-        const CURRENT_APP_VERSION = '1.1.2';
+        const CURRENT_APP_VERSION = '1.1.3';
         const lastVersion = localStorage.getItem('icelauch_installed_version');
         const isNewVersion = Boolean(lastVersion && lastVersion !== CURRENT_APP_VERSION);
         localStorage.setItem('icelauch_installed_version', CURRENT_APP_VERSION);
@@ -385,22 +387,25 @@ export default function App() {
           const loadedProfiles = await window.api.getProfiles();
           setProfiles(loadedProfiles || []);
 
-          const active = !isNewVersion ? await window.api.getActiveProfile() : null;
-          const rememberedId = !isNewVersion ? await window.api.getRememberedProfileId() : null;
+          if (!isInitialLoadDoneRef.current) {
+            isInitialLoadDoneRef.current = true;
+            const active = !isNewVersion ? await window.api.getActiveProfile() : null;
+            const rememberedId = !isNewVersion ? await window.api.getRememberedProfileId() : null;
 
-          if (active) {
-            setActiveProfile(active);
-            setIsProfilePickerOpen(false);
-          } else if (rememberedId) {
-            const remembered = (loadedProfiles || []).find((p: UserProfile) => p.id === rememberedId);
-            if (remembered) {
-              setActiveProfile(remembered);
+            if (active) {
+              setActiveProfile(active);
               setIsProfilePickerOpen(false);
+            } else if (rememberedId) {
+              const remembered = (loadedProfiles || []).find((p: UserProfile) => p.id === rememberedId);
+              if (remembered) {
+                setActiveProfile(remembered);
+                setIsProfilePickerOpen(false);
+              } else if ((loadedProfiles || []).length > 0) {
+                setIsProfilePickerOpen(true);
+              }
             } else if ((loadedProfiles || []).length > 0) {
               setIsProfilePickerOpen(true);
             }
-          } else if ((loadedProfiles || []).length > 0) {
-            setIsProfilePickerOpen(true);
           }
         }
 
@@ -736,6 +741,68 @@ export default function App() {
     } else if (window.api) {
       await window.api.toggleInLibrary(id);
     }
+  };
+
+  const handleToggleFavoriteMedia = async (mediaId: string) => {
+    if (!activeProfile) {
+      setRequireLoginModal({
+        isOpen: true,
+        actionText: 'lưu nội dung giải trí vào mục Yêu Thích',
+        pendingAction: () => handleToggleFavoriteMedia(mediaId),
+      });
+      return;
+    }
+
+    const currentFavorites = activeProfile.favoriteMedia || [];
+    const exists = currentFavorites.includes(mediaId);
+    const updatedFavorites = exists
+      ? currentFavorites.filter((id) => id !== mediaId)
+      : [...currentFavorites, mediaId];
+
+    const updatedProfile: UserProfile = {
+      ...activeProfile,
+      favoriteMedia: updatedFavorites,
+      lastActiveDate: new Date().toISOString(),
+    };
+
+    setActiveProfile(updatedProfile);
+    setProfiles((prev) => prev.map((p) => (p.id === updatedProfile.id ? updatedProfile : p)));
+
+    if (window.api?.saveProfile) {
+      await window.api.saveProfile(updatedProfile);
+    }
+    sfx.playSuccess();
+  };
+
+  const handleToggleFavoritePlaylist = async (playlistId: string) => {
+    if (!activeProfile) {
+      setRequireLoginModal({
+        isOpen: true,
+        actionText: 'lưu Danh Sách Phát vào mục Yêu Thích',
+        pendingAction: () => handleToggleFavoritePlaylist(playlistId),
+      });
+      return;
+    }
+
+    const currentFavorites = activeProfile.favoritePlaylists || [];
+    const exists = currentFavorites.includes(playlistId);
+    const updatedFavorites = exists
+      ? currentFavorites.filter((id) => id !== playlistId)
+      : [...currentFavorites, playlistId];
+
+    const updatedProfile: UserProfile = {
+      ...activeProfile,
+      favoritePlaylists: updatedFavorites,
+      lastActiveDate: new Date().toISOString(),
+    };
+
+    setActiveProfile(updatedProfile);
+    setProfiles((prev) => prev.map((p) => (p.id === updatedProfile.id ? updatedProfile : p)));
+
+    if (window.api?.saveProfile) {
+      await window.api.saveProfile(updatedProfile);
+    }
+    sfx.playSuccess();
   };
 
   const handleOpenFolder = async (target: 'app' | 'games' | 'downloads' | 'gameDir', gameId?: string) => {
@@ -1172,6 +1239,34 @@ export default function App() {
     }
   };
 
+  // Dynamic Aggregation for Game Tags (Settings + all games tags + defaults)
+  const aggregatedGameTags = useMemo(() => {
+    const set = new Set<string>(
+      appData?.settings.gameTags || ['Coop', 'Hành động', 'Nhập vai (RPG)', 'Chiến thuật', 'Kinh dị', 'Mô phỏng', 'Thế giới mở', 'Bắn súng (FPS)', 'Phiêu lưu', 'Indie']
+    );
+    (appData?.games || []).forEach((g) => {
+      (g.tags || []).forEach((t) => t && set.add(t.trim()));
+      if (g.genre) {
+        g.genre.split(',').forEach((t) => t && set.add(t.trim()));
+      }
+    });
+    return Array.from(set);
+  }, [appData?.settings.gameTags, appData?.games]);
+
+  // Dynamic Aggregation for Media Tags (Settings + all media tags + defaults)
+  const aggregatedMediaTags = useMemo(() => {
+    const set = new Set<string>(
+      appData?.settings.mediaTags || ['Hoạt hình', 'Phim Chiếu Rạp', 'Phim Lẻ', 'Phim Bộ', 'YouTube', 'Nhạc Chill', 'Nhạc Game', 'EDM', 'Pop', 'MV']
+    );
+    (appData?.media || []).forEach((m) => {
+      (m.tags || []).forEach((t) => t && set.add(t.trim()));
+      if (m.category) {
+        m.category.split(',').forEach((t) => t && set.add(t.trim()));
+      }
+    });
+    return Array.from(set);
+  }, [appData?.settings.mediaTags, appData?.media]);
+
   if (!appData) {
     return (
       <div className="h-screen w-screen bg-ice-bg flex flex-col items-center justify-center text-ice-subtext space-y-3">
@@ -1513,8 +1608,13 @@ export default function App() {
                     media={appData.media}
                     playlists={appData.playlists || []}
                     bannerSettings={appData.settings.bannerSettings}
+                    settings={appData.settings}
                     isAdmin={isAdmin}
                     searchQuery={searchQuery}
+                    favoriteMediaIds={activeProfile?.favoriteMedia || []}
+                    favoritePlaylistIds={activeProfile?.favoritePlaylists || []}
+                    onToggleFavoriteMedia={handleToggleFavoriteMedia}
+                    onToggleFavoritePlaylist={handleToggleFavoritePlaylist}
                     onPlayAudio={handlePlayAudio}
                     onSaveMedia={handleSaveMedia}
                     onDeleteMedia={handleDeleteMedia}
@@ -1631,7 +1731,7 @@ export default function App() {
         onClose={() => setIsAdminUserMgmtOpen(false)}
         onEditProfile={(p) => {
           setIsAdminUserMgmtOpen(false);
-          setIsEditingCurrentProfile(true);
+          setEditingTargetProfile(p);
         }}
         onDeleteProfile={async (id) => {
           if (window.api?.deleteProfile) {
@@ -1641,6 +1741,23 @@ export default function App() {
         }}
         onBanProfile={handleBanProfile}
       />
+
+      {/* Admin Edit Specific User Profile Modal */}
+      {editingTargetProfile && (
+        <ProfileModal
+          profile={editingTargetProfile}
+          isOpen={Boolean(editingTargetProfile)}
+          onClose={() => setEditingTargetProfile(null)}
+          onSave={async (data) => {
+            await handleSaveProfile(data);
+            setEditingTargetProfile(null);
+          }}
+          onDelete={async (id) => {
+            setEditingTargetProfile(null);
+            await handleDeleteProfile(id);
+          }}
+        />
+      )}
 
       {/* Game Install Location Picker Modal */}
       {installSettingsGame && (
@@ -1710,7 +1827,7 @@ export default function App() {
           setEditingGame(null);
         }}
         onSave={handleSaveGame}
-        availableTags={appData.settings.gameTags || []}
+        availableTags={aggregatedGameTags}
         globalActionButtons={appData.settings.globalActionButtons || []}
         onAddNewGlobalTag={async (newTag) => {
           const current = appData.settings.gameTags || [];
@@ -1749,7 +1866,7 @@ export default function App() {
             filters: [{ name: 'Images', extensions: ['jpg', 'jpeg', 'png', 'webp'] }],
           });
         }}
-        availableTags={appData.settings.mediaTags || []}
+        availableTags={aggregatedMediaTags}
         onAddNewGlobalTag={async (newTag) => {
           const current = appData.settings.mediaTags || [];
           if (!current.includes(newTag)) {

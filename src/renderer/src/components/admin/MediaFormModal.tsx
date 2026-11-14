@@ -209,19 +209,20 @@ export const MediaFormModal: React.FC<MediaFormModalProps> = ({
       .map((l) => l.trim())
       .filter(Boolean);
 
-    onSave({
+    const mergedMedia: Partial<MediaItem> = {
+      ...(media || {}),
       id: media?.id,
       type,
       subType,
-      artist: artist.trim() || undefined,
+      artist: artist.trim() || media?.artist,
       aspectRatioMode,
-      title: title.trim(),
-      link: link.trim(),
-      backupLinks: bLinks.length > 0 ? bLinks : undefined,
-      coverPath: finalCover,
-      bannerPath: bannerPath.trim() || undefined,
-      coverPosition: coverPosition || undefined,
-      bannerPosition: bannerPosition || undefined,
+      title: title.trim() || media?.title || '',
+      link: link.trim() || media?.link || '',
+      backupLinks: bLinks.length > 0 ? bLinks : media?.backupLinks,
+      coverPath: finalCover || media?.coverPath,
+      bannerPath: bannerPath.trim() || media?.bannerPath,
+      coverPosition: coverPosition || media?.coverPosition,
+      bannerPosition: bannerPosition || media?.bannerPosition,
       coverZoom,
       bannerZoom,
       bannerBlur,
@@ -232,11 +233,13 @@ export const MediaFormModal: React.FC<MediaFormModalProps> = ({
       isBannerPinned,
       isBannerPermanent,
       bannerFeaturedUntil,
-      description: description.trim() || undefined,
+      description: description.trim() || media?.description,
       tags: selectedTags,
       hidden,
-      category: selectedTags.join(', ') || (parsed.kind === 'youtube' ? 'YouTube' : parsed.kind === 'facebook' ? 'Facebook' : parsed.kind === 'gdrive' ? 'Google Drive' : undefined),
-    });
+      category: selectedTags.join(', ') || (parsed.kind === 'youtube' ? 'YouTube' : parsed.kind === 'facebook' ? 'Facebook' : parsed.kind === 'gdrive' ? 'Google Drive' : undefined) || media?.category,
+    };
+
+    onSave(mergedMedia);
     onClose();
   };
 

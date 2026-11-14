@@ -236,13 +236,14 @@ export const GameFormModal: React.FC<GameFormModalProps> = ({
       bannerFeaturedUntil = new Date(Date.now() + bannerExpiryDays * 24 * 60 * 60 * 1000).toISOString();
     }
 
-    onSave({
+    const mergedGame: Partial<Game> = {
+      ...(game || {}),
       id: game?.id,
       name: name.trim(),
-      coverPath: coverPath.trim(),
-      bannerPath: bannerPath.trim() || undefined,
-      coverPosition: coverPosition || undefined,
-      bannerPosition: bannerPosition || undefined,
+      coverPath: coverPath.trim() || game?.coverPath || '',
+      bannerPath: bannerPath.trim() || game?.bannerPath,
+      coverPosition: coverPosition || game?.coverPosition,
+      bannerPosition: bannerPosition || game?.bannerPosition,
       coverZoom,
       bannerZoom,
       bannerBlur,
@@ -253,22 +254,24 @@ export const GameFormModal: React.FC<GameFormModalProps> = ({
       isBannerPinned,
       isBannerPermanent,
       bannerFeaturedUntil,
-      trailerUrl: trailerUrl.trim() || undefined,
-      screenshots: screenshots.length > 0 ? screenshots : undefined,
+      trailerUrl: trailerUrl.trim() || game?.trailerUrl,
+      screenshots: screenshots.length > 0 ? screenshots : game?.screenshots,
       hidden,
-      downloadLinks: links,
-      expectedSize: sizeBytes,
-      archivePassword: archivePassword || undefined,
+      downloadLinks: links.length > 0 ? links : game?.downloadLinks || [],
+      expectedSize: sizeBytes ?? game?.expectedSize,
+      archivePassword: archivePassword || game?.archivePassword,
       tags: selectedTags,
       genre: selectedTags.join(', '),
-      description: description.trim(),
-      requirementsText: requirementsText.trim() || undefined,
+      description: description.trim() || game?.description || '',
+      requirementsText: requirementsText.trim() || game?.requirementsText,
       actionButtonIds: selectedActionButtonIds,
-      installPath: installPath.trim() || undefined,
+      installPath: installPath.trim() || game?.installPath,
       runAsAdmin,
       deleteArchiveAfterInstall: deleteArchive,
       featured: isBannerPinned,
-    });
+    };
+
+    onSave(mergedGame);
     onClose();
   };
 

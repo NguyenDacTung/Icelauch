@@ -92,6 +92,7 @@ export interface MediaPlaylist {
   subType?: MediaSubType;
   description?: string;
   coverPath?: string;
+  coverAspectRatio?: '1:1' | '16:9';
   itemIds: string[];
   createdAt: string;
 }
@@ -169,6 +170,8 @@ export interface AppSettings {
   bannerSettings?: AppBannerSettings;
   // TV Settings
   tvAutoPlayTrailer?: boolean;
+  // Trailer Banner Settings
+  trailerSettings?: TrailerSettings;
 }
 
 export interface BannerItemConfig {
@@ -256,6 +259,7 @@ export interface UserProfile {
   lastActiveDate: string;          // ISO 8601
   library: string[];               // game IDs in personal library
   favoriteMedia: string[];         // media IDs in personal favorites
+  favoritePlaylists?: string[];    // playlist IDs in personal favorites
   watchProgress: Record<string, {
     currentTime: number;
     duration: number;
@@ -331,4 +335,19 @@ export interface AppData {
 }
 
 export type NavigationTab = 'home' | 'library' | 'media' | 'extras' | 'settings';
+
+export interface TrailerItem {
+  id: string;
+  title: string;
+  tag: string;
+  videoUrl: string;
+  mediaId?: string;
+  isPinned?: boolean;
+}
+
+export interface TrailerSettings {
+  enabled: boolean;
+  playbackMode: 'auto-next' | 'loop' | 'shuffle';
+  trailers: TrailerItem[];
+}
 
