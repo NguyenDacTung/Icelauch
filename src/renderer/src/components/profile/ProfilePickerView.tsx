@@ -14,11 +14,23 @@ import {
   EyeOff,
   HelpCircle,
   Send,
-  ShieldCheck
+  ShieldCheck,
+  LogIn,
+  UserPlus
 } from 'lucide-react';
 import { AvatarBadge } from '../common/AvatarBadge';
 import { ProfileModal } from './ProfileModal';
 import type { UserProfile } from '../../types';
+
+interface SavedAccountRecord {
+  id: string;
+  username?: string;
+  nickname: string;
+  avatar: string;
+  role?: 'admin' | 'user';
+}
+
+const STORAGE_KEY_KNOWN_ACCOUNTS = 'icelauch_saved_known_accounts';
 
 interface ProfilePickerViewProps {
   profiles: UserProfile[];
@@ -54,7 +66,26 @@ export const ProfilePickerView: React.FC<ProfilePickerViewProps> = ({
   const [editingProfile, setEditingProfile] = useState<UserProfile | null>(null);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
-  // Authentication prompt state for entering a selected profile
+  // Saved/known accounts on this device
+  const [savedRecords, setSavedRecords] = useState<SavedAccountRecord[]>(() => {
+    try {
+      const stored = localStorage.getItem(STORAGE_KEY_KNOWN_ACCOUNTS);
+      return stored ? JSON.parse(stored) : [];
+    } catch {
+      return [];
+    }
+  });
+
+  // Direct login form state
+  const [loginUsername, setLoginUsername] = useState('');
+  const [loginPassword, setLoginPassword] = useState('');
+  const [loginPin, setLoginPin] = useState('');
+  const [showLoginPassword, setShowLoginPassword] = useState(false);
+  const [loginRemember, setLoginRemember] = useState(true);
+  const [loginError, setLoginError] = useState<string | null>(null);
+  const [isSubmittingDirect, setIsSubmittingDirect] = useState(false);
+
+  // Authentication prompt modal for entering a selected saved profile
   const [promptProfile, setPromptProfile] = useState<UserProfile | null>(null);
   const [pinInput, setPinInput] = useState('');
   const [passwordInput, setPasswordInput] = useState('');
@@ -66,7 +97,121 @@ export const ProfilePickerView: React.FC<ProfilePickerViewProps> = ({
   const [showForgotModal, setShowForgotModal] = useState(false);
   const [resetFeedback, setResetFeedback] = useState<string | null>(null);
 
+  // Filter profiles that have been previously logged in on THIS device
+  const visibleSavedProfiles = profiles.filter((p) =>
+    savedRecords.some(
+      (r) =>
+        r.id === p.id ||
+        (p.username && r.username && p.username.toLowerCase() === r.username.toLowerCase())
+    )
+  );
+
+  const isDirectLoginAdmin = loginUsername.trim().toLowerCase() === 'admin' || loginUsername.trim().toLowerCase() === 'quantri';
   const isAdminProfile = promptProfile?.role === 'admin' || (promptProfile?.pinHash && !promptProfile?.passwordHash);
+
+  const saveToKnownAccounts = (profile: UserProfile) => {
+    const record: SavedAccountRecord = {
+      id: profile.id,
+      username: profile.username,
+      nickname: profile.nickname,
+      avatar: profile.avatar,
+      role: profile.role,
+    };
+    setSavedRecords((prev) => {
+      const filtered = prev.filter((r) => r.id !== profile.id);
+      const updated = [record, ...filtered];
+      try {
+        localStorage.setItem(STORAGE_KEY_KNOWN_ACCOUNTS, JSON.stringify(updated));
+      } catch {}
+      return updated;
+    });
+  };
+
+  const handleForgetAccount = (profileId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (window.confirm('Xóa tài khoản này khỏi danh sách đã nhớ trên thiết bị này?')) {
+      setSavedRecords((prev) => {
+        const updated = prev.filter((r) => r.id !== profileId);
+        try {
+          localStorage.setItem(STORAGE_KEY_KNOWN_ACCOUNTS, JSON.stringify(updated));
+        } catch {}
+        return updated;
+      });
+    }
+  };
+
+  // Direct Login Submit Handler
+  const handleDirectLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoginError(null);
+
+    const cleanUser = loginUsername.trim().toLowerCase();
+    if (!cleanUser) {
+      setLoginError('Vui lòng nhập Tên đăng nhập');
+      return;
+    }
+
+    // Find profile in profiles list
+    let matchedProfile = profiles.find(
+      (p) =>
+        (p.username && p.username.toLowerCase() === cleanUser) ||
+        p.id.toLowerCase() === cleanUser ||
+        p.nickname.toLowerCase() === cleanUser
+    );
+
+    // If typing 'admin', match the admin profile
+    if (!matchedProfile && (cleanUser === 'admin' || cleanUser === 'quantri')) {
+      matchedProfile = profiles.find((p) => p.role === 'admin' || (p.pinHash && !p.passwordHash));
+    }
+
+    if (!matchedProfile) {
+      setLoginError('Không tìm thấy tài khoản với Tên đăng nhập này. Vui lòng kiểm tra lại hoặc bấm Đăng Ký.');
+      return;
+    }
+
+    // Check ban
+    if (matchedProfile.bannedUntil) {
+      const banEnd = new Date(matchedProfile.bannedUntil);
+      if (banEnd > new Date()) {
+        const timeStr = banEnd.toLocaleString('vi-VN');
+        const reasonMsg = matchedProfile.banReason ? ` vì lý do: "${matchedProfile.banReason}"` : '';
+        setLoginError(`Tài khoản này đã bị tạm khóa đến ${timeStr}${reasonMsg}. Vui lòng liên hệ Admin.`);
+        return;
+      }
+    }
+
+    const isAdmin = matchedProfile.role === 'admin' || (matchedProfile.pinHash && !matchedProfile.passwordHash);
+
+    if (isAdmin && !loginPin.trim()) {
+      setLoginError('Vui lòng nhập mã PIN Quản Trị Viên');
+      return;
+    }
+    if (!isAdmin && !loginPassword.trim()) {
+      setLoginError('Vui lòng nhập mật khẩu tài khoản');
+      return;
+    }
+
+    setIsSubmittingDirect(true);
+    try {
+      const res = await onSelectProfile(
+        matchedProfile,
+        { pin: loginPin.trim(), password: loginPassword },
+        loginRemember
+      );
+
+      if (res.success) {
+        if (loginRemember) {
+          saveToKnownAccounts(matchedProfile);
+        }
+      } else {
+        setLoginError(res.error || (isAdmin ? 'Mã PIN Admin không chính xác' : 'Mật khẩu không chính xác'));
+      }
+    } catch (err: any) {
+      setLoginError(err?.message || 'Lỗi đăng nhập');
+    } finally {
+      setIsSubmittingDirect(false);
+    }
+  };
 
   // Handle Physical Keyboard input when PIN prompt is active (for Admin)
   useEffect(() => {
@@ -161,6 +306,9 @@ export const ProfilePickerView: React.FC<ProfilePickerViewProps> = ({
         triggerShake();
         if (isAdminProfile) setPinInput('');
       } else {
+        if (rememberLogin) {
+          saveToKnownAccounts(promptProfile);
+        }
         setPromptProfile(null);
       }
     } catch (err: any) {
@@ -191,130 +339,205 @@ export const ProfilePickerView: React.FC<ProfilePickerViewProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-[#0A0C10] flex flex-col items-center justify-center p-6 select-none overflow-hidden">
+    <div className="fixed inset-0 z-50 bg-[#0A0C10] flex flex-col items-center justify-center p-4 sm:p-6 select-none overflow-y-auto custom-scrollbar">
       {/* Background ambient lighting */}
       <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[350px] bg-gradient-to-r from-ice-accent/15 via-blue-600/10 to-indigo-600/15 rounded-full blur-[120px] pointer-events-none" />
 
       {/* Main Content Container */}
-      <div className="relative z-10 w-full max-w-5xl flex flex-col items-center text-center space-y-10 animate-fade-in">
+      <div className="relative z-10 w-full max-w-4xl flex flex-col items-center text-center space-y-8 animate-fade-in my-auto py-8">
         {/* Brand & Heading */}
-        <div className="space-y-3">
+        <div className="space-y-2">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-xs font-semibold text-ice-accent tracking-widest uppercase">
             <Sparkles className="w-3.5 h-3.5" />
             <span>Icelauch Profiles</span>
           </div>
-          <h1 className="text-3xl sm:text-4xl md:text-5xl font-black text-white tracking-tight">
-            {isManaging ? 'Quản Lý Hồ Sơ Người Dùng' : 'Ai Đang Trải Nghiệm?'}
+          <h1 className="text-2xl sm:text-4xl font-black text-white tracking-tight">
+            Đăng Nhập Icelauch
           </h1>
-          <p className="text-sm text-ice-subtext max-w-md mx-auto">
-            {isManaging
-              ? 'Nhấp vào hồ sơ để chỉnh sửa tên, ảnh đại diện hoặc thay đổi mã PIN'
-              : 'Chọn hồ sơ của bạn để tiếp tục kho game, tiến độ xem phim và danh sách yêu thích'}
+          <p className="text-xs sm:text-sm text-ice-subtext max-w-md mx-auto">
+            Hệ thống bảo mật: Chỉ hiển thị các tài khoản đã từng đăng nhập trên thiết bị này
           </p>
         </div>
 
-        {/* Netflix-Style Profile Cards Row */}
-        <div className="flex flex-wrap items-center justify-center gap-6 sm:gap-8 max-w-4xl py-4">
-          {profiles.map((profile) => (
-            <div
-              key={profile.id}
-              onClick={() => handleProfileClick(profile)}
-              className="group flex flex-col items-center gap-3 cursor-pointer transition-all transform hover:-translate-y-2"
-            >
-              <div className="relative">
-                <AvatarBadge
-                  avatar={profile.avatar}
-                  nickname={profile.nickname}
-                  size="xl"
-                  className={`ring-4 transition-all ${
-                    isManaging
-                      ? 'ring-amber-400 group-hover:ring-amber-300'
-                      : 'ring-transparent group-hover:ring-ice-accent group-hover:shadow-[0_0_25px_rgba(79,140,255,0.6)]'
-                  }`}
-                />
-                {isManaging && (
-                  <div className="absolute inset-0 rounded-2xl bg-black/60 flex items-center justify-center text-amber-300 backdrop-blur-xs">
-                    <Settings2 className="w-8 h-8 animate-spin-slow" />
-                  </div>
-                )}
-              </div>
-              <div className="space-y-0.5">
-                <span className="font-bold text-base sm:text-lg text-white group-hover:text-ice-accent transition-colors block">
-                  {profile.nickname}
-                </span>
-                {profile.bannedUntil && new Date(profile.bannedUntil) > new Date() ? (
-                  <span className="inline-block px-1.5 py-0.5 rounded text-[10px] font-bold bg-red-500/20 text-red-400 border border-red-500/30">
-                    🚫 Tạm Khóa
-                  </span>
-                ) : (
-                  <span className="text-[11px] text-ice-subtext block">
-                    {profile.library?.length || 0} Game • {Object.keys(profile.watchProgress || {}).length} Phim
-                  </span>
-                )}
-              </div>
-            </div>
-          ))}
+        {/* SECTION 1: SAVED ACCOUNTS ON THIS DEVICE (IF ANY) */}
+        {visibleSavedProfiles.length > 0 && (
+          <div className="w-full space-y-3">
+            <span className="text-xs font-bold text-ice-muted uppercase tracking-wider block">
+              Tài khoản đã nhớ trên máy này ({visibleSavedProfiles.length}):
+            </span>
+            <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-6 py-2">
+              {visibleSavedProfiles.map((profile) => (
+                <div
+                  key={profile.id}
+                  onClick={() => handleProfileClick(profile)}
+                  className="group relative flex flex-col items-center gap-2.5 p-3 rounded-2xl bg-white/[0.03] hover:bg-white/[0.08] border border-white/10 hover:border-ice-accent transition-all transform hover:-translate-y-1 cursor-pointer w-28 sm:w-32"
+                >
+                  {/* Remove Account from this Device Button */}
+                  <button
+                    type="button"
+                    onClick={(e) => handleForgetAccount(profile.id, e)}
+                    className="absolute -top-1.5 -right-1.5 w-6 h-6 rounded-full bg-black/80 hover:bg-red-600 border border-white/20 text-white/70 hover:text-white flex items-center justify-center text-xs transition-colors shadow-lg z-10"
+                    title="Xóa tài khoản khỏi thiết bị này"
+                  >
+                    <X className="w-3 h-3" />
+                  </button>
 
-          {/* Add Profile Card */}
-          <div
+                  <AvatarBadge
+                    avatar={profile.avatar}
+                    nickname={profile.nickname}
+                    size="md"
+                    className="group-hover:ring-2 group-hover:ring-ice-accent transition-all"
+                  />
+                  <div className="w-full text-center">
+                    <span className="font-bold text-xs sm:text-sm text-white truncate block">
+                      {profile.nickname}
+                    </span>
+                    <span className="text-[10px] text-ice-muted block truncate font-mono">
+                      {profile.role === 'admin' ? '🛡️ Admin' : profile.username ? `@${profile.username}` : 'Thành viên'}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* SECTION 2: DIRECT LOGIN FORM */}
+        <div className="w-full max-w-md p-6 rounded-3xl bg-black/40 border border-white/10 shadow-2xl space-y-4 text-left">
+          <div className="flex items-center gap-2 border-b border-white/10 pb-3">
+            <LogIn className="w-4 h-4 text-amber-400" />
+            <span className="text-xs font-bold text-white uppercase tracking-wider">
+              Đăng Nhập Tài Khoản
+            </span>
+          </div>
+
+          <form onSubmit={handleDirectLogin} className="space-y-3.5">
+            {/* Username Input */}
+            <div className="space-y-1">
+              <label className="text-[11px] font-bold text-ice-subtext uppercase tracking-wider">
+                Tên đăng nhập (Username):
+              </label>
+              <input
+                type="text"
+                value={loginUsername}
+                onChange={(e) => {
+                  setLoginUsername(e.target.value);
+                  setLoginError(null);
+                }}
+                placeholder="Ví dụ: dactung hoặc admin"
+                className="w-full h-10 px-3.5 rounded-xl bg-black/50 border border-white/15 text-xs text-white placeholder-ice-muted focus:border-amber-400 focus:outline-none transition-colors font-medium"
+              />
+            </div>
+
+            {/* Password or Admin PIN Input */}
+            {isDirectLoginAdmin ? (
+              <div className="space-y-1 animate-fade-in">
+                <label className="text-[11px] font-bold text-amber-400 uppercase tracking-wider flex items-center gap-1.5">
+                  <ShieldCheck className="w-3.5 h-3.5" />
+                  <span>Mã PIN Quản Trị Viên (Admin):</span>
+                </label>
+                <input
+                  type="password"
+                  value={loginPin}
+                  onChange={(e) => {
+                    setLoginPin(e.target.value);
+                    setLoginError(null);
+                  }}
+                  placeholder="Nhập mã PIN Admin..."
+                  className="w-full h-10 px-3.5 rounded-xl bg-black/50 border border-amber-400/40 text-xs text-white placeholder-ice-muted focus:border-amber-400 focus:outline-none transition-colors font-mono tracking-widest"
+                />
+              </div>
+            ) : (
+              <div className="space-y-1">
+                <label className="text-[11px] font-bold text-ice-subtext uppercase tracking-wider">
+                  Mật khẩu:
+                </label>
+                <div className="relative">
+                  <input
+                    type={showLoginPassword ? 'text' : 'password'}
+                    value={loginPassword}
+                    onChange={(e) => {
+                      setLoginPassword(e.target.value);
+                      setLoginError(null);
+                    }}
+                    placeholder="Nhập mật khẩu tài khoản..."
+                    className="w-full h-10 pl-3.5 pr-10 rounded-xl bg-black/50 border border-white/15 text-xs text-white placeholder-ice-muted focus:border-amber-400 focus:outline-none transition-colors font-medium"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowLoginPassword(!showLoginPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-ice-muted hover:text-white transition-colors"
+                  >
+                    {showLoginPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Remember on this device checkbox */}
+            <div className="flex items-center justify-between text-xs pt-1">
+              <label className="flex items-center gap-2 cursor-pointer text-ice-subtext hover:text-white transition-colors">
+                <input
+                  type="checkbox"
+                  checked={loginRemember}
+                  onChange={(e) => setLoginRemember(e.target.checked)}
+                  className="w-4 h-4 rounded border-ice-border bg-black/40 text-ice-accent focus:ring-0"
+                />
+                <span>Ghi nhớ tài khoản trên thiết bị này</span>
+              </label>
+            </div>
+
+            {/* Error Message */}
+            {loginError && (
+              <p className="text-[11px] text-red-400 flex items-center gap-1.5 pt-1">
+                <ShieldAlert className="w-4 h-4 shrink-0" />
+                <span>{loginError}</span>
+              </p>
+            )}
+
+            {/* Submit Button */}
+            <button
+              type="submit"
+              disabled={isSubmittingDirect}
+              className="w-full h-11 rounded-xl bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-black font-black text-xs tracking-wider uppercase shadow-xl transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+            >
+              <LogIn className="w-4 h-4" />
+              <span>{isSubmittingDirect ? 'Đang xác thực...' : 'Đăng Nhập'}</span>
+            </button>
+          </form>
+        </div>
+
+        {/* SECTION 3: REGISTER NEW & GUEST ACTIONS */}
+        <div className="flex flex-wrap items-center justify-center gap-4 text-xs">
+          <button
+            type="button"
             onClick={() => {
               setEditingProfile(null);
               setIsCreateModalOpen(true);
             }}
-            className="group flex flex-col items-center gap-3 cursor-pointer transition-all transform hover:-translate-y-2"
+            className="px-5 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold transition-all flex items-center gap-2 border border-white/10 shadow"
           >
-            <div className="w-24 h-24 rounded-2xl border-2 border-dashed border-white/20 hover:border-ice-accent bg-white/5 hover:bg-ice-accent/10 flex items-center justify-center text-white/50 group-hover:text-ice-accent transition-all group-hover:shadow-[0_0_20px_rgba(79,140,255,0.4)]">
-              <Plus className="w-10 h-10 stroke-[2.5]" />
-            </div>
-            <span className="font-bold text-base sm:text-lg text-white/70 group-hover:text-ice-accent transition-colors">
-              Thêm Hồ Sơ
-            </span>
-          </div>
+            <UserPlus className="w-4 h-4 text-amber-400" />
+            <span>Đăng Ký Tài Khoản Mới</span>
+          </button>
 
-          {/* Guest Mode Card */}
-          {!isManaging && (
-            <div
-              onClick={onSelectGuest}
-              className="group flex flex-col items-center gap-3 cursor-pointer transition-all transform hover:-translate-y-2 opacity-80 hover:opacity-100"
-            >
-              <div className="w-24 h-24 rounded-2xl border-2 border-white/10 hover:border-white/30 bg-gradient-to-br from-slate-800 to-slate-900 flex items-center justify-center text-white/60 group-hover:text-white transition-all shadow-md">
-                <User className="w-10 h-10" />
-              </div>
-              <div className="space-y-0.5">
-                <span className="font-bold text-base sm:text-lg text-white/80 group-hover:text-white transition-colors block">
-                  Khách (Guest)
-                </span>
-                <span className="text-[11px] text-ice-subtext block">
-                  Trải nghiệm nhanh
-                </span>
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* Bottom Actions: Manage Profiles Button */}
-        <div className="pt-4 flex items-center gap-4">
           <button
-            onClick={() => setIsManaging(!isManaging)}
-            className={`px-6 py-2.5 rounded-xl border text-xs font-bold tracking-wider uppercase transition-all flex items-center gap-2 ${
-              isManaging
-                ? 'bg-amber-500 text-black border-amber-400 shadow-lg shadow-amber-500/30'
-                : 'bg-white/5 hover:bg-white/10 text-ice-subtext hover:text-white border-white/10'
-            }`}
+            type="button"
+            onClick={onSelectGuest}
+            className="px-5 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-ice-muted hover:text-white font-bold transition-all flex items-center gap-2 border border-white/5"
           >
-            <Settings2 className="w-4 h-4" />
-            <span>{isManaging ? 'Xong / Quay Lại' : 'Quản Lý Hồ Sơ'}</span>
+            <User className="w-4 h-4" />
+            <span>Trải Nghiệm Dưới Dạng Khách (Guest)</span>
           </button>
         </div>
       </div>
 
-      {/* Dual Login Modal: Admin PIN vs User Password */}
+      {/* Dual Login Modal for Selected Saved Profile Card */}
       {promptProfile && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md animate-fade-in select-none">
           <div className={`bg-[#14171F] border border-ice-border rounded-3xl w-full max-w-sm overflow-hidden shadow-2xl p-6 flex flex-col items-center space-y-5 ${
             isShaking ? 'animate-shake' : ''
           }`}>
-            {/* Header with Selected Profile Avatar */}
             <div className="flex flex-col items-center space-y-2">
               <AvatarBadge
                 avatar={promptProfile.avatar}
@@ -336,37 +559,19 @@ export const ProfilePickerView: React.FC<ProfilePickerViewProps> = ({
                   <p className="text-[11px] text-ice-subtext font-mono">@{promptProfile.username}</p>
                 )}
                 <p className="text-xs text-ice-subtext mt-0.5">
-                  {isAdminProfile ? 'Nhập mã PIN Quản Trị Viên' : 'Nhập mật khẩu tài khoản để đăng nhập'}
+                  {isAdminProfile ? 'Nhập mã PIN Quản Trị Viên' : 'Nhập mật khẩu để tiếp tục'}
                 </p>
               </div>
             </div>
 
-            {/* Requires reset notice if flagged */}
-            {promptProfile.requiresPasswordReset && (
-              <div className="w-full p-2.5 rounded-xl bg-amber-500/15 border border-amber-500/30 text-amber-300 text-xs flex items-center gap-2">
-                <ShieldAlert className="w-4 h-4 shrink-0" />
-                <span>Admin đã duyệt đặt lại mật khẩu. Vui lòng nhập mật khẩu mới.</span>
-              </div>
-            )}
-
-            {/* Error Message */}
             {authError && (
               <span className="text-xs text-rose-400 font-semibold text-center w-full">
                 {authError}
               </span>
             )}
 
-            {/* RESET FEEDBACK */}
-            {resetFeedback && (
-              <div className="w-full p-2.5 rounded-xl bg-cyan-500/15 border border-cyan-500/30 text-cyan-300 text-xs text-center font-medium">
-                {resetFeedback}
-              </div>
-            )}
-
             {isAdminProfile ? (
-              /* CASE 1: ADMIN PIN KEYPAD */
               <>
-                {/* Dynamic PIN Dots Display */}
                 <div className="flex items-center justify-center gap-2 min-h-[32px]">
                   {Array.from({ length: Math.max(pinInput.length, 6) }).map((_, idx) => {
                     const isFilled = idx < pinInput.length;
@@ -383,7 +588,6 @@ export const ProfilePickerView: React.FC<ProfilePickerViewProps> = ({
                   })}
                 </div>
 
-                {/* Virtual Numeric Keypad (1 - 9, 0, Backspace) */}
                 <div className="grid grid-cols-3 gap-3 w-full max-w-[260px]">
                   {['1', '2', '3', '4', '5', '6', '7', '8', '9'].map((digit) => (
                     <button
@@ -422,7 +626,6 @@ export const ProfilePickerView: React.FC<ProfilePickerViewProps> = ({
                 </div>
               </>
             ) : (
-              /* CASE 2: REGULAR USER PASSWORD FORM */
               <form
                 onSubmit={(e) => {
                   e.preventDefault();
@@ -431,9 +634,6 @@ export const ProfilePickerView: React.FC<ProfilePickerViewProps> = ({
                 className="w-full space-y-4"
               >
                 <div className="space-y-1.5">
-                  <label className="text-[11px] font-bold text-ice-subtext uppercase tracking-wider block">
-                    Mật Khẩu *
-                  </label>
                   <div className="relative w-full">
                     <input
                       type={showPassword ? 'text' : 'password'}
@@ -449,116 +649,58 @@ export const ProfilePickerView: React.FC<ProfilePickerViewProps> = ({
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-ice-subtext hover:text-white p-1 rounded-lg transition-colors"
-                      title={showPassword ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'}
+                      className="absolute right-3.5 top-1/2 -translate-y-1/2 text-ice-muted hover:text-white transition-colors"
                     >
                       {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                     </button>
                   </div>
                 </div>
 
-                {/* Forgot password link */}
-                <div className="flex items-center justify-between text-xs pt-0.5">
+                <div className="flex gap-2">
                   <button
                     type="button"
-                    onClick={() => setShowForgotModal(true)}
-                    className="text-cyan-400 hover:text-cyan-300 font-semibold transition-colors underline"
+                    onClick={() => setPromptProfile(null)}
+                    className="flex-1 h-11 rounded-xl bg-white/5 hover:bg-white/10 text-white text-xs font-bold transition-colors"
                   >
-                    Quên mật khẩu?
+                    Hủy
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={isSubmitting || !passwordInput.trim()}
+                    className="flex-1 h-11 rounded-xl bg-ice-accent hover:bg-ice-accentHover text-white text-xs font-bold transition-all shadow-lg shadow-ice-accent/30 disabled:opacity-50"
+                  >
+                    {isSubmitting ? 'Đang vào...' : 'Xác Nhận'}
                   </button>
                 </div>
               </form>
             )}
-
-            {/* Remember on this device checkbox */}
-            <label className="flex items-center gap-2 text-xs text-ice-subtext hover:text-white cursor-pointer transition-colors w-full justify-start pt-1">
-              <input
-                type="checkbox"
-                checked={rememberLogin}
-                onChange={(e) => setRememberLogin(e.target.checked)}
-                className="w-4 h-4 rounded border-ice-border text-ice-accent focus:ring-0 focus:ring-offset-0 bg-black/40"
-              />
-              <span>Ghi nhớ đăng nhập trên máy này</span>
-            </label>
-
-            {/* Action Buttons */}
-            <div className="w-full flex items-center gap-2.5 pt-1">
-              <button
-                type="button"
-                onClick={() => {
-                  setPromptProfile(null);
-                  setPinInput('');
-                  setPasswordInput('');
-                }}
-                className="flex-1 h-11 rounded-xl bg-white/5 hover:bg-white/10 text-white text-xs font-bold transition-all border border-white/5"
-              >
-                Đóng
-              </button>
-              <button
-                type="button"
-                onClick={handleSubmitAuth}
-                disabled={isSubmitting || (isAdminProfile ? pinInput.length < 4 : !passwordInput.trim())}
-                className={`flex-1 h-11 rounded-xl text-xs font-bold tracking-wider uppercase flex items-center justify-center gap-2 transition-all ${
-                  (isAdminProfile ? pinInput.length >= 4 : Boolean(passwordInput.trim()))
-                    ? 'bg-gradient-to-r from-ice-accent to-blue-600 hover:from-ice-accentHover hover:to-blue-500 text-white shadow-lg shadow-blue-950/50 transform hover:-translate-y-0.5 active:scale-95'
-                    : 'bg-white/5 text-white/30 border border-white/5 cursor-not-allowed'
-                }`}
-              >
-                <Check className="w-4 h-4" />
-                <span>Đăng Nhập</span>
-              </button>
-            </div>
           </div>
         </div>
       )}
 
-      {/* Forgot Password Request Confirmation Modal */}
-      {showForgotModal && promptProfile && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90 backdrop-blur-md animate-fade-in select-none">
-          <div className="bg-[#14171F] border border-cyan-500/40 rounded-2xl w-full max-w-sm overflow-hidden shadow-2xl p-6 flex flex-col space-y-4">
-            <div className="flex items-center gap-2.5 text-cyan-400">
-              <HelpCircle className="w-5 h-5 shrink-0" />
-              <h3 className="text-sm font-bold text-white">Yêu Cầu Đặt Lại Mật Khẩu</h3>
-            </div>
-            <p className="text-xs text-ice-subtext leading-relaxed">
-              Bạn có chắc chắn muốn gửi yêu cầu đặt lại mật khẩu cho tài khoản <b className="text-white">{promptProfile.nickname}</b> (@{promptProfile.username || promptProfile.nickname}) tới Quản trị viên không?
-            </p>
-            <div className="flex items-center gap-2.5 pt-2">
-              <button
-                type="button"
-                onClick={() => setShowForgotModal(false)}
-                className="flex-1 h-10 rounded-xl bg-white/5 hover:bg-white/10 text-white text-xs font-semibold"
-              >
-                Hủy
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  setShowForgotModal(false);
-                  handleSendResetRequest();
-                }}
-                className="flex-1 h-10 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-bold flex items-center justify-center gap-1.5 shadow-md shadow-cyan-950/50"
-              >
-                <Send className="w-3.5 h-3.5" />
-                <span>Gửi Yêu Cầu</span>
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Profile Create / Edit Modal */}
+      {/* Profile Registration Modal */}
       <ProfileModal
         isOpen={isCreateModalOpen}
+        onClose={() => setIsCreateModalOpen(false)}
         profile={editingProfile}
-        onClose={() => {
+        onSave={async (data) => {
+          await onSaveProfile(data);
           setIsCreateModalOpen(false);
-          setEditingProfile(null);
+          // If registered with remember, save to known accounts
+          const saved: SavedAccountRecord = {
+            id: data.id || `user-${Date.now()}`,
+            username: data.username,
+            nickname: data.nickname,
+            avatar: data.avatar,
+            role: data.role || 'user',
+          };
+          setSavedRecords((prev) => [saved, ...prev.filter((r) => r.id !== saved.id)]);
+          try {
+            const current = JSON.parse(localStorage.getItem(STORAGE_KEY_KNOWN_ACCOUNTS) || '[]');
+            localStorage.setItem(STORAGE_KEY_KNOWN_ACCOUNTS, JSON.stringify([saved, ...current.filter((r: any) => r.id !== saved.id)]));
+          } catch {}
         }}
-        onSave={onSaveProfile}
-        onDelete={onDeleteProfile}
       />
     </div>
   );
 };
-

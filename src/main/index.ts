@@ -774,6 +774,19 @@ app.whenReady().then(async () => {
     return true;
   });
 
+  ipcMain.handle('system:open-external', async (_event, url: string) => {
+    try {
+      let cleanUrl = url.trim();
+      if (!cleanUrl.startsWith('http://') && !cleanUrl.startsWith('https://')) {
+        cleanUrl = `https://${cleanUrl}`;
+      }
+      await shell.openExternal(cleanUrl);
+      return true;
+    } catch {
+      return false;
+    }
+  });
+
   // System Drive Free Space
   ipcMain.handle('system:get-drives-space', () => {
     const letters = ['C:\\', 'D:\\', 'E:\\', 'F:\\', 'G:\\'];

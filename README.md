@@ -1,8 +1,8 @@
 # Icelauch - Trình Quản Lý Game & Rạp Giải Trí Đa Nền Tảng (Windows, Mobile & Android TV)
 
 **Phiên bản phát hành:** 
-- 🖥️ **Windows PC:** `v1.1.1`
-- 📱 **Android Điện Thoại:** `v1.1.1`
+- 🖥️ **Windows PC:** `v1.1.2`
+- 📱 **Android Điện Thoại:** `v1.1.2`
 - 📺 **Android TV Edition:** `v1.0.0` (Bản chuyên biệt điều khiển 100% bằng Remote)
 
 **Hệ điều hành hỗ trợ:** 

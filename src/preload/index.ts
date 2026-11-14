@@ -115,6 +115,9 @@ export const API = {
     return () => ipcRenderer.removeListener('controller:message', handler);
   },
 
+  // System External URL opener
+  openExternalUrl: (url: string): Promise<boolean> => ipcRenderer.invoke('system:open-external', url),
+
   // Drives Storage Space
   getDrivesSpace: (): Promise<{ drive: string; freeGB: number; totalGB: number }[]> =>
     ipcRenderer.invoke('system:get-drives-space'),

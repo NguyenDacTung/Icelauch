@@ -21,7 +21,9 @@ import {
   Camera,
   Sparkles,
   RefreshCw,
-  ExternalLink
+  ExternalLink,
+  Lock,
+  UserCheck
 } from 'lucide-react';
 import QRCode from 'qrcode';
 import type { IceDropShareItem, UserProfile } from '../../types';
@@ -37,15 +39,24 @@ export const IceDropView: React.FC<IceDropViewProps> = ({ activeProfile }) => {
   const isDesktop = isElectron();
   const [channel, setChannel] = useState<'cloud' | 'direct'>('cloud');
 
-  // Cloud Shares State
-  const [shares, setShares] = useState<IceDropShareItem[]>([]);
+  // Cloud Shares State (My Shares only)
+  const [myShares, setMyShares] = useState<IceDropShareItem[]>([]);
   const [inputContent, setInputContent] = useState('');
   const [shareType, setShareType] = useState<'text' | 'link'>('text');
   const [receivePin, setReceivePin] = useState('');
-  const [foundItem, setFoundItem] = useState<IceDropShareItem | null>(null);
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [isSubmittingCloud, setIsSubmittingCloud] = useState(false);
   const [cloudError, setCloudError] = useState<string | null>(null);
+
+  // Received items history in this session
+  const [receivedItems, setReceivedItems] = useState<IceDropShareItem[]>(() => {
+    try {
+      const stored = sessionStorage.getItem('icelauch_received_icedrop_items');
+      return stored ? JSON.parse(stored) : [];
+    } catch {
+      return [];
+    }
+  });
 
   // Direct QR Transfer State
   const [directQrUrl, setDirectQrUrl] = useState<string>('');
@@ -56,19 +67,23 @@ export const IceDropView: React.FC<IceDropViewProps> = ({ activeProfile }) => {
   const [receivedDirectItems, setReceivedDirectItems] = useState<{ id: string; type: string; content: string; time: string }[]>([]);
   const directWsRef = useRef<WebSocket | null>(null);
 
-  // 1. Load Cloud Shares from Supabase
-  const loadCloudShares = async () => {
-    const list = await IceDropCloudService.getActiveShares();
-    setShares(list);
+  // 1. Load Cloud Shares for the CURRENT logged-in user only
+  const loadMyShares = async () => {
+    if (activeProfile?.id) {
+      const list = await IceDropCloudService.getMyActiveShares(activeProfile.id);
+      setMyShares(list);
+    } else {
+      setMyShares([]);
+    }
   };
 
   useEffect(() => {
     if (channel === 'cloud') {
-      loadCloudShares();
-      const interval = setInterval(loadCloudShares, 8000); // 8s auto refresh
+      loadMyShares();
+      const interval = setInterval(loadMyShares, 8000); // 8s auto refresh
       return () => clearInterval(interval);
     }
-  }, [channel]);
+  }, [channel, activeProfile?.id]);
 
   // 2. Generate Direct Transfer QR Code on PC
   useEffect(() => {
@@ -100,16 +115,38 @@ export const IceDropView: React.FC<IceDropViewProps> = ({ activeProfile }) => {
     }
   }, [isDesktop, channel]);
 
+  // Handle URL opener (Desktop default browser or mobile web)
+  const handleOpenUrl = (rawUrl: string) => {
+    let clean = rawUrl.trim();
+    if (!clean.startsWith('http://') && !clean.startsWith('https://')) {
+      clean = `https://${clean}`;
+    }
+    if (window.api?.openExternalUrl) {
+      window.api.openExternalUrl(clean);
+    } else {
+      window.open(clean, '_blank');
+    }
+  };
+
+  const isLinkContent = (text: string, type?: string) => {
+    return type === 'link' || /^(https?:\/\/|www\.)/i.test(text.trim());
+  };
+
   // Handle Create Cloud Share
   const handleCreateCloudShare = async () => {
+    if (!activeProfile) {
+      alert('Chỉ tài khoản đã đăng nhập mới có thể tạo chia sẻ đám mây. Vui lòng đăng nhập.');
+      return;
+    }
     if (!inputContent.trim()) return;
+
     setIsSubmittingCloud(true);
     setCloudError(null);
 
-    // Limit 5 shares max warning
-    if (shares.length >= 5) {
+    // Limit 5 shares max per account check
+    if (myShares.length >= 5) {
       const confirmDelete = window.confirm(
-        'Đã đạt tối đa 5 phần chia sẻ. Hệ thống sẽ tự động xóa phần chia sẻ cũ nhất để tiếp tục. Bạn có đồng ý không?'
+        'Tài khoản của bạn đã đạt giới hạn tối đa 5 phần chia sẻ đang hoạt động. Hệ thống sẽ tự động xóa phần chia sẻ cũ nhất của bạn để tiếp tục. Bạn có đồng ý không?'
       );
       if (!confirmDelete) {
         setIsSubmittingCloud(false);
@@ -119,17 +156,17 @@ export const IceDropView: React.FC<IceDropViewProps> = ({ activeProfile }) => {
 
     try {
       const created = await IceDropCloudService.createShare({
-        senderProfileId: activeProfile?.id,
-        senderName: activeProfile?.nickname || 'Người dùng Icelauch',
+        senderProfileId: activeProfile.id,
+        senderName: activeProfile.nickname || activeProfile.username || 'Người dùng',
         type: shareType,
         content: inputContent.trim(),
       });
 
       if (created) {
         setInputContent('');
-        await loadCloudShares();
+        await loadMyShares();
       } else {
-        setCloudError('Không thể tải lên Supabase. Vui lòng kiểm tra kết nối mạng.');
+        setCloudError('Không thể lưu lên Supabase Cloud. Vui lòng kiểm tra mạng.');
       }
     } catch (e: any) {
       setCloudError(e?.message || 'Lỗi gửi chia sẻ');
@@ -141,11 +178,21 @@ export const IceDropView: React.FC<IceDropViewProps> = ({ activeProfile }) => {
   // Handle Find by 4-digit PIN
   const handleLookupPin = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!receivePin.trim()) return;
-    setFoundItem(null);
-    const item = await IceDropCloudService.findByPinCode(receivePin.trim());
+    const cleanPin = receivePin.trim();
+    if (cleanPin.length !== 4) return;
+
+    const item = await IceDropCloudService.findByPinCode(cleanPin);
     if (item) {
-      setFoundItem(item);
+      // Add to session received items list if not already present
+      setReceivedItems((prev) => {
+        const filtered = prev.filter((i) => i.id !== item.id);
+        const updated = [item, ...filtered].slice(0, 10);
+        try {
+          sessionStorage.setItem('icelauch_received_icedrop_items', JSON.stringify(updated));
+        } catch {}
+        return updated;
+      });
+      setReceivePin('');
     } else {
       alert('Không tìm thấy nội dung chia sẻ với mã 4 số này hoặc mã đã hết hạn 10 phút.');
     }
@@ -216,11 +263,11 @@ export const IceDropView: React.FC<IceDropViewProps> = ({ activeProfile }) => {
             <h2 className="text-base font-bold text-white flex items-center gap-2">
               <span>IceDrop - Chia Sẻ Dữ Liệu Tức Thì</span>
               <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-400/20 text-amber-300 border border-amber-400/30 font-bold">
-                Mới v1.1.0
+                Bảo Mật Cao
               </span>
             </h2>
             <p className="text-xs text-ice-muted">
-              Gửi văn bản, liên kết và tệp tin siêu tốc giữa các thiết bị
+              {activeProfile ? `Đang đăng nhập: ${activeProfile.nickname}` : 'Đang sử dụng chế độ Khách (Guest)'}
             </p>
           </div>
         </div>
@@ -237,7 +284,7 @@ export const IceDropView: React.FC<IceDropViewProps> = ({ activeProfile }) => {
             }`}
           >
             <Cloud className="w-4 h-4" />
-            <span>Đám Mây (Cloud PIN)</span>
+            <span>Đám Mây (Mã 4 Số)</span>
           </button>
           <button
             type="button"
@@ -257,85 +304,104 @@ export const IceDropView: React.FC<IceDropViewProps> = ({ activeProfile }) => {
       {/* TAB 1: CLOUD SHARING */}
       {channel === 'cloud' && (
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-          {/* Left Column: Create Share & PIN Code Box (5 cols) */}
+          {/* Left Column: Create Share OR Guest Banner + Receive Box (5 cols) */}
           <div className="lg:col-span-5 space-y-5">
-            {/* Create Share Card */}
-            <div className="p-6 rounded-3xl bg-black/40 border border-white/10 shadow-xl space-y-4">
-              <div className="flex items-center justify-between border-b border-white/10 pb-3">
-                <span className="text-xs font-bold text-white flex items-center gap-1.5 uppercase tracking-wider">
-                  <Send className="w-3.5 h-3.5 text-amber-400" />
-                  <span>Tạo Chia Sẻ Lên Đám Mây</span>
-                </span>
-                <span className="text-[10px] text-amber-300 font-mono">Tối đa 5 mục • TTL 10 phút</span>
-              </div>
+            {/* If Logged-in: Create Share Card */}
+            {activeProfile ? (
+              <div className="p-6 rounded-3xl bg-black/40 border border-white/10 shadow-xl space-y-4">
+                <div className="flex items-center justify-between border-b border-white/10 pb-3">
+                  <span className="text-xs font-bold text-white flex items-center gap-1.5 uppercase tracking-wider">
+                    <Send className="w-3.5 h-3.5 text-amber-400" />
+                    <span>Tạo Chia Sẻ Đám Mây Mới</span>
+                  </span>
+                  <span className="text-[10px] text-amber-300 font-mono">
+                    Đã dùng: {myShares.length}/5 (Của bạn)
+                  </span>
+                </div>
 
-              {/* Type Switcher */}
-              <div className="grid grid-cols-2 gap-2">
-                <button
-                  type="button"
-                  onClick={() => setShareType('text')}
-                  className={`py-2 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 border transition-all ${
-                    shareType === 'text'
-                      ? 'bg-amber-400/20 text-amber-300 border-amber-400/40 shadow'
-                      : 'bg-black/30 text-ice-muted border-white/10 hover:text-white'
-                  }`}
-                >
-                  <FileText className="w-3.5 h-3.5" />
-                  <span>Văn Bản Ghi Chú</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setShareType('link')}
-                  className={`py-2 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 border transition-all ${
-                    shareType === 'link'
-                      ? 'bg-amber-400/20 text-amber-300 border-amber-400/40 shadow'
-                      : 'bg-black/30 text-ice-muted border-white/10 hover:text-white'
-                  }`}
-                >
-                  <LinkIcon className="w-3.5 h-3.5" />
-                  <span>Đường Dẫn Link</span>
-                </button>
-              </div>
+                {/* Type Switcher */}
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setShareType('text')}
+                    className={`py-2 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 border transition-all ${
+                      shareType === 'text'
+                        ? 'bg-amber-400/20 text-amber-300 border-amber-400/40 shadow'
+                        : 'bg-black/30 text-ice-muted border-white/10 hover:text-white'
+                    }`}
+                  >
+                    <FileText className="w-3.5 h-3.5" />
+                    <span>Văn Bản Ghi Chú</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setShareType('link')}
+                    className={`py-2 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 border transition-all ${
+                      shareType === 'link'
+                        ? 'bg-amber-400/20 text-amber-300 border-amber-400/40 shadow'
+                        : 'bg-black/30 text-ice-muted border-white/10 hover:text-white'
+                    }`}
+                  >
+                    <LinkIcon className="w-3.5 h-3.5" />
+                    <span>Đường Dẫn Link</span>
+                  </button>
+                </div>
 
-              {/* Input Area */}
-              <div className="space-y-2">
-                <textarea
-                  value={inputContent}
-                  onChange={(e) => setInputContent(e.target.value)}
-                  placeholder={shareType === 'text' ? 'Nhập nội dung văn bản muốn gửi qua thiết bị khác...' : 'Dán đường dẫn link (https://...)'}
-                  rows={4}
-                  className="w-full p-3.5 rounded-2xl bg-black/50 border border-white/15 text-xs text-white placeholder-ice-muted focus:border-amber-400 focus:outline-none transition-colors resize-none"
-                />
+                {/* Input Area */}
+                <div className="space-y-2">
+                  <textarea
+                    value={inputContent}
+                    onChange={(e) => setInputContent(e.target.value)}
+                    placeholder={
+                      shareType === 'text'
+                        ? 'Nhập nội dung văn bản muốn gửi...'
+                        : 'Dán đường dẫn link (ví dụ: https://youtube.com/...)'
+                    }
+                    rows={4}
+                    className="w-full p-3.5 rounded-2xl bg-black/50 border border-white/15 text-xs text-white placeholder-ice-muted focus:border-amber-400 focus:outline-none transition-colors resize-none"
+                  />
 
-                {cloudError && (
-                  <p className="text-[11px] text-red-400 flex items-center gap-1.5">
-                    <AlertCircle className="w-3.5 h-3.5 shrink-0" />
-                    <span>{cloudError}</span>
-                  </p>
-                )}
-
-                <button
-                  type="button"
-                  disabled={isSubmittingCloud || !inputContent.trim()}
-                  onClick={handleCreateCloudShare}
-                  className="w-full py-3 rounded-2xl bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-black font-black text-xs tracking-wider uppercase shadow-xl transition-all flex items-center justify-center gap-2 disabled:opacity-50 active:scale-98"
-                >
-                  {isSubmittingCloud ? (
-                    <RefreshCw className="w-4 h-4 animate-spin" />
-                  ) : (
-                    <Send className="w-4 h-4" />
+                  {cloudError && (
+                    <p className="text-[11px] text-red-400 flex items-center gap-1.5">
+                      <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                      <span>{cloudError}</span>
+                    </p>
                   )}
-                  <span>{isSubmittingCloud ? 'Đang tải lên...' : 'Chia Sẻ Ngay (Sinh Mã 4 Số)'}</span>
-                </button>
+
+                  <button
+                    type="button"
+                    disabled={isSubmittingCloud || !inputContent.trim()}
+                    onClick={handleCreateCloudShare}
+                    className="w-full py-3 rounded-2xl bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-black font-black text-xs tracking-wider uppercase shadow-xl transition-all flex items-center justify-center gap-2 disabled:opacity-50 active:scale-98"
+                  >
+                    {isSubmittingCloud ? (
+                      <RefreshCw className="w-4 h-4 animate-spin" />
+                    ) : (
+                      <Send className="w-4 h-4" />
+                    )}
+                    <span>{isSubmittingCloud ? 'Đang tải lên...' : 'Chia Sẻ (Sinh Mã 4 Số)'}</span>
+                  </button>
+                </div>
               </div>
-            </div>
+            ) : (
+              /* Guest Notice: Cannot post, only receive */
+              <div className="p-6 rounded-3xl bg-amber-500/10 border border-amber-500/30 shadow-xl space-y-3 text-center">
+                <div className="w-12 h-12 rounded-2xl bg-amber-400/20 text-amber-400 border border-amber-400/30 mx-auto flex items-center justify-center">
+                  <Lock className="w-6 h-6" />
+                </div>
+                <h3 className="text-sm font-bold text-white">Chế Độ Khách (Guest)</h3>
+                <p className="text-xs text-ice-muted leading-relaxed">
+                  Ở chế độ Khách, bạn có thể tra cứu và nhận chia sẻ từ người khác bằng <b>Mã PIN 4 số</b> bên dưới. Vui lòng đăng nhập tài khoản nếu muốn tạo chia sẻ của riêng bạn.
+                </p>
+              </div>
+            )}
 
             {/* Quick Receive by 4-digit PIN Code */}
             <div className="p-6 rounded-3xl bg-black/40 border border-white/10 shadow-xl space-y-4">
               <div className="flex items-center gap-2 border-b border-white/10 pb-3">
                 <KeyRound className="w-4 h-4 text-emerald-400" />
                 <span className="text-xs font-bold text-white uppercase tracking-wider">
-                  Nhận Bằng Mã PIN 4 Số (Khác Tài Khoản)
+                  Nhận Chia Sẻ Bằng Mã PIN 4 Số
                 </span>
               </div>
 
@@ -353,150 +419,230 @@ export const IceDropView: React.FC<IceDropViewProps> = ({ activeProfile }) => {
                   disabled={receivePin.length !== 4}
                   className="flex-1 h-10 rounded-2xl bg-emerald-500 hover:bg-emerald-400 disabled:opacity-40 text-black font-black text-xs shadow-lg transition-all"
                 >
-                  Tra Cứu
+                  Nhận Ngay
                 </button>
               </form>
-
-              {/* Found Item Display */}
-              {foundItem && (
-                <div className="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 space-y-2.5 animate-scale-up">
-                  <div className="flex items-center justify-between text-xs font-bold text-emerald-400">
-                    <span>Tìm thấy chia sẻ từ: {foundItem.senderName}</span>
-                    <span className="text-[10px] text-ice-muted">Mã: {foundItem.pinCode}</span>
-                  </div>
-                  <div className="p-3 rounded-xl bg-black/50 border border-white/10 text-xs text-white break-all select-text font-mono">
-                    {foundItem.content}
-                  </div>
-                  <div className="flex items-center justify-end gap-2">
-                    <button
-                      type="button"
-                      onClick={() => handleCopy('found_' + foundItem.id, foundItem.content)}
-                      className="px-3 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-xs text-white font-bold flex items-center gap-1.5 transition-all"
-                    >
-                      <Copy className="w-3.5 h-3.5" />
-                      <span>{copiedId === 'found_' + foundItem.id ? 'Đã sao chép!' : 'Sao Chép'}</span>
-                    </button>
-                    {foundItem.type === 'link' && (
-                      <a
-                        href={foundItem.content}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="px-3 py-1.5 rounded-xl bg-emerald-500 text-black text-xs font-black flex items-center gap-1.5 shadow"
-                      >
-                        <ExternalLink className="w-3.5 h-3.5" />
-                        <span>Mở Link</span>
-                      </a>
-                    )}
-                  </div>
-                </div>
-              )}
             </div>
           </div>
 
-          {/* Right Column: Active Shares Stream (7 cols) */}
+          {/* Right Column: "Chia Sẻ Của Tôi" & "Đã Nhận Bằng Mã PIN" (7 cols) */}
           <div className="lg:col-span-7 space-y-5">
+            {/* 1. My Shares Section (Visible only when logged in) */}
+            {activeProfile && (
+              <div className="p-6 rounded-3xl bg-black/40 border border-white/10 shadow-xl space-y-4">
+                <div className="flex items-center justify-between border-b border-white/10 pb-3">
+                  <div className="flex items-center gap-2">
+                    <UserCheck className="w-4 h-4 text-amber-400" />
+                    <h3 className="text-sm font-bold text-white">
+                      Chia Sẻ Của Bạn ({myShares.length}/5)
+                    </h3>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={loadMyShares}
+                    className="p-1.5 rounded-lg text-ice-muted hover:text-white hover:bg-white/10 transition-colors"
+                    title="Làm mới danh sách"
+                  >
+                    <RefreshCw className="w-4 h-4" />
+                  </button>
+                </div>
+
+                {myShares.length === 0 ? (
+                  <div className="py-8 text-center space-y-2">
+                    <Clock className="w-8 h-8 text-ice-muted/40 mx-auto" />
+                    <p className="text-xs text-ice-muted">Bạn chưa có chia sẻ nào đang hoạt động.</p>
+                    <p className="text-[11px] text-ice-muted/70">
+                      Tạo chia sẻ ở khung bên trái. Người khác chỉ có thể xem khi bạn đưa cho họ mã PIN 4 số.
+                    </p>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {myShares.map((item) => {
+                      const isCopied = copiedId === item.id;
+                      const isUrl = isLinkContent(item.content, item.type);
+                      const timeLeftMin = Math.max(
+                        0,
+                        Math.round((new Date(item.expiresAt).getTime() - Date.now()) / 60000)
+                      );
+
+                      return (
+                        <div
+                          key={item.id}
+                          className="p-4 rounded-2xl bg-white/[0.03] border border-white/10 hover:border-amber-400/50 transition-all space-y-3 group"
+                        >
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              <span className="w-7 h-7 rounded-lg bg-amber-400/20 text-amber-300 border border-amber-400/30 flex items-center justify-center text-xs font-black">
+                                {item.type === 'link' ? <LinkIcon className="w-3.5 h-3.5" /> : <FileText className="w-3.5 h-3.5" />}
+                              </span>
+                              <div>
+                                <span className="text-xs font-bold text-white">{item.senderName}</span>
+                                <span className="text-[10px] text-ice-muted block">
+                                  {new Date(item.createdAt).toLocaleTimeString()}
+                                </span>
+                              </div>
+                            </div>
+
+                            {/* 4-digit PIN Badge */}
+                            <div className="flex items-center gap-2">
+                              <div className="px-2.5 py-1 rounded-xl bg-black/60 border border-amber-400/60 flex items-center gap-1.5 shadow">
+                                <KeyRound className="w-3 h-3 text-amber-400" />
+                                <span className="text-xs font-mono font-black text-amber-300 tracking-wider">
+                                  {item.pinCode}
+                                </span>
+                              </div>
+                              <span className="text-[10px] text-ice-muted flex items-center gap-1">
+                                <Clock className="w-3 h-3 text-ice-muted" />
+                                <span>Còn ~{timeLeftMin}p</span>
+                              </span>
+                            </div>
+                          </div>
+
+                          {/* Content text (Clickable if link) */}
+                          <div className="p-3 rounded-xl bg-black/40 border border-white/5 text-xs text-ice-text break-all select-text font-mono">
+                            {isUrl ? (
+                              <button
+                                type="button"
+                                onClick={() => handleOpenUrl(item.content)}
+                                className="text-blue-400 hover:text-blue-300 underline font-bold flex items-center gap-1 text-left inline-flex"
+                              >
+                                <span>{item.content}</span>
+                                <ExternalLink className="w-3 h-3 shrink-0" />
+                              </button>
+                            ) : (
+                              item.content
+                            )}
+                          </div>
+
+                          {/* Actions */}
+                          <div className="flex items-center justify-end gap-2 pt-1">
+                            {isUrl && (
+                              <button
+                                type="button"
+                                onClick={() => handleOpenUrl(item.content)}
+                                className="px-3 py-1 rounded-lg bg-blue-500/20 hover:bg-blue-500/30 text-blue-300 text-xs font-bold flex items-center gap-1.5 transition-colors border border-blue-500/30"
+                              >
+                                <ExternalLink className="w-3 h-3" />
+                                <span>Mở Link Trực Tiếp</span>
+                              </button>
+                            )}
+
+                            <button
+                              type="button"
+                              onClick={() => handleCopy(item.id, item.content)}
+                              className="px-3 py-1 rounded-lg bg-white/10 hover:bg-white/20 text-xs text-white font-bold flex items-center gap-1.5 transition-colors"
+                            >
+                              <Copy className="w-3 h-3" />
+                              <span>{isCopied ? 'Đã chép!' : 'Sao chép'}</span>
+                            </button>
+
+                            <button
+                              type="button"
+                              onClick={() => IceDropCloudService.deleteShare(item.id).then(loadMyShares)}
+                              className="p-1 rounded-lg text-ice-muted hover:text-red-400 transition-colors"
+                              title="Xóa chia sẻ này"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* 2. Received Items History (For both Guest & Logged-in Users) */}
             <div className="p-6 rounded-3xl bg-black/40 border border-white/10 shadow-xl space-y-4">
               <div className="flex items-center justify-between border-b border-white/10 pb-3">
                 <div className="flex items-center gap-2">
-                  <Cloud className="w-4 h-4 text-amber-400" />
-                  <h3 className="text-sm font-bold text-white">Danh Sách Chia Sẻ Đang Hoạt Động ({shares.length}/5)</h3>
+                  <Download className="w-4 h-4 text-emerald-400" />
+                  <h3 className="text-sm font-bold text-white">
+                    Đã Nhận Bằng Mã PIN Gần Đây ({receivedItems.length})
+                  </h3>
                 </div>
-                <button
-                  type="button"
-                  onClick={loadCloudShares}
-                  className="p-1.5 rounded-lg text-ice-muted hover:text-white hover:bg-white/10 transition-colors"
-                  title="Làm mới danh sách"
-                >
-                  <RefreshCw className="w-4 h-4" />
-                </button>
+                {receivedItems.length > 0 && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setReceivedItems([]);
+                      sessionStorage.removeItem('icelauch_received_icedrop_items');
+                    }}
+                    className="text-[10px] text-ice-muted hover:text-red-400 transition-colors"
+                  >
+                    Xóa lịch sử
+                  </button>
+                )}
               </div>
 
-              {shares.length === 0 ? (
-                <div className="py-14 text-center space-y-3">
-                  <Clock className="w-10 h-10 text-ice-muted/50 mx-auto" />
-                  <p className="text-xs text-ice-muted">Chưa có chia sẻ nào trên Đám Mây.</p>
+              {receivedItems.length === 0 ? (
+                <div className="py-8 text-center space-y-2">
+                  <KeyRound className="w-8 h-8 text-ice-muted/30 mx-auto" />
+                  <p className="text-xs text-ice-muted">Chưa nhận nội dung nào qua mã PIN.</p>
                   <p className="text-[11px] text-ice-muted/70">
-                    Hãy tạo chia sẻ ở khung bên trái; chia sẻ sẽ tồn tại trong 10 phút rồi tự động biến mất.
+                    Nhập mã PIN 4 số ở khung bên trái để xem nội dung do người khác chia sẻ cho bạn.
                   </p>
                 </div>
               ) : (
                 <div className="space-y-3">
-                  {shares.map((item) => {
-                    const isCopied = copiedId === item.id;
-                    const timeLeftMin = Math.max(
-                      0,
-                      Math.round((new Date(item.expiresAt).getTime() - Date.now()) / 60000)
-                    );
+                  {receivedItems.map((item) => {
+                    const isCopied = copiedId === 'rec_' + item.id;
+                    const isUrl = isLinkContent(item.content, item.type);
 
                     return (
                       <div
                         key={item.id}
-                        className="p-4 rounded-2xl bg-white/[0.03] border border-white/10 hover:border-amber-400/50 transition-all space-y-3 group"
+                        className="p-4 rounded-2xl bg-emerald-500/[0.04] border border-emerald-500/20 space-y-3"
                       >
-                        {/* Header: Sender & PIN Code */}
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-2">
-                            <span className="w-7 h-7 rounded-lg bg-amber-400/20 text-amber-300 border border-amber-400/30 flex items-center justify-center text-xs font-black">
+                            <span className="w-7 h-7 rounded-lg bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 flex items-center justify-center text-xs font-black">
                               {item.type === 'link' ? <LinkIcon className="w-3.5 h-3.5" /> : <FileText className="w-3.5 h-3.5" />}
                             </span>
                             <div>
-                              <span className="text-xs font-bold text-white">{item.senderName}</span>
-                              <span className="text-[10px] text-ice-muted block">
-                                {new Date(item.createdAt).toLocaleTimeString()}
-                              </span>
+                              <span className="text-xs font-bold text-white">Từ: {item.senderName}</span>
+                              <span className="text-[10px] text-ice-muted block">Mã PIN: {item.pinCode}</span>
                             </div>
-                          </div>
-
-                          {/* 4-digit PIN Badge */}
-                          <div className="flex items-center gap-2">
-                            <div className="px-2.5 py-1 rounded-xl bg-black/60 border border-amber-400/50 flex items-center gap-1.5 shadow">
-                              <KeyRound className="w-3 h-3 text-amber-400" />
-                              <span className="text-xs font-mono font-black text-amber-300 tracking-wider">
-                                {item.pinCode}
-                              </span>
-                            </div>
-                            <span className="text-[10px] text-ice-muted flex items-center gap-1">
-                              <Clock className="w-3 h-3" />
-                              <span>Còn ~{timeLeftMin}p</span>
-                            </span>
                           </div>
                         </div>
 
-                        {/* Content text */}
+                        {/* Content text (Clickable if link) */}
                         <div className="p-3 rounded-xl bg-black/40 border border-white/5 text-xs text-ice-text break-all select-text font-mono">
-                          {item.content}
+                          {isUrl ? (
+                            <button
+                              type="button"
+                              onClick={() => handleOpenUrl(item.content)}
+                              className="text-blue-400 hover:text-blue-300 underline font-bold flex items-center gap-1 text-left inline-flex"
+                            >
+                              <span>{item.content}</span>
+                              <ExternalLink className="w-3 h-3 shrink-0" />
+                            </button>
+                          ) : (
+                            item.content
+                          )}
                         </div>
 
                         {/* Actions */}
                         <div className="flex items-center justify-end gap-2 pt-1">
-                          {item.type === 'link' && (
-                            <a
-                              href={item.content}
-                              target="_blank"
-                              rel="noreferrer"
-                              className="px-3 py-1 rounded-lg bg-white/10 hover:bg-white/20 text-xs text-white font-bold flex items-center gap-1.5 transition-colors"
+                          {isUrl && (
+                            <button
+                              type="button"
+                              onClick={() => handleOpenUrl(item.content)}
+                              className="px-3 py-1 rounded-lg bg-blue-500 text-black text-xs font-black flex items-center gap-1.5 transition-colors shadow"
                             >
                               <ExternalLink className="w-3 h-3" />
-                              <span>Mở</span>
-                            </a>
+                              <span>Mở Link Trực Tiếp</span>
+                            </button>
                           )}
 
                           <button
                             type="button"
-                            onClick={() => handleCopy(item.id, item.content)}
+                            onClick={() => handleCopy('rec_' + item.id, item.content)}
                             className="px-3 py-1 rounded-lg bg-white/10 hover:bg-white/20 text-xs text-white font-bold flex items-center gap-1.5 transition-colors"
                           >
                             <Copy className="w-3 h-3" />
                             <span>{isCopied ? 'Đã chép!' : 'Sao chép'}</span>
-                          </button>
-
-                          <button
-                            type="button"
-                            onClick={() => IceDropCloudService.deleteShare(item.id).then(loadCloudShares)}
-                            className="p-1 rounded-lg text-ice-muted hover:text-red-400 transition-colors"
-                            title="Xóa chia sẻ này"
-                          >
-                            <Trash2 className="w-3.5 h-3.5" />
                           </button>
                         </div>
                       </div>
