@@ -54,6 +54,7 @@ export interface Game {
   bannerFeaturedUntil?: string; // ISO date for expiration
   isBannerPermanent?: boolean;
   isBannerPinned?: boolean;
+  isFeatured?: boolean;
   playTimeMinutes?: number;
   viewCount?: number;
   trailerUrl?: string;
@@ -98,6 +99,8 @@ export interface MediaPlaylist {
   coverAspectRatio?: '1:1' | '16:9';
   itemIds: string[];
   createdAt: string;
+  ownerProfileId?: string;
+  isUserCustom?: boolean;
 }
 
 export interface MediaItem {
@@ -129,6 +132,7 @@ export interface MediaItem {
   bannerFeaturedUntil?: string; // ISO date for expiration
   isBannerPermanent?: boolean;
   isBannerPinned?: boolean;
+  isFeatured?: boolean;
   viewCount?: number;
   playTimeMinutes?: number;
   description?: string;
@@ -149,6 +153,9 @@ export interface AppSettings {
   runAsAdminDefault: boolean;
   gameTags?: string[];
   mediaTags?: string[];
+  movieTags?: string[];
+  musicTags?: string[];
+  podcastTags?: string[];
   googleToken?: {
     accessToken: string;
     refreshToken: string;
@@ -266,6 +273,7 @@ export interface UserProfile {
   library: string[];               // game IDs in personal library
   favoriteMedia: string[];         // media IDs in personal favorites
   favoritePlaylists?: string[];    // playlist IDs in personal favorites
+  customPlaylists?: MediaPlaylist[]; // Danh sách phát cá nhân do chính user tạo
   watchProgress: Record<string, {
     currentTime: number;
     duration: number;

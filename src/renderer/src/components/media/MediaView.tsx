@@ -27,12 +27,14 @@ import {
   ArrowUpDown,
   ChevronLeft,
   ArrowLeft,
-  X
+  X,
+  ListMusic
 } from 'lucide-react';
 import { VideoTheaterView } from './VideoTheaterView';
 import { VinylTurntablePlayer } from './VinylTurntablePlayer';
 import { MediaHeroBanner } from './MediaHeroBanner';
 import { PlaylistFormModal } from './PlaylistFormModal';
+import { AddToPlaylistModal } from './AddToPlaylistModal';
 import { GenreShelfScroller } from '../common/GenreShelfScroller';
 import { parseMediaUrl } from '../../utils/mediaUrl';
 import type { MediaItem, MediaPlaylist, MediaSubType, AppBannerSettings, AppSettings } from '../../types';
@@ -41,6 +43,7 @@ import { sfx } from '../../utils/sfx';
 interface MediaViewProps {
   media: MediaItem[];
   playlists?: MediaPlaylist[];
+  userPlaylists?: MediaPlaylist[];
   bannerSettings?: AppBannerSettings;
   settings?: AppSettings;
   isAdmin: boolean;
@@ -50,23 +53,29 @@ interface MediaViewProps {
   onToggleFavoriteMedia?: (id: string) => void;
   onToggleFavoritePlaylist?: (id: string) => void;
   onPlayAudio?: (track: MediaItem) => void;
-  onSaveMedia: (media: Partial<MediaItem>) => void;
+  onPauseAudio?: () => void;
+  onTurntableOpenChange?: (open: boolean) => void;
+  onSaveMedia: (media: Partial<MediaItem>, playlistIds?: string[]) => void;
   onDeleteMedia: (id: string) => void;
   onToggleHide?: (id: string) => void;
   onEditMedia?: (media: MediaItem) => void;
   onOpenAddMedia: () => void;
-  onOpenTagManager?: () => void;
+  onOpenTagManager?: (mode: 'movie' | 'music' | 'podcast') => void;
   onUpdateMediaProgress: (id: string, position: number, watched: boolean) => void;
   onSavePlaylist?: (playlist: Partial<MediaPlaylist>) => void;
   onDeletePlaylist?: (id: string) => void;
   onDownloadMedia?: (id: string) => void;
   onDeleteDownloaded?: (id: string) => void;
   onMinimizeToMiniPlayer?: (media: MediaItem) => void;
+  onToggleItemInUserPlaylist?: (playlistId: string, mediaId: string) => Promise<void>;
+  onCreateUserPlaylist?: (name: string, type: 'video' | 'audio', initialMediaId?: string) => Promise<void>;
+  onNavigateToUserPlaylists?: () => void;
 }
 
 export const MediaView: React.FC<MediaViewProps> = ({
   media,
   playlists = [],
+  userPlaylists = [],
   bannerSettings,
   settings,
   isAdmin,
@@ -76,6 +85,8 @@ export const MediaView: React.FC<MediaViewProps> = ({
   onToggleFavoriteMedia,
   onToggleFavoritePlaylist,
   onPlayAudio,
+  onPauseAudio,
+  onTurntableOpenChange,
   onSaveMedia,
   onDeleteMedia,
   onToggleHide,
@@ -88,6 +99,9 @@ export const MediaView: React.FC<MediaViewProps> = ({
   onDownloadMedia,
   onDeleteDownloaded,
   onMinimizeToMiniPlayer,
+  onToggleItemInUserPlaylist,
+  onCreateUserPlaylist,
+  onNavigateToUserPlaylists,
 }) => {
   // 3 Sub-Tabs: 'video' | 'music' | 'podcast'
   const [activeTab, setActiveTab] = useState<'video' | 'music' | 'podcast'>('video');
@@ -103,6 +117,7 @@ export const MediaView: React.FC<MediaViewProps> = ({
   const [playlistSortAsc, setPlaylistSortAsc] = useState<boolean>(true);
   const [playlistSearch, setPlaylistSearch] = useState<string>('');
   const [isPlaylistSearchOpen, setIsPlaylistSearchOpen] = useState<boolean>(false);
+  const [targetMediaForPlaylist, setTargetMediaForPlaylist] = useState<MediaItem | null>(null);
 
   useEffect(() => {
     setVisibleCount(24);
@@ -111,6 +126,20 @@ export const MediaView: React.FC<MediaViewProps> = ({
   // Playlist Form Modal state
   const [isPlaylistModalOpen, setIsPlaylistModalOpen] = useState(false);
   const [editingPlaylist, setEditingPlaylist] = useState<MediaPlaylist | null>(null);
+
+  // Playback handlers
+  const handleOpenVideo = (video: MediaItem) => {
+    sfx.playClick();
+    onPauseAudio?.();
+    setActiveVideo(video);
+  };
+
+  const handleOpenAudio = (track: MediaItem) => {
+    sfx.playClick();
+    onTurntableOpenChange?.(true);
+    setActiveAudioTrack(track);
+    onPlayAudio?.(track);
+  };
 
   // Filter out hidden items for normal users; apply admin hidden filter if active
   const baseMedia = media.filter((m) => {
@@ -136,6 +165,14 @@ export const MediaView: React.FC<MediaViewProps> = ({
       return m.type === 'audio' && m.subType === 'podcast';
     }
   });
+
+  // Featured Media for this tab (isFeatured !== false, sorted by newest added)
+  const featuredMedia = useMemo(() => {
+    return tabMedia
+      .filter((m) => m.isFeatured !== false)
+      .sort((a, b) => new Date(b.addedAt || 0).getTime() - new Date(a.addedAt || 0).getTime())
+      .slice(0, 15);
+  }, [tabMedia]);
 
   // Extract all unique tags for current active tab
   const availableTags = Array.from(
@@ -181,6 +218,176 @@ export const MediaView: React.FC<MediaViewProps> = ({
     return `${m}:${s < 10 ? '0' : ''}${s}`;
   };
 
+  // Reusable Media Card
+  const renderMediaCard = (item: MediaItem, isShelf = true, orderIndex?: number) => {
+    const parsed = parseMediaUrl(item.link);
+    const isFav = favoriteMediaIds.includes(item.id);
+    const hasCover = Boolean(item.coverPath || item.bannerPath || (parsed.kind === 'youtube' && parsed.thumbnailUrl));
+    const coverImg = item.coverPath || item.bannerPath || (parsed.kind === 'youtube' ? parsed.thumbnailUrl : null);
+    const isDownloaded = Boolean(item.localFilePath && item.downloadStatus === 'downloaded');
+    const IconComponent = item.type === 'video' ? Film : item.subType === 'podcast' ? Mic : Music;
+
+    return (
+      <div
+        key={item.id}
+        onClick={() => {
+          if (item.type === 'video') handleOpenVideo(item);
+          else handleOpenAudio(item);
+        }}
+        className={`group relative bg-ice-card rounded-xl overflow-hidden border border-ice-border hover:border-amber-400/80 hover:shadow-xl cursor-pointer transition-all duration-300 hover:-translate-y-1 flex flex-col ${
+          isShelf ? 'w-[170px] shrink-0' : ''
+        }`}
+      >
+        <div className="aspect-[2/3] w-full relative overflow-hidden bg-black flex items-center justify-center">
+          {hasCover && coverImg ? (
+            <img
+              src={coverImg.startsWith('http') ? coverImg : `file://${coverImg}`}
+              alt={item.title}
+              style={{
+                objectPosition: item.listCardPosition || item.coverPosition || '50% 50%',
+                transform: (item.listCardZoom || item.coverZoom) ? `scale(${item.listCardZoom || item.coverZoom})` : undefined,
+                transformOrigin: item.listCardPosition || item.coverPosition || '50% 50%',
+              }}
+              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+            />
+          ) : (
+            <div
+              className={`w-full h-full flex flex-col items-center justify-center p-3 text-center select-none ${
+                item.type === 'video'
+                  ? 'bg-gradient-to-br from-[#121624] via-[#0E111A] to-[#080B10]'
+                  : item.subType === 'podcast'
+                  ? 'bg-gradient-to-br from-[#1E1224] via-[#140A1A] to-[#0A050D]'
+                  : 'bg-gradient-to-br from-[#1E1A12] via-[#14110A] to-[#0A0805]'
+              }`}
+            >
+              <div className="w-12 h-12 rounded-2xl bg-white/10 flex items-center justify-center text-amber-400 shadow-md">
+                <IconComponent className="w-6 h-6" />
+              </div>
+              <span className="text-[10px] text-white/70 font-semibold line-clamp-2 mt-2 px-1">
+                {item.title}
+              </span>
+            </div>
+          )}
+
+          {/* Action buttons on top right */}
+          <div className="absolute top-2 right-2 z-10 flex items-center gap-1">
+            {onToggleItemInUserPlaylist && (
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  sfx.playClick();
+                  setTargetMediaForPlaylist(item);
+                }}
+                className="p-1.5 rounded-full backdrop-blur-md bg-black/60 text-white/70 hover:text-amber-400 hover:bg-black/80 transition-all"
+                title="Thêm vào danh sách phát cá nhân"
+              >
+                <ListPlus className="w-3.5 h-3.5" />
+              </button>
+            )}
+            {onToggleFavoriteMedia && (
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  sfx.playClick();
+                  onToggleFavoriteMedia(item.id);
+                }}
+                className={`p-1.5 rounded-full backdrop-blur-md transition-all ${
+                  isFav ? 'bg-rose-500 text-white' : 'bg-black/60 text-white/70 hover:text-rose-400'
+                }`}
+                title={isFav ? 'Bỏ thích' : 'Yêu thích'}
+              >
+                <Heart className={`w-3.5 h-3.5 ${isFav ? 'fill-current' : ''}`} />
+              </button>
+            )}
+          </div>
+
+          {/* Optional order index badge */}
+          {orderIndex !== undefined && (
+            <div className="absolute top-2 left-2 px-1.5 py-0.5 rounded bg-black/80 text-[10px] font-mono text-amber-300 font-bold border border-white/10 z-10">
+              #{orderIndex}
+            </div>
+          )}
+
+          <div className="absolute inset-0 bg-black/30 group-hover:bg-black/10 flex items-center justify-center transition-colors">
+            <div className="w-10 h-10 rounded-full bg-amber-400 text-black flex items-center justify-center shadow-lg transform scale-75 opacity-0 group-hover:opacity-100 group-hover:scale-100 transition-all">
+              <Play className="w-4 h-4 fill-black ml-0.5" />
+            </div>
+          </div>
+
+          {isDownloaded && (
+            <span className="absolute top-2 left-2 px-1.5 py-0.5 rounded text-[8px] font-black uppercase bg-emerald-500 text-black shadow z-10">
+              ĐÃ TẢI VỀ
+            </span>
+          )}
+
+          {item.duration && (
+            <div className="absolute bottom-2 right-2 px-1.5 py-0.5 rounded bg-black/80 text-white text-[10px] font-mono border border-white/10">
+              {formatDuration(item.duration)}
+            </div>
+          )}
+        </div>
+
+        <div className="p-2.5 flex flex-col flex-1 justify-between gap-1">
+          <div>
+            <h4 className="text-xs font-bold text-white truncate group-hover:text-amber-300">
+              {item.title}
+            </h4>
+            <p className="text-[10px] text-ice-muted truncate mt-0.5">
+              {item.artist || item.category || (item.tags?.[0] ? `#${item.tags[0]}` : '')}
+            </p>
+          </div>
+
+          {isAdmin && (
+            <div className="flex items-center justify-end gap-1 pt-1.5 border-t border-ice-border/40">
+              {onToggleHide && (
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    sfx.playClick();
+                    onToggleHide(item.id);
+                  }}
+                  className="p-1 rounded text-ice-subtext hover:text-white"
+                  title={item.hidden ? 'Hiện mục này' : 'Ẩn mục này'}
+                >
+                  {item.hidden ? <EyeOff className="w-3 h-3 text-amber-400" /> : <Eye className="w-3 h-3" />}
+                </button>
+              )}
+              {onEditMedia && (
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    sfx.playClick();
+                    onEditMedia(item);
+                  }}
+                  className="p-1 rounded text-ice-subtext hover:text-amber-400"
+                  title="Sửa thông tin"
+                >
+                  <Edit3 className="w-3 h-3" />
+                </button>
+              )}
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  sfx.playClick();
+                  onDeleteMedia(item.id);
+                }}
+                className="p-1 rounded text-ice-subtext hover:text-rose-400"
+                title="Xoá mục"
+              >
+                <Trash2 className="w-3 h-3" />
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  };
+
   // 1. VIDEO THEATER VIEW
   if (activeVideo) {
     return (
@@ -194,7 +401,7 @@ export const MediaView: React.FC<MediaViewProps> = ({
           setActiveVideo(null);
           onMinimizeToMiniPlayer?.(m);
         }}
-        onSelectVideo={(item) => setActiveVideo(item)}
+        onSelectVideo={(item) => handleOpenVideo(item)}
         onEditMedia={onEditMedia}
         onUpdateProgress={onUpdateMediaProgress}
         onDownloadMedia={onDownloadMedia}
@@ -211,11 +418,11 @@ export const MediaView: React.FC<MediaViewProps> = ({
         allAudio={tabMedia}
         playlists={tabPlaylists}
         isAdmin={isAdmin}
-        onBack={() => setActiveAudioTrack(null)}
-        onSelectTrack={(item) => {
-          setActiveAudioTrack(item);
-          onPlayAudio?.(item);
+        onBack={() => {
+          onTurntableOpenChange?.(false);
+          setActiveAudioTrack(null);
         }}
+        onSelectTrack={(item) => handleOpenAudio(item)}
         onUpdateProgress={onUpdateMediaProgress}
         onDownloadMedia={onDownloadMedia}
         onDeleteDownloaded={onDeleteDownloaded}
@@ -415,67 +622,7 @@ export const MediaView: React.FC<MediaViewProps> = ({
 
         {/* Playlist Items Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4">
-          {processedItems.map((item, idx) => {
-            const isFav = favoriteMediaIds.includes(item.id);
-            const coverImg = item.coverPath || item.bannerPath || 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=600&q=80';
-
-            return (
-              <div
-                key={item.id}
-                onClick={() => {
-                  sfx.playClick();
-                  if (item.type === 'video') setActiveVideo(item);
-                  else {
-                    setActiveAudioTrack(item);
-                    onPlayAudio?.(item);
-                  }
-                }}
-                className="group relative bg-ice-card rounded-xl overflow-hidden border border-ice-border hover:border-amber-400/70 hover:shadow-xl cursor-pointer transition-all duration-300 hover:-translate-y-1 flex flex-col"
-              >
-                <div className="aspect-[2/3] w-full relative overflow-hidden bg-black/90">
-                  <img
-                    src={coverImg.startsWith('http') ? coverImg : `file://${coverImg}`}
-                    alt={item.title}
-                    style={{
-                      objectPosition: item.listCardPosition || item.coverPosition || '50% 50%',
-                      transform: (item.listCardZoom || item.coverZoom) ? `scale(${item.listCardZoom || item.coverZoom})` : undefined,
-                      transformOrigin: item.listCardPosition || item.coverPosition || '50% 50%',
-                    }}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                  />
-                  <div className="absolute top-2 left-2 px-1.5 py-0.5 rounded bg-black/80 text-[10px] font-mono text-amber-300 font-bold border border-white/10">
-                    #{idx + 1}
-                  </div>
-
-                  {onToggleFavoriteMedia && (
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onToggleFavoriteMedia(item.id);
-                      }}
-                      className={`absolute top-2 right-2 p-1.5 rounded-full backdrop-blur-md transition-all ${
-                        isFav ? 'bg-rose-500 text-white' : 'bg-black/60 text-white/70 hover:text-rose-400'
-                      }`}
-                      title={isFav ? 'Bỏ thích' : 'Yêu thích'}
-                    >
-                      <Heart className={`w-3.5 h-3.5 ${isFav ? 'fill-current' : ''}`} />
-                    </button>
-                  )}
-
-                  <div className="absolute inset-0 bg-black/30 group-hover:bg-black/10 flex items-center justify-center transition-colors">
-                    <div className="w-10 h-10 rounded-full bg-amber-400 text-black flex items-center justify-center shadow-lg transform scale-75 opacity-0 group-hover:opacity-100 group-hover:scale-100 transition-all">
-                      <Play className="w-4 h-4 fill-black ml-0.5" />
-                    </div>
-                  </div>
-                </div>
-
-                <div className="p-3">
-                  <h4 className="text-xs font-bold text-white truncate group-hover:text-amber-300">{item.title}</h4>
-                  <p className="text-[10px] text-ice-muted truncate mt-0.5">{item.artist || item.category || 'Tập phim'}</p>
-                </div>
-              </div>
-            );
-          })}
+          {processedItems.map((item, idx) => renderMediaCard(item, false, idx + 1))}
         </div>
       </div>
     );
@@ -544,6 +691,20 @@ export const MediaView: React.FC<MediaViewProps> = ({
 
         {/* Right Tools: Offline Toggle, Admin Hidden, Add Buttons */}
         <div className="flex items-center gap-3">
+          {onNavigateToUserPlaylists && (
+            <button
+              onClick={() => {
+                sfx.playClick();
+                onNavigateToUserPlaylists();
+              }}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 border border-amber-500/30 text-xs font-bold transition-all shadow-sm active:scale-95"
+              title="Xem danh sách phát cá nhân trong Thư Viện"
+            >
+              <ListMusic className="w-3.5 h-3.5" />
+              <span>Playlist Của Tôi</span>
+            </button>
+          )}
+
           <button
             onClick={() => {
               sfx.playClick();
@@ -582,7 +743,7 @@ export const MediaView: React.FC<MediaViewProps> = ({
                 <button
                   onClick={() => {
                     sfx.playClick();
-                    onOpenTagManager();
+                    onOpenTagManager(activeTab === 'video' ? 'movie' : activeTab === 'music' ? 'music' : 'podcast');
                   }}
                   className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/10 hover:bg-white/15 border border-white/15 text-white text-xs font-bold transition-all shadow-sm active:scale-95"
                   title="Quản lý thể loại / tag giải trí"
@@ -696,80 +857,14 @@ export const MediaView: React.FC<MediaViewProps> = ({
         </GenreShelfScroller>
       )}
 
-      {/* 4. Playlists / Series Shelf (Without horizontal scrollbar) */}
-      {tabPlaylists.length > 0 && !searchQuery && (
+      {/* 4. Featured Shelf (Nổi Bật & Mới Cập Nhật) */}
+      {featuredMedia.length > 0 && !searchQuery && (
         <GenreShelfScroller
-          title={activeTab === 'video' ? 'Danh Sách Phát / Series Tuyển Tập' : activeTab === 'music' ? 'Albums & Tuyển Tập Nhạc' : 'Chuỗi Podcast & Sách Nói'}
+          title="Nổi Bật & Mới Cập Nhật"
           iconAccentColor="bg-amber-400"
-          count={tabPlaylists.length}
+          count={featuredMedia.length}
         >
-          {tabPlaylists.map((pl) => {
-            const count = pl.itemIds.length;
-            const isFav = favoritePlaylistIds.includes(pl.id);
-
-            return (
-              <div
-                key={pl.id}
-                onClick={() => {
-                  sfx.playClick();
-                  setViewingPlaylist(pl);
-                }}
-                className="flex items-center gap-3 bg-ice-card hover:bg-ice-hover border border-ice-border rounded-xl p-3 min-w-[260px] max-w-[320px] cursor-pointer transition-all hover:-translate-y-1 hover:shadow-xl hover:border-amber-400/60 group shrink-0 relative"
-              >
-                <div className={`overflow-hidden bg-black/60 shrink-0 border border-white/10 flex items-center justify-center ${
-                  pl.coverAspectRatio === '16:9' ? 'w-24 aspect-video rounded-lg' : 'w-14 h-14 rounded-xl'
-                }`}>
-                  {pl.coverPath ? (
-                    <img
-                      src={pl.coverPath.startsWith('http') ? pl.coverPath : `file://${pl.coverPath}`}
-                      alt={pl.name}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform"
-                    />
-                  ) : (
-                    <Disc className="w-6 h-6 text-amber-400" />
-                  )}
-                </div>
-
-                <div className="flex-1 min-w-0">
-                  <h4 className="text-xs font-bold text-white truncate group-hover:text-amber-300">
-                    {pl.name}
-                  </h4>
-                  <p className="text-[10px] text-ice-muted mt-0.5">{count} {activeTab === 'video' ? 'tập phim' : 'bài hát'}</p>
-                </div>
-
-                {/* Favorite Heart on Playlist Card */}
-                {onToggleFavoritePlaylist && (
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onToggleFavoritePlaylist(pl.id);
-                    }}
-                    className={`p-1.5 rounded-full transition-colors ${
-                      isFav ? 'text-rose-500' : 'text-ice-muted hover:text-rose-400'
-                    }`}
-                    title={isFav ? 'Bỏ thích' : 'Lưu danh sách'}
-                  >
-                    <Heart className={`w-3.5 h-3.5 ${isFav ? 'fill-current' : ''}`} />
-                  </button>
-                )}
-
-                {isAdmin && (
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      sfx.playClick();
-                      setEditingPlaylist(pl);
-                      setIsPlaylistModalOpen(true);
-                    }}
-                    className="p-1.5 rounded-lg text-ice-muted hover:text-amber-400 hover:bg-white/10"
-                    title="Sửa danh sách"
-                  >
-                    <Edit3 className="w-3.5 h-3.5" />
-                  </button>
-                )}
-              </div>
-            );
-          })}
+          {featuredMedia.map((item) => renderMediaCard(item, true))}
         </GenreShelfScroller>
       )}
 
@@ -824,80 +919,7 @@ export const MediaView: React.FC<MediaViewProps> = ({
                 count={tagItems.length}
                 onViewAll={() => setSelectedTag(tag)}
               >
-                {tagItems.map((item) => {
-                  const parsed = parseMediaUrl(item.link);
-                  const isFav = favoriteMediaIds.includes(item.id);
-                  const coverImg =
-                    item.coverPath ||
-                    item.bannerPath ||
-                    parsed.thumbnailUrl ||
-                    'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=600&q=80';
-                  const isDownloaded = Boolean(item.localFilePath && item.downloadStatus === 'downloaded');
-
-                  return (
-                    <div
-                      key={item.id}
-                      onClick={() => {
-                        sfx.playClick();
-                        if (item.type === 'video') setActiveVideo(item);
-                        else {
-                          setActiveAudioTrack(item);
-                          onPlayAudio?.(item);
-                        }
-                      }}
-                      className="group relative bg-ice-card rounded-xl overflow-hidden border border-ice-border hover:border-amber-400/70 hover:shadow-xl cursor-pointer transition-all duration-300 hover:-translate-y-1 flex flex-col w-[170px] shrink-0"
-                    >
-                      <div className="aspect-[2/3] w-full relative overflow-hidden bg-black/90">
-                        <img
-                          src={coverImg.startsWith('http') ? coverImg : `file://${coverImg}`}
-                          alt={item.title}
-                          style={{
-                            objectPosition: item.listCardPosition || item.coverPosition || '50% 50%',
-                            transform: (item.listCardZoom || item.coverZoom) ? `scale(${item.listCardZoom || item.coverZoom})` : undefined,
-                            transformOrigin: item.listCardPosition || item.coverPosition || '50% 50%',
-                          }}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                        />
-
-                        {onToggleFavoriteMedia && (
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              onToggleFavoriteMedia(item.id);
-                            }}
-                            className={`absolute top-2 right-2 z-10 p-1.5 rounded-full backdrop-blur-md transition-all ${
-                              isFav ? 'bg-rose-500 text-white' : 'bg-black/60 text-white/70 hover:text-rose-400'
-                            }`}
-                            title={isFav ? 'Bỏ thích' : 'Yêu thích'}
-                          >
-                            <Heart className={`w-3.5 h-3.5 ${isFav ? 'fill-current' : ''}`} />
-                          </button>
-                        )}
-
-                        <div className="absolute inset-0 bg-black/30 group-hover:bg-black/10 flex items-center justify-center transition-colors">
-                          <div className="w-10 h-10 rounded-full bg-amber-400 text-black flex items-center justify-center shadow-lg transform scale-75 opacity-0 group-hover:opacity-100 group-hover:scale-100 transition-all">
-                            <Play className="w-4 h-4 fill-black ml-0.5" />
-                          </div>
-                        </div>
-
-                        {isDownloaded && (
-                          <span className="absolute top-2 left-2 px-1.5 py-0.5 rounded text-[8px] font-black uppercase bg-emerald-500 text-black shadow">
-                            ĐÃ TẢI VỀ
-                          </span>
-                        )}
-                      </div>
-
-                      <div className="p-2.5">
-                        <h4 className="text-xs font-bold text-white truncate group-hover:text-amber-300">
-                          {item.title}
-                        </h4>
-                        {item.description && (
-                          <p className="text-[10px] text-ice-muted truncate mt-0.5">{item.description}</p>
-                        )}
-                      </div>
-                    </div>
-                  );
-                })}
+                {tagItems.map((item) => renderMediaCard(item, true))}
               </GenreShelfScroller>
             );
           })}
@@ -930,152 +952,7 @@ export const MediaView: React.FC<MediaViewProps> = ({
         ) : (
           <>
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4">
-              {filteredMedia.slice(0, visibleCount).map((item) => {
-                const parsed = parseMediaUrl(item.link);
-                const isFav = favoriteMediaIds.includes(item.id);
-                const coverImg =
-                  item.coverPath ||
-                  item.bannerPath ||
-                  parsed.thumbnailUrl ||
-                  'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=600&q=80';
-                const isDownloaded = Boolean(item.localFilePath && item.downloadStatus === 'downloaded');
-
-                return (
-                  <div
-                    key={item.id}
-                    onClick={() => {
-                      sfx.playClick();
-                      if (item.type === 'video') setActiveVideo(item);
-                      else {
-                        setActiveAudioTrack(item);
-                        onPlayAudio?.(item);
-                      }
-                    }}
-                    className="group relative bg-ice-card rounded-2xl overflow-hidden border border-ice-border hover:border-amber-400/80 hover:shadow-2xl cursor-pointer transition-all duration-300 hover:-translate-y-1.5 flex flex-col"
-                  >
-                    <div className="aspect-[2/3] w-full relative overflow-hidden bg-black/90">
-                      <img
-                        src={coverImg.startsWith('http') ? coverImg : `file://${coverImg}`}
-                        alt={item.title}
-                        style={{
-                          objectPosition: item.listCardPosition || item.coverPosition || '50% 50%',
-                          transform: (item.listCardZoom || item.coverZoom) ? `scale(${item.listCardZoom || item.coverZoom})` : undefined,
-                          transformOrigin: item.listCardPosition || item.coverPosition || '50% 50%',
-                        }}
-                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                      />
-
-                      {onToggleFavoriteMedia && (
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            onToggleFavoriteMedia(item.id);
-                          }}
-                          className={`absolute top-2 right-2 z-10 p-1.5 rounded-full backdrop-blur-md transition-all ${
-                            isFav ? 'bg-rose-500 text-white' : 'bg-black/60 text-white/70 hover:text-rose-400'
-                          }`}
-                          title={isFav ? 'Bỏ thích' : 'Yêu thích'}
-                        >
-                          <Heart className={`w-3.5 h-3.5 ${isFav ? 'fill-current' : ''}`} />
-                        </button>
-                      )}
-
-                      <div className="absolute inset-0 bg-black/40 group-hover:bg-black/15 flex items-center justify-center transition-colors">
-                        <div className="w-12 h-12 rounded-full bg-amber-400 text-black flex items-center justify-center shadow-xl shadow-black/80 transform scale-75 opacity-0 group-hover:opacity-100 group-hover:scale-100 transition-all duration-200">
-                          {item.type === 'video' ? <Play className="w-5 h-5 fill-black ml-0.5" /> : <Disc className="w-6 h-6 animate-spin" />}
-                        </div>
-                      </div>
-
-                      {/* Badges */}
-                      <div className="absolute top-2 left-2 flex flex-wrap items-center gap-1 z-10">
-                        {isDownloaded && (
-                          <span className="px-2 py-0.5 rounded text-[9px] font-black uppercase bg-emerald-500 text-black shadow">
-                            ĐÃ TẢI VỀ
-                          </span>
-                        )}
-                        {parsed.kind === 'youtube' && (
-                          <span className="px-2 py-0.5 rounded text-[9px] font-black uppercase bg-red-600 text-white shadow">
-                            YouTube
-                          </span>
-                        )}
-                        {parsed.kind === 'facebook' && (
-                          <span className="px-2 py-0.5 rounded text-[9px] font-black uppercase bg-blue-600 text-white shadow">
-                            Facebook
-                          </span>
-                        )}
-                        {parsed.kind === 'gdrive' && (
-                          <span className="px-2 py-0.5 rounded text-[9px] font-black uppercase bg-ice-accent/30 text-ice-accent border border-ice-accent/50 shadow">
-                            Drive
-                          </span>
-                        )}
-                      </div>
-
-                      {item.duration && (
-                        <div className="absolute bottom-2 right-2 px-1.5 py-0.5 rounded bg-black/80 text-white text-[10px] font-mono border border-white/10">
-                          {formatDuration(item.duration)}
-                        </div>
-                      )}
-                    </div>
-
-                    <div className="p-3.5 flex flex-col flex-1 justify-between gap-2">
-                      <div>
-                        <h4 className="text-xs font-bold text-white group-hover:text-amber-300 transition-colors line-clamp-2">
-                          {item.title}
-                        </h4>
-                        <p className="text-[11px] text-ice-muted mt-1 truncate">
-                          {item.artist || item.category || (item.tags?.[0] ? `#${item.tags[0]}` : 'Media')}
-                        </p>
-                      </div>
-
-                      {isAdmin && (
-                        <div className="flex items-center justify-end gap-1 pt-2 border-t border-ice-border/40">
-                          {onToggleHide && (
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                sfx.playClick();
-                                onToggleHide(item.id);
-                              }}
-                              className={`p-1 rounded text-xs transition-colors ${
-                                item.hidden ? 'text-amber-400 font-bold' : 'text-ice-muted hover:text-white'
-                              }`}
-                              title={item.hidden ? 'Bỏ ẩn mục này' : 'Ẩn mục này'}
-                            >
-                              {item.hidden ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
-                            </button>
-                          )}
-                          {onEditMedia && (
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                sfx.playClick();
-                                onEditMedia(item);
-                              }}
-                              className="p-1 rounded text-ice-muted hover:text-amber-400 transition-colors"
-                              title="Sửa"
-                            >
-                              <Edit3 className="w-3.5 h-3.5" />
-                            </button>
-                          )}
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              sfx.playClick();
-                              if (confirm('Bạn có chắc muốn xoá mục này không?')) {
-                                onDeleteMedia(item.id);
-                              }
-                            }}
-                            className="p-1 rounded text-ice-muted hover:text-red-400 transition-colors"
-                            title="Xoá"
-                          >
-                            <Trash2 className="w-3.5 h-3.5" />
-                          </button>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                );
-              })}
+              {filteredMedia.slice(0, visibleCount).map((item) => renderMediaCard(item, false))}
             </div>
 
             {/* View More Button */}
@@ -1108,6 +985,18 @@ export const MediaView: React.FC<MediaViewProps> = ({
           }}
           onSave={onSavePlaylist}
           onDelete={onDeletePlaylist}
+        />
+      )}
+
+      {/* Add To User Playlist Modal */}
+      {targetMediaForPlaylist && onToggleItemInUserPlaylist && onCreateUserPlaylist && (
+        <AddToPlaylistModal
+          isOpen={Boolean(targetMediaForPlaylist)}
+          onClose={() => setTargetMediaForPlaylist(null)}
+          media={targetMediaForPlaylist}
+          userPlaylists={userPlaylists || []}
+          onToggleItemInPlaylist={onToggleItemInUserPlaylist}
+          onCreatePlaylist={onCreateUserPlaylist}
         />
       )}
     </div>

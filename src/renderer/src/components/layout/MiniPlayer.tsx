@@ -17,6 +17,7 @@ interface MiniPlayerProps {
   currentTrack: MediaItem | null;
   playlist: MediaItem[];
   isPlaying: boolean;
+  isTurntableActive?: boolean;
   onPlayPause: () => void;
   onNext: () => void;
   onPrev: () => void;
@@ -27,6 +28,7 @@ interface MiniPlayerProps {
 export const MiniPlayer: React.FC<MiniPlayerProps> = ({
   currentTrack,
   isPlaying,
+  isTurntableActive = false,
   onPlayPause,
   onNext,
   onPrev,
@@ -56,14 +58,18 @@ export const MiniPlayer: React.FC<MiniPlayerProps> = ({
   }, [currentTrack?.id, currentTrack?.link]);
 
   useEffect(() => {
-    if (audioRef.current && currentTrack) {
-      if (isPlaying) {
-        audioRef.current.play().catch(e => console.warn('Audio play error:', e));
+    if (audioRef.current) {
+      if (isTurntableActive) {
+        audioRef.current.pause();
+        return;
+      }
+      if (isPlaying && currentTrack) {
+        audioRef.current.play().catch((e) => console.warn('Audio play error:', e));
       } else {
         audioRef.current.pause();
       }
     }
-  }, [isPlaying, currentTrack, audioSrc]);
+  }, [isPlaying, currentTrack, audioSrc, isTurntableActive]);
 
   useEffect(() => {
     if (audioRef.current && currentTrack?.lastPosition) {

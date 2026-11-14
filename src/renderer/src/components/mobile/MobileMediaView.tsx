@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useDeferredValue } from 'react';
+import React, { useState, useEffect, useDeferredValue, useMemo } from 'react';
 import {
   Film,
   Music,
@@ -10,23 +10,32 @@ import {
   ChevronRight,
   Flame,
   Plus,
+  Heart,
+  ListPlus
 } from 'lucide-react';
 import type { MediaItem, MediaPlaylist, SectionBannerSettings } from '../../types';
 import { MobileHeroBanner } from './MobileHeroBanner';
 import { HorizontalScroller } from '../common/HorizontalScroller';
 import { MobileVideoTheaterView } from './MobileVideoTheaterView';
 import { SafeImage } from '../common/SafeImage';
+import { AddToPlaylistModal } from '../media/AddToPlaylistModal';
 import { sfx } from '../../utils/sfx';
 
 interface MobileMediaViewProps {
   media: MediaItem[];
   playlists: MediaPlaylist[];
+  userPlaylists?: MediaPlaylist[];
   bannerSettings?: SectionBannerSettings;
   isAdmin: boolean;
   searchQuery: string;
+  favoriteMediaIds?: string[];
   activeTheaterMedia?: MediaItem | null;
   onSelectTheaterMedia?: (item: MediaItem | null) => void;
   onPlayAudio?: (item: MediaItem) => void;
+  onPauseAudio?: () => void;
+  onToggleFavoriteMedia?: (id: string) => void;
+  onToggleItemInUserPlaylist?: (playlistId: string, mediaId: string) => Promise<void>;
+  onCreateUserPlaylist?: (name: string, type: 'video' | 'audio', initialMediaId?: string) => Promise<void>;
   onSaveMedia?: (item: Partial<MediaItem>) => void;
   onDeleteMedia?: (id: string) => void;
   onUpdateMediaProgress?: (id: string, position: number, watched: boolean) => void;
@@ -38,12 +47,18 @@ interface MobileMediaViewProps {
 export const MobileMediaView: React.FC<MobileMediaViewProps> = ({
   media,
   playlists = [],
+  userPlaylists = [],
   bannerSettings,
   isAdmin,
   searchQuery,
+  favoriteMediaIds = [],
   activeTheaterMedia: propActiveTheaterMedia,
   onSelectTheaterMedia,
   onPlayAudio,
+  onPauseAudio,
+  onToggleFavoriteMedia,
+  onToggleItemInUserPlaylist,
+  onCreateUserPlaylist,
   onSaveMedia,
   onDeleteMedia,
   onUpdateMediaProgress,
@@ -56,6 +71,7 @@ export const MobileMediaView: React.FC<MobileMediaViewProps> = ({
   const [visibleCount, setVisibleCount] = useState<number>(10);
   const deferredSearch = useDeferredValue(localSearch);
   const [localActiveTheaterMedia, setLocalActiveTheaterMedia] = useState<MediaItem | null>(null);
+  const [targetMediaForPlaylist, setTargetMediaForPlaylist] = useState<MediaItem | null>(null);
 
   useEffect(() => {
     setVisibleCount(10);
@@ -63,6 +79,9 @@ export const MobileMediaView: React.FC<MobileMediaViewProps> = ({
 
   const activeMedia = propActiveTheaterMedia !== undefined ? propActiveTheaterMedia : localActiveTheaterMedia;
   const handleSetActiveMedia = (item: MediaItem | null) => {
+    if (item) {
+      onPauseAudio?.();
+    }
     setLocalActiveTheaterMedia(item);
     onSelectTheaterMedia?.(item);
   };
@@ -72,6 +91,14 @@ export const MobileMediaView: React.FC<MobileMediaViewProps> = ({
   const podcastList = media.filter((m) => m.type === 'audio' && m.subType === 'podcast');
 
   const currentList = mediaTab === 'video' ? videoList : mediaTab === 'music' ? musicList : podcastList;
+
+  // Featured Media for current tab (isFeatured !== false, newest first)
+  const featuredMedia = useMemo(() => {
+    return currentList
+      .filter((m) => m.isFeatured !== false)
+      .sort((a, b) => new Date(b.addedAt || 0).getTime() - new Date(a.addedAt || 0).getTime())
+      .slice(0, 10);
+  }, [currentList]);
 
   // Extract all categories
   const categories = Array.from(
@@ -243,6 +270,94 @@ export const MobileMediaView: React.FC<MobileMediaViewProps> = ({
         />
       )}
 
+      {/* 2.5. FEATURED MEDIA ROW (Nổi Bật / Mới Thêm) */}
+      {!effectiveSearch && featuredMedia.length > 0 && (
+        <div className="space-y-2 shrink-0">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-black text-white flex items-center gap-1.5 uppercase tracking-wide">
+              <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
+              <span>Nổi Bật & Mới Cập Nhật</span>
+            </span>
+            <span className="text-[10px] text-cyan-400 font-semibold">
+              {featuredMedia.length} mục
+            </span>
+          </div>
+
+          <HorizontalScroller className="gap-2.5" scrollStep={200}>
+            {featuredMedia.map((item) => {
+              const isFav = favoriteMediaIds.includes(item.id);
+              return (
+                <div
+                  key={item.id}
+                  onClick={() => {
+                    sfx.playClick();
+                    if (item.type === 'video') handleSetActiveMedia(item);
+                    else onPlayAudio?.(item);
+                  }}
+                  className="w-32 aspect-[2/3] rounded-2xl overflow-hidden bg-[#12151F] border border-white/10 relative shrink-0 cursor-pointer group shadow-md active:scale-98 transition-all flex flex-col"
+                >
+                  <div className="relative w-full h-full bg-black">
+                    <SafeImage
+                      src={item.coverPath || item.bannerPath}
+                      alt={item.title}
+                      title={item.title}
+                      fallbackType={item.type === 'video' ? 'video' : item.subType === 'podcast' ? 'podcast' : 'audio'}
+                      style={{
+                        objectPosition: item.listCardPosition || item.coverPosition || '50% 50%',
+                        transform: (item.listCardZoom || item.coverZoom) ? `scale(${item.listCardZoom || item.coverZoom})` : undefined,
+                        transformOrigin: item.listCardPosition || item.coverPosition || '50% 50%',
+                      }}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                    />
+
+                    {/* Quick Action Buttons */}
+                    <div className="absolute top-1.5 right-1.5 flex items-center gap-1 z-10">
+                      {onToggleItemInUserPlaylist && (
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            sfx.playClick();
+                            setTargetMediaForPlaylist(item);
+                          }}
+                          className="p-1 rounded-full bg-black/70 text-white/80 hover:text-cyan-300 backdrop-blur-sm"
+                          title="Thêm vào playlist"
+                        >
+                          <ListPlus className="w-3 h-3" />
+                        </button>
+                      )}
+                      {onToggleFavoriteMedia && (
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            sfx.playClick();
+                            onToggleFavoriteMedia(item.id);
+                          }}
+                          className={`p-1 rounded-full backdrop-blur-sm ${
+                            isFav ? 'bg-rose-500 text-white' : 'bg-black/70 text-white/80 hover:text-rose-400'
+                          }`}
+                          title={isFav ? 'Bỏ thích' : 'Yêu thích'}
+                        >
+                          <Heart className={`w-3 h-3 ${isFav ? 'fill-current' : ''}`} />
+                        </button>
+                      )}
+                    </div>
+
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-transparent to-transparent flex flex-col justify-end p-2">
+                      <p className="text-xs font-bold text-white line-clamp-1">{item.title}</p>
+                      <span className="text-[9px] text-cyan-300/80 line-clamp-1">
+                        {item.artist || item.category || (item.tags?.[0] ? `#${item.tags[0]}` : '')}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </HorizontalScroller>
+        </div>
+      )}
+
       {/* 3. CATEGORY FILTER CHIPS ROW */}
       {categories.length > 0 && (
         <HorizontalScroller className="gap-1.5 shrink-0" showButtons={false}>
@@ -408,56 +523,94 @@ export const MobileMediaView: React.FC<MobileMediaViewProps> = ({
         {filteredList.length > 0 ? (
           <>
             <div className="grid grid-cols-2 gap-2.5">
-              {filteredList.slice(0, visibleCount).map((item) => (
-                <div
-                  key={item.id}
-                  onClick={() => {
-                    sfx.playClick();
-                    if (item.type === 'video') handleSetActiveMedia(item);
-                    else onPlayAudio?.(item);
-                  }}
-                  className="rounded-2xl overflow-hidden bg-[#12151F] border border-white/10 cursor-pointer group hover:border-cyan-500/50 transition-all shadow-md flex flex-col active:scale-98"
-                >
-                  {/* 4:6 (2:3) List Card Poster */}
-                  <div className="relative aspect-[2/3] w-full bg-black overflow-hidden">
-                    <SafeImage
-                      src={item.coverPath || item.bannerPath}
-                      alt={item.title}
-                      title={item.title}
-                      fallbackType={item.type === 'audio' ? 'audio' : 'video'}
-                      style={{
-                        objectPosition: item.listCardPosition || item.coverPosition || '50% 50%',
-                        transform: (item.listCardZoom || item.coverZoom) ? `scale(${item.listCardZoom || item.coverZoom})` : undefined,
-                        transformOrigin: item.listCardPosition || item.coverPosition || '50% 50%',
-                      }}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                    />
-                    <div className="absolute top-1.5 right-1.5 flex items-center gap-1">
+              {filteredList.slice(0, visibleCount).map((item) => {
+                const isFav = favoriteMediaIds.includes(item.id);
+                return (
+                  <div
+                    key={item.id}
+                    onClick={() => {
+                      sfx.playClick();
+                      if (item.type === 'video') handleSetActiveMedia(item);
+                      else onPlayAudio?.(item);
+                    }}
+                    className="rounded-2xl overflow-hidden bg-[#12151F] border border-white/10 cursor-pointer group hover:border-cyan-500/50 transition-all shadow-md flex flex-col active:scale-98"
+                  >
+                    {/* 4:6 (2:3) List Card Poster */}
+                    <div className="relative aspect-[2/3] w-full bg-black overflow-hidden">
+                      <SafeImage
+                        src={item.coverPath || item.bannerPath}
+                        alt={item.title}
+                        title={item.title}
+                        fallbackType={item.type === 'video' ? 'video' : item.subType === 'podcast' ? 'podcast' : 'audio'}
+                        style={{
+                          objectPosition: item.listCardPosition || item.coverPosition || '50% 50%',
+                          transform: (item.listCardZoom || item.coverZoom) ? `scale(${item.listCardZoom || item.coverZoom})` : undefined,
+                          transformOrigin: item.listCardPosition || item.coverPosition || '50% 50%',
+                        }}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      />
+
+                      {/* Action buttons on card */}
+                      <div className="absolute top-1.5 right-1.5 flex items-center gap-1 z-10">
+                        {onToggleItemInUserPlaylist && (
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              sfx.playClick();
+                              setTargetMediaForPlaylist(item);
+                            }}
+                            className="p-1 rounded-full bg-black/70 text-white/80 hover:text-cyan-300 backdrop-blur-sm"
+                            title="Thêm vào danh sách phát"
+                          >
+                            <ListPlus className="w-3 h-3" />
+                          </button>
+                        )}
+                        {onToggleFavoriteMedia && (
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              sfx.playClick();
+                              onToggleFavoriteMedia(item.id);
+                            }}
+                            className={`p-1 rounded-full backdrop-blur-sm ${
+                              isFav ? 'bg-rose-500 text-white' : 'bg-black/70 text-white/80 hover:text-rose-400'
+                            }`}
+                            title={isFav ? 'Bỏ thích' : 'Yêu thích'}
+                          >
+                            <Heart className={`w-3 h-3 ${isFav ? 'fill-current' : ''}`} />
+                          </button>
+                        )}
+                      </div>
+
                       {item.tags && item.tags.length > 0 && (
-                        <span className="px-1.5 py-0.2 rounded text-[8px] font-black bg-black/75 text-cyan-300 border border-cyan-400/30">
-                          {item.tags[0]}
-                        </span>
+                        <div className="absolute top-1.5 left-1.5 flex items-center gap-1">
+                          <span className="px-1.5 py-0.2 rounded text-[8px] font-black bg-black/75 text-cyan-300 border border-cyan-400/30">
+                            {item.tags[0]}
+                          </span>
+                        </div>
                       )}
                     </div>
-                  </div>
 
-                  {/* Info */}
-                  <div className="p-2.5 flex-1 flex flex-col justify-between space-y-1">
-                    <div>
-                      <h4 className="text-xs font-bold text-white line-clamp-1 group-hover:text-cyan-400 transition-colors">
-                        {item.title}
-                      </h4>
-                      <span className="text-[10px] text-slate-400 line-clamp-1">
-                        {item.category || (item.type === 'video' ? 'Phim' : 'Nhạc')}
-                      </span>
-                    </div>
-                    <div className="pt-1 flex items-center justify-between text-[10px] text-cyan-400 font-semibold">
-                      <span>{item.type === 'video' ? 'Xem ngay' : 'Phát nhạc'}</span>
-                      <Play className="w-3 h-3 fill-current" />
+                    {/* Info */}
+                    <div className="p-2.5 flex-1 flex flex-col justify-between space-y-1">
+                      <div>
+                        <h4 className="text-xs font-bold text-white line-clamp-1 group-hover:text-cyan-400 transition-colors">
+                          {item.title}
+                        </h4>
+                        <span className="text-[10px] text-slate-400 line-clamp-1">
+                          {item.category || (item.type === 'video' ? 'Phim' : 'Nhạc')}
+                        </span>
+                      </div>
+                      <div className="pt-1 flex items-center justify-between text-[10px] text-cyan-400 font-semibold">
+                        <span>{item.type === 'video' ? 'Xem ngay' : 'Phát nhạc'}</span>
+                        <Play className="w-3 h-3 fill-current" />
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
 
             {/* Load More Button for Mobile (10 items = 5 rows x 2 cols) */}
@@ -483,6 +636,18 @@ export const MobileMediaView: React.FC<MobileMediaViewProps> = ({
           </div>
         )}
       </div>
+
+      {/* Add To User Playlist Modal */}
+      {targetMediaForPlaylist && onToggleItemInUserPlaylist && onCreateUserPlaylist && (
+        <AddToPlaylistModal
+          isOpen={Boolean(targetMediaForPlaylist)}
+          onClose={() => setTargetMediaForPlaylist(null)}
+          media={targetMediaForPlaylist}
+          userPlaylists={userPlaylists}
+          onToggleItemInPlaylist={onToggleItemInUserPlaylist}
+          onCreatePlaylist={onCreateUserPlaylist}
+        />
+      )}
     </div>
   );
 };

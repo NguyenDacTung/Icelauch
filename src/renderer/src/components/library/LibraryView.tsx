@@ -16,11 +16,24 @@ import {
   BookmarkCheck,
   Search,
   Sparkles,
-  Settings2
+  Settings2,
+  Film,
+  Music,
+  Mic,
+  Plus,
+  Heart,
+  ListPlus,
+  ListMusic,
+  Edit3,
+  Trash2
 } from 'lucide-react';
 import { GameSettingsModal } from './GameSettingsModal';
-import type { Game, AppActionButton } from '../../types';
+import { UserPlaylistModal } from '../media/UserPlaylistModal';
+import { AddToPlaylistModal } from '../media/AddToPlaylistModal';
+import { SafeImage } from '../common/SafeImage';
+import type { Game, AppActionButton, MediaItem, MediaPlaylist } from '../../types';
 import { GameActionsWidget } from '../common/GameActionsWidget';
+import { sfx } from '../../utils/sfx';
 
 interface LibraryViewProps {
   games: Game[];
@@ -41,6 +54,16 @@ interface LibraryViewProps {
   onAutoPickExe: (gameId: string) => void;
   onToggleLibrary: (id: string) => void;
   globalActionButtons?: AppActionButton[];
+  // Media library props
+  allMedia?: MediaItem[];
+  userPlaylists?: MediaPlaylist[];
+  favoriteMediaIds?: string[];
+  onToggleFavoriteMedia?: (id: string) => void;
+  onPlayMedia?: (item: MediaItem) => void;
+  onCreateUserPlaylist?: (name: string, type: 'video' | 'audio', initialMediaId?: string) => Promise<void>;
+  onSaveUserPlaylist?: (playlist: MediaPlaylist) => Promise<void>;
+  onDeleteUserPlaylist?: (id: string) => Promise<void>;
+  onToggleItemInUserPlaylist?: (playlistId: string, mediaId: string) => Promise<void>;
 }
 
 export const LibraryView: React.FC<LibraryViewProps> = ({
@@ -62,10 +85,26 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
   onAutoPickExe,
   onToggleLibrary,
   globalActionButtons = [],
+  allMedia = [],
+  userPlaylists = [],
+  favoriteMediaIds = [],
+  onToggleFavoriteMedia,
+  onPlayMedia,
+  onCreateUserPlaylist,
+  onSaveUserPlaylist,
+  onDeleteUserPlaylist,
+  onToggleItemInUserPlaylist,
 }) => {
+  const [activeTab, setActiveTab] = useState<'game' | 'movie' | 'music' | 'podcast'>('game');
   const [filter, setFilter] = useState<'all' | 'installed' | 'downloading' | 'saved' | 'error'>('all');
   const [search, setSearch] = useState('');
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+
+  // Media Library state
+  const [mediaSearch, setMediaSearch] = useState('');
+  const [isUserPlaylistModalOpen, setIsUserPlaylistModalOpen] = useState(false);
+  const [editingUserPlaylist, setEditingUserPlaylist] = useState<MediaPlaylist | null>(null);
+  const [targetMediaForPlaylist, setTargetMediaForPlaylist] = useState<MediaItem | null>(null);
 
   // Library contains games that are in personal library OR downloaded/installed
   const isPersonalInLibrary = (g: Game) => userLibraryIds ? userLibraryIds.includes(g.id) : g.inLibrary;
@@ -94,10 +133,101 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
     return `${gb.toFixed(1)} GB`;
   };
 
+  // Media calculations
+  const currentTabMedia = allMedia.filter((m) => {
+    if (activeTab === 'movie') return m.type === 'video';
+    if (activeTab === 'music') return m.type === 'audio' && (m.subType === 'music' || !m.subType);
+    if (activeTab === 'podcast') return m.type === 'audio' && m.subType === 'podcast';
+    return false;
+  });
+
+  const favoriteTabMedia = currentTabMedia.filter(
+    (m) =>
+      favoriteMediaIds.includes(m.id) &&
+      (!mediaSearch ||
+        m.title.toLowerCase().includes(mediaSearch.toLowerCase()) ||
+        (m.artist && m.artist.toLowerCase().includes(mediaSearch.toLowerCase())))
+  );
+
+  const tabUserPlaylists = userPlaylists.filter((p) => {
+    const targetType = activeTab === 'movie' ? 'video' : 'audio';
+    const matchesType = p.type === targetType;
+    const matchesSearch = !mediaSearch || p.name.toLowerCase().includes(mediaSearch.toLowerCase());
+    return matchesType && matchesSearch;
+  });
+
   return (
-    <div className="flex-1 flex overflow-hidden select-none">
-      {/* LEFT COLUMN: Game List (Width: 260px) */}
-      <div className="w-64 bg-ice-card/95 border-r border-ice-border flex flex-col flex-shrink-0">
+    <div className="flex-1 flex flex-col overflow-hidden select-none">
+      {/* 4-Tab Bar: Trò Chơi / Phim & Video / Âm Nhạc / Podcast & Audio */}
+      <div className="flex items-center justify-between px-6 py-2.5 bg-ice-card/90 border-b border-ice-border/60 shrink-0">
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => {
+              sfx.playClick();
+              setActiveTab('game');
+            }}
+            className={`flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all ${
+              activeTab === 'game'
+                ? 'bg-amber-400 text-black shadow-md'
+                : 'text-ice-subtext hover:text-white hover:bg-white/5'
+            }`}
+          >
+            <Gamepad2 className="w-3.5 h-3.5" />
+            <span>Trò Chơi ({libraryGames.length})</span>
+          </button>
+
+          <button
+            onClick={() => {
+              sfx.playClick();
+              setActiveTab('movie');
+            }}
+            className={`flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all ${
+              activeTab === 'movie'
+                ? 'bg-amber-400 text-black shadow-md'
+                : 'text-ice-subtext hover:text-white hover:bg-white/5'
+            }`}
+          >
+            <Film className="w-3.5 h-3.5" />
+            <span>Phim & Video</span>
+          </button>
+
+          <button
+            onClick={() => {
+              sfx.playClick();
+              setActiveTab('music');
+            }}
+            className={`flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all ${
+              activeTab === 'music'
+                ? 'bg-amber-400 text-black shadow-md'
+                : 'text-ice-subtext hover:text-white hover:bg-white/5'
+            }`}
+          >
+            <Music className="w-3.5 h-3.5" />
+            <span>Âm Nhạc</span>
+          </button>
+
+          <button
+            onClick={() => {
+              sfx.playClick();
+              setActiveTab('podcast');
+            }}
+            className={`flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all ${
+              activeTab === 'podcast'
+                ? 'bg-amber-400 text-black shadow-md'
+                : 'text-ice-subtext hover:text-white hover:bg-white/5'
+            }`}
+          >
+            <Mic className="w-3.5 h-3.5" />
+            <span>Podcast & Audio</span>
+          </button>
+        </div>
+      </div>
+
+      {/* Main Tab Content */}
+      {activeTab === 'game' ? (
+        <div className="flex-1 flex overflow-hidden">
+          {/* LEFT COLUMN: Game List (Width: 260px) */}
+          <div className="w-64 bg-ice-card/95 border-r border-ice-border flex flex-col flex-shrink-0">
         {/* Search & Filter */}
         <div className="p-3 border-b border-ice-border space-y-2">
           <div className="relative">
@@ -569,6 +699,290 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
         </div>
       )}
     </div>
+  ) : (
+    /* MEDIA LIBRARY VIEW (Movie, Music, Podcast) */
+    <div className="flex-1 overflow-y-auto px-8 py-6 space-y-8">
+      {/* Sub-Header: Search & Create Playlist */}
+      <div className="flex flex-wrap items-center justify-between gap-4 border-b border-ice-border/60 pb-4">
+        <div className="relative w-72">
+          <Search className="w-4 h-4 text-ice-muted absolute left-3.5 top-1/2 -translate-y-1/2" />
+          <input
+            type="text"
+            value={mediaSearch}
+            onChange={(e) => setMediaSearch(e.target.value)}
+            placeholder={`Tìm kiếm trong ${activeTab === 'movie' ? 'phim' : activeTab === 'music' ? 'nhạc' : 'podcast'}...`}
+            className="w-full bg-ice-card border border-ice-border rounded-xl pl-9.5 pr-4 py-2 text-xs text-white placeholder-ice-muted focus:outline-none focus:border-amber-400 shadow-inner"
+          />
+          {mediaSearch && (
+            <button
+              onClick={() => setMediaSearch('')}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-ice-muted hover:text-white"
+            >
+              <X className="w-3.5 h-3.5" />
+            </button>
+          )}
+        </div>
+
+        {onCreateUserPlaylist && (
+          <button
+            onClick={() => {
+              sfx.playClick();
+              setEditingUserPlaylist(null);
+              setIsUserPlaylistModalOpen(true);
+            }}
+            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-amber-400 hover:bg-amber-300 text-black font-bold text-xs transition-all shadow-md active:scale-95"
+          >
+            <Plus className="w-4 h-4 stroke-[3]" />
+            <span>Tạo Playlist Mới</span>
+          </button>
+        )}
+      </div>
+
+      {/* Section 1: User Custom Playlists */}
+      <section className="space-y-4">
+        <div className="flex items-center justify-between">
+          <h3 className="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
+            <ListMusic className="w-4 h-4 text-amber-400" />
+            <span>Danh Sách Phát Của Bạn</span>
+            <span className="text-xs text-ice-muted font-mono font-normal">({tabUserPlaylists.length})</span>
+          </h3>
+        </div>
+
+        {tabUserPlaylists.length > 0 ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            {tabUserPlaylists.map((pl) => {
+              const count = pl.itemIds?.length || 0;
+              const firstItem = pl.itemIds?.[0] ? allMedia.find((m) => m.id === pl.itemIds[0]) : null;
+
+              return (
+                <div
+                  key={pl.id}
+                  className="group bg-ice-card border border-ice-border hover:border-amber-400/70 rounded-2xl p-4 flex flex-col justify-between transition-all duration-300 hover:shadow-xl hover:-translate-y-1"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-14 h-14 rounded-xl bg-black/60 border border-white/10 flex items-center justify-center shrink-0 overflow-hidden relative">
+                      {firstItem?.coverPath ? (
+                        <img
+                          src={firstItem.coverPath.startsWith('http') ? firstItem.coverPath : `file://${firstItem.coverPath}`}
+                          alt={pl.name}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <ListMusic className="w-6 h-6 text-amber-400" />
+                      )}
+                    </div>
+
+                    <div className="min-w-0 flex-1">
+                      <h4 className="text-xs font-bold text-white truncate group-hover:text-amber-300 transition-colors">
+                        {pl.name}
+                      </h4>
+                      <p className="text-[11px] text-ice-muted mt-0.5">
+                        {count} {pl.type === 'video' ? 'tập phim' : 'bài hát'}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-between pt-3 mt-3 border-t border-white/5">
+                    <button
+                      onClick={() => {
+                        sfx.playClick();
+                        if (firstItem && onPlayMedia) {
+                          onPlayMedia(firstItem);
+                        }
+                      }}
+                      disabled={count === 0}
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-400/10 hover:bg-amber-400/20 text-amber-300 text-xs font-bold disabled:opacity-40 transition-colors"
+                    >
+                      <Play className="w-3.5 h-3.5 fill-current" />
+                      <span>Phát</span>
+                    </button>
+
+                    <div className="flex items-center gap-1">
+                      <button
+                        onClick={() => {
+                          sfx.playClick();
+                          setEditingUserPlaylist(pl);
+                          setIsUserPlaylistModalOpen(true);
+                        }}
+                        className="p-1.5 rounded-lg text-ice-subtext hover:text-amber-400 hover:bg-white/5 transition-colors"
+                        title="Sắp xếp & Đổi tên"
+                      >
+                        <Edit3 className="w-3.5 h-3.5" />
+                      </button>
+                      {onDeleteUserPlaylist && (
+                        <button
+                          onClick={() => {
+                            sfx.playClick();
+                            if (confirm(`Bạn có chắc muốn xoá danh sách "${pl.name}" không?`)) {
+                              onDeleteUserPlaylist(pl.id);
+                            }
+                          }}
+                          className="p-1.5 rounded-lg text-ice-subtext hover:text-rose-400 hover:bg-white/5 transition-colors"
+                          title="Xoá playlist"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        ) : (
+          <div className="p-8 rounded-2xl bg-ice-card/40 border border-dashed border-white/10 text-center space-y-2">
+            <ListMusic className="w-8 h-8 text-ice-muted mx-auto opacity-50" />
+            <p className="text-xs text-ice-muted">Bạn chưa tạo danh sách phát nào trong danh mục này</p>
+            {onCreateUserPlaylist && (
+              <button
+                onClick={() => {
+                  sfx.playClick();
+                  setEditingUserPlaylist(null);
+                  setIsUserPlaylistModalOpen(true);
+                }}
+                className="text-xs text-amber-400 font-bold hover:underline inline-block pt-1"
+              >
+                + Tạo danh sách phát đầu tiên
+              </button>
+            )}
+          </div>
+        )}
+      </section>
+
+      {/* Section 2: Favorited Items */}
+      <section className="space-y-4">
+        <div className="flex items-center justify-between">
+          <h3 className="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
+            <Heart className="w-4 h-4 text-rose-500 fill-current" />
+            <span>Nội Dung Đã Lưu & Yêu Thích</span>
+            <span className="text-xs text-ice-muted font-mono font-normal">({favoriteTabMedia.length})</span>
+          </h3>
+        </div>
+
+        {favoriteTabMedia.length > 0 ? (
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+            {favoriteTabMedia.map((item) => (
+              <div
+                key={item.id}
+                onClick={() => {
+                  sfx.playClick();
+                  onPlayMedia?.(item);
+                }}
+                className="group relative bg-ice-card rounded-2xl overflow-hidden border border-ice-border hover:border-amber-400/80 hover:shadow-2xl cursor-pointer transition-all duration-300 hover:-translate-y-1.5 flex flex-col"
+              >
+                <div className="aspect-[2/3] w-full relative overflow-hidden bg-black flex items-center justify-center">
+                  <SafeImage
+                    src={item.coverPath || item.bannerPath}
+                    alt={item.title}
+                    title={item.title}
+                    fallbackType={item.type === 'video' ? 'video' : item.subType === 'podcast' ? 'podcast' : 'audio'}
+                    style={{
+                      objectPosition: item.listCardPosition || item.coverPosition || '50% 50%',
+                      transform: (item.listCardZoom || item.coverZoom) ? `scale(${item.listCardZoom || item.coverZoom})` : undefined,
+                      transformOrigin: item.listCardPosition || item.coverPosition || '50% 50%',
+                    }}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                  />
+
+                  {/* Action buttons */}
+                  <div className="absolute top-2 right-2 flex items-center gap-1 z-10">
+                    {onToggleItemInUserPlaylist && (
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          sfx.playClick();
+                          setTargetMediaForPlaylist(item);
+                        }}
+                        className="p-1.5 rounded-full bg-black/70 text-white/70 hover:text-amber-400 backdrop-blur-md"
+                        title="Thêm vào playlist cá nhân"
+                      >
+                        <ListPlus className="w-3.5 h-3.5" />
+                      </button>
+                    )}
+                    {onToggleFavoriteMedia && (
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          sfx.playClick();
+                          onToggleFavoriteMedia(item.id);
+                        }}
+                        className="p-1.5 rounded-full bg-rose-500 text-white backdrop-blur-md"
+                        title="Bỏ thích"
+                      >
+                        <Heart className="w-3.5 h-3.5 fill-current" />
+                      </button>
+                    )}
+                  </div>
+
+                  <div className="absolute inset-0 bg-black/30 group-hover:bg-black/10 flex items-center justify-center transition-colors">
+                    <div className="w-10 h-10 rounded-full bg-amber-400 text-black flex items-center justify-center shadow-lg transform scale-75 opacity-0 group-hover:opacity-100 group-hover:scale-100 transition-all">
+                      <Play className="w-4 h-4 fill-black ml-0.5" />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="p-3">
+                  <h4 className="text-xs font-bold text-white truncate group-hover:text-amber-300 transition-colors">
+                    {item.title}
+                  </h4>
+                  <p className="text-[10px] text-ice-muted truncate mt-0.5">
+                    {item.artist || item.category || 'Nội dung'}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="py-12 text-center text-ice-muted space-y-2">
+            <Heart className="w-8 h-8 mx-auto opacity-30 text-rose-500" />
+            <p className="text-xs">Chưa có nội dung nào được thêm vào yêu thích trong mục này.</p>
+          </div>
+        )}
+      </section>
+    </div>
+  )}
+
+  {/* User Playlist Modal (Create or Edit) */}
+  {isUserPlaylistModalOpen && (
+    <UserPlaylistModal
+      isOpen={isUserPlaylistModalOpen}
+      playlist={editingUserPlaylist}
+      defaultType={activeTab === 'movie' ? 'video' : 'audio'}
+      allItems={allMedia}
+      onClose={() => {
+        setIsUserPlaylistModalOpen(false);
+        setEditingUserPlaylist(null);
+      }}
+      onSave={async (name, type, itemIds) => {
+        if (editingUserPlaylist && onSaveUserPlaylist) {
+          await onSaveUserPlaylist({
+            ...editingUserPlaylist,
+            name,
+            type,
+            itemIds: itemIds || [],
+          });
+        } else if (onCreateUserPlaylist) {
+          await onCreateUserPlaylist(name, type);
+        }
+      }}
+      onDelete={onDeleteUserPlaylist}
+    />
+  )}
+
+  {/* Add To User Playlist Modal */}
+  {targetMediaForPlaylist && onToggleItemInUserPlaylist && onCreateUserPlaylist && (
+    <AddToPlaylistModal
+      isOpen={Boolean(targetMediaForPlaylist)}
+      onClose={() => setTargetMediaForPlaylist(null)}
+      media={targetMediaForPlaylist}
+      userPlaylists={userPlaylists}
+      onToggleItemInPlaylist={onToggleItemInUserPlaylist}
+      onCreatePlaylist={onCreateUserPlaylist}
+    />
+  )}
+</div>
   );
 };
 

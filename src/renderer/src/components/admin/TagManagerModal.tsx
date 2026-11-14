@@ -20,7 +20,7 @@ import { sfx } from '../../utils/sfx';
 interface TagManagerModalProps {
   isOpen: boolean;
   onClose: () => void;
-  mode: 'game' | 'media';
+  mode: 'game' | 'movie' | 'music' | 'podcast' | 'media';
   tags: string[];
   games?: Game[];
   media?: MediaItem[];
@@ -56,7 +56,11 @@ export const TagManagerModal: React.FC<TagManagerModalProps> = ({
   const [batchSuccessMsg, setBatchSuccessMsg] = useState<string | null>(null);
 
   const items = useMemo(() => {
-    return mode === 'game' ? games : media;
+    if (mode === 'game') return games;
+    if (mode === 'movie') return media.filter((m) => m.type === 'video');
+    if (mode === 'music') return media.filter((m) => m.type === 'audio' && (m.subType === 'music' || !m.subType));
+    if (mode === 'podcast') return media.filter((m) => m.type === 'audio' && m.subType === 'podcast');
+    return media;
   }, [mode, games, media]);
 
   // Count usage of each tag
@@ -190,7 +194,16 @@ export const TagManagerModal: React.FC<TagManagerModalProps> = ({
           <div className="flex items-center gap-2.5">
             <Tag className="w-5 h-5 text-amber-400" />
             <h3 className="text-base font-bold text-white tracking-wide">
-              Quản Lý Thể Loại {mode === 'game' ? 'Trò Chơi' : 'Giải Trí'}
+              Quản Lý Thể Loại{' '}
+              {mode === 'game'
+                ? 'Trò Chơi'
+                : mode === 'movie'
+                ? 'Phim & Video'
+                : mode === 'music'
+                ? 'Âm Nhạc'
+                : mode === 'podcast'
+                ? 'Podcast & Audio'
+                : 'Giải Trí'}
             </h3>
             <span className="text-xs px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-400 font-mono border border-amber-500/30">
               {tags.length} thể loại

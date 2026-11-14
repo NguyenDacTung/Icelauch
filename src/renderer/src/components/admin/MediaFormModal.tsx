@@ -13,7 +13,10 @@ interface MediaFormModalProps {
   onDeleteMedia?: (id: string) => void;
   onBrowseFile?: (type: 'cover' | 'banner') => Promise<string | null>;
   availableTags?: string[];
-  onAddNewGlobalTag?: (tag: string) => void;
+  movieTags?: string[];
+  musicTags?: string[];
+  podcastTags?: string[];
+  onAddNewGlobalTag?: (tag: string, categoryType?: 'movie' | 'music' | 'podcast') => void;
   playlists?: MediaPlaylist[];
 }
 
@@ -25,6 +28,9 @@ export const MediaFormModal: React.FC<MediaFormModalProps> = ({
   onDeleteMedia,
   onBrowseFile,
   availableTags = [],
+  movieTags = [],
+  musicTags = [],
+  podcastTags = [],
   onAddNewGlobalTag,
   playlists = [],
 }) => {
@@ -52,6 +58,7 @@ export const MediaFormModal: React.FC<MediaFormModalProps> = ({
   const [isBannerPinned, setIsBannerPinned] = useState(false);
   const [isBannerPermanent, setIsBannerPermanent] = useState(false);
   const [bannerExpiryDays, setBannerExpiryDays] = useState(7);
+  const [isFeatured, setIsFeatured] = useState(true);
   const [description, setDescription] = useState('');
   const [selectedTags, setSelectedTags] = useState<string[]>(['Hoạt hình']);
   const [hidden, setHidden] = useState(false);
@@ -86,6 +93,7 @@ export const MediaFormModal: React.FC<MediaFormModalProps> = ({
         setIsBannerPinned(media.isBannerPinned ?? false);
         setIsBannerPermanent(media.isBannerPermanent ?? false);
         setBannerExpiryDays(7);
+        setIsFeatured(media.isFeatured ?? true);
         setDescription(media.description || '');
         setSelectedTags(
           media.tags && media.tags.length > 0
@@ -120,9 +128,10 @@ export const MediaFormModal: React.FC<MediaFormModalProps> = ({
         setBannerEdgeDarkness(10);
         setCoverSharpen(0);
         setBannerSharpen(0);
-        setIsBannerPinned(true);
+        setIsBannerPinned(false);
         setIsBannerPermanent(false);
         setBannerExpiryDays(7);
+        setIsFeatured(true);
         setDescription('');
         setSelectedTags(['Hoạt hình']);
         setHidden(false);
@@ -247,6 +256,7 @@ export const MediaFormModal: React.FC<MediaFormModalProps> = ({
       bannerSharpen,
       isBannerPinned,
       isBannerPermanent,
+      isFeatured,
       bannerFeaturedUntil,
       description: description.trim() || media?.description,
       tags: selectedTags,
@@ -468,14 +478,33 @@ export const MediaFormModal: React.FC<MediaFormModalProps> = ({
           </div>
 
           {/* Tag Selector */}
-          <TagSelector
-            label="Thể loại / Phân loại (Tags)"
-            selectedTags={selectedTags}
-            availableTags={availableTags}
-            onChange={setSelectedTags}
-            onAddNewTag={onAddNewGlobalTag}
-            placeholder={type === 'video' ? 'Ví dụ: Hoạt hình, Phim lẻ, Phim 1080p...' : 'Ví dụ: Nhạc Chill, EDM, Pop...'}
-          />
+          {(() => {
+            const activeCategory: 'movie' | 'music' | 'podcast' =
+              type === 'video' ? 'movie' : subType === 'podcast' ? 'podcast' : 'music';
+            const currentAvailableTags =
+              activeCategory === 'movie'
+                ? (movieTags.length > 0 ? movieTags : availableTags)
+                : activeCategory === 'music'
+                ? (musicTags.length > 0 ? musicTags : availableTags)
+                : (podcastTags.length > 0 ? podcastTags : availableTags);
+
+            return (
+              <TagSelector
+                label={`Thể loại / Phân loại (${activeCategory === 'movie' ? 'Phim & Video' : activeCategory === 'music' ? 'Âm Nhạc' : 'Podcast & Audio'})`}
+                selectedTags={selectedTags}
+                availableTags={currentAvailableTags}
+                onChange={setSelectedTags}
+                onAddNewTag={(newTag) => onAddNewGlobalTag?.(newTag, activeCategory)}
+                placeholder={
+                  activeCategory === 'movie'
+                    ? 'Ví dụ: Hoạt hình, Chiếu rạp, Phim lẻ...'
+                    : activeCategory === 'music'
+                    ? 'Ví dụ: Nhạc Chill, EDM, Pop...'
+                    : 'Ví dụ: Kinh doanh, Lịch sử, Truyện...'
+                }
+              />
+            );
+          })()}
 
           {/* Cover & Banner Images */}
           <div className="grid grid-cols-2 gap-3">
@@ -627,6 +656,25 @@ export const MediaFormModal: React.FC<MediaFormModalProps> = ({
               </div>
             </div>
           )}
+
+          {/* Featured in Shelf Row Toggle */}
+          <div className="p-3 rounded-lg bg-black/40 border border-ice-border space-y-1">
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={isFeatured}
+                onChange={(e) => setIsFeatured(e.target.checked)}
+                className="w-4 h-4 rounded accent-cyan-500"
+              />
+              <span className="font-semibold text-cyan-300 flex items-center gap-1.5">
+                <Sparkles className="w-4 h-4 text-cyan-400" />
+                <span>Hiển thị ở hàng "Nổi Bật / Mới Thêm" trên trang Giải Trí</span>
+              </span>
+            </label>
+            <p className="text-[10px] text-ice-muted pl-6">
+              Mặc định được bật. Nếu bỏ tích, mục này sẽ không xuất hiện trong hàng Nổi Bật đầu trang dù là mới thêm (vẫn xuất hiện trong thể loại và kho tất cả).
+            </p>
+          </div>
 
           {/* Banner Featured Pin Section */}
           <div className="p-3 rounded-lg bg-black/40 border border-ice-border space-y-2">

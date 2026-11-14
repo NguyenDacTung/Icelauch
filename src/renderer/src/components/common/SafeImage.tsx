@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import { Gamepad2, Film, Music, Image as ImageIcon } from 'lucide-react';
+import { Gamepad2, Film, Music, Mic, Image as ImageIcon } from 'lucide-react';
 
 interface SafeImageProps extends React.ImgHTMLAttributes<HTMLImageElement> {
-  fallbackType?: 'game' | 'video' | 'audio' | 'general';
+  fallbackType?: 'game' | 'video' | 'audio' | 'podcast' | 'general';
   title?: string;
 }
 
@@ -30,6 +30,8 @@ export const SafeImage: React.FC<SafeImageProps> = ({
         ? Film
         : fallbackType === 'audio'
         ? Music
+        : fallbackType === 'podcast'
+        ? Mic
         : ImageIcon;
 
     return (

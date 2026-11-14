@@ -90,6 +90,15 @@ export const VinylTurntablePlayer: React.FC<VinylTurntablePlayerProps> = ({
     }
   }, [media.id, isDownloaded, proxyUrl]);
 
+  // Ensure audio tag pauses cleanly on unmount
+  useEffect(() => {
+    return () => {
+      if (audioRef.current) {
+        audioRef.current.pause();
+      }
+    };
+  }, []);
+
   // Handle Play/Pause
   const togglePlay = () => {
     sfx.playClick();

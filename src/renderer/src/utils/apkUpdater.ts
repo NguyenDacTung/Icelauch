@@ -1,6 +1,6 @@
 import { registerPlugin } from '@capacitor/core';
 
-export const CURRENT_MOBILE_VERSION = '1.1.4';
+export const CURRENT_MOBILE_VERSION = '1.1.5';
 export const CURRENT_TV_VERSION = '1.0.0';
 const GITHUB_REPO = 'NguyenDacTung/Icelauch';
 

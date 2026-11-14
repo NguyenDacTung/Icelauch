@@ -102,7 +102,7 @@ export default function App() {
   const [editingMedia, setEditingMedia] = useState<MediaItem | null>(null);
   const [isBannerManagerOpen, setIsBannerManagerOpen] = useState(false);
   const [isTagManagerOpen, setIsTagManagerOpen] = useState(false);
-  const [tagManagerMode, setTagManagerMode] = useState<'game' | 'media'>('game');
+  const [tagManagerMode, setTagManagerMode] = useState<'game' | 'movie' | 'music' | 'podcast' | 'media'>('game');
   const [isFirstRunOpen, setIsFirstRunOpen] = useState(false);
   const [isChangeAdminPinOpen, setIsChangeAdminPinOpen] = useState(false);
   const [passwordPromptData, setPasswordPromptData] = useState<{
@@ -114,6 +114,7 @@ export default function App() {
   // Audio player state
   const [currentTrack, setCurrentTrack] = useState<MediaItem | null>(null);
   const [isPlayingAudio, setIsPlayingAudio] = useState(false);
+  const [isTurntableOpen, setIsTurntableOpen] = useState(false);
   const [isMobileVinylOpen, setIsMobileVinylOpen] = useState(false);
 
   // Multi-User Profile State
@@ -822,8 +823,11 @@ export default function App() {
     if (window.api) {
       const savedGame = await window.api.saveGame(gameData);
       
-      // Auto register to banner if pinned or autoAddNew is enabled for newly created games
-      if (appData && savedGame && (gameData.isBannerPinned || (!gameData.id && appData.settings.bannerSettings?.games.autoAddNew))) {
+      // Auto register to banner if pinned or autoAddNew is enabled for newly created games (NEVER if isBannerPinned is false)
+      const shouldAddToBanner = gameData.isBannerPinned === true ||
+        (gameData.isBannerPinned !== false && !gameData.id && Boolean(appData?.settings.bannerSettings?.games.autoAddNew));
+
+      if (appData && savedGame && shouldAddToBanner) {
         const updatedBannerSettings = registerItemToBanner(
           appData.settings.bannerSettings,
           'games',
@@ -932,6 +936,80 @@ export default function App() {
     }
   };
 
+  const handlePauseAudio = () => {
+    setIsPlayingAudio(false);
+  };
+
+  // User Custom Playlists handlers
+  const handleToggleItemInUserPlaylist = async (playlistId: string, mediaId: string) => {
+    if (!activeProfile) {
+      setRequireLoginModal({ isOpen: true, actionText: 'Vui lòng đăng nhập hoặc chọn hồ sơ để quản lý playlist cá nhân' });
+      return;
+    }
+    const currentPlaylists = activeProfile.customPlaylists || [];
+    const updatedPlaylists = currentPlaylists.map((pl) => {
+      if (pl.id !== playlistId) return pl;
+      const exists = pl.itemIds.includes(mediaId);
+      const newItemIds = exists ? pl.itemIds.filter((id) => id !== mediaId) : [...pl.itemIds, mediaId];
+      return { ...pl, itemIds: newItemIds, updatedAt: new Date().toISOString() };
+    });
+    const updatedProfile = { ...activeProfile, customPlaylists: updatedPlaylists };
+    setActiveProfile(updatedProfile);
+    if (window.api) {
+      await window.api.saveProfile(updatedProfile);
+    }
+  };
+
+  const handleCreateUserPlaylist = async (name: string, type: 'video' | 'audio', initialMediaId?: string) => {
+    if (!activeProfile) {
+      setRequireLoginModal({ isOpen: true, actionText: 'Vui lòng đăng nhập hoặc chọn hồ sơ để tạo playlist cá nhân' });
+      return;
+    }
+    const newPlaylist: MediaPlaylist = {
+      id: `upl_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
+      name: name.trim(),
+      type,
+      itemIds: initialMediaId ? [initialMediaId] : [],
+      ownerProfileId: activeProfile.id,
+      isUserCustom: true,
+      createdAt: new Date().toISOString(),
+    };
+    const currentPlaylists = activeProfile.customPlaylists || [];
+    const updatedProfile = {
+      ...activeProfile,
+      customPlaylists: [newPlaylist, ...currentPlaylists],
+    };
+    setActiveProfile(updatedProfile);
+    if (window.api) {
+      await window.api.saveProfile(updatedProfile);
+    }
+  };
+
+  const handleDeleteUserPlaylist = async (playlistId: string) => {
+    if (!activeProfile) return;
+    const currentPlaylists = activeProfile.customPlaylists || [];
+    const updatedPlaylists = currentPlaylists.filter((pl) => pl.id !== playlistId);
+    const updatedProfile = { ...activeProfile, customPlaylists: updatedPlaylists };
+    setActiveProfile(updatedProfile);
+    if (window.api) {
+      await window.api.saveProfile(updatedProfile);
+    }
+  };
+
+  const handleSaveUserPlaylist = async (playlist: MediaPlaylist) => {
+    if (!activeProfile) return;
+    const currentPlaylists = activeProfile.customPlaylists || [];
+    const exists = currentPlaylists.some((pl) => pl.id === playlist.id);
+    const updatedPlaylists = exists
+      ? currentPlaylists.map((pl) => (pl.id === playlist.id ? { ...playlist, updatedAt: new Date().toISOString() } : pl))
+      : [playlist, ...currentPlaylists];
+    const updatedProfile = { ...activeProfile, customPlaylists: updatedPlaylists };
+    setActiveProfile(updatedProfile);
+    if (window.api) {
+      await window.api.saveProfile(updatedProfile);
+    }
+  };
+
   const handleSaveMedia = async (mediaData: Partial<MediaItem>, targetPlaylistIds?: string[]) => {
     if (window.api) {
       const savedMedia = await window.api.saveMedia(mediaData);
@@ -969,7 +1047,11 @@ export default function App() {
             ? 'podcasts' 
             : 'music';
 
-        if (mediaData.isBannerPinned || (!mediaData.id && appData.settings.bannerSettings?.[secKey]?.autoAddNew)) {
+        // Auto register to banner if pinned or autoAddNew is enabled for newly created media (NEVER if isBannerPinned is false)
+        const shouldAddToBanner = mediaData.isBannerPinned === true ||
+          (mediaData.isBannerPinned !== false && !mediaData.id && Boolean(appData.settings.bannerSettings?.[secKey]?.autoAddNew));
+
+        if (shouldAddToBanner) {
           const updatedBannerSettings = registerItemToBanner(
             appData.settings.bannerSettings,
             secKey,
@@ -1016,8 +1098,17 @@ export default function App() {
         }
       }
     } else {
-      const currentTags = appData.settings.mediaTags || [];
-      const updatedTags = currentTags.map((t) => (t === oldTag ? newTag : t));
+      const tagSettingKey =
+        tagManagerMode === 'movie'
+          ? 'movieTags'
+          : tagManagerMode === 'music'
+          ? 'musicTags'
+          : tagManagerMode === 'podcast'
+          ? 'podcastTags'
+          : 'mediaTags';
+
+      const currentTags = (appData.settings as any)[tagSettingKey] || [];
+      const updatedTags = currentTags.map((t: string) => (t === oldTag ? newTag : t));
       if (!updatedTags.includes(newTag)) updatedTags.push(newTag);
 
       const updatedMedia = appData.media.map((m) => {
@@ -1031,11 +1122,11 @@ export default function App() {
       setAppData({
         ...appData,
         media: updatedMedia,
-        settings: { ...appData.settings, mediaTags: updatedTags },
+        settings: { ...appData.settings, [tagSettingKey]: updatedTags },
       });
 
       if (window.api) {
-        await window.api.saveSettings({ mediaTags: updatedTags });
+        await window.api.saveSettings({ [tagSettingKey]: updatedTags });
         for (const m of updatedMedia) {
           if (m.tags?.includes(newTag)) {
             await window.api.saveMedia(m);
@@ -1073,8 +1164,17 @@ export default function App() {
         }
       }
     } else {
-      const currentTags = appData.settings.mediaTags || [];
-      const updatedTags = currentTags.filter((t) => t !== tagToDelete);
+      const tagSettingKey =
+        tagManagerMode === 'movie'
+          ? 'movieTags'
+          : tagManagerMode === 'music'
+          ? 'musicTags'
+          : tagManagerMode === 'podcast'
+          ? 'podcastTags'
+          : 'mediaTags';
+
+      const currentTags = (appData.settings as any)[tagSettingKey] || [];
+      const updatedTags = currentTags.filter((t: string) => t !== tagToDelete);
 
       const updatedMedia = appData.media.map((m) => {
         if (m.tags && m.tags.includes(tagToDelete)) {
@@ -1087,11 +1187,11 @@ export default function App() {
       setAppData({
         ...appData,
         media: updatedMedia,
-        settings: { ...appData.settings, mediaTags: updatedTags },
+        settings: { ...appData.settings, [tagSettingKey]: updatedTags },
       });
 
       if (window.api) {
-        await window.api.saveSettings({ mediaTags: updatedTags });
+        await window.api.saveSettings({ [tagSettingKey]: updatedTags });
         for (const m of updatedMedia) {
           await window.api.saveMedia(m);
         }
@@ -1460,6 +1560,46 @@ export default function App() {
     return Array.from(set);
   }, [appData?.settings.mediaTags, appData?.media]);
 
+  // Separate Aggregated Tags for 3 Media Types
+  const aggregatedMovieTags = useMemo(() => {
+    const set = new Set<string>(
+      appData?.settings.movieTags || ['Chiếu Rạp', 'Hành Động', 'Hoạt Hình', 'Phim Lẻ', 'Phim Bộ', 'Anime', 'Khoa Học Viễn Tưởng', 'Kinh Dị']
+    );
+    (appData?.media || []).filter((m) => m.type === 'video').forEach((m) => {
+      (m.tags || []).forEach((t) => t && set.add(t.trim()));
+      if (m.category) {
+        m.category.split(',').forEach((t) => t && set.add(t.trim()));
+      }
+    });
+    return Array.from(set);
+  }, [appData?.settings.movieTags, appData?.media]);
+
+  const aggregatedMusicTags = useMemo(() => {
+    const set = new Set<string>(
+      appData?.settings.musicTags || ['Pop', 'EDM', 'Rock', 'Chill / Lofi', 'Nhạc Game', 'Acoustic', 'Ballad', 'Rap / Hip-hop']
+    );
+    (appData?.media || []).filter((m) => m.type === 'audio' && (m.subType === 'music' || !m.subType)).forEach((m) => {
+      (m.tags || []).forEach((t) => t && set.add(t.trim()));
+      if (m.category) {
+        m.category.split(',').forEach((t) => t && set.add(t.trim()));
+      }
+    });
+    return Array.from(set);
+  }, [appData?.settings.musicTags, appData?.media]);
+
+  const aggregatedPodcastTags = useMemo(() => {
+    const set = new Set<string>(
+      appData?.settings.podcastTags || ['Sách Nói', 'Tâm Lý', 'Công Nghệ', 'Kể Chuyện', 'Phát Triển Bản Thân', 'Tin Tức', 'Lịch Sử']
+    );
+    (appData?.media || []).filter((m) => m.type === 'audio' && m.subType === 'podcast').forEach((m) => {
+      (m.tags || []).forEach((t) => t && set.add(t.trim()));
+      if (m.category) {
+        m.category.split(',').forEach((t) => t && set.add(t.trim()));
+      }
+    });
+    return Array.from(set);
+  }, [appData?.settings.podcastTags, appData?.media]);
+
   if (!appData) {
     return (
       <div className="h-screen w-screen bg-ice-bg flex flex-col items-center justify-center text-ice-subtext space-y-3">
@@ -1561,7 +1701,10 @@ export default function App() {
                   <TVHomeMediaView
                     media={appData.media}
                     bannerSettings={appData.settings.bannerSettings?.videos}
-                    onPlayMedia={(item) => setTvPlayingMedia(item)}
+                    onPlayMedia={(item) => {
+                      handlePauseAudio();
+                      setTvPlayingMedia(item);
+                    }}
                     onToggleLibrary={handleToggleLibrary}
                   />
                 )}
@@ -1653,9 +1796,11 @@ export default function App() {
                   <MobileLibraryView
                     games={appData.games}
                     allMedia={appData.media}
+                    userPlaylists={activeProfile?.customPlaylists || []}
                     isAdmin={isAdmin}
                     activeProfile={activeProfile}
                     userLibraryIds={activeProfile?.library}
+                    favoriteMediaIds={activeProfile?.favoriteMedia || []}
                     onSelectGame={(game) => {
                       setViewingDetailGame(game);
                       setCurrentTab('home');
@@ -1666,9 +1811,14 @@ export default function App() {
                     }}
                     onIncompatibleClick={(game) => setIncompatibleGame(game)}
                     onToggleLibrary={handleToggleLibrary}
+                    onToggleFavoriteMedia={handleToggleFavoriteMedia}
                     onSwitchProfile={handleSwitchProfile}
                     onPlayAudio={handlePlayAudio}
                     onNavigateTab={handleMobileTabChange}
+                    onCreateUserPlaylist={handleCreateUserPlaylist}
+                    onSaveUserPlaylist={handleSaveUserPlaylist}
+                    onDeleteUserPlaylist={handleDeleteUserPlaylist}
+                    onToggleItemInUserPlaylist={handleToggleItemInUserPlaylist}
                   />
                 )}
 
@@ -1676,12 +1826,18 @@ export default function App() {
                   <MobileMediaView
                     media={appData.media}
                     playlists={appData.playlists || []}
+                    userPlaylists={activeProfile?.customPlaylists || []}
                     bannerSettings={appData.settings.bannerSettings?.videos}
                     isAdmin={isAdmin}
                     searchQuery={searchQuery}
+                    favoriteMediaIds={activeProfile?.favoriteMedia || []}
                     activeTheaterMedia={mobileTheaterMedia}
                     onSelectTheaterMedia={setMobileTheaterMedia}
                     onPlayAudio={handlePlayAudio}
+                    onPauseAudio={handlePauseAudio}
+                    onToggleFavoriteMedia={handleToggleFavoriteMedia}
+                    onToggleItemInUserPlaylist={handleToggleItemInUserPlaylist}
+                    onCreateUserPlaylist={handleCreateUserPlaylist}
                     onSaveMedia={handleSaveMedia}
                     onDeleteMedia={handleDeleteMedia}
                     onUpdateMediaProgress={handleUpdateMediaProgress}
@@ -1797,6 +1953,21 @@ export default function App() {
                     onAutoPickExe={handleAutoPickExe}
                     onToggleLibrary={handleToggleLibrary}
                     globalActionButtons={appData.settings.globalActionButtons || []}
+                    allMedia={appData.media}
+                    userPlaylists={activeProfile?.customPlaylists || []}
+                    favoriteMediaIds={activeProfile?.favoriteMedia || []}
+                    onToggleFavoriteMedia={handleToggleFavoriteMedia}
+                    onPlayMedia={(item) => {
+                      if (item.type === 'video') {
+                        setCurrentTab('media');
+                      } else {
+                        handlePlayAudio(item);
+                      }
+                    }}
+                    onCreateUserPlaylist={handleCreateUserPlaylist}
+                    onSaveUserPlaylist={handleSaveUserPlaylist}
+                    onDeleteUserPlaylist={handleDeleteUserPlaylist}
+                    onToggleItemInUserPlaylist={handleToggleItemInUserPlaylist}
                   />
                 )}
 
@@ -1804,6 +1975,7 @@ export default function App() {
                   <MediaView
                     media={appData.media}
                     playlists={appData.playlists || []}
+                    userPlaylists={activeProfile?.customPlaylists || []}
                     bannerSettings={appData.settings.bannerSettings}
                     settings={appData.settings}
                     isAdmin={isAdmin}
@@ -1813,6 +1985,8 @@ export default function App() {
                     onToggleFavoriteMedia={handleToggleFavoriteMedia}
                     onToggleFavoritePlaylist={handleToggleFavoritePlaylist}
                     onPlayAudio={handlePlayAudio}
+                    onPauseAudio={handlePauseAudio}
+                    onTurntableOpenChange={setIsTurntableOpen}
                     onSaveMedia={handleSaveMedia}
                     onDeleteMedia={handleDeleteMedia}
                     onToggleHide={handleToggleHideMedia}
@@ -1820,8 +1994,8 @@ export default function App() {
                       setEditingMedia(null);
                       setIsMediaFormOpen(true);
                     }}
-                    onOpenTagManager={() => {
-                      setTagManagerMode('media');
+                    onOpenTagManager={(mode) => {
+                      setTagManagerMode(mode);
                       setIsTagManagerOpen(true);
                     }}
                     onEditMedia={(item) => {
@@ -1834,6 +2008,9 @@ export default function App() {
                     onDownloadMedia={handleDownloadMedia}
                     onDeleteDownloaded={handleDeleteDownloadedMedia}
                     onMinimizeToMiniPlayer={(m: any) => setMiniPlayerMedia(m)}
+                    onToggleItemInUserPlaylist={handleToggleItemInUserPlaylist}
+                    onCreateUserPlaylist={handleCreateUserPlaylist}
+                    onNavigateToUserPlaylists={() => setCurrentTab('library')}
                   />
                 )}
 
@@ -1881,6 +2058,7 @@ export default function App() {
         currentTrack={currentTrack}
         playlist={appData.media.filter((m) => m.type === 'audio')}
         isPlaying={isPlayingAudio}
+        isTurntableActive={isTurntableOpen}
         onPlayPause={() => setIsPlayingAudio(!isPlayingAudio)}
         onNext={() => {
           const audios = appData.media.filter((m) => m.type === 'audio');
@@ -2070,6 +2248,9 @@ export default function App() {
             filters: [{ name: 'Images', extensions: ['jpg', 'jpeg', 'png', 'webp'] }],
           });
         }}
+        movieTags={aggregatedMovieTags}
+        musicTags={aggregatedMusicTags}
+        podcastTags={aggregatedPodcastTags}
         availableTags={aggregatedMediaTags}
         onAddNewGlobalTag={async (newTag) => {
           const current = appData.settings.mediaTags || [];
@@ -2101,11 +2282,30 @@ export default function App() {
         isOpen={isTagManagerOpen}
         onClose={() => setIsTagManagerOpen(false)}
         mode={tagManagerMode}
-        tags={tagManagerMode === 'game' ? aggregatedGameTags : aggregatedMediaTags}
+        tags={
+          tagManagerMode === 'game'
+            ? aggregatedGameTags
+            : tagManagerMode === 'movie'
+            ? aggregatedMovieTags
+            : tagManagerMode === 'music'
+            ? aggregatedMusicTags
+            : tagManagerMode === 'podcast'
+            ? aggregatedPodcastTags
+            : aggregatedMediaTags
+        }
         games={appData.games}
         media={appData.media}
         onSaveTags={async (newTags: string[]) => {
-          const type = tagManagerMode === 'game' ? 'gameTags' : 'mediaTags';
+          const type =
+            tagManagerMode === 'game'
+              ? 'gameTags'
+              : tagManagerMode === 'movie'
+              ? 'movieTags'
+              : tagManagerMode === 'music'
+              ? 'musicTags'
+              : tagManagerMode === 'podcast'
+              ? 'podcastTags'
+              : 'mediaTags';
           setAppData({
             ...appData,
             settings: { ...appData.settings, [type]: newTags },
