@@ -69,3 +69,4 @@ export function getDefaultConfigForMode(mode: 'gamepad' | 'keyboard_mouse' | 'di
     customButtons: JSON.parse(JSON.stringify(XBOX_STANDARD_BUTTONS)),
   };
 }
+

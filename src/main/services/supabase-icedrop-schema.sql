@@ -20,3 +20,4 @@ ALTER TABLE icelauch_icedrop ENABLE ROW LEVEL SECURITY;
 
 DROP POLICY IF EXISTS "IceDrop Anon All" ON icelauch_icedrop;
 CREATE POLICY "IceDrop Anon All" ON icelauch_icedrop FOR ALL TO anon USING (true) WITH CHECK (true);
+

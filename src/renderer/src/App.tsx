@@ -370,7 +370,7 @@ export default function App() {
         }
 
         // Version update check: require re-login on new app version update; keep auto-login on same version
-        const CURRENT_APP_VERSION = '1.1.0';
+        const CURRENT_APP_VERSION = '1.1.1';
         const lastVersion = localStorage.getItem('icelauch_installed_version');
         const isNewVersion = Boolean(lastVersion && lastVersion !== CURRENT_APP_VERSION);
         localStorage.setItem('icelauch_installed_version', CURRENT_APP_VERSION);
