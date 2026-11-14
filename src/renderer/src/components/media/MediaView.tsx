@@ -1,18 +1,18 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  Film, 
-  Music, 
-  Play, 
-  Plus, 
-  Clock, 
-  MoreVertical, 
-  Trash2, 
-  Edit3, 
-  Sparkles, 
-  Search, 
-  CheckCircle2, 
-  Tag, 
-  Eye, 
+import {
+  Film,
+  Music,
+  Play,
+  Plus,
+  Clock,
+  MoreVertical,
+  Trash2,
+  Edit3,
+  Sparkles,
+  Search,
+  CheckCircle2,
+  Tag,
+  Eye,
   EyeOff,
   Tv,
   Flame,
@@ -210,11 +210,10 @@ export const MediaView: React.FC<MediaViewProps> = ({
               setSelectedTag('all');
             }}
             title="Phim & Video"
-            className={`flex items-center gap-2 py-2 rounded-xl text-xs font-bold transition-all duration-300 ${
-              activeTab === 'video'
+            className={`flex items-center gap-2 py-2 rounded-xl text-xs font-bold transition-all duration-300 ${activeTab === 'video'
                 ? 'px-4 bg-blue-600/30 text-blue-400 border border-blue-500/50 shadow-md'
                 : 'px-3 text-ice-subtext hover:text-white hover:bg-white/5 border border-transparent'
-            }`}
+              }`}
           >
             <Film className="w-4 h-4 shrink-0" />
             {activeTab === 'video' && (
@@ -234,11 +233,10 @@ export const MediaView: React.FC<MediaViewProps> = ({
               setSelectedTag('all');
             }}
             title="Âm Nhạc (Songs & Chill)"
-            className={`flex items-center gap-2 py-2 rounded-xl text-xs font-bold transition-all duration-300 ${
-              activeTab === 'music'
+            className={`flex items-center gap-2 py-2 rounded-xl text-xs font-bold transition-all duration-300 ${activeTab === 'music'
                 ? 'px-4 bg-amber-500/20 text-amber-300 border border-amber-500/40 shadow-md'
                 : 'px-3 text-ice-subtext hover:text-white hover:bg-white/5 border border-transparent'
-            }`}
+              }`}
           >
             <Music className="w-4 h-4 shrink-0" />
             {activeTab === 'music' && (
@@ -258,11 +256,10 @@ export const MediaView: React.FC<MediaViewProps> = ({
               setSelectedTag('all');
             }}
             title="Audio & Podcast (Sách nói)"
-            className={`flex items-center gap-2 py-2 rounded-xl text-xs font-bold transition-all duration-300 ${
-              activeTab === 'podcast'
+            className={`flex items-center gap-2 py-2 rounded-xl text-xs font-bold transition-all duration-300 ${activeTab === 'podcast'
                 ? 'px-4 bg-purple-600/30 text-purple-300 border border-purple-500/40 shadow-md'
                 : 'px-3 text-ice-subtext hover:text-white hover:bg-white/5 border border-transparent'
-            }`}
+              }`}
           >
             <Mic className="w-4 h-4 shrink-0" />
             {activeTab === 'podcast' && (
@@ -284,11 +281,10 @@ export const MediaView: React.FC<MediaViewProps> = ({
               sfx.playClick();
               setFilterOfflineOnly(!filterOfflineOnly);
             }}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-semibold transition-all ${
-              filterOfflineOnly
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-semibold transition-all ${filterOfflineOnly
                 ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40 shadow-sm'
                 : 'bg-ice-card text-ice-muted border-ice-border hover:text-white'
-            }`}
+              }`}
             title="Chỉ hiển thị các video/bài hát đã tải về máy"
           >
             <Download className="w-3.5 h-3.5 text-emerald-400" />
@@ -337,8 +333,8 @@ export const MediaView: React.FC<MediaViewProps> = ({
             activeTab === 'video'
               ? bannerSettings?.videos
               : activeTab === 'music'
-              ? bannerSettings?.music
-              : bannerSettings?.podcasts
+                ? bannerSettings?.music
+                : bannerSettings?.podcasts
           }
           onPlayMedia={(item) => {
             sfx.playClick();
@@ -496,11 +492,10 @@ export const MediaView: React.FC<MediaViewProps> = ({
               sfx.playClick();
               setSelectedTag('all');
             }}
-            className={`px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all border ${
-              selectedTag === 'all'
+            className={`px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all border ${selectedTag === 'all'
                 ? 'bg-amber-500/20 text-amber-300 border-amber-500/50 shadow-sm'
                 : 'bg-ice-card text-ice-text border-ice-border hover:text-white'
-            }`}
+              }`}
           >
             Tất cả
           </button>
@@ -511,11 +506,10 @@ export const MediaView: React.FC<MediaViewProps> = ({
                 sfx.playClick();
                 setSelectedTag(tag);
               }}
-              className={`px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all border ${
-                selectedTag === tag
+              className={`px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all border ${selectedTag === tag
                   ? 'bg-amber-500/20 text-amber-300 border-amber-500/50 shadow-sm'
                   : 'bg-ice-card text-ice-text border-ice-border hover:text-white'
-              }`}
+                }`}
             >
               {tag}
             </button>
@@ -623,160 +617,159 @@ export const MediaView: React.FC<MediaViewProps> = ({
         {filteredMedia.length > 0 ? (
           <>
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4">
-            {filteredMedia.slice(0, visibleCount).map((item) => {
-              const parsed = parseMediaUrl(item.link);
-              const coverImg =
-                item.coverPath ||
-                item.bannerPath ||
-                parsed.thumbnailUrl ||
-                'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=600&q=80';
-              const isDownloaded = Boolean(item.localFilePath && item.downloadStatus === 'downloaded');
+              {filteredMedia.slice(0, visibleCount).map((item) => {
+                const parsed = parseMediaUrl(item.link);
+                const coverImg =
+                  item.coverPath ||
+                  item.bannerPath ||
+                  parsed.thumbnailUrl ||
+                  'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=600&q=80';
+                const isDownloaded = Boolean(item.localFilePath && item.downloadStatus === 'downloaded');
 
-              return (
-                <div
-                  key={item.id}
+                return (
+                  <div
+                    key={item.id}
+                    onClick={() => {
+                      sfx.playClick();
+                      if (item.type === 'video') {
+                        setActiveVideo(item);
+                      } else {
+                        setActiveAudioTrack(item);
+                        onPlayAudio?.(item);
+                      }
+                    }}
+                    className="group relative bg-ice-card rounded-2xl overflow-hidden border border-ice-border hover:border-amber-400/70 hover:shadow-2xl hover:shadow-amber-500/10 cursor-pointer transition-all duration-300 hover:-translate-y-1.5 flex flex-col"
+                  >
+                    {/* Thumbnail */}
+                    <div className="aspect-video w-full relative overflow-hidden bg-black/90">
+                      <img
+                        src={coverImg.startsWith('http') ? coverImg : `file://${coverImg}`}
+                        alt={item.title}
+                        style={{
+                          objectPosition: item.coverPosition || '50% 50%',
+                          transform: item.coverZoom ? `scale(${item.coverZoom})` : undefined,
+                          transformOrigin: item.coverPosition || '50% 50%',
+                        }}
+                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                      />
+
+                      {/* Play Button Overlay */}
+                      <div className="absolute inset-0 bg-black/40 group-hover:bg-black/15 flex items-center justify-center transition-colors">
+                        <div className="w-12 h-12 rounded-full bg-amber-400 text-black flex items-center justify-center shadow-xl shadow-black/80 transform scale-75 opacity-0 group-hover:opacity-100 group-hover:scale-100 transition-all duration-200">
+                          {item.type === 'video' ? <Play className="w-5 h-5 fill-black ml-0.5" /> : <Disc className="w-6 h-6 animate-spin" />}
+                        </div>
+                      </div>
+
+                      {/* Badges */}
+                      <div className="absolute top-2 left-2 flex flex-wrap items-center gap-1 z-10">
+                        {isDownloaded && (
+                          <span className="px-2 py-0.5 rounded text-[9px] font-black uppercase bg-emerald-500 text-black shadow">
+                            ĐÃ TẢI VỀ
+                          </span>
+                        )}
+                        {parsed.kind === 'youtube' && (
+                          <span className="px-2 py-0.5 rounded text-[9px] font-black uppercase bg-red-600 text-white shadow">
+                            YouTube
+                          </span>
+                        )}
+                        {parsed.kind === 'facebook' && (
+                          <span className="px-2 py-0.5 rounded text-[9px] font-black uppercase bg-blue-600 text-white shadow">
+                            Facebook
+                          </span>
+                        )}
+                        {parsed.kind === 'gdrive' && (
+                          <span className="px-2 py-0.5 rounded text-[9px] font-black uppercase bg-ice-accent/30 text-ice-accent border border-ice-accent/50 shadow">
+                            Drive
+                          </span>
+                        )}
+                      </div>
+
+                      {item.duration && (
+                        <div className="absolute bottom-2 right-2 px-1.5 py-0.5 rounded bg-black/80 text-white text-[10px] font-mono border border-white/10">
+                          {formatDuration(item.duration)}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Body Info */}
+                    <div className="p-3.5 flex flex-col flex-1 justify-between gap-2">
+                      <div>
+                        <h4 className="text-xs font-bold text-white group-hover:text-amber-300 transition-colors line-clamp-2">
+                          {item.title}
+                        </h4>
+                        <p className="text-[11px] text-ice-muted mt-1 truncate">
+                          {item.artist || item.category || (item.tags?.[0] ? `#${item.tags[0]}` : 'Media')}
+                        </p>
+                      </div>
+
+                      {/* Admin Actions */}
+                      {isAdmin && (
+                        <div className="flex items-center justify-end gap-1 pt-2 border-t border-ice-border/40">
+                          {onToggleHide && (
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                sfx.playClick();
+                                onToggleHide(item.id);
+                              }}
+                              className={`p-1 rounded text-xs transition-colors ${item.hidden ? 'text-amber-400 font-bold' : 'text-ice-muted hover:text-white'
+                                }`}
+                              title={item.hidden ? 'Bỏ ẩn mục này' : 'Ẩn mục này'}
+                            >
+                              {item.hidden ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
+                            </button>
+                          )}
+                          {onEditMedia && (
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                sfx.playClick();
+                                onEditMedia(item);
+                              }}
+                              className="p-1 rounded text-ice-muted hover:text-amber-400 transition-colors"
+                              title="Sửa"
+                            >
+                              <Edit3 className="w-3.5 h-3.5" />
+                            </button>
+                          )}
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              sfx.playClick();
+                              if (confirm('Bạn có chắc muốn xoá mục này không?')) {
+                                onDeleteMedia(item.id);
+                              }
+                            }}
+                            className="p-1 rounded text-ice-muted hover:text-red-400 transition-colors"
+                            title="Xoá"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Load More Button for PC Media (24 items per batch) */}
+            {visibleCount < filteredMedia.length && (
+              <div className="pt-4 flex justify-center">
+                <button
+                  type="button"
                   onClick={() => {
                     sfx.playClick();
-                    if (item.type === 'video') {
-                      setActiveVideo(item);
-                    } else {
-                      setActiveAudioTrack(item);
-                      onPlayAudio?.(item);
-                    }
+                    setVisibleCount((prev) => prev + 24);
                   }}
-                  className="group relative bg-ice-card rounded-2xl overflow-hidden border border-ice-border hover:border-amber-400/70 hover:shadow-2xl hover:shadow-amber-500/10 cursor-pointer transition-all duration-300 hover:-translate-y-1.5 flex flex-col"
+                  className="px-8 py-3 rounded-2xl bg-white/10 hover:bg-white/20 border border-white/20 text-white font-bold text-xs tracking-wider uppercase transition-all shadow-lg active:scale-95 flex items-center gap-2 hover:border-amber-400"
                 >
-                  {/* Thumbnail */}
-                  <div className="aspect-video w-full relative overflow-hidden bg-black/90">
-                    <img
-                      src={coverImg.startsWith('http') ? coverImg : `file://${coverImg}`}
-                      alt={item.title}
-                      style={{
-                        objectPosition: item.coverPosition || '50% 50%',
-                        transform: item.coverZoom ? `scale(${item.coverZoom})` : undefined,
-                        transformOrigin: item.coverPosition || '50% 50%',
-                      }}
-                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                    />
-
-                    {/* Play Button Overlay */}
-                    <div className="absolute inset-0 bg-black/40 group-hover:bg-black/15 flex items-center justify-center transition-colors">
-                      <div className="w-12 h-12 rounded-full bg-amber-400 text-black flex items-center justify-center shadow-xl shadow-black/80 transform scale-75 opacity-0 group-hover:opacity-100 group-hover:scale-100 transition-all duration-200">
-                        {item.type === 'video' ? <Play className="w-5 h-5 fill-black ml-0.5" /> : <Disc className="w-6 h-6 animate-spin" />}
-                      </div>
-                    </div>
-
-                    {/* Badges */}
-                    <div className="absolute top-2 left-2 flex flex-wrap items-center gap-1 z-10">
-                      {isDownloaded && (
-                        <span className="px-2 py-0.5 rounded text-[9px] font-black uppercase bg-emerald-500 text-black shadow">
-                          ĐÃ TẢI VỀ
-                        </span>
-                      )}
-                      {parsed.kind === 'youtube' && (
-                        <span className="px-2 py-0.5 rounded text-[9px] font-black uppercase bg-red-600 text-white shadow">
-                          YouTube
-                        </span>
-                      )}
-                      {parsed.kind === 'facebook' && (
-                        <span className="px-2 py-0.5 rounded text-[9px] font-black uppercase bg-blue-600 text-white shadow">
-                          Facebook
-                        </span>
-                      )}
-                      {parsed.kind === 'gdrive' && (
-                        <span className="px-2 py-0.5 rounded text-[9px] font-black uppercase bg-ice-accent/30 text-ice-accent border border-ice-accent/50 shadow">
-                          Drive
-                        </span>
-                      )}
-                    </div>
-
-                    {item.duration && (
-                      <div className="absolute bottom-2 right-2 px-1.5 py-0.5 rounded bg-black/80 text-white text-[10px] font-mono border border-white/10">
-                        {formatDuration(item.duration)}
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Body Info */}
-                  <div className="p-3.5 flex flex-col flex-1 justify-between gap-2">
-                    <div>
-                      <h4 className="text-xs font-bold text-white group-hover:text-amber-300 transition-colors line-clamp-2">
-                        {item.title}
-                      </h4>
-                      <p className="text-[11px] text-ice-muted mt-1 truncate">
-                        {item.artist || item.category || (item.tags?.[0] ? `#${item.tags[0]}` : 'Media')}
-                      </p>
-                    </div>
-
-                    {/* Admin Actions */}
-                    {isAdmin && (
-                      <div className="flex items-center justify-end gap-1 pt-2 border-t border-ice-border/40">
-                        {onToggleHide && (
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              sfx.playClick();
-                              onToggleHide(item.id);
-                            }}
-                            className={`p-1 rounded text-xs transition-colors ${
-                              item.hidden ? 'text-amber-400 font-bold' : 'text-ice-muted hover:text-white'
-                            }`}
-                            title={item.hidden ? 'Bỏ ẩn mục này' : 'Ẩn mục này'}
-                          >
-                            {item.hidden ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
-                          </button>
-                        )}
-                        {onEditMedia && (
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              sfx.playClick();
-                              onEditMedia(item);
-                            }}
-                            className="p-1 rounded text-ice-muted hover:text-amber-400 transition-colors"
-                            title="Sửa"
-                          >
-                            <Edit3 className="w-3.5 h-3.5" />
-                          </button>
-                        )}
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            sfx.playClick();
-                            if (confirm('Bạn có chắc muốn xoá mục này không?')) {
-                              onDeleteMedia(item.id);
-                            }
-                          }}
-                          className="p-1 rounded text-ice-muted hover:text-red-400 transition-colors"
-                          title="Xoá"
-                        >
-                          <Trash2 className="w-3.5 h-3.5" />
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-
-          {/* Load More Button for PC Media (24 items per batch) */}
-          {visibleCount < filteredMedia.length && (
-            <div className="pt-4 flex justify-center">
-              <button
-                type="button"
-                onClick={() => {
-                  sfx.playClick();
-                  setVisibleCount((prev) => prev + 24);
-                }}
-                className="px-8 py-3 rounded-2xl bg-white/10 hover:bg-white/20 border border-white/20 text-white font-bold text-xs tracking-wider uppercase transition-all shadow-lg active:scale-95 flex items-center gap-2 hover:border-amber-400"
-              >
-                <Plus className="w-4 h-4 text-amber-400" />
-                <span>Xem Thêm Phim & Video (+24 Mục • Còn lại {filteredMedia.length - visibleCount})</span>
-              </button>
-            </div>
-          )}
-        </>
+                  <Plus className="w-4 h-4 text-amber-400" />
+                  <span>Xem Thêm Phim & Video (+24 Mục • Còn lại {filteredMedia.length - visibleCount})</span>
+                </button>
+              </div>
+            )}
+          </>
         ) : (
           <div className="py-20 flex flex-col items-center justify-center text-center space-y-3 rounded-2xl border border-dashed border-ice-border bg-ice-card/40">
             <Film className="w-10 h-10 text-ice-subtext opacity-50" />

@@ -107,6 +107,15 @@ export const GameCard: React.FC<GameCardProps> = ({
               {game.inLibrary ? <BookmarkCheck className="w-3.5 h-3.5" /> : <Bookmark className="w-3.5 h-3.5" />}
             </button>
 
+            {game.controllerConfig?.mode && game.controllerConfig.mode !== 'disabled' && (
+              <div
+                title={`Điều khiển điện thoại: ${game.controllerConfig.presetName || 'Bật'}`}
+                className="p-1.5 rounded-full backdrop-blur-md bg-amber-400 text-black shadow-md flex items-center justify-center"
+              >
+                <Gamepad2 className="w-3.5 h-3.5" />
+              </div>
+            )}
+
             {game.hidden && (
               <span className="px-1.5 py-0.5 rounded text-[9px] font-black uppercase tracking-wider bg-amber-500/90 text-black shadow">
                 ĐÃ ẨN

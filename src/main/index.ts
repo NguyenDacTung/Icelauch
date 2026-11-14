@@ -769,6 +769,11 @@ app.whenReady().then(async () => {
     return true;
   });
 
+  ipcMain.handle('controller:broadcast', (_event, msg: any) => {
+    controllerServer.broadcast(msg);
+    return true;
+  });
+
   // System Drive Free Space
   ipcMain.handle('system:get-drives-space', () => {
     const letters = ['C:\\', 'D:\\', 'E:\\', 'F:\\', 'G:\\'];

@@ -295,13 +295,48 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
             <div className="flex items-center gap-4">
               {/* Primary Action Button */}
               {selectedGame.status === 'ready' && (
-                <button
-                  onClick={() => onLaunch(selectedGame.id)}
-                  className="h-11 px-8 rounded-md bg-ice-success hover:bg-[#34a544] text-white text-sm font-bold tracking-wider uppercase flex items-center gap-2.5 shadow-lg hover:shadow-ice-success/20 transition-all transform active:scale-95"
-                >
-                  <Play className="w-5 h-5 fill-white" />
-                  <span>CHƠI NGAY</span>
-                </button>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => onLaunch(selectedGame.id)}
+                    className="h-11 px-8 rounded-md bg-ice-success hover:bg-[#34a544] text-white text-sm font-bold tracking-wider uppercase flex items-center gap-2.5 shadow-lg hover:shadow-ice-success/20 transition-all transform active:scale-95"
+                  >
+                    <Play className="w-5 h-5 fill-white" />
+                    <span>CHƠI NGAY</span>
+                  </button>
+
+                  {selectedGame.controllerConfig?.mode && selectedGame.controllerConfig.mode !== 'disabled' && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (window.api?.broadcastController) {
+                          window.api.broadcastController({
+                            type: 'launch_controller',
+                            gameId: selectedGame.id,
+                            gameTitle: selectedGame.name,
+                            config: selectedGame.controllerConfig,
+                          });
+                        }
+                        onLaunch(selectedGame.id);
+                      }}
+                      className="h-11 px-4 rounded-md bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/40 text-amber-300 text-xs font-bold flex items-center gap-2 transition-all shadow"
+                      title="Khởi động game đồng thời mở tay cầm ảo trên điện thoại"
+                    >
+                      <Gamepad2 className="w-4 h-4 text-amber-400" />
+                      <span>Tay Cầm ĐT</span>
+                    </button>
+                  )}
+
+                  {onOpenInstallSettings && (
+                    <button
+                      type="button"
+                      onClick={() => onOpenInstallSettings(selectedGame)}
+                      className="w-11 h-11 rounded-md bg-white/10 hover:bg-white/20 border border-white/20 text-white flex items-center justify-center transition-all shadow-md active:scale-95 shrink-0"
+                      title="Cài đặt game & bố cục điều khiển điện thoại"
+                    >
+                      <Settings2 className="w-5 h-5 text-amber-400" />
+                    </button>
+                  )}
+                </div>
               )}
 
               {selectedGame.status === 'running' && (

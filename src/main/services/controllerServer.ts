@@ -113,6 +113,19 @@ export class ControllerServer {
       connectedClients: this.clients.size,
     };
   }
+
+  public broadcast(msg: any): void {
+    if (!this.wss) return;
+    const str = typeof msg === 'string' ? msg : JSON.stringify(msg);
+    this.clients.forEach((c) => {
+      try {
+        if (c.readyState === WebSocket.OPEN) {
+          c.send(str);
+        }
+      } catch {}
+    });
+  }
 }
 
 export const controllerServer = new ControllerServer(18999);
+

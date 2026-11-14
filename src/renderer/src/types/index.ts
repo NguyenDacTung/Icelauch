@@ -62,6 +62,7 @@ export interface Game {
   downloadLinks: string[];
   backupLinks?: string[];
   extensions?: GameExtension[];
+  controllerConfig?: GameControllerConfig;
   expectedSize?: number;
   archivePassword?: string;
   installPath?: string;
@@ -276,6 +277,34 @@ export interface IceDropShareItem {
   pinCode: string;                 // Mã 4 số nhận chéo tài khoản
   createdAt: string;
   expiresAt: string;               // Hết hạn sau 10 phút
+}
+
+export type GameControllerMode = 'gamepad' | 'keyboard_mouse' | 'disabled';
+
+export interface VirtualButtonBinding {
+  id: string;             // 'btn_a', 'btn_b', 'btn_x', 'btn_y', 'dpad', 'joystick', 'lb', 'rb', 'lt', 'rt', 'key_custom'
+  label: string;          // 'A', 'B', 'Space', 'Shift', 'Click Trái'
+  type: 'gamepad_btn' | 'key' | 'mouse_btn' | 'dpad' | 'joystick';
+  targetKey?: string;     // Key code on PC, e.g., 'Space', 'KeyW', 'KeyA', 'KeyS', 'KeyD', 'ShiftLeft'
+  x: number;              // Coordinate % from 0 - 100 on landscape screen
+  y: number;              // Coordinate % from 0 - 100 on landscape screen
+  size?: number;          // Custom size
+  enabled: boolean;       // Enabled / visible
+}
+
+export interface GameControllerConfig {
+  mode: GameControllerMode;       // 'gamepad' | 'keyboard_mouse' | 'disabled'
+  presetName?: string;            // 'Xbox 360 Chuẩn', 'Bàn Phím & Chuột', 'Tùy Chỉnh'
+  customButtons?: VirtualButtonBinding[];
+}
+
+export interface PairedDevice {
+  id: string;
+  name: string;
+  type: 'phone' | 'pc';
+  ip?: string;
+  lastConnectedAt?: string;
+  isOnline?: boolean;
 }
 
 export interface CloudSyncSettings {

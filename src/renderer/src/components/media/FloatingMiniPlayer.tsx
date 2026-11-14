@@ -93,3 +93,4 @@ export const FloatingMiniPlayer: React.FC<FloatingMiniPlayerProps> = ({
     </div>
   );
 };
+

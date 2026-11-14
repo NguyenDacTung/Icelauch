@@ -108,6 +108,7 @@ export const API = {
     ipcRenderer.invoke('controller:get-status'),
   startControllerServer: (): Promise<boolean> => ipcRenderer.invoke('controller:start'),
   stopControllerServer: (): Promise<boolean> => ipcRenderer.invoke('controller:stop'),
+  broadcastController: (msg: any): Promise<boolean> => ipcRenderer.invoke('controller:broadcast', msg),
   onControllerMessage: (callback: (msg: any) => void) => {
     const handler = (_event: any, data: any) => callback(data);
     ipcRenderer.on('controller:message', handler);

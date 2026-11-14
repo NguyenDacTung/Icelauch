@@ -43,6 +43,8 @@ import { DeviceSelectionModal } from './components/common/DeviceSelectionModal';
 import { ExtrasView } from './components/extras/ExtrasView';
 import { AdminUserManagementModal } from './components/admin/AdminUserManagementModal';
 import { GameInstallModal } from './components/home/GameInstallModal';
+import { MobileLandscapeGamepad } from './components/extras/MobileLandscapeGamepad';
+import type { GameControllerConfig } from './types';
 import { RequireLoginModal } from './components/common/RequireLoginModal';
 import { FloatingMiniPlayer } from './components/media/FloatingMiniPlayer';
 import { App as CapApp } from '@capacitor/app';
@@ -167,6 +169,54 @@ export default function App() {
     pendingAction?: () => void;
   }>({ isOpen: false, actionText: '' });
   const [miniPlayerMedia, setMiniPlayerMedia] = useState<MediaItem | null>(null);
+  const [activeMobileGamepad, setActiveMobileGamepad] = useState<{
+    isOpen: boolean;
+    gameTitle?: string;
+    config?: GameControllerConfig;
+    hostIp: string;
+  }>({ isOpen: false, hostIp: '127.0.0.1' });
+
+  // Mobile Controller listener: auto-open landscape gamepad when PC launches game
+  useEffect(() => {
+    if (isMobileOrTvNative) {
+      let ws: WebSocket | null = null;
+      let checkTimer: any = null;
+
+      const connectMobileListener = () => {
+        try {
+          const stored = localStorage.getItem('icelauch_paired_controller_device');
+          if (stored) {
+            const paired = JSON.parse(stored);
+            if (paired.ip && (!ws || ws.readyState === WebSocket.CLOSED)) {
+              ws = new WebSocket(`ws://${paired.ip}:18999`);
+              ws.onmessage = (e) => {
+                try {
+                  const msg = JSON.parse(e.data);
+                  if (msg.type === 'launch_controller') {
+                    setActiveMobileGamepad({
+                      isOpen: true,
+                      gameTitle: msg.gameTitle || 'Game Đang Chạy',
+                      config: msg.config,
+                      hostIp: paired.ip,
+                    });
+                  }
+                } catch {}
+              };
+            }
+          }
+        } catch {}
+      };
+
+      connectMobileListener();
+      checkTimer = setInterval(connectMobileListener, 8000);
+
+      return () => {
+        if (checkTimer) clearInterval(checkTimer);
+        if (ws) ws.close();
+      };
+    }
+    return undefined;
+  }, [isMobileOrTvNative]);
 
   useEffect(() => {
     // Check update silently on startup
@@ -206,6 +256,12 @@ export default function App() {
     const setupBackHandler = async () => {
       try {
         backListener = await CapApp.addListener('backButton', () => {
+          // 0. If mobile landscape gamepad is open, close it
+          if (activeMobileGamepad.isOpen) {
+            setActiveMobileGamepad((prev) => ({ ...prev, isOpen: false }));
+            return;
+          }
+
           // 1. If any modal is open, close it
           if (isEditingCurrentProfile) {
             setIsEditingCurrentProfile(false);
@@ -586,9 +642,18 @@ export default function App() {
     await window.api.downloadGame(id);
   };
 
-  const handleSaveGameInstallPath = async (targetFolder: string, setAsDefault: boolean, startDownloadImmediately: boolean) => {
+  const handleSaveGameInstallPath = async (
+    targetFolder: string,
+    setAsDefault: boolean,
+    startDownloadImmediately: boolean,
+    controllerConfig?: GameControllerConfig
+  ) => {
     if (!installSettingsGame) return;
-    const g = { ...installSettingsGame, installPath: targetFolder };
+    const g: Game = {
+      ...installSettingsGame,
+      installPath: targetFolder,
+      controllerConfig: controllerConfig || installSettingsGame.controllerConfig,
+    };
 
     if (setAsDefault && appData) {
       const updatedSettings = { ...appData.settings, defaultGamesInstallPath: targetFolder };
@@ -1588,6 +1653,15 @@ export default function App() {
           onSaveInstallPath={handleSaveGameInstallPath}
         />
       )}
+
+      {/* Mobile Landscape Gamepad (Auto popup when PC launches game) */}
+      <MobileLandscapeGamepad
+        isOpen={activeMobileGamepad.isOpen}
+        onClose={() => setActiveMobileGamepad((prev) => ({ ...prev, isOpen: false }))}
+        hostIp={activeMobileGamepad.hostIp}
+        gameTitle={activeMobileGamepad.gameTitle}
+        config={activeMobileGamepad.config}
+      />
 
       {/* Require Login Modal */}
       <RequireLoginModal

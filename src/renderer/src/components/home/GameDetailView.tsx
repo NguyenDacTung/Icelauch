@@ -24,6 +24,7 @@ import {
   Monitor,
   Puzzle,
   Settings2,
+  Gamepad2,
   Tag,
 } from 'lucide-react';
 import { parseMediaUrl, getActiveProxyPort } from '../../utils/mediaUrl';
@@ -420,14 +421,51 @@ export const GameDetailView: React.FC<GameDetailViewProps> = ({
                 <>
                   {/* Ready to Play CTA */}
                   {isReady && (
-                    <button
-                      onClick={() => onLaunch(game.id)}
-                      disabled={isRunning}
-                      className="w-full h-12 rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 text-white text-sm font-black tracking-wider uppercase flex items-center justify-center gap-2.5 shadow-xl shadow-emerald-950/40 transition-all transform hover:-translate-y-0.5 active:translate-y-0"
-                    >
-                      <Play className="w-5 h-5 fill-white" />
-                      <span>{isRunning ? 'GAME ĐANG CHẠY...' : 'CHƠI NGAY'}</span>
-                    </button>
+                    <div className="space-y-2 w-full">
+                      <div className="flex items-center gap-2 w-full">
+                        <button
+                          onClick={() => onLaunch(game.id)}
+                          disabled={isRunning}
+                          className="flex-1 h-12 rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 text-white text-sm font-black tracking-wider uppercase flex items-center justify-center gap-2.5 shadow-xl shadow-emerald-950/40 transition-all transform hover:-translate-y-0.5 active:translate-y-0"
+                        >
+                          <Play className="w-5 h-5 fill-white" />
+                          <span>{isRunning ? 'GAME ĐANG CHẠY...' : 'CHƠI NGAY'}</span>
+                        </button>
+                        {onOpenInstallSettings && (
+                          <button
+                            type="button"
+                            onClick={() => onOpenInstallSettings(game)}
+                            className="w-12 h-12 rounded-xl bg-white/10 hover:bg-white/20 border border-white/20 text-white flex items-center justify-center transition-all shadow-md active:scale-95 shrink-0"
+                            title="Cài đặt game & bố cục điều khiển điện thoại"
+                          >
+                            <Settings2 className="w-5 h-5 text-amber-400" />
+                          </button>
+                        )}
+                      </div>
+
+                      {/* Play with Mobile Controller Option */}
+                      {game.controllerConfig?.mode && game.controllerConfig.mode !== 'disabled' && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (window.api?.broadcastController) {
+                              window.api.broadcastController({
+                                type: 'launch_controller',
+                                gameId: game.id,
+                                gameTitle: game.name,
+                                config: game.controllerConfig,
+                              });
+                            }
+                            onLaunch(game.id);
+                          }}
+                          disabled={isRunning}
+                          className="w-full h-10 rounded-xl bg-gradient-to-r from-amber-500/20 to-orange-500/20 hover:from-amber-500/30 hover:to-orange-500/30 border border-amber-500/40 text-amber-300 text-xs font-black tracking-wider uppercase flex items-center justify-center gap-2 shadow-lg transition-all active:scale-98"
+                        >
+                          <Gamepad2 className="w-4 h-4 text-amber-400" />
+                          <span>🎮 Chơi Bằng Tay Cầm Điện Thoại</span>
+                        </button>
+                      )}
+                    </div>
                   )}
 
                   {/* Uninstalled CTA */}
