@@ -368,6 +368,11 @@ export const MobileMediaView: React.FC<MobileMediaViewProps> = ({
                           alt={item.title}
                           title={item.title}
                           fallbackType="video"
+                          style={{
+                            objectPosition: item.listCardPosition || item.coverPosition || '50% 50%',
+                            transform: (item.listCardZoom || item.coverZoom) ? `scale(${item.listCardZoom || item.coverZoom})` : undefined,
+                            transformOrigin: item.listCardPosition || item.coverPosition || '50% 50%',
+                          }}
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-transparent to-transparent flex flex-col justify-end p-2">
@@ -413,13 +418,18 @@ export const MobileMediaView: React.FC<MobileMediaViewProps> = ({
                   }}
                   className="rounded-2xl overflow-hidden bg-[#12151F] border border-white/10 cursor-pointer group hover:border-cyan-500/50 transition-all shadow-md flex flex-col active:scale-98"
                 >
-                  {/* 16:9 Thumbnail Poster */}
-                  <div className="relative aspect-video w-full bg-black overflow-hidden">
+                  {/* 4:6 (2:3) List Card Poster */}
+                  <div className="relative aspect-[2/3] w-full bg-black overflow-hidden">
                     <SafeImage
                       src={item.coverPath || item.bannerPath}
                       alt={item.title}
                       title={item.title}
                       fallbackType={item.type === 'audio' ? 'audio' : 'video'}
+                      style={{
+                        objectPosition: item.listCardPosition || item.coverPosition || '50% 50%',
+                        transform: (item.listCardZoom || item.coverZoom) ? `scale(${item.listCardZoom || item.coverZoom})` : undefined,
+                        transformOrigin: item.listCardPosition || item.coverPosition || '50% 50%',
+                      }}
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                     />
                     <div className="absolute top-1.5 right-1.5 flex items-center gap-1">

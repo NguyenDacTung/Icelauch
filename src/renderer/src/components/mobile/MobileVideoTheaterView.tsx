@@ -64,9 +64,10 @@ export const MobileVideoTheaterView: React.FC<MobileVideoTheaterViewProps> = ({
   const parsed = parseMediaUrl(currentActiveLink);
   const isYouTube = parsed.kind === 'youtube' && parsed.id;
   const isGoogleDrive = parsed.kind === 'gdrive' && parsed.id;
+  const isFacebook = parsed.kind === 'facebook';
 
   // Default playback mode
-  const defaultMode: PlaybackEngine = isGoogleDrive ? 'external' : isYouTube ? 'embed' : 'direct';
+  const defaultMode: PlaybackEngine = isGoogleDrive ? 'external' : (isYouTube || isFacebook) ? 'embed' : 'direct';
 
   const [playbackMode, setPlaybackMode] = useState<PlaybackEngine>(defaultMode);
   const [showFullDesc, setShowFullDesc] = useState(false);
@@ -302,6 +303,15 @@ export const MobileVideoTheaterView: React.FC<MobileVideoTheaterViewProps> = ({
             onPlaying={() => setIsLoadingStream(false)}
             onTimeUpdate={handleTimeUpdate}
             className="w-full h-full object-contain absolute inset-0"
+          />
+        ) : isFacebook ? (
+          <iframe
+            src={parsed.embedUrl}
+            title={media.title}
+            allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
+            allowFullScreen
+            onLoad={() => setIsLoadingStream(false)}
+            className="w-full h-full border-0 absolute inset-0"
           />
         ) : playbackMode === 'embed' && isYouTube ? (
           <iframe

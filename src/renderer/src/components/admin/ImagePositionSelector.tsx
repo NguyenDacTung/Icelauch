@@ -4,7 +4,7 @@ import { Move, Sliders, RotateCcw, ZoomIn, ZoomOut, Eye, Sparkles } from 'lucide
 interface ImagePositionSelectorProps {
   label: string;
   imageUrl?: string;
-  aspectRatio?: 'banner' | 'cover' | 'video' | 'audio';
+  aspectRatio?: 'banner' | 'cover' | 'listCard' | '16:9' | '4:6' | '1:1' | 'video' | 'audio';
   value?: string; // e.g. "50% 50%" or "center" or "50% 20%"
   onChange: (val: string) => void;
   zoom?: number;
@@ -433,11 +433,15 @@ export const ImagePositionSelector: React.FC<ImagePositionSelectorProps> = ({
         <div className="flex flex-col items-center">
           <div className="flex items-center justify-between w-full text-[10px] text-ice-subtext mb-1.5 font-medium px-1">
             <span>
-              {aspectRatio === 'banner'
-                ? 'Khung Banner 16:9 chuẩn (đồng bộ Trang chủ & Thư viện):'
-                : aspectRatio === 'video'
-                ? 'Khung Video 16:9 thực tế:'
-                : 'Khung Thẻ Trang Chủ (2:3 dọc):'}
+              {aspectRatio === 'banner' || aspectRatio === '16:9'
+                ? 'Khung Banner 16:9 (Chuẩn Trang chủ & Thư viện):'
+                : aspectRatio === 'cover'
+                ? 'Khung Ảnh Bìa 16:9 (Chi tiết & Trình phát):'
+                : aspectRatio === 'listCard' || aspectRatio === '4:6'
+                ? 'Khung Thẻ Danh Sách 4:6 (2:3 chuẩn Poster rạp & Hộp game):'
+                : aspectRatio === '1:1' || aspectRatio === 'audio'
+                ? 'Khung Vuông 1:1 (Chuẩn Album nhạc):'
+                : 'Khung Video 16:9:'}
             </span>
             <span className="text-amber-400 italic">Bấm & rê chuột để kéo ảnh</span>
           </div>
@@ -450,10 +454,12 @@ export const ImagePositionSelector: React.FC<ImagePositionSelectorProps> = ({
             onMouseLeave={handleMouseUp}
             onWheel={handleWheel}
             className={`overflow-hidden rounded-xl border-2 border-amber-400/80 bg-black/95 relative shadow-2xl cursor-grab active:cursor-grabbing select-none transition-all ${
-              aspectRatio === 'banner'
+              aspectRatio === 'banner' || aspectRatio === '16:9'
                 ? 'w-full aspect-video max-h-52'
-                : aspectRatio === 'video'
-                ? 'w-56 aspect-video'
+                : aspectRatio === 'cover' || aspectRatio === 'video'
+                ? 'w-64 aspect-video'
+                : aspectRatio === '1:1' || aspectRatio === 'audio'
+                ? 'w-40 aspect-square'
                 : 'w-36 aspect-[2/3]'
             }`}
           >

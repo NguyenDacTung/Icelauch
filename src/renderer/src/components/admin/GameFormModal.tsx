@@ -27,6 +27,7 @@ interface GameFormModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSave: (gameData: Partial<Game>) => void;
+  onDeleteGame?: (id: string) => void;
   onBrowseFile: (type: 'cover' | 'banner') => Promise<string | null>;
   availableTags?: string[];
   onAddNewGlobalTag?: (tag: string) => void;
@@ -38,6 +39,7 @@ export const GameFormModal: React.FC<GameFormModalProps> = ({
   isOpen,
   onClose,
   onSave,
+  onDeleteGame,
   onBrowseFile,
   availableTags = [],
   onAddNewGlobalTag,
@@ -50,6 +52,8 @@ export const GameFormModal: React.FC<GameFormModalProps> = ({
   const [bannerPosition, setBannerPosition] = useState('50% 30%');
   const [coverZoom, setCoverZoom] = useState(1);
   const [bannerZoom, setBannerZoom] = useState(1);
+  const [listCardPosition, setListCardPosition] = useState('50% 50%');
+  const [listCardZoom, setListCardZoom] = useState(1);
   const [bannerBlur, setBannerBlur] = useState(0);
   const [bannerDarkness, setBannerDarkness] = useState(30);
   const [bannerEdgeDarkness, setBannerEdgeDarkness] = useState(10);
@@ -89,6 +93,8 @@ export const GameFormModal: React.FC<GameFormModalProps> = ({
         setBannerPosition(game.bannerPosition || '50% 30%');
         setCoverZoom(game.coverZoom || 1);
         setBannerZoom(game.bannerZoom || 1);
+        setListCardPosition(game.listCardPosition || game.coverPosition || '50% 50%');
+        setListCardZoom(game.listCardZoom || game.coverZoom || 1);
         setBannerBlur(game.bannerBlur ?? 0);
         setBannerDarkness(game.bannerDarkness ?? 30);
         setBannerEdgeDarkness(game.bannerEdgeDarkness ?? 10);
@@ -129,6 +135,8 @@ export const GameFormModal: React.FC<GameFormModalProps> = ({
         setBannerPosition('50% 30%');
         setCoverZoom(1);
         setBannerZoom(1);
+        setListCardPosition('50% 50%');
+        setListCardZoom(1);
         setBannerBlur(0);
         setBannerDarkness(30);
         setBannerEdgeDarkness(10);
@@ -246,6 +254,8 @@ export const GameFormModal: React.FC<GameFormModalProps> = ({
       bannerPosition: bannerPosition || game?.bannerPosition,
       coverZoom,
       bannerZoom,
+      listCardPosition,
+      listCardZoom,
       bannerBlur,
       bannerDarkness,
       bannerEdgeDarkness,
@@ -379,18 +389,32 @@ export const GameFormModal: React.FC<GameFormModalProps> = ({
           {/* Interactive Alignment Controls */}
           <div className="space-y-4 pt-1">
             {coverPath && (
-              <ImagePositionSelector
-                label="Căn chỉnh, Nét & Thu phóng Thẻ Game Trang Chủ (2:3 Dọc)"
-                imageUrl={coverPath}
-                aspectRatio="cover"
-                value={coverPosition}
-                onChange={setCoverPosition}
-                zoom={coverZoom}
-                onZoomChange={setCoverZoom}
-                sharpen={coverSharpen}
-                onSharpenChange={setCoverSharpen}
-                demoTitle={name}
-              />
+              <>
+                <ImagePositionSelector
+                  label="Căn chỉnh Thẻ Danh Sách Trang Chủ (4:6 / 2:3 Chuẩn Poster)"
+                  imageUrl={coverPath}
+                  aspectRatio="4:6"
+                  value={listCardPosition}
+                  onChange={setListCardPosition}
+                  zoom={listCardZoom}
+                  onZoomChange={setListCardZoom}
+                  sharpen={coverSharpen}
+                  onSharpenChange={setCoverSharpen}
+                  demoTitle={name}
+                />
+                <ImagePositionSelector
+                  label="Căn chỉnh Ảnh Bìa / Chi Tiết (16:9 Chuẩn)"
+                  imageUrl={coverPath}
+                  aspectRatio="16:9"
+                  value={coverPosition}
+                  onChange={setCoverPosition}
+                  zoom={coverZoom}
+                  onZoomChange={setCoverZoom}
+                  sharpen={coverSharpen}
+                  onSharpenChange={setCoverSharpen}
+                  demoTitle={name}
+                />
+              </>
             )}
             {(bannerPath || coverPath) && (
               <ImagePositionSelector
@@ -723,21 +747,38 @@ export const GameFormModal: React.FC<GameFormModalProps> = ({
           </div>
 
           {/* Footer Submit */}
-          <div className="pt-4 border-t border-ice-border flex items-center justify-end gap-3">
-            <button
-              type="button"
-              onClick={onClose}
-              className="px-4 py-2 rounded text-xs font-medium text-ice-subtext hover:text-white transition-colors"
-            >
-              Huỷ
-            </button>
-            <button
-              type="submit"
-              className="px-6 py-2 rounded bg-amber-500 hover:bg-amber-600 text-black text-xs font-bold tracking-wide flex items-center gap-2 transition-colors shadow-sm"
-            >
-              <Check className="w-4 h-4" />
-              <span>{game ? 'Lưu thay đổi' : 'Tạo game mới'}</span>
-            </button>
+          <div className="pt-4 border-t border-ice-border flex items-center justify-between gap-3">
+            {game && onDeleteGame && (
+              <button
+                type="button"
+                onClick={() => {
+                  if (confirm(`Bạn có chắc chắn muốn xoá game "${game.name}" không? Thao tác này không thể hoàn tác.`)) {
+                    onDeleteGame(game.id);
+                    onClose();
+                  }
+                }}
+                className="px-4 py-2 rounded bg-red-500/15 hover:bg-red-500/25 border border-red-500/40 text-red-300 text-xs font-semibold flex items-center gap-1.5 transition-colors"
+              >
+                <Trash2 className="w-4 h-4 text-red-400" />
+                <span>Xoá game này</span>
+              </button>
+            )}
+            <div className="flex items-center gap-3 ml-auto">
+              <button
+                type="button"
+                onClick={onClose}
+                className="px-4 py-2 rounded text-xs font-medium text-ice-subtext hover:text-white transition-colors"
+              >
+                Huỷ
+              </button>
+              <button
+                type="submit"
+                className="px-6 py-2 rounded bg-amber-500 hover:bg-amber-600 text-black text-xs font-bold tracking-wide flex items-center gap-2 transition-colors shadow-sm"
+              >
+                <Check className="w-4 h-4" />
+                <span>{game ? 'Lưu thay đổi' : 'Tạo game mới'}</span>
+              </button>
+            </div>
           </div>
         </form>
       </div>

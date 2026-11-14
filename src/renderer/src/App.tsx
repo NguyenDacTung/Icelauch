@@ -11,6 +11,7 @@ import { AdminAuthModal } from './components/admin/AdminAuthModal';
 import { GameFormModal } from './components/admin/GameFormModal';
 import { MediaFormModal } from './components/admin/MediaFormModal';
 import { BannerManagerModal } from './components/admin/BannerManagerModal';
+import { TagManagerModal } from './components/admin/TagManagerModal';
 import { PasswordPromptModal } from './components/common/PasswordPromptModal';
 import { FirstRunModal } from './components/common/FirstRunModal';
 import { setActiveProxyPort, getActiveProxyPort } from './utils/mediaUrl';
@@ -100,6 +101,8 @@ export default function App() {
   const [isMediaFormOpen, setIsMediaFormOpen] = useState(false);
   const [editingMedia, setEditingMedia] = useState<MediaItem | null>(null);
   const [isBannerManagerOpen, setIsBannerManagerOpen] = useState(false);
+  const [isTagManagerOpen, setIsTagManagerOpen] = useState(false);
+  const [tagManagerMode, setTagManagerMode] = useState<'game' | 'media'>('game');
   const [isFirstRunOpen, setIsFirstRunOpen] = useState(false);
   const [isChangeAdminPinOpen, setIsChangeAdminPinOpen] = useState(false);
   const [passwordPromptData, setPasswordPromptData] = useState<{
@@ -929,9 +932,33 @@ export default function App() {
     }
   };
 
-  const handleSaveMedia = async (mediaData: Partial<MediaItem>) => {
+  const handleSaveMedia = async (mediaData: Partial<MediaItem>, targetPlaylistIds?: string[]) => {
     if (window.api) {
       const savedMedia = await window.api.saveMedia(mediaData);
+      const mediaId = savedMedia?.id || mediaData.id;
+
+      // Update playlists if targetPlaylistIds provided
+      if (mediaId && targetPlaylistIds && appData?.playlists) {
+        let changed = false;
+        const updatedPlaylists = appData.playlists.map((pl) => {
+          const shouldHave = targetPlaylistIds.includes(pl.id);
+          const has = pl.itemIds.includes(mediaId);
+          if (shouldHave && !has) {
+            changed = true;
+            return { ...pl, itemIds: [...pl.itemIds, mediaId] };
+          } else if (!shouldHave && has) {
+            changed = true;
+            return { ...pl, itemIds: pl.itemIds.filter((id) => id !== mediaId) };
+          }
+          return pl;
+        });
+
+        if (changed) {
+          for (const pl of updatedPlaylists) {
+            await window.api.savePlaylist(pl);
+          }
+        }
+      }
 
       // Auto register to banner if pinned or autoAddNew is enabled for newly created media
       if (appData && savedMedia) {
@@ -957,6 +984,172 @@ export default function App() {
 
       await loadData();
     }
+  };
+
+  const handleRenameTag = async (oldTag: string, newTag: string) => {
+    if (!appData) return;
+    if (tagManagerMode === 'game') {
+      const currentTags = appData.settings.gameTags || [];
+      const updatedTags = currentTags.map((t) => (t === oldTag ? newTag : t));
+      if (!updatedTags.includes(newTag)) updatedTags.push(newTag);
+
+      const updatedGames = appData.games.map((g) => {
+        if (g.tags && g.tags.includes(oldTag)) {
+          const newGtags = g.tags.map((t) => (t === oldTag ? newTag : t));
+          return { ...g, tags: newGtags, genre: newGtags.join(', ') };
+        }
+        return g;
+      });
+
+      setAppData({
+        ...appData,
+        games: updatedGames,
+        settings: { ...appData.settings, gameTags: updatedTags },
+      });
+
+      if (window.api) {
+        await window.api.saveSettings({ gameTags: updatedTags });
+        for (const g of updatedGames) {
+          if (g.tags?.includes(newTag)) {
+            await window.api.saveGame(g);
+          }
+        }
+      }
+    } else {
+      const currentTags = appData.settings.mediaTags || [];
+      const updatedTags = currentTags.map((t) => (t === oldTag ? newTag : t));
+      if (!updatedTags.includes(newTag)) updatedTags.push(newTag);
+
+      const updatedMedia = appData.media.map((m) => {
+        if (m.tags && m.tags.includes(oldTag)) {
+          const newMtags = m.tags.map((t) => (t === oldTag ? newTag : t));
+          return { ...m, tags: newMtags, category: newMtags.join(', ') };
+        }
+        return m;
+      });
+
+      setAppData({
+        ...appData,
+        media: updatedMedia,
+        settings: { ...appData.settings, mediaTags: updatedTags },
+      });
+
+      if (window.api) {
+        await window.api.saveSettings({ mediaTags: updatedTags });
+        for (const m of updatedMedia) {
+          if (m.tags?.includes(newTag)) {
+            await window.api.saveMedia(m);
+          }
+        }
+      }
+    }
+    await loadData();
+  };
+
+  const handleDeleteTag = async (tagToDelete: string) => {
+    if (!appData) return;
+    if (tagManagerMode === 'game') {
+      const currentTags = appData.settings.gameTags || [];
+      const updatedTags = currentTags.filter((t) => t !== tagToDelete);
+
+      const updatedGames = appData.games.map((g) => {
+        if (g.tags && g.tags.includes(tagToDelete)) {
+          const newGtags = g.tags.filter((t) => t !== tagToDelete);
+          return { ...g, tags: newGtags, genre: newGtags.join(', ') };
+        }
+        return g;
+      });
+
+      setAppData({
+        ...appData,
+        games: updatedGames,
+        settings: { ...appData.settings, gameTags: updatedTags },
+      });
+
+      if (window.api) {
+        await window.api.saveSettings({ gameTags: updatedTags });
+        for (const g of updatedGames) {
+          await window.api.saveGame(g);
+        }
+      }
+    } else {
+      const currentTags = appData.settings.mediaTags || [];
+      const updatedTags = currentTags.filter((t) => t !== tagToDelete);
+
+      const updatedMedia = appData.media.map((m) => {
+        if (m.tags && m.tags.includes(tagToDelete)) {
+          const newMtags = m.tags.filter((t) => t !== tagToDelete);
+          return { ...m, tags: newMtags, category: newMtags.join(', ') };
+        }
+        return m;
+      });
+
+      setAppData({
+        ...appData,
+        media: updatedMedia,
+        settings: { ...appData.settings, mediaTags: updatedTags },
+      });
+
+      if (window.api) {
+        await window.api.saveSettings({ mediaTags: updatedTags });
+        for (const m of updatedMedia) {
+          await window.api.saveMedia(m);
+        }
+      }
+    }
+    await loadData();
+  };
+
+  const handleBatchAssignTags = async (itemIds: string[], tagsToAdd: string[], tagsToRemove: string[]) => {
+    if (!appData) return;
+    if (tagManagerMode === 'game') {
+      const updatedGames = appData.games.map((g) => {
+        if (itemIds.includes(g.id)) {
+          let gTags = g.tags ? [...g.tags] : [];
+          if (tagsToRemove.length > 0) {
+            gTags = gTags.filter((t) => !tagsToRemove.includes(t));
+          }
+          for (const t of tagsToAdd) {
+            if (!gTags.includes(t)) gTags.push(t);
+          }
+          return { ...g, tags: gTags, genre: gTags.join(', ') };
+        }
+        return g;
+      });
+
+      setAppData({ ...appData, games: updatedGames });
+
+      if (window.api) {
+        for (const id of itemIds) {
+          const g = updatedGames.find((x) => x.id === id);
+          if (g) await window.api.saveGame(g);
+        }
+      }
+    } else {
+      const updatedMedia = appData.media.map((m) => {
+        if (itemIds.includes(m.id)) {
+          let mTags = m.tags ? [...m.tags] : [];
+          if (tagsToRemove.length > 0) {
+            mTags = mTags.filter((t) => !tagsToRemove.includes(t));
+          }
+          for (const t of tagsToAdd) {
+            if (!mTags.includes(t)) mTags.push(t);
+          }
+          return { ...m, tags: mTags, category: mTags.join(', ') };
+        }
+        return m;
+      });
+
+      setAppData({ ...appData, media: updatedMedia });
+
+      if (window.api) {
+        for (const id of itemIds) {
+          const m = updatedMedia.find((x) => x.id === id);
+          if (m) await window.api.saveMedia(m);
+        }
+      }
+    }
+    await loadData();
   };
 
   const handleSaveBannerSettings = async (newBannerSettings: AppBannerSettings) => {
@@ -1576,6 +1769,10 @@ export default function App() {
                       setEditingGame(null);
                       setIsGameFormOpen(true);
                     }}
+                    onOpenTagManager={() => {
+                      setTagManagerMode('game');
+                      setIsTagManagerOpen(true);
+                    }}
                     onLoadDemoData={handleLoadDemoData}
                   />
                 )}
@@ -1622,6 +1819,10 @@ export default function App() {
                     onOpenAddMedia={() => {
                       setEditingMedia(null);
                       setIsMediaFormOpen(true);
+                    }}
+                    onOpenTagManager={() => {
+                      setTagManagerMode('media');
+                      setIsTagManagerOpen(true);
                     }}
                     onEditMedia={(item) => {
                       setEditingMedia(item);
@@ -1827,6 +2028,7 @@ export default function App() {
           setEditingGame(null);
         }}
         onSave={handleSaveGame}
+        onDeleteGame={handleDeleteGame}
         availableTags={aggregatedGameTags}
         globalActionButtons={appData.settings.globalActionButtons || []}
         onAddNewGlobalTag={async (newTag) => {
@@ -1860,6 +2062,8 @@ export default function App() {
           setEditingMedia(null);
         }}
         onSave={handleSaveMedia}
+        onDeleteMedia={handleDeleteMedia}
+        playlists={appData.playlists || []}
         onBrowseFile={async (type) => {
           return window.api.browseFile({
             title: type === 'cover' ? 'Chọn ảnh bìa / Poster' : 'Chọn ảnh banner',
@@ -1890,6 +2094,29 @@ export default function App() {
         mediaList={appData.media}
         bannerSettings={appData.settings.bannerSettings}
         onSaveBannerSettings={handleSaveBannerSettings}
+      />
+
+      {/* Centralized Tag Manager Modal */}
+      <TagManagerModal
+        isOpen={isTagManagerOpen}
+        onClose={() => setIsTagManagerOpen(false)}
+        mode={tagManagerMode}
+        tags={tagManagerMode === 'game' ? aggregatedGameTags : aggregatedMediaTags}
+        games={appData.games}
+        media={appData.media}
+        onSaveTags={async (newTags: string[]) => {
+          const type = tagManagerMode === 'game' ? 'gameTags' : 'mediaTags';
+          setAppData({
+            ...appData,
+            settings: { ...appData.settings, [type]: newTags },
+          });
+          if (window.api) {
+            await window.api.saveSettings({ [type]: newTags });
+          }
+        }}
+        onRenameTag={handleRenameTag}
+        onDeleteTag={handleDeleteTag}
+        onBatchAssignTags={handleBatchAssignTags}
       />
 
       {/* Password Prompt Modal for 7-zip */}

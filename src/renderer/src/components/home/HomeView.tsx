@@ -20,7 +20,8 @@ import {
   Smile,
   Zap,
   BookOpen,
-  Users
+  Users,
+  Tag
 } from 'lucide-react';
 import type { Game, MediaItem, AppSettings } from '../../types';
 import type { DeviceType } from '../../utils/deviceDetector';
@@ -47,6 +48,7 @@ interface HomeViewProps {
   onEditGame: (game: Game) => void;
   onDeleteGame: (id: string) => void;
   onOpenAddGame: () => void;
+  onOpenTagManager?: () => void;
   onLoadDemoData: () => void;
 }
 
@@ -71,6 +73,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
   onEditGame,
   onDeleteGame,
   onOpenAddGame,
+  onOpenTagManager,
   onLoadDemoData,
 }) => {
   const [selectedGenre, setSelectedGenre] = useState<string>('Tất cả');
@@ -507,18 +510,34 @@ export const HomeView: React.FC<HomeViewProps> = ({
               </select>
             </div>
 
-            {/* Admin Add Game */}
+            {/* Admin Controls */}
             {isAdmin && (
-              <button
-                onClick={() => {
-                  sfx.playClick();
-                  onOpenAddGame();
-                }}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-black text-xs font-bold transition-colors shadow-sm"
-              >
-                <Plus className="w-3.5 h-3.5" />
-                <span>Thêm Game</span>
-              </button>
+              <div className="flex items-center gap-2">
+                {onOpenTagManager && (
+                  <button
+                    onClick={() => {
+                      sfx.playClick();
+                      onOpenTagManager();
+                    }}
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/10 hover:bg-white/15 border border-white/15 text-white text-xs font-bold transition-all shadow-sm active:scale-95"
+                    title="Quản lý thể loại / tag game"
+                  >
+                    <Tag className="w-3.5 h-3.5 text-amber-400" />
+                    <span>Quản Lý Thể Loại</span>
+                  </button>
+                )}
+
+                <button
+                  onClick={() => {
+                    sfx.playClick();
+                    onOpenAddGame();
+                  }}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-black text-xs font-bold transition-colors shadow-sm"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                  <span>Thêm Game</span>
+                </button>
+              </div>
             )}
           </div>
         </div>

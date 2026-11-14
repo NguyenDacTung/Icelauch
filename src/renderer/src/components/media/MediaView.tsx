@@ -32,11 +32,10 @@ import {
 import { VideoTheaterView } from './VideoTheaterView';
 import { VinylTurntablePlayer } from './VinylTurntablePlayer';
 import { MediaHeroBanner } from './MediaHeroBanner';
-import { MediaTrailerBanner } from './MediaTrailerBanner';
 import { PlaylistFormModal } from './PlaylistFormModal';
 import { GenreShelfScroller } from '../common/GenreShelfScroller';
 import { parseMediaUrl } from '../../utils/mediaUrl';
-import type { MediaItem, MediaPlaylist, MediaSubType, AppBannerSettings, AppSettings, TrailerItem } from '../../types';
+import type { MediaItem, MediaPlaylist, MediaSubType, AppBannerSettings, AppSettings } from '../../types';
 import { sfx } from '../../utils/sfx';
 
 interface MediaViewProps {
@@ -56,6 +55,7 @@ interface MediaViewProps {
   onToggleHide?: (id: string) => void;
   onEditMedia?: (media: MediaItem) => void;
   onOpenAddMedia: () => void;
+  onOpenTagManager?: () => void;
   onUpdateMediaProgress: (id: string, position: number, watched: boolean) => void;
   onSavePlaylist?: (playlist: Partial<MediaPlaylist>) => void;
   onDeletePlaylist?: (id: string) => void;
@@ -81,6 +81,7 @@ export const MediaView: React.FC<MediaViewProps> = ({
   onToggleHide,
   onEditMedia,
   onOpenAddMedia,
+  onOpenTagManager,
   onUpdateMediaProgress,
   onSavePlaylist,
   onDeletePlaylist,
@@ -142,29 +143,6 @@ export const MediaView: React.FC<MediaViewProps> = ({
       tabMedia.flatMap((m) => m.tags || (m.category ? m.category.split(',').map((s) => s.trim()) : []))
     )
   ).filter(Boolean);
-
-  // Active Trailers derived from settings and media catalog
-  const activeTrailers: TrailerItem[] = useMemo(() => {
-    const list: TrailerItem[] = [];
-    if (settings?.trailerSettings?.trailers && settings.trailerSettings.trailers.length > 0) {
-      list.push(...settings.trailerSettings.trailers);
-    }
-    media.forEach((m) => {
-      if (m.type === 'video' && m.link && !list.some((t) => t.mediaId === m.id || t.videoUrl === m.link)) {
-        if (m.isBannerPinned || m.tags?.includes('Trailer') || m.subType === 'movie') {
-          list.push({
-            id: `trailer-${m.id}`,
-            title: m.title,
-            tag: m.tags?.[0] || 'Phim Nổi Bật',
-            videoUrl: m.link,
-            mediaId: m.id,
-            isPinned: m.isBannerPinned,
-          });
-        }
-      }
-    });
-    return list;
-  }, [settings?.trailerSettings, media]);
 
   // Filter & Search
   const filteredMedia = tabMedia.filter((m) => {
@@ -454,11 +432,16 @@ export const MediaView: React.FC<MediaViewProps> = ({
                 }}
                 className="group relative bg-ice-card rounded-xl overflow-hidden border border-ice-border hover:border-amber-400/70 hover:shadow-xl cursor-pointer transition-all duration-300 hover:-translate-y-1 flex flex-col"
               >
-                <div className="aspect-video w-full relative overflow-hidden bg-black/90">
+                <div className="aspect-[2/3] w-full relative overflow-hidden bg-black/90">
                   <img
                     src={coverImg.startsWith('http') ? coverImg : `file://${coverImg}`}
                     alt={item.title}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                    style={{
+                      objectPosition: item.listCardPosition || item.coverPosition || '50% 50%',
+                      transform: (item.listCardZoom || item.coverZoom) ? `scale(${item.listCardZoom || item.coverZoom})` : undefined,
+                      transformOrigin: item.listCardPosition || item.coverPosition || '50% 50%',
+                    }}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                   />
                   <div className="absolute top-2 left-2 px-1.5 py-0.5 rounded bg-black/80 text-[10px] font-mono text-amber-300 font-bold border border-white/10">
                     #{idx + 1}
@@ -595,6 +578,20 @@ export const MediaView: React.FC<MediaViewProps> = ({
 
           {isAdmin && (
             <div className="flex items-center gap-2">
+              {onOpenTagManager && (
+                <button
+                  onClick={() => {
+                    sfx.playClick();
+                    onOpenTagManager();
+                  }}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/10 hover:bg-white/15 border border-white/15 text-white text-xs font-bold transition-all shadow-sm active:scale-95"
+                  title="Quản lý thể loại / tag giải trí"
+                >
+                  <Tag className="w-3.5 h-3.5 text-amber-400" />
+                  <span>Quản Lý Thể Loại</span>
+                </button>
+              )}
+
               {onSavePlaylist && (
                 <button
                   onClick={() => {
@@ -624,20 +621,8 @@ export const MediaView: React.FC<MediaViewProps> = ({
         </div>
       </div>
 
-      {/* 2. Top Cinema Trailer Showcase Banner (Non-seekable, auto-pause on scroll) */}
-      {activeTab === 'video' && !searchQuery && activeTrailers.length > 0 && (
-        <MediaTrailerBanner
-          trailers={activeTrailers}
-          settings={settings?.trailerSettings}
-          onSelectMedia={(mediaId) => {
-            const m = tabMedia.find((item) => item.id === mediaId);
-            if (m) setActiveVideo(m);
-          }}
-        />
-      )}
-
-      {/* Fallback Hero Banner if no trailers or in audio tabs */}
-      {(activeTab !== 'video' || activeTrailers.length === 0) && !searchQuery && (
+      {/* 2. Upgraded Hero Banner with Ambient Glow & Smooth Transitions (16:9) */}
+      {!searchQuery && (
         <MediaHeroBanner
           mediaList={tabMedia}
           type={activeTab === 'video' ? 'video' : 'audio'}
@@ -860,18 +845,18 @@ export const MediaView: React.FC<MediaViewProps> = ({
                           onPlayAudio?.(item);
                         }
                       }}
-                      className="group relative bg-ice-card rounded-xl overflow-hidden border border-ice-border hover:border-amber-400/70 hover:shadow-xl cursor-pointer transition-all duration-300 hover:-translate-y-1 flex flex-col w-[240px] shrink-0"
+                      className="group relative bg-ice-card rounded-xl overflow-hidden border border-ice-border hover:border-amber-400/70 hover:shadow-xl cursor-pointer transition-all duration-300 hover:-translate-y-1 flex flex-col w-[170px] shrink-0"
                     >
-                      <div className="aspect-video w-full relative overflow-hidden bg-black/90">
+                      <div className="aspect-[2/3] w-full relative overflow-hidden bg-black/90">
                         <img
                           src={coverImg.startsWith('http') ? coverImg : `file://${coverImg}`}
                           alt={item.title}
                           style={{
-                            objectPosition: item.coverPosition || '50% 50%',
-                            transform: item.coverZoom ? `scale(${item.coverZoom})` : undefined,
-                            transformOrigin: item.coverPosition || '50% 50%',
+                            objectPosition: item.listCardPosition || item.coverPosition || '50% 50%',
+                            transform: (item.listCardZoom || item.coverZoom) ? `scale(${item.listCardZoom || item.coverZoom})` : undefined,
+                            transformOrigin: item.listCardPosition || item.coverPosition || '50% 50%',
                           }}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                         />
 
                         {onToggleFavoriteMedia && (
@@ -968,14 +953,14 @@ export const MediaView: React.FC<MediaViewProps> = ({
                     }}
                     className="group relative bg-ice-card rounded-2xl overflow-hidden border border-ice-border hover:border-amber-400/80 hover:shadow-2xl cursor-pointer transition-all duration-300 hover:-translate-y-1.5 flex flex-col"
                   >
-                    <div className="aspect-video w-full relative overflow-hidden bg-black/90">
+                    <div className="aspect-[2/3] w-full relative overflow-hidden bg-black/90">
                       <img
                         src={coverImg.startsWith('http') ? coverImg : `file://${coverImg}`}
                         alt={item.title}
                         style={{
-                          objectPosition: item.coverPosition || '50% 50%',
-                          transform: item.coverZoom ? `scale(${item.coverZoom})` : undefined,
-                          transformOrigin: item.coverPosition || '50% 50%',
+                          objectPosition: item.listCardPosition || item.coverPosition || '50% 50%',
+                          transform: (item.listCardZoom || item.coverZoom) ? `scale(${item.listCardZoom || item.coverZoom})` : undefined,
+                          transformOrigin: item.listCardPosition || item.coverPosition || '50% 50%',
                         }}
                         className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                       />

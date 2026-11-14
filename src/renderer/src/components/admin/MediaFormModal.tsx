@@ -1,18 +1,20 @@
 import React, { useState, useEffect } from 'react';
-import { X, Film, Music, Check, ExternalLink, Sparkles, FolderOpen, Mic, Monitor, Smartphone } from 'lucide-react';
+import { X, Film, Music, Check, ExternalLink, Sparkles, FolderOpen, Mic, Monitor, Smartphone, Trash2, ListMusic } from 'lucide-react';
 import { TagSelector } from './TagSelector';
 import { ImagePositionSelector } from './ImagePositionSelector';
 import { parseMediaUrl } from '../../utils/mediaUrl';
-import type { MediaItem, MediaSubType } from '../../types';
+import type { MediaItem, MediaSubType, MediaPlaylist } from '../../types';
 
 interface MediaFormModalProps {
   media: MediaItem | null;
   isOpen: boolean;
   onClose: () => void;
-  onSave: (mediaData: Partial<MediaItem>) => void;
+  onSave: (mediaData: Partial<MediaItem>, playlistIds?: string[]) => void;
+  onDeleteMedia?: (id: string) => void;
   onBrowseFile?: (type: 'cover' | 'banner') => Promise<string | null>;
   availableTags?: string[];
   onAddNewGlobalTag?: (tag: string) => void;
+  playlists?: MediaPlaylist[];
 }
 
 export const MediaFormModal: React.FC<MediaFormModalProps> = ({
@@ -20,9 +22,11 @@ export const MediaFormModal: React.FC<MediaFormModalProps> = ({
   isOpen,
   onClose,
   onSave,
+  onDeleteMedia,
   onBrowseFile,
   availableTags = [],
   onAddNewGlobalTag,
+  playlists = [],
 }) => {
   const [type, setType] = useState<'video' | 'audio'>('video');
   const [subType, setSubType] = useState<MediaSubType>('movie');
@@ -37,6 +41,9 @@ export const MediaFormModal: React.FC<MediaFormModalProps> = ({
   const [bannerPosition, setBannerPosition] = useState('50% 50%');
   const [coverZoom, setCoverZoom] = useState(1);
   const [bannerZoom, setBannerZoom] = useState(1);
+  const [listCardPosition, setListCardPosition] = useState('50% 50%');
+  const [listCardZoom, setListCardZoom] = useState(1);
+  const [selectedPlaylistIds, setSelectedPlaylistIds] = useState<string[]>([]);
   const [bannerBlur, setBannerBlur] = useState(0);
   const [bannerDarkness, setBannerDarkness] = useState(30);
   const [bannerEdgeDarkness, setBannerEdgeDarkness] = useState(10);
@@ -68,6 +75,9 @@ export const MediaFormModal: React.FC<MediaFormModalProps> = ({
         setBannerPosition(media.bannerPosition || '50% 50%');
         setCoverZoom(media.coverZoom || 1);
         setBannerZoom(media.bannerZoom || 1);
+        setListCardPosition(media.listCardPosition || media.coverPosition || '50% 50%');
+        setListCardZoom(media.listCardZoom || media.coverZoom || 1);
+        setSelectedPlaylistIds(playlists?.filter((p) => p.itemIds.includes(media.id)).map((p) => p.id) || []);
         setBannerBlur(media.bannerBlur ?? 0);
         setBannerDarkness(media.bannerDarkness ?? 30);
         setBannerEdgeDarkness(media.bannerEdgeDarkness ?? 10);
@@ -102,6 +112,9 @@ export const MediaFormModal: React.FC<MediaFormModalProps> = ({
         setBannerPosition('50% 50%');
         setCoverZoom(1);
         setBannerZoom(1);
+        setListCardPosition('50% 50%');
+        setListCardZoom(1);
+        setSelectedPlaylistIds([]);
         setBannerBlur(0);
         setBannerDarkness(30);
         setBannerEdgeDarkness(10);
@@ -116,7 +129,7 @@ export const MediaFormModal: React.FC<MediaFormModalProps> = ({
       }
       setTestResult(null);
     }
-  }, [media, isOpen]);
+  }, [media, isOpen, playlists]);
 
   if (!isOpen) return null;
 
@@ -225,6 +238,8 @@ export const MediaFormModal: React.FC<MediaFormModalProps> = ({
       bannerPosition: bannerPosition || media?.bannerPosition,
       coverZoom,
       bannerZoom,
+      listCardPosition,
+      listCardZoom,
       bannerBlur,
       bannerDarkness,
       bannerEdgeDarkness,
@@ -239,7 +254,7 @@ export const MediaFormModal: React.FC<MediaFormModalProps> = ({
       category: selectedTags.join(', ') || (parsed.kind === 'youtube' ? 'YouTube' : parsed.kind === 'facebook' ? 'Facebook' : parsed.kind === 'gdrive' ? 'Google Drive' : undefined) || media?.category,
     };
 
-    onSave(mergedMedia);
+    onSave(mergedMedia, selectedPlaylistIds);
     onClose();
   };
 
@@ -523,18 +538,32 @@ export const MediaFormModal: React.FC<MediaFormModalProps> = ({
           {/* Manual Image Alignment Controls */}
           <div className="space-y-4 pt-1">
             {coverPath && (
-              <ImagePositionSelector
-                label={type === 'video' ? 'Căn chỉnh & Nét Thẻ Video (16:9)' : 'Căn chỉnh & Nét Ảnh Bìa / Poster'}
-                imageUrl={coverPath}
-                aspectRatio={type === 'video' ? 'video' : 'cover'}
-                value={coverPosition}
-                onChange={setCoverPosition}
-                zoom={coverZoom}
-                onZoomChange={setCoverZoom}
-                sharpen={coverSharpen}
-                onSharpenChange={setCoverSharpen}
-                demoTitle={title}
-              />
+              <>
+                <ImagePositionSelector
+                  label="Căn chỉnh Thẻ Danh Sách Thư Viện (4:6 / 2:3 Poster Chuẩn)"
+                  imageUrl={coverPath}
+                  aspectRatio="4:6"
+                  value={listCardPosition}
+                  onChange={setListCardPosition}
+                  zoom={listCardZoom}
+                  onZoomChange={setListCardZoom}
+                  sharpen={coverSharpen}
+                  onSharpenChange={setCoverSharpen}
+                  demoTitle={title}
+                />
+                <ImagePositionSelector
+                  label={type === 'video' ? 'Căn chỉnh Ảnh Bìa / Trình Phát Video (16:9 Chuẩn)' : 'Căn chỉnh Ảnh Bìa Audio (1:1)'}
+                  imageUrl={coverPath}
+                  aspectRatio={type === 'video' ? '16:9' : '1:1'}
+                  value={coverPosition}
+                  onChange={setCoverPosition}
+                  zoom={coverZoom}
+                  onZoomChange={setCoverZoom}
+                  sharpen={coverSharpen}
+                  onSharpenChange={setCoverSharpen}
+                  demoTitle={title}
+                />
+              </>
             )}
             {(bannerPath || coverPath) && (
               <ImagePositionSelector
@@ -557,6 +586,47 @@ export const MediaFormModal: React.FC<MediaFormModalProps> = ({
               />
             )}
           </div>
+
+          {/* Add to Playlist Section */}
+          {playlists && playlists.length > 0 && (
+            <div className="space-y-2 p-3.5 bg-black/30 rounded-xl border border-ice-border/60">
+              <label className="font-semibold text-white flex items-center gap-1.5">
+                <ListMusic className="w-4 h-4 text-cyan-400" />
+                <span>Thêm vào Danh Sách Phát (Playlist)</span>
+              </label>
+              <div className="grid grid-cols-2 gap-2 max-h-36 overflow-y-auto pr-1">
+                {playlists
+                  .filter((pl) => pl.type === type)
+                  .map((pl) => {
+                    const checked = selectedPlaylistIds.includes(pl.id);
+                    return (
+                      <label
+                        key={pl.id}
+                        className={`flex items-center gap-2 p-2 rounded-lg border text-xs cursor-pointer transition-colors ${
+                          checked
+                            ? 'bg-cyan-500/15 border-cyan-500/40 text-cyan-200'
+                            : 'bg-ice-bg/60 border-ice-border/40 text-ice-subtext hover:border-ice-border hover:text-white'
+                        }`}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={checked}
+                          onChange={(e) => {
+                            if (e.target.checked) {
+                              setSelectedPlaylistIds((prev) => [...prev, pl.id]);
+                            } else {
+                              setSelectedPlaylistIds((prev) => prev.filter((id) => id !== pl.id));
+                            }
+                          }}
+                          className="rounded accent-cyan-500"
+                        />
+                        <span className="truncate">{pl.name}</span>
+                      </label>
+                    );
+                  })}
+              </div>
+            </div>
+          )}
 
           {/* Banner Featured Pin Section */}
           <div className="p-3 rounded-lg bg-black/40 border border-ice-border space-y-2">
@@ -620,21 +690,38 @@ export const MediaFormModal: React.FC<MediaFormModalProps> = ({
           </div>
 
           {/* Footer Submit */}
-          <div className="pt-4 border-t border-ice-border flex items-center justify-end gap-3">
-            <button
-              type="button"
-              onClick={onClose}
-              className="px-4 py-2 rounded text-xs font-medium text-ice-subtext hover:text-white transition-colors"
-            >
-              Huỷ
-            </button>
-            <button
-              type="submit"
-              className="px-6 py-2 rounded bg-amber-500 hover:bg-amber-600 text-black text-xs font-bold tracking-wide flex items-center gap-2 transition-colors shadow-sm"
-            >
-              <Check className="w-4 h-4" />
-              <span>{media ? 'Lưu thay đổi' : 'Thêm mục mới'}</span>
-            </button>
+          <div className="pt-4 border-t border-ice-border flex items-center justify-between gap-3">
+            {media && onDeleteMedia && (
+              <button
+                type="button"
+                onClick={() => {
+                  if (confirm(`Bạn có chắc chắn muốn xoá mục "${media.title}" không? Thao tác này không thể hoàn tác.`)) {
+                    onDeleteMedia(media.id);
+                    onClose();
+                  }
+                }}
+                className="px-4 py-2 rounded bg-red-500/15 hover:bg-red-500/25 border border-red-500/40 text-red-300 text-xs font-semibold flex items-center gap-1.5 transition-colors"
+              >
+                <Trash2 className="w-4 h-4 text-red-400" />
+                <span>Xoá mục này</span>
+              </button>
+            )}
+            <div className="flex items-center gap-3 ml-auto">
+              <button
+                type="button"
+                onClick={onClose}
+                className="px-4 py-2 rounded text-xs font-medium text-ice-subtext hover:text-white transition-colors"
+              >
+                Huỷ
+              </button>
+              <button
+                type="submit"
+                className="px-6 py-2 rounded bg-amber-500 hover:bg-amber-600 text-black text-xs font-bold tracking-wide flex items-center gap-2 transition-colors shadow-sm"
+              >
+                <Check className="w-4 h-4" />
+                <span>{media ? 'Lưu thay đổi' : 'Thêm mục mới'}</span>
+              </button>
+            </div>
           </div>
         </form>
       </div>

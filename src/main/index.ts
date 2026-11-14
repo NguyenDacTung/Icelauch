@@ -113,24 +113,48 @@ app.whenReady().then(async () => {
       }
 
       const requestHeaders = { ...details.requestHeaders };
-      // Always inject valid nocookie referer & origin across all YouTube/GoogleVideo endpoints to bypass Error 152-4
-      requestHeaders['Referer'] = 'https://www.youtube-nocookie.com/';
-      requestHeaders['Origin'] = 'https://www.youtube-nocookie.com';
-      requestHeaders['User-Agent'] =
-        'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36';
+
+      // 1. Facebook Embeds & Video Plugins
+      if (details.url.includes('facebook.com') || details.url.includes('fb.watch') || details.url.includes('fbcdn.net')) {
+        requestHeaders['Referer'] = 'https://www.facebook.com/';
+        requestHeaders['Origin'] = 'https://www.facebook.com';
+        requestHeaders['User-Agent'] =
+          'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36';
+        callback({ cancel: false, requestHeaders });
+        return;
+      }
+
+      // 2. YouTube & Google Video Endpoints (bypass Error 152-4)
+      if (
+        details.url.includes('youtube.com') ||
+        details.url.includes('googlevideo.com') ||
+        details.url.includes('youtube-nocookie.com')
+      ) {
+        requestHeaders['Referer'] = 'https://www.youtube-nocookie.com/';
+        requestHeaders['Origin'] = 'https://www.youtube-nocookie.com';
+        requestHeaders['User-Agent'] =
+          'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36';
+        callback({ cancel: false, requestHeaders });
+        return;
+      }
+
       callback({ cancel: false, requestHeaders });
     }
   );
 
-  // 2. Allow YouTube and Google Drive streaming embeds inside Electron without iframe header blocks
+  // 2. Allow YouTube, Facebook and Google Drive streaming embeds inside Electron without iframe header blocks
   session.defaultSession.webRequest.onHeadersReceived((details, callback) => {
     const responseHeaders = { ...details.responseHeaders };
     delete responseHeaders['x-frame-options'];
     delete responseHeaders['X-Frame-Options'];
-    if (responseHeaders['content-security-policy']) {
-      responseHeaders['content-security-policy'] = responseHeaders['content-security-policy'].map((val) =>
-        val.replace(/frame-ancestors[^;]+;?/gi, '')
-      );
+    delete responseHeaders['X-FRAME-OPTIONS'];
+    const cspKeys = Object.keys(responseHeaders).filter((k) => k.toLowerCase() === 'content-security-policy');
+    for (const key of cspKeys) {
+      if (Array.isArray(responseHeaders[key])) {
+        responseHeaders[key] = responseHeaders[key].map((val) =>
+          val.replace(/frame-ancestors[^;]+;?/gi, '')
+        );
+      }
     }
     callback({ cancel: false, responseHeaders });
   });

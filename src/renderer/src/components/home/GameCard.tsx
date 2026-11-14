@@ -77,9 +77,9 @@ export const GameCard: React.FC<GameCardProps> = ({
           src={game.coverPath || 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=600&q=80'}
           alt={game.name}
           style={{ 
-            objectPosition: game.coverPosition || '50% 50%',
-            transform: game.coverZoom ? `scale(${game.coverZoom})` : undefined,
-            transformOrigin: game.coverPosition || '50% 50%',
+            objectPosition: game.listCardPosition || game.coverPosition || '50% 50%',
+            transform: (game.listCardZoom || game.coverZoom) ? `scale(${game.listCardZoom || game.coverZoom})` : undefined,
+            transformOrigin: game.listCardPosition || game.coverPosition || '50% 50%',
             filter: game.coverSharpen ? `contrast(${1 + (game.coverSharpen / 100) * 0.25}) brightness(${1 + (game.coverSharpen / 100) * 0.04}) saturate(${1 + (game.coverSharpen / 100) * 0.08})` : undefined,
             imageRendering: game.coverSharpen ? '-webkit-optimize-contrast' : 'auto'
           }}

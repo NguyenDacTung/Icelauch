@@ -67,19 +67,31 @@ export const MediaHeroBanner: React.FC<MediaHeroBannerProps> = ({
   const edgeDarknessVal = (currentItem.bannerEdgeDarkness ?? 0) / 100;
 
   return (
-    <div className="relative w-full max-w-[1240px] mx-auto rounded-2xl overflow-hidden border border-ice-border/80 shadow-2xl select-none group bg-[#111318] flex flex-col md:flex-row items-stretch md:h-[460px] lg:h-[480px]">
-      {/* SVG Convolution Filter for true pixel unsharp masking */}
-      <svg className="absolute w-0 h-0 overflow-hidden pointer-events-none" aria-hidden="true">
-        <defs>
-          <filter id={`svg-sharpen-media-${type}`}>
-            <feConvolveMatrix
-              order="3"
-              preserveAlpha="true"
-              kernelMatrix={`0 -${((sharpenVal / 100) * 0.6).toFixed(2)} 0 -${((sharpenVal / 100) * 0.6).toFixed(2)} ${(1 + 4 * (sharpenVal / 100) * 0.6).toFixed(2)} -${((sharpenVal / 100) * 0.6).toFixed(2)} 0 -${((sharpenVal / 100) * 0.6).toFixed(2)} 0`}
-            />
-          </filter>
-        </defs>
-      </svg>
+    <div className="relative w-full max-w-[1240px] mx-auto select-none group">
+      {/* Ambient Backdrop Blur & Glow on PC: spills colors onto left and right edges */}
+      <div
+        className="absolute -inset-4 sm:-inset-8 -z-10 rounded-3xl overflow-hidden pointer-events-none opacity-40 blur-3xl transition-all duration-700 hidden md:block"
+        style={{
+          backgroundImage: `url(${bannerImg})`,
+          backgroundPosition: objectPos,
+          backgroundSize: 'cover',
+          filter: 'blur(48px) brightness(0.65) saturate(1.4)',
+        }}
+      />
+
+      <div className="relative w-full rounded-2xl overflow-hidden border border-ice-border/80 shadow-2xl bg-[#111318] flex flex-col md:flex-row items-stretch md:h-[460px] lg:h-[480px]">
+        {/* SVG Convolution Filter for true pixel unsharp masking */}
+        <svg className="absolute w-0 h-0 overflow-hidden pointer-events-none" aria-hidden="true">
+          <defs>
+            <filter id={`svg-sharpen-media-${type}`}>
+              <feConvolveMatrix
+                order="3"
+                preserveAlpha="true"
+                kernelMatrix={`0 -${((sharpenVal / 100) * 0.6).toFixed(2)} 0 -${((sharpenVal / 100) * 0.6).toFixed(2)} ${(1 + 4 * (sharpenVal / 100) * 0.6).toFixed(2)} -${((sharpenVal / 100) * 0.6).toFixed(2)} 0 -${((sharpenVal / 100) * 0.6).toFixed(2)} 0`}
+              />
+            </filter>
+          </defs>
+        </svg>
 
       {/* 1. LEFT COLUMN: Exact 16:9 Aspect Ratio (aspect-video) - Large & Cinematic */}
       <div
@@ -245,5 +257,6 @@ export const MediaHeroBanner: React.FC<MediaHeroBannerProps> = ({
         </div>
       </div>
     </div>
-  );
+  </div>
+);
 };

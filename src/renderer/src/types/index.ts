@@ -43,6 +43,9 @@ export interface Game {
   bannerPosition?: string;
   coverZoom?: number;
   bannerZoom?: number;
+  listCardPath?: string;
+  listCardPosition?: string;
+  listCardZoom?: number;
   bannerBlur?: number;
   bannerDarkness?: number;
   bannerEdgeDarkness?: number; // 0 - 100: side fade darkness (0 = crystal clear, no side fade)
@@ -115,6 +118,9 @@ export interface MediaItem {
   bannerPosition?: string;
   coverZoom?: number;
   bannerZoom?: number;
+  listCardPath?: string;
+  listCardPosition?: string;
+  listCardZoom?: number;
   bannerBlur?: number;
   bannerDarkness?: number;
   bannerEdgeDarkness?: number; // 0 - 100: side fade darkness (0 = crystal clear, no side fade)
