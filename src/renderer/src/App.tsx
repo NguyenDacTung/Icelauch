@@ -17,7 +17,6 @@ import { FirstRunModal } from './components/common/FirstRunModal';
 import { setActiveProxyPort, getActiveProxyPort } from './utils/mediaUrl';
 import { SeasonalParticleEngine } from './components/common/SeasonalParticleEngine';
 import { AppWallpaper } from './components/common/AppWallpaper';
-import { FloatingMiniDiscWidget } from './components/media/FloatingMiniDiscWidget';
 import { UpdateToast } from './components/common/UpdateToast';
 import { ProfilePickerView } from './components/profile/ProfilePickerView';
 import { ProfileModal } from './components/profile/ProfileModal';
@@ -31,6 +30,7 @@ import { MobileMediaView } from './components/mobile/MobileMediaView';
 import { MobileLibraryView } from './components/mobile/MobileLibraryView';
 import { MobileGameDetailView } from './components/mobile/MobileGameDetailView';
 import { MobileSettingsView } from './components/mobile/MobileSettingsView';
+import { MobileMiniPlayer } from './components/mobile/MobileMiniPlayer';
 import { MobileVinylPlayerModal } from './components/mobile/MobileVinylPlayerModal';
 import { MobileUpdateModal } from './components/mobile/MobileUpdateModal';
 import { checkMobileUpdate, checkTVUpdate, type MobileUpdateInfo, type TVUpdateInfo } from './utils/apkUpdater';
@@ -115,7 +115,14 @@ export default function App() {
   const [currentTrack, setCurrentTrack] = useState<MediaItem | null>(null);
   const [isPlayingAudio, setIsPlayingAudio] = useState(false);
   const [isTurntableOpen, setIsTurntableOpen] = useState(false);
+  const [mediaActiveAudioTrack, setMediaActiveAudioTrack] = useState<MediaItem | null>(null);
+  const [audioCurrentTime, setAudioCurrentTime] = useState<number>(0);
+  const [audioDuration, setAudioDuration] = useState<number>(0);
+  const [audioVolume, setAudioVolume] = useState<number>(0.8);
+  const [audioIsMuted, setAudioIsMuted] = useState<boolean>(false);
+  const [audioSeekTime, setAudioSeekTime] = useState<number | null>(null);
   const [isMobileVinylOpen, setIsMobileVinylOpen] = useState(false);
+  const isTurntableActive = isTurntableOpen && currentTab === 'media';
 
   // Multi-User Profile State
   const [profiles, setProfiles] = useState<UserProfile[]>([]);
@@ -450,9 +457,23 @@ export default function App() {
             downloadsPath: '/storage/emulated/0/Icelauch/Downloads',
           },
         });
-        setProfiles(cloudData.profiles || []);
-        if (cloudData.profiles?.length > 0) {
-          setActiveProfile(cloudData.profiles[0]);
+        const fetchedProfiles = cloudData.profiles || [];
+        setProfiles(fetchedProfiles);
+        const localSessionProfileId =
+          localStorage.getItem('icelauch_remembered_profile_id') ||
+          localStorage.getItem('icelauch_active_profile_id');
+        const matchedProfile = localSessionProfileId
+          ? fetchedProfiles.find((p) => p.id === localSessionProfileId)
+          : null;
+
+        if (matchedProfile) {
+          setActiveProfile(matchedProfile);
+          setIsProfilePickerOpen(false);
+        } else {
+          setActiveProfile(null);
+          if (fetchedProfiles.length > 0) {
+            setIsProfilePickerOpen(true);
+          }
         }
         setCloudSyncSettings({
           enabled: true,
@@ -940,6 +961,35 @@ export default function App() {
     setIsPlayingAudio(false);
   };
 
+  const handleNextTrack = () => {
+    const audios = appData?.media.filter((m) => m.type === 'audio') || [];
+    if (audios.length <= 1) return;
+    const idx = audios.findIndex((a) => a.id === currentTrack?.id);
+    const next = audios[(idx + 1) % audios.length];
+    setCurrentTrack(next);
+    if (mediaActiveAudioTrack) {
+      setMediaActiveAudioTrack(next);
+    }
+  };
+
+  const handlePrevTrack = () => {
+    const audios = appData?.media.filter((m) => m.type === 'audio') || [];
+    if (audios.length <= 1) return;
+    const idx = audios.findIndex((a) => a.id === currentTrack?.id);
+    const prev = audios[(idx - 1 + audios.length) % audios.length];
+    setCurrentTrack(prev);
+    if (mediaActiveAudioTrack) {
+      setMediaActiveAudioTrack(prev);
+    }
+  };
+
+  const handleReturnToPlayingSong = () => {
+    if (!currentTrack) return;
+    setCurrentTab('media');
+    setMediaActiveAudioTrack(currentTrack);
+    setIsTurntableOpen(true);
+  };
+
   // User Custom Playlists handlers
   const handleToggleItemInUserPlaylist = async (playlistId: string, mediaId: string) => {
     if (!activeProfile) {
@@ -1313,6 +1363,16 @@ export default function App() {
         remember,
       });
       if (res.success && res.profile) {
+        try {
+          localStorage.setItem('icelauch_active_profile_id', profile.id);
+          if (remember) {
+            localStorage.setItem('icelauch_remembered_profile_id', profile.id);
+          } else {
+            localStorage.removeItem('icelauch_remembered_profile_id');
+          }
+        } catch (e) {
+          console.warn('Failed to save profile to localStorage:', e);
+        }
         setActiveProfile(res.profile);
         setIsProfilePickerOpen(false);
         sfx.playSuccess();
@@ -1320,12 +1380,28 @@ export default function App() {
       }
       return { success: false, error: res.error || 'Xác thực không chính xác' };
     }
+    try {
+      localStorage.setItem('icelauch_active_profile_id', profile.id);
+      if (remember) {
+        localStorage.setItem('icelauch_remembered_profile_id', profile.id);
+      } else {
+        localStorage.removeItem('icelauch_remembered_profile_id');
+      }
+    } catch (e) {
+      console.warn('Failed to save profile to localStorage:', e);
+    }
     setActiveProfile(profile);
     setIsProfilePickerOpen(false);
     return { success: true };
   };
 
   const handleSelectGuest = () => {
+    try {
+      localStorage.removeItem('icelauch_active_profile_id');
+      localStorage.removeItem('icelauch_remembered_profile_id');
+    } catch (e) {
+      console.warn('Failed to clear profile from localStorage:', e);
+    }
     setActiveProfile(null);
     setIsProfilePickerOpen(false);
     sfx.playClick();
@@ -1420,6 +1496,12 @@ export default function App() {
       const updated = await window.api.getProfiles();
       setProfiles(updated);
       if (activeProfile?.id === id) {
+        try {
+          localStorage.removeItem('icelauch_active_profile_id');
+          localStorage.removeItem('icelauch_remembered_profile_id');
+        } catch (e) {
+          console.warn('Failed to clear profile from localStorage:', e);
+        }
         setActiveProfile(null);
         setIsProfilePickerOpen(true);
       }
@@ -1434,6 +1516,12 @@ export default function App() {
 
   const handleLogoutProfile = async () => {
     sfx.playClick();
+    try {
+      localStorage.removeItem('icelauch_active_profile_id');
+      localStorage.removeItem('icelauch_remembered_profile_id');
+    } catch (e) {
+      console.warn('Failed to clear profile from localStorage:', e);
+    }
     if (window.api?.logoutProfile) {
       await window.api.logoutProfile();
     }
@@ -1757,6 +1845,24 @@ export default function App() {
             onTabReTap={handleMobileTabReTap}
             isSimulated={isSimulating}
             onExitSimulation={() => setSimulatedDevice('windows_pc')}
+            miniPlayer={
+              currentTrack ? (
+                <MobileMiniPlayer
+                  currentTrack={currentTrack}
+                  isPlaying={isPlayingAudio}
+                  currentTime={audioCurrentTime}
+                  duration={audioDuration}
+                  onPlayPause={() => setIsPlayingAudio(!isPlayingAudio)}
+                  onOpenFullPlayer={() => setIsMobileVinylOpen(true)}
+                  onClose={() => {
+                    setIsPlayingAudio(false);
+                    setCurrentTrack(null);
+                    setMediaActiveAudioTrack(null);
+                    setIsMobileVinylOpen(false);
+                  }}
+                />
+              ) : undefined
+            }
             isAdmin={isAdmin}
             adminTimeRemaining={adminTimeRemaining}
             onOpenAdminAuth={() => setIsAdminAuthOpen(true)}
@@ -1980,6 +2086,20 @@ export default function App() {
                     settings={appData.settings}
                     isAdmin={isAdmin}
                     searchQuery={searchQuery}
+                    currentTrack={currentTrack}
+                    activeAudioTrack={mediaActiveAudioTrack}
+                    onActiveAudioTrackChange={setMediaActiveAudioTrack}
+                    isPlayingAudio={isPlayingAudio}
+                    audioCurrentTime={audioCurrentTime}
+                    audioDuration={audioDuration}
+                    audioVolume={audioVolume}
+                    audioIsMuted={audioIsMuted}
+                    onTogglePlayAudio={() => setIsPlayingAudio(!isPlayingAudio)}
+                    onSeekAudio={(val) => setAudioSeekTime(val)}
+                    onNextAudio={handleNextTrack}
+                    onPrevAudio={handlePrevTrack}
+                    onVolumeChange={setAudioVolume}
+                    onToggleMuteAudio={() => setAudioIsMuted(!audioIsMuted)}
                     favoriteMediaIds={activeProfile?.favoriteMedia || []}
                     favoritePlaylistIds={activeProfile?.favoritePlaylists || []}
                     onToggleFavoriteMedia={handleToggleFavoriteMedia}
@@ -2058,31 +2178,35 @@ export default function App() {
         currentTrack={currentTrack}
         playlist={appData.media.filter((m) => m.type === 'audio')}
         isPlaying={isPlayingAudio}
-        isTurntableActive={isTurntableOpen}
+        isTurntableActive={isTurntableActive}
+        hideVisualBar={effectiveDevice !== 'windows_pc'}
         onPlayPause={() => setIsPlayingAudio(!isPlayingAudio)}
-        onNext={() => {
-          const audios = appData.media.filter((m) => m.type === 'audio');
-          if (audios.length <= 1) return;
-          const idx = audios.findIndex((a) => a.id === currentTrack?.id);
-          const next = audios[(idx + 1) % audios.length];
-          setCurrentTrack(next);
-        }}
-        onPrev={() => {
-          const audios = appData.media.filter((m) => m.type === 'audio');
-          if (audios.length <= 1) return;
-          const idx = audios.findIndex((a) => a.id === currentTrack?.id);
-          const prev = audios[(idx - 1 + audios.length) % audios.length];
-          setCurrentTrack(prev);
-        }}
+        onNext={handleNextTrack}
+        onPrev={handlePrevTrack}
         onClose={() => {
           setIsPlayingAudio(false);
           setCurrentTrack(null);
+          setMediaActiveAudioTrack(null);
+          setIsTurntableOpen(false);
         }}
         onTrackProgress={(pos) => {
           if (currentTrack) {
             handleUpdateMediaProgress(currentTrack.id, pos, false);
           }
         }}
+        onNavigateToTrack={handleReturnToPlayingSong}
+        currentTime={audioCurrentTime}
+        duration={audioDuration}
+        onTimeUpdate={(cur, dur) => {
+          setAudioCurrentTime(cur);
+          if (dur) setAudioDuration(dur);
+        }}
+        seekTime={audioSeekTime}
+        onSeeked={() => setAudioSeekTime(null)}
+        volume={audioVolume}
+        isMuted={audioIsMuted}
+        onVolumeChange={setAudioVolume}
+        onToggleMute={() => setAudioIsMuted(!audioIsMuted)}
       />
 
       {/* 5. Modals */}
@@ -2352,38 +2476,6 @@ export default function App() {
         lowSpecMode={appData.settings.lowSpecMode}
       />
 
-      {/* Persistent Background Vinyl Disc Widget (Bottom-right corner) */}
-      {currentTrack && (appData.settings.backgroundAudioEnabled !== false) && currentTab !== 'media' && (
-        <FloatingMiniDiscWidget
-          currentTrack={currentTrack}
-          isPlaying={isPlayingAudio}
-          currentTime={0}
-          duration={currentTrack.duration || 100}
-          onTogglePlay={() => setIsPlayingAudio(!isPlayingAudio)}
-          onNext={() => {
-            const audios = appData.media.filter((m) => m.type === 'audio');
-            if (audios.length <= 1) return;
-            const idx = audios.findIndex((a) => a.id === currentTrack.id);
-            const next = audios[(idx + 1) % audios.length];
-            setCurrentTrack(next);
-          }}
-          onPrev={() => {
-            const audios = appData.media.filter((m) => m.type === 'audio');
-            if (audios.length <= 1) return;
-            const idx = audios.findIndex((a) => a.id === currentTrack.id);
-            const prev = audios[(idx - 1 + audios.length) % audios.length];
-            setCurrentTrack(prev);
-          }}
-          onSeek={(pos) => handleUpdateMediaProgress(currentTrack.id, pos, false)}
-          onOpenFullPlayer={() => {
-            setCurrentTab('media');
-          }}
-          onClose={() => {
-            setIsPlayingAudio(false);
-            setCurrentTrack(null);
-          }}
-        />
-      )}
 
       {/* Netflix-Style Profile Picker */}
       {isProfilePickerOpen && (
@@ -2425,22 +2517,13 @@ export default function App() {
         track={currentTrack}
         playlist={appData?.media.filter((m) => m.type === 'audio') || []}
         isPlaying={isPlayingAudio}
+        currentTime={audioCurrentTime}
+        duration={audioDuration}
+        onSeek={(pos) => setAudioSeekTime(pos)}
         onClose={() => setIsMobileVinylOpen(false)}
         onPlayPause={() => setIsPlayingAudio(!isPlayingAudio)}
-        onNext={() => {
-          const audios = appData?.media.filter((m) => m.type === 'audio') || [];
-          if (audios.length <= 1) return;
-          const idx = audios.findIndex((a) => a.id === currentTrack?.id);
-          const next = audios[(idx + 1) % audios.length];
-          setCurrentTrack(next);
-        }}
-        onPrev={() => {
-          const audios = appData?.media.filter((m) => m.type === 'audio') || [];
-          if (audios.length <= 1) return;
-          const idx = audios.findIndex((a) => a.id === currentTrack?.id);
-          const prev = audios[(idx - 1 + audios.length) % audios.length];
-          setCurrentTrack(prev);
-        }}
+        onNext={handleNextTrack}
+        onPrev={handlePrevTrack}
         onSelectTrack={(t) => setCurrentTrack(t)}
       />
 

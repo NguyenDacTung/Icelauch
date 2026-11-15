@@ -85,3 +85,37 @@ export function parseMediaUrl(url: string, customPort?: number): ParsedMediaUrl 
     directUrl: trimmed,
   };
 }
+
+/**
+ * Extracts driveId from Google Drive links and returns direct binary audio stream URL.
+ * Handles drive.google.com/file/d/<id>/..., drive.google.com/open?id=<id>, drive.google.com/uc?id=<id>
+ * Returns direct URL: https://drive.usercontent.google.com/download?id=${driveId}&export=download
+ * Falls back to rawUrl for direct streams or non-Drive URLs.
+ */
+export function getDirectAudioStreamUrl(rawUrl: string): string {
+  if (!rawUrl) return '';
+  const trimmed = rawUrl.trim();
+
+  // If already pointing to direct usercontent download endpoint, keep as is
+  if (trimmed.includes('drive.usercontent.google.com/download')) {
+    return trimmed;
+  }
+
+  // 1. Match /file/d/<id>
+  const driveMatchD = trimmed.match(/\/file\/d\/([a-zA-Z0-9_-]+)/i);
+  let driveId = driveMatchD ? driveMatchD[1] : null;
+
+  // 2. Match [?&]id=<id> for open?id= or uc?id=
+  if (!driveId) {
+    const driveMatchId = trimmed.match(/[?&]id=([a-zA-Z0-9_-]+)/i);
+    if (driveMatchId && (trimmed.includes('drive.google.com') || trimmed.includes('docs.google.com'))) {
+      driveId = driveMatchId[1];
+    }
+  }
+
+  if (driveId) {
+    return `https://drive.usercontent.google.com/download?id=${driveId}&export=download`;
+  }
+
+  return trimmed;
+}

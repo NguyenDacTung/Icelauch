@@ -556,17 +556,21 @@ export class SupabaseSyncService {
       if (ok) mediaCount++;
     }
 
-    for (const playlist of playlists) {
+    // Strict Segregation: Only upload system playlists, NEVER upload user private/custom playlists
+    const systemPlaylists = playlists.filter((p) => !p.isUserCustom && !p.ownerProfileId);
+    let playlistCount = 0;
+    for (const playlist of systemPlaylists) {
       if (playlist.coverPath && !playlist.coverPath.startsWith('http')) {
         playlist.coverPath = (await this.uploadLocalImage(supabaseUrl, anonKey, playlist.coverPath, 'covers')) || playlist.coverPath;
       }
-      await this.upsertPlaylist(supabaseUrl, anonKey, playlist);
+      const ok = await this.upsertPlaylist(supabaseUrl, anonKey, playlist);
+      if (ok) playlistCount++;
     }
 
     return {
       success: true,
-      message: `Đã xuất bản thành công ${gameCount} game và ${mediaCount} phim & video lên Cloud!`,
-      count: gameCount + mediaCount,
+      message: `Đã xuất bản thành công ${gameCount} game, ${mediaCount} phim & video và ${playlistCount} playlist hệ thống lên Cloud!`,
+      count: gameCount + mediaCount + playlistCount,
     };
   }
 
@@ -678,9 +682,9 @@ export class SupabaseSyncService {
     }
     const finalMedia = Array.from(mediaMap.values());
 
-    // C. Sync Playlists Catalog
-    const processedPlaylists = [...localPlaylists];
-    for (const p of processedPlaylists) {
+    // C. Sync Playlists Catalog (Strictly shared system playlists only)
+    const systemLocalPlaylists = localPlaylists.filter((p) => !p.isUserCustom && !p.ownerProfileId);
+    for (const p of systemLocalPlaylists) {
       if (p.coverPath) {
         p.coverPath = await this.uploadLocalImage(supabaseUrl, anonKey, p.coverPath, 'covers');
       }
@@ -688,61 +692,22 @@ export class SupabaseSyncService {
     }
     const remotePlaylists = await this.pullPlaylists(supabaseUrl, anonKey);
     const playlistMap = new Map<string, MediaPlaylist>();
-    for (const p of processedPlaylists) playlistMap.set(p.id, p);
+    for (const p of localPlaylists) playlistMap.set(p.id, p);
     for (const rp of remotePlaylists) {
       if (!playlistMap.has(rp.id)) playlistMap.set(rp.id, rp);
     }
     const finalPlaylists = Array.from(playlistMap.values());
 
-    // D. Sync User Profiles & Personalized Data
-    const remoteProfiles = await this.pullProfiles(supabaseUrl, anonKey);
-    const mergedProfiles = new Map<string, UserProfile>();
-    for (const lp of localProfiles) mergedProfiles.set(lp.id, { ...lp });
-
-    for (const rp of remoteProfiles) {
-      const local = mergedProfiles.get(rp.id);
-      if (!local) {
-        const userData = await this.pullUserData(supabaseUrl, anonKey, rp.id);
-        mergedProfiles.set(rp.id, {
-          ...rp,
-          library: userData?.library || [],
-          watchProgress: userData?.watchProgress || {},
-          favoriteMedia: userData?.favoriteMedia || [],
-          favoritePlaylists: userData?.favoritePlaylists || [],
-          gameStats: userData?.gameStats || {},
-        });
-      } else {
-        const localActive = new Date(local.lastActiveDate || 0).getTime();
-        const remoteActive = new Date(rp.lastActiveDate || 0).getTime();
-        if (remoteActive > localActive) {
-          local.nickname = rp.nickname;
-          local.avatar = rp.avatar;
-          local.pinHash = rp.pinHash;
-          local.lastActiveDate = rp.lastActiveDate;
-          const userData = await this.pullUserData(supabaseUrl, anonKey, rp.id);
-          if (userData) {
-            local.library = userData.library || local.library;
-            local.watchProgress = { ...local.watchProgress, ...(userData.watchProgress || {}) };
-            local.favoriteMedia = userData.favoriteMedia || local.favoriteMedia;
-            local.favoritePlaylists = userData.favoritePlaylists || local.favoritePlaylists;
-            local.gameStats = { ...local.gameStats, ...(userData.gameStats || {}) };
-          }
-        }
-      }
-    }
-
-    const finalProfiles = Array.from(mergedProfiles.values());
-    for (const prof of finalProfiles) {
-      await this.upsertProfile(supabaseUrl, anonKey, prof);
-      await this.upsertUserData(supabaseUrl, anonKey, prof);
-    }
+    // D. User Profiles & Personal Data: Segregated and kept strictly local
+    // Do NOT upload user profiles, PIN hashes, or personal data to Supabase public bucket/tables
+    const finalProfiles = localProfiles;
 
     return {
       updatedProfiles: finalProfiles,
       updatedGames: finalGames,
       updatedMedia: finalMedia,
       updatedPlaylists: finalPlaylists,
-      message: `Đồng bộ thành công ${finalProfiles.length} hồ sơ, ${finalGames.length} game và ${finalMedia.length} phim/media lên Supabase Cloud!`,
+      message: `Đồng bộ thành công danh mục dùng chung (${finalGames.length} game, ${finalMedia.length} phim/media, ${finalPlaylists.length} playlists)! Dữ liệu tài khoản cá nhân được bảo vệ cục bộ.`,
     };
   }
 }

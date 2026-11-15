@@ -4,11 +4,12 @@ import type { DeviceType } from '../utils/deviceDetector';
 export const DEFAULT_SUPABASE_URL = 'https://wqmmagfrwwctvipopazx.supabase.co';
 export const DEFAULT_SUPABASE_ANON_KEY = 'sb_publishable_l1vNbLKXXhLNnfi1pI5UnQ_0EaqbXuJ';
 
-const STORAGE_KEY_APP_DATA = 'icelauch_cached_app_data';
-const STORAGE_KEY_PROFILES = 'icelauch_cached_profiles';
-const STORAGE_KEY_ACTIVE_PROFILE_ID = 'icelauch_active_profile_id';
-const STORAGE_KEY_DEVICE_PREF = 'icelauch_device_preference';
-const STORAGE_KEY_DEVICE_PROMPTED = 'icelauch_device_prompted';
+export const STORAGE_KEY_APP_DATA = 'icelauch_cached_app_data';
+export const STORAGE_KEY_PROFILES = 'icelauch_cached_profiles';
+export const STORAGE_KEY_ACTIVE_PROFILE_ID = 'icelauch_active_profile_id';
+export const STORAGE_KEY_REMEMBERED_PROFILE_ID = 'icelauch_remembered_profile_id';
+export const STORAGE_KEY_DEVICE_PREF = 'icelauch_device_preference';
+export const STORAGE_KEY_DEVICE_PROMPTED = 'icelauch_device_prompted';
 
 export function isElectron(): boolean {
   return typeof window !== 'undefined' && Boolean((window as any).api);
@@ -90,7 +91,7 @@ export async function fetchDirectCloudCatalog(
     const [gamesRes, mediaRes, profilesRes, playlistsRes] = await Promise.all([
       fetch(`${supabaseUrl}/rest/v1/icelauch_games?select=*&order=updated_at.desc`, { headers }),
       fetch(`${supabaseUrl}/rest/v1/icelauch_media?select=*&order=updated_at.desc`, { headers }),
-      fetch(`${supabaseUrl}/rest/v1/icelauch_profiles?select=*&order=last_active.desc`, { headers }),
+      fetch(`${supabaseUrl}/rest/v1/icelauch_profiles?select=*&order=created_at.asc`, { headers }),
       fetch(`${supabaseUrl}/rest/v1/icelauch_playlists?select=*&order=updated_at.desc`, { headers }),
     ]);
 

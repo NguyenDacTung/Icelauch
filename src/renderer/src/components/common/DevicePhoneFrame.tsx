@@ -9,6 +9,7 @@ interface DevicePhoneFrameProps {
   onTabReTap?: (tab: NavigationTab) => void;
   onExitSimulation?: () => void;
   isSimulated?: boolean;
+  miniPlayer?: React.ReactNode;
   isAdmin?: boolean;
   adminTimeRemaining?: number;
   onOpenAdminAuth?: () => void;
@@ -26,6 +27,7 @@ export const DevicePhoneFrame: React.FC<DevicePhoneFrameProps> = ({
   onTabReTap,
   onExitSimulation,
   isSimulated = false,
+  miniPlayer,
 }) => {
   // 5 Primary Mobile Navigation Tabs
   const mobileNavItems: { id: NavigationTab; label: string; icon: any }[] = [
@@ -110,6 +112,9 @@ export const DevicePhoneFrame: React.FC<DevicePhoneFrameProps> = ({
               {children}
             </div>
 
+            {/* Mobile Mini Player */}
+            {miniPlayer}
+
             {/* Bottom Nav */}
             {renderBottomNav()}
 
@@ -133,6 +138,9 @@ export const DevicePhoneFrame: React.FC<DevicePhoneFrameProps> = ({
       <main className="flex-1 w-full overflow-hidden flex flex-col relative">
         {children}
       </main>
+
+      {/* Mobile Mini Player */}
+      {miniPlayer}
 
       {/* Native Mobile Bottom Navigation Bar */}
       {renderBottomNav()}

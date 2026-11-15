@@ -439,7 +439,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
   };
 
   const handlePublishCloudCatalog = async () => {
-    if (!window.confirm('Hành động này sẽ xuất bản toàn bộ danh mục Game, Phim và Gói mở rộng từ máy này lên Cloud làm phiên bản chuẩn cho toàn bộ người dùng. Tiếp tục?')) {
+    if (!window.confirm('Hành động này sẽ xuất bản danh mục Game, Phim, Nhạc và Playlist hệ thống dùng chung từ máy này lên Cloud cho toàn bộ người dùng. Hồ sơ tài khoản và dữ liệu cá nhân sẽ được giữ an toàn trên máy này. Tiếp tục?')) {
       return;
     }
     sfx.playClick();
@@ -1343,7 +1343,7 @@ CREATE POLICY "Public Update Assets" ON storage.objects FOR UPDATE TO anon WITH 
                     type="button"
                     onClick={handlePublishCloudCatalog}
                     disabled={isPublishingCloud || isSyncingCloud}
-                    title="Xuất bản danh mục Game, Phim và Gói mở rộng từ máy này lên Cloud cho toàn bộ người dùng"
+                    title="Xuất bản danh mục Game, Phim, Nhạc và Playlist hệ thống từ máy này lên Cloud (Không tải dữ liệu tài khoản và playlist cá nhân)"
                     className={`px-4 py-2 rounded-xl text-xs font-black flex items-center gap-1.5 transition-all ${
                       isPublishingCloud
                         ? 'bg-white/10 text-white/50 cursor-not-allowed'
@@ -1351,7 +1351,7 @@ CREATE POLICY "Public Update Assets" ON storage.objects FOR UPDATE TO anon WITH 
                     }`}
                   >
                     <Cloud className={`w-3.5 h-3.5 ${isPublishingCloud ? 'animate-bounce' : ''}`} />
-                    <span>{isPublishingCloud ? 'Đang xuất bản...' : '☁️ Tải Lên Cloud (Publish)'}</span>
+                    <span>{isPublishingCloud ? 'Đang xuất bản...' : '☁️ Tải Lên Danh Mục Chung (Admin Publish)'}</span>
                   </button>
 
                   <button
@@ -1371,7 +1371,7 @@ CREATE POLICY "Public Update Assets" ON storage.objects FOR UPDATE TO anon WITH 
                 type="button"
                 onClick={handleManualCloudSync}
                 disabled={isSyncingCloud || isPublishingCloud || isPullingCloud}
-                title={isAdmin ? "Đồng bộ 2 chiều dữ liệu cá nhân" : "Đồng bộ an toàn: Tải danh mục mới nhất và lưu dữ liệu cá nhân của bạn"}
+                title={isAdmin ? "Đồng bộ danh mục chung từ Cloud" : "Đồng bộ an toàn: Tải danh mục mới nhất và giữ an toàn dữ liệu cá nhân"}
                 className={`px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all ${
                   isSyncingCloud
                     ? 'bg-white/10 text-white/50 cursor-not-allowed'
@@ -1379,8 +1379,19 @@ CREATE POLICY "Public Update Assets" ON storage.objects FOR UPDATE TO anon WITH 
                 }`}
               >
                 <RefreshCw className={`w-3.5 h-3.5 ${isSyncingCloud ? 'animate-spin' : ''}`} />
-                <span>{isSyncingCloud ? 'Đang đồng bộ...' : isAdmin ? 'Đồng Bộ Hồ Sơ' : 'Đồng Bộ Ngay'}</span>
+                <span>{isSyncingCloud ? 'Đang đồng bộ...' : 'Đồng Bộ Danh Mục'}</span>
               </button>
+            </div>
+          </div>
+
+          {/* Security & Data Segregation Note */}
+          <div className="p-4 rounded-xl bg-indigo-950/40 border border-indigo-500/30 flex items-start gap-3.5 shadow-sm">
+            <ShieldCheck className="w-5 h-5 text-indigo-400 shrink-0 mt-0.5" />
+            <div className="space-y-0.5">
+              <span className="text-xs font-bold text-white block">Phân định dữ liệu & Bảo mật phiên làm việc</span>
+              <p className="text-[11px] text-ice-subtext leading-relaxed">
+                Chức năng <strong>Tải Lên Danh Mục Chung (Admin Publish)</strong> chỉ xuất bản danh mục Game, Phim, Nhạc và Playlist hệ thống chung. Toàn bộ hồ sơ tài khoản (mã PIN, mật khẩu), danh sách phát cá nhân, thư viện và tiến độ riêng của người dùng được lưu trữ an toàn độc lập trên máy này, hoàn toàn không bị đẩy lên đám mây hay ảnh hưởng bởi thiết bị khác.
+              </p>
             </div>
           </div>
 

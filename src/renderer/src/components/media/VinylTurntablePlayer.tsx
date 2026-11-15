@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState } from 'react';
 import { 
   ArrowLeft, 
   Play, 
@@ -14,11 +14,7 @@ import {
   Check, 
   ListMusic, 
   Sparkles, 
-  ExternalLink, 
-  Disc,
-  Radio,
-  Share2,
-  Clock
+  Disc
 } from 'lucide-react';
 import type { MediaItem, MediaPlaylist } from '../../types';
 import { parseMediaUrl, getActiveProxyPort } from '../../utils/mediaUrl';
@@ -26,11 +22,22 @@ import { sfx } from '../../utils/sfx';
 
 interface VinylTurntablePlayerProps {
   media: MediaItem;
-  allAudio: MediaItem[];
-  playlists: MediaPlaylist[];
-  isAdmin: boolean;
+  allAudio?: MediaItem[];
+  playlists?: MediaPlaylist[];
+  isAdmin?: boolean;
+  isPlaying?: boolean;
+  currentTime?: number;
+  duration?: number;
+  volume?: number;
+  isMuted?: boolean;
+  onTogglePlay?: () => void;
+  onSeek?: (seconds: number) => void;
+  onNext?: () => void;
+  onPrev?: () => void;
+  onVolumeChange?: (volume: number) => void;
+  onToggleMute?: () => void;
   onBack: () => void;
-  onSelectTrack: (item: MediaItem) => void;
+  onSelectTrack?: (item: MediaItem) => void;
   onUpdateProgress?: (id: string, position: number, watched: boolean) => void;
   onDownloadMedia?: (id: string) => void;
   onDeleteDownloaded?: (id: string) => void;
@@ -38,108 +45,79 @@ interface VinylTurntablePlayerProps {
 
 export const VinylTurntablePlayer: React.FC<VinylTurntablePlayerProps> = ({
   media,
-  allAudio,
-  playlists,
-  isAdmin,
+  allAudio = [],
+  playlists = [],
+  isAdmin: _isAdmin,
+  isPlaying = false,
+  currentTime = 0,
+  duration = 0,
+  volume = 0.8,
+  isMuted = false,
+  onTogglePlay,
+  onSeek,
+  onNext,
+  onPrev,
+  onVolumeChange,
+  onToggleMute,
   onBack,
   onSelectTrack,
-  onUpdateProgress,
   onDownloadMedia,
   onDeleteDownloaded,
 }) => {
-  const audioRef = useRef<HTMLAudioElement>(null);
-  const [isPlaying, setIsPlaying] = useState(true);
-  const [currentTime, setCurrentTime] = useState(media.lastPosition || 0);
-  const [duration, setDuration] = useState(media.duration || 0);
-  const [volume, setVolume] = useState(1);
-  const [isMuted, setIsMuted] = useState(false);
   const [isLooping, setIsLooping] = useState(false);
   const [isShuffle, setIsShuffle] = useState(false);
   const [showPlaylistDrawer, setShowPlaylistDrawer] = useState(true);
-  const [selectedSource, setSelectedSource] = useState<'offline' | 'stream' | 'proxy' | 'direct'>('stream');
 
   const parsed = parseMediaUrl(media.link);
   const proxyUrl = parsed.id ? `http://127.0.0.1:${getActiveProxyPort()}/drive/${parsed.id}` : null;
   const isDownloaded = Boolean(media.localFilePath && media.downloadStatus === 'downloaded');
 
-  // Determine active audio src based on selected source
-  let activeAudioSrc = media.link;
-  if (selectedSource === 'offline' && media.localFilePath) {
-    activeAudioSrc = `file://${media.localFilePath}`;
-  } else if (selectedSource === 'proxy' && proxyUrl) {
-    activeAudioSrc = proxyUrl;
-  } else if (selectedSource === 'stream' && isDownloaded) {
-    // If downloaded, default to offline
-    activeAudioSrc = `file://${media.localFilePath}`;
-  }
-
   // Find playlist for this track
   const currentPlaylist = playlists.find((p) => p.itemIds.includes(media.id));
   const playlistTracks = currentPlaylist
-    ? currentPlaylist.itemIds.map((id) => allAudio.find((a) => a.id === id)).filter(Boolean) as MediaItem[]
+    ? (currentPlaylist.itemIds.map((id) => allAudio.find((a) => a.id === id)).filter(Boolean) as MediaItem[])
     : allAudio.filter((a) => a.id !== media.id);
 
-  // Auto-set offline if file is available
-  useEffect(() => {
-    if (isDownloaded) {
-      setSelectedSource('offline');
-    } else if (proxyUrl) {
-      setSelectedSource('proxy');
-    } else {
-      setSelectedSource('stream');
-    }
-  }, [media.id, isDownloaded, proxyUrl]);
-
-  // Ensure audio tag pauses cleanly on unmount
-  useEffect(() => {
-    return () => {
-      if (audioRef.current) {
-        audioRef.current.pause();
-      }
-    };
-  }, []);
-
-  // Handle Play/Pause
+  // Handle Play/Pause via controlled parent
   const togglePlay = () => {
     sfx.playClick();
-    if (!audioRef.current) return;
-    if (isPlaying) {
-      audioRef.current.pause();
-      setIsPlaying(false);
-    } else {
-      audioRef.current.play().then(() => setIsPlaying(true)).catch((e) => console.warn(e));
-    }
+    onTogglePlay?.();
   };
 
   // Skip Next / Prev
   const handleNext = () => {
     sfx.playClick();
+    if (onNext) {
+      onNext();
+      return;
+    }
     const list = playlistTracks.length > 0 ? playlistTracks : allAudio;
     const currIdx = list.findIndex((x) => x.id === media.id);
     if (currIdx !== -1 && currIdx < list.length - 1) {
-      onSelectTrack(list[currIdx + 1]);
+      onSelectTrack?.(list[currIdx + 1]);
     } else if (list.length > 0) {
-      onSelectTrack(list[0]);
+      onSelectTrack?.(list[0]);
     }
   };
 
   const handlePrev = () => {
     sfx.playClick();
+    if (onPrev) {
+      onPrev();
+      return;
+    }
     const list = playlistTracks.length > 0 ? playlistTracks : allAudio;
     const currIdx = list.findIndex((x) => x.id === media.id);
     if (currIdx > 0) {
-      onSelectTrack(list[currIdx - 1]);
+      onSelectTrack?.(list[currIdx - 1]);
     } else if (list.length > 0) {
-      onSelectTrack(list[list.length - 1]);
+      onSelectTrack?.(list[list.length - 1]);
     }
   };
 
   const handleSeek = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = parseFloat(e.target.value);
-    setCurrentTime(val);
-    if (audioRef.current) {
-      audioRef.current.currentTime = val;
-    }
+    onSeek?.(val);
   };
 
   const formatTime = (secs: number) => {
@@ -151,38 +129,13 @@ export const VinylTurntablePlayer: React.FC<VinylTurntablePlayerProps> = ({
 
   // Cover image
   const coverUrl = media.coverPath
-    ? (media.coverPath.startsWith('http') || media.coverPath.startsWith('data:') ? media.coverPath : `file://${media.coverPath}`)
+    ? (media.coverPath.startsWith('http') || media.coverPath.startsWith('data:') || media.coverPath.startsWith('file:')
+        ? media.coverPath
+        : `file://${media.coverPath}`)
     : parsed.thumbnailUrl || '';
 
   return (
     <div className="flex-1 flex flex-col h-full bg-[#0B0D11] text-white select-none overflow-hidden">
-      {/* Hidden Audio Tag */}
-      <audio
-        ref={audioRef}
-        src={activeAudioSrc}
-        autoPlay
-        loop={isLooping}
-        onTimeUpdate={() => {
-          if (audioRef.current) {
-            setCurrentTime(audioRef.current.currentTime);
-            onUpdateProgress?.(media.id, audioRef.current.currentTime, false);
-          }
-        }}
-        onLoadedMetadata={() => {
-          if (audioRef.current) {
-            setDuration(audioRef.current.duration);
-            if (media.lastPosition && media.lastPosition > 5 && !media.watched) {
-              audioRef.current.currentTime = media.lastPosition;
-            }
-          }
-        }}
-        onEnded={() => {
-          onUpdateProgress?.(media.id, duration, true);
-          handleNext();
-        }}
-        onError={(e) => console.warn('Audio tag playback error:', e)}
-      />
-
       {/* Top Header Bar */}
       <div className="flex items-center justify-between px-6 py-4 border-b border-ice-border/60 bg-ice-card/50 backdrop-blur-md shrink-0">
         <div className="flex items-center gap-3">
@@ -198,41 +151,27 @@ export const VinylTurntablePlayer: React.FC<VinylTurntablePlayerProps> = ({
           </button>
           <div>
             <span className="text-[10px] font-bold uppercase tracking-wider text-amber-400 flex items-center gap-1">
-              <Disc className="w-3.5 h-3.5 animate-spin" style={{ animationDuration: '4s' }} />
+              <Disc className={`w-3.5 h-3.5 ${isPlaying ? 'animate-spin' : ''}`} style={{ animationDuration: '4s' }} />
               {currentPlaylist ? currentPlaylist.name : 'Đĩa Than Âm Nhạc'}
             </span>
             <h1 className="text-sm font-bold text-white truncate max-w-md">{media.title}</h1>
           </div>
         </div>
 
-        {/* Source Switcher Pills */}
+        {/* Source Badges & Download Actions */}
         <div className="flex items-center gap-2">
           {isDownloaded && (
-            <button
-              onClick={() => setSelectedSource('offline')}
-              className={`px-2.5 py-1 rounded-lg text-xs font-semibold flex items-center gap-1 border transition-all ${
-                selectedSource === 'offline'
-                  ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/50 shadow-md'
-                  : 'bg-ice-bg text-ice-muted border-ice-border hover:text-white'
-              }`}
-            >
+            <div className="px-2.5 py-1 rounded-lg text-xs font-semibold flex items-center gap-1 border bg-emerald-500/20 text-emerald-300 border-emerald-500/50 shadow-md">
               <Check className="w-3 h-3 text-emerald-400" />
               <span>Bản Offline</span>
-            </button>
+            </div>
           )}
 
-          {proxyUrl && (
-            <button
-              onClick={() => setSelectedSource('proxy')}
-              className={`px-2.5 py-1 rounded-lg text-xs font-semibold flex items-center gap-1 border transition-all ${
-                selectedSource === 'proxy'
-                  ? 'bg-blue-500/20 text-blue-300 border-blue-500/50 shadow-md'
-                  : 'bg-ice-bg text-ice-muted border-ice-border hover:text-white'
-              }`}
-            >
+          {!isDownloaded && proxyUrl && (
+            <div className="px-2.5 py-1 rounded-lg text-xs font-semibold flex items-center gap-1 border bg-blue-500/20 text-blue-300 border-blue-500/50 shadow-md">
               <Sparkles className="w-3 h-3 text-blue-400" />
               <span>HTML5 Proxy</span>
-            </button>
+            </div>
           )}
 
           {/* Download offline action */}
@@ -418,14 +357,12 @@ export const VinylTurntablePlayer: React.FC<VinylTurntablePlayerProps> = ({
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => {
-                    if (audioRef.current) {
-                      audioRef.current.muted = !isMuted;
-                      setIsMuted(!isMuted);
-                    }
+                    sfx.playClick();
+                    onToggleMute?.();
                   }}
                   className="text-ice-muted hover:text-white transition-colors"
                 >
-                  {isMuted ? <VolumeX className="w-4 h-4 text-red-400" /> : <Volume2 className="w-4 h-4" />}
+                  {isMuted || volume === 0 ? <VolumeX className="w-4 h-4 text-red-400" /> : <Volume2 className="w-4 h-4" />}
                 </button>
                 <input
                   type="range"
@@ -435,12 +372,7 @@ export const VinylTurntablePlayer: React.FC<VinylTurntablePlayerProps> = ({
                   value={isMuted ? 0 : volume}
                   onChange={(e) => {
                     const v = parseFloat(e.target.value);
-                    setVolume(v);
-                    setIsMuted(false);
-                    if (audioRef.current) {
-                      audioRef.current.volume = v;
-                      audioRef.current.muted = false;
-                    }
+                    onVolumeChange?.(v);
                   }}
                   className="w-20 h-1.5 rounded-lg appearance-none bg-white/20 accent-amber-400 cursor-pointer"
                 />
@@ -468,7 +400,7 @@ export const VinylTurntablePlayer: React.FC<VinylTurntablePlayerProps> = ({
                     key={item.id}
                     onClick={() => {
                       sfx.playClick();
-                      onSelectTrack(item);
+                      onSelectTrack?.(item);
                     }}
                     className={`flex items-center gap-2.5 p-2 rounded-xl cursor-pointer transition-all ${
                       isCurrent
@@ -504,4 +436,3 @@ export const VinylTurntablePlayer: React.FC<VinylTurntablePlayerProps> = ({
     </div>
   );
 };
-

@@ -887,18 +887,24 @@ app.whenReady().then(async () => {
     }
 
     try {
+      const systemPlaylists = storage.getPlaylists().filter((p) => !p.isUserCustom && !p.ownerProfileId);
       const res = await SupabaseSyncService.getInstance().syncAll(
         targetUrl,
         targetKey,
         storage.getProfiles(),
         storage.getGames(),
         storage.getMedia(),
-        storage.getPlaylists()
+        systemPlaylists
       );
-      storage.setAllProfiles(res.updatedProfiles);
       storage.setAllGames(res.updatedGames);
       storage.setAllMedia(res.updatedMedia);
-      storage.setAllPlaylists(res.updatedPlaylists);
+
+      const existingUserPlaylists = storage.getPlaylists().filter((p) => p.isUserCustom || p.ownerProfileId);
+      const playlistMap = new Map<string, MediaPlaylist>();
+      for (const p of res.updatedPlaylists) playlistMap.set(p.id, p);
+      for (const p of existingUserPlaylists) playlistMap.set(p.id, p);
+      const mergedPlaylists = Array.from(playlistMap.values());
+      storage.setAllPlaylists(mergedPlaylists);
 
       storage.saveCloudSyncSettings({
         lastSyncedAt: new Date().toISOString(),
@@ -907,17 +913,17 @@ app.whenReady().then(async () => {
       });
 
       mainWindow?.webContents.send('cloud:synced', {
-        profiles: res.updatedProfiles,
+        profiles: storage.getProfiles(),
         games: res.updatedGames,
         media: res.updatedMedia,
-        playlists: res.updatedPlaylists,
+        playlists: mergedPlaylists,
         message: res.message,
       });
 
       return {
         success: true,
         message: res.message,
-        profiles: res.updatedProfiles,
+        profiles: storage.getProfiles(),
         games: res.updatedGames,
         media: res.updatedMedia,
       };
@@ -941,12 +947,13 @@ app.whenReady().then(async () => {
     }
 
     try {
+      const systemPlaylists = storage.getPlaylists().filter((p) => !p.isUserCustom && !p.ownerProfileId);
       const res = await SupabaseSyncService.getInstance().publishCatalog(
         targetUrl,
         targetKey,
         storage.getGames(),
         storage.getMedia(),
-        storage.getPlaylists()
+        systemPlaylists
       );
 
       storage.saveCloudSyncSettings({
@@ -1033,18 +1040,25 @@ app.whenReady().then(async () => {
     try {
       isAutoSyncing = true;
       console.log(`[Supabase Auto-Sync] Triggered by ${reason}...`);
+      const systemPlaylists = storage.getPlaylists().filter((p) => !p.isUserCustom && !p.ownerProfileId);
       const res = await SupabaseSyncService.getInstance().syncAll(
         syncSettings.supabaseUrl,
         syncSettings.supabaseAnonKey,
         storage.getProfiles(),
         storage.getGames(),
         storage.getMedia(),
-        storage.getPlaylists()
+        systemPlaylists
       );
-      storage.setAllProfiles(res.updatedProfiles);
+      // Profiles are kept local; update shared catalog items only
       storage.setAllGames(res.updatedGames);
       storage.setAllMedia(res.updatedMedia);
-      storage.setAllPlaylists(res.updatedPlaylists);
+
+      const existingUserPlaylists = storage.getPlaylists().filter((p) => p.isUserCustom || p.ownerProfileId);
+      const playlistMap = new Map<string, MediaPlaylist>();
+      for (const p of res.updatedPlaylists) playlistMap.set(p.id, p);
+      for (const p of existingUserPlaylists) playlistMap.set(p.id, p);
+      const mergedPlaylists = Array.from(playlistMap.values());
+      storage.setAllPlaylists(mergedPlaylists);
 
       storage.saveCloudSyncSettings({
         lastSyncedAt: new Date().toISOString(),
@@ -1052,10 +1066,10 @@ app.whenReady().then(async () => {
         lastSyncMessage: res.message,
       });
       mainWindow?.webContents.send('cloud:synced', {
-        profiles: res.updatedProfiles,
+        profiles: storage.getProfiles(),
         games: res.updatedGames,
         media: res.updatedMedia,
-        playlists: res.updatedPlaylists,
+        playlists: mergedPlaylists,
         message: res.message,
       });
       console.log(`[Supabase Auto-Sync] Success: ${res.message}`);
@@ -1092,13 +1106,14 @@ app.whenReady().then(async () => {
     if (syncSettings.enabled && syncSettings.supabaseUrl && syncSettings.supabaseAnonKey) {
       try {
         console.log('[Supabase Auto-Sync] Final sync before quit...');
+        const systemPlaylists = storage.getPlaylists().filter((p) => !p.isUserCustom && !p.ownerProfileId);
         await SupabaseSyncService.getInstance().syncAll(
           syncSettings.supabaseUrl,
           syncSettings.supabaseAnonKey,
           storage.getProfiles(),
           storage.getGames(),
           storage.getMedia(),
-          storage.getPlaylists()
+          systemPlaylists
         );
       } catch (e) {
         console.warn('Final quit sync error:', e);

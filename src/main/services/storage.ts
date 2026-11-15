@@ -43,7 +43,14 @@ export class StorageService {
     this.logsDir = path.join(this.dataDir, 'logs');
     this.gamesDir = path.join(this.rootDir, 'Games');
     this.downloadsDir = path.join(this.rootDir, 'Downloads');
-    this.toolsDir = path.join(this.rootDir, '7z');
+    
+    // Resolve 7z tools directory: check process.resourcesPath first (packaged Electron production build), fallback to rootDir
+    const resources7z = process.resourcesPath ? path.join(process.resourcesPath, '7z') : '';
+    const root7z = path.join(this.rootDir, '7z');
+    this.toolsDir = (resources7z && (fs.existsSync(path.join(resources7z, '7z.exe')) || fs.existsSync(resources7z)))
+      ? resources7z
+      : root7z;
+
     this.mediaDownloadsDir = path.join(this.dataDir, 'media_downloads');
 
     this.ensureDirectories();
@@ -74,6 +81,28 @@ export class StorageService {
     }
   }
 
+  /**
+   * Resolves the absolute path to a bundled tool executable (e.g., '7z.exe').
+   * Checks process.resourcesPath (packaged Electron extraResources), toolsDir, and rootDir.
+   */
+  public resolveTool(toolName: string): string {
+    const candidates = [
+      process.resourcesPath ? path.join(process.resourcesPath, '7z', toolName) : '',
+      process.resourcesPath ? path.join(process.resourcesPath, toolName) : '',
+      path.join(this.toolsDir, toolName),
+      path.join(this.rootDir, '7z', toolName),
+      path.join(this.rootDir, toolName),
+    ].filter(Boolean);
+
+    for (const candidate of candidates) {
+      if (fs.existsSync(candidate)) {
+        return candidate;
+      }
+    }
+
+    return path.join(this.toolsDir, toolName);
+  }
+
   public getPaths() {
     const s = this.data?.settings;
     const effectiveGamesDir = s?.defaultGamesInstallPath && fs.existsSync(s.defaultGamesInstallPath)
@@ -94,7 +123,7 @@ export class StorageService {
       downloadsDir: effectiveDownloadsDir,
       toolsDir: this.toolsDir,
       mediaDownloadsDir: this.mediaDownloadsDir,
-      sevenZipExe: path.join(this.toolsDir, '7z.exe'),
+      sevenZipExe: this.resolveTool('7z.exe'),
     };
   }
 

@@ -48,6 +48,20 @@ interface MediaViewProps {
   settings?: AppSettings;
   isAdmin: boolean;
   searchQuery: string;
+  currentTrack?: MediaItem | null;
+  activeAudioTrack?: MediaItem | null;
+  onActiveAudioTrackChange?: (track: MediaItem | null) => void;
+  isPlayingAudio?: boolean;
+  audioCurrentTime?: number;
+  audioDuration?: number;
+  audioVolume?: number;
+  audioIsMuted?: boolean;
+  onTogglePlayAudio?: () => void;
+  onSeekAudio?: (seconds: number) => void;
+  onNextAudio?: () => void;
+  onPrevAudio?: () => void;
+  onVolumeChange?: (v: number) => void;
+  onToggleMuteAudio?: () => void;
   favoriteMediaIds?: string[];
   favoritePlaylistIds?: string[];
   onToggleFavoriteMedia?: (id: string) => void;
@@ -80,6 +94,20 @@ export const MediaView: React.FC<MediaViewProps> = ({
   settings,
   isAdmin,
   searchQuery,
+  currentTrack,
+  activeAudioTrack: propActiveAudioTrack,
+  onActiveAudioTrackChange,
+  isPlayingAudio,
+  audioCurrentTime,
+  audioDuration,
+  audioVolume,
+  audioIsMuted,
+  onTogglePlayAudio,
+  onSeekAudio,
+  onNextAudio,
+  onPrevAudio,
+  onVolumeChange,
+  onToggleMuteAudio,
   favoriteMediaIds = [],
   favoritePlaylistIds = [],
   onToggleFavoriteMedia,
@@ -108,7 +136,27 @@ export const MediaView: React.FC<MediaViewProps> = ({
   const [selectedTag, setSelectedTag] = useState<string>('all');
   const [filterOfflineOnly, setFilterOfflineOnly] = useState(false);
   const [activeVideo, setActiveVideo] = useState<MediaItem | null>(null);
-  const [activeAudioTrack, setActiveAudioTrack] = useState<MediaItem | null>(null);
+  const [internalActiveAudioTrack, setInternalActiveAudioTrack] = useState<MediaItem | null>(null);
+  const effectiveActiveAudioTrack = propActiveAudioTrack !== undefined ? propActiveAudioTrack : internalActiveAudioTrack;
+
+  const setActiveAudio = (track: MediaItem | null) => {
+    if (onActiveAudioTrackChange) {
+      onActiveAudioTrackChange(track);
+    }
+    setInternalActiveAudioTrack(track);
+  };
+
+  // Auto-switch activeTab to 'podcast' or 'music' when activeAudioTrack is set
+  useEffect(() => {
+    if (effectiveActiveAudioTrack) {
+      if (effectiveActiveAudioTrack.subType === 'podcast') {
+        setActiveTab('podcast');
+      } else {
+        setActiveTab('music');
+      }
+    }
+  }, [effectiveActiveAudioTrack?.id, effectiveActiveAudioTrack?.subType]);
+
   const [showHiddenOnly, setShowHiddenOnly] = useState(false);
   const [visibleCount, setVisibleCount] = useState<number>(24);
 
@@ -137,7 +185,7 @@ export const MediaView: React.FC<MediaViewProps> = ({
   const handleOpenAudio = (track: MediaItem) => {
     sfx.playClick();
     onTurntableOpenChange?.(true);
-    setActiveAudioTrack(track);
+    setActiveAudio(track);
     onPlayAudio?.(track);
   };
 
@@ -227,6 +275,8 @@ export const MediaView: React.FC<MediaViewProps> = ({
     const isDownloaded = Boolean(item.localFilePath && item.downloadStatus === 'downloaded');
     const IconComponent = item.type === 'video' ? Film : item.subType === 'podcast' ? Mic : Music;
 
+    const isPlayingCurrent = currentTrack && item.id === currentTrack.id;
+
     return (
       <div
         key={item.id}
@@ -234,7 +284,11 @@ export const MediaView: React.FC<MediaViewProps> = ({
           if (item.type === 'video') handleOpenVideo(item);
           else handleOpenAudio(item);
         }}
-        className={`group relative bg-ice-card rounded-xl overflow-hidden border border-ice-border hover:border-amber-400/80 hover:shadow-xl cursor-pointer transition-all duration-300 hover:-translate-y-1 flex flex-col ${
+        className={`group relative bg-ice-card rounded-xl overflow-hidden border ${
+          isPlayingCurrent
+            ? 'border-amber-400 ring-2 ring-amber-500/50 shadow-amber-500/20'
+            : 'border-ice-border hover:border-amber-400/80 hover:shadow-xl'
+        } cursor-pointer transition-all duration-300 hover:-translate-y-1 flex flex-col ${
           isShelf ? 'w-[170px] shrink-0' : ''
         }`}
       >
@@ -411,16 +465,27 @@ export const MediaView: React.FC<MediaViewProps> = ({
   }
 
   // 2. VINYL TURNTABLE AUDIO PLAYER
-  if (activeAudioTrack) {
+  if (effectiveActiveAudioTrack) {
     return (
       <VinylTurntablePlayer
-        media={activeAudioTrack}
+        media={effectiveActiveAudioTrack}
         allAudio={tabMedia}
         playlists={tabPlaylists}
         isAdmin={isAdmin}
+        isPlaying={isPlayingAudio}
+        currentTime={audioCurrentTime}
+        duration={audioDuration || effectiveActiveAudioTrack.duration || 0}
+        volume={audioVolume}
+        isMuted={audioIsMuted}
+        onTogglePlay={onTogglePlayAudio}
+        onSeek={onSeekAudio}
+        onNext={onNextAudio}
+        onPrev={onPrevAudio}
+        onVolumeChange={onVolumeChange}
+        onToggleMute={onToggleMuteAudio}
         onBack={() => {
           onTurntableOpenChange?.(false);
-          setActiveAudioTrack(null);
+          setActiveAudio(null);
         }}
         onSelectTrack={(item) => handleOpenAudio(item)}
         onUpdateProgress={onUpdateMediaProgress}
@@ -467,9 +532,8 @@ export const MediaView: React.FC<MediaViewProps> = ({
 
         {/* Playlist Header Card */}
         <div className="p-6 rounded-2xl bg-gradient-to-r from-[#141824] via-[#10141E] to-[#161B29] border border-white/10 shadow-2xl flex flex-wrap md:flex-nowrap items-center gap-6">
-          <div className={`overflow-hidden bg-black/70 shrink-0 border border-white/15 shadow-xl ${
-            viewingPlaylist.coverAspectRatio === '16:9' ? 'w-48 aspect-video rounded-xl' : 'w-32 h-32 rounded-2xl'
-          }`}>
+          <div className={`overflow-hidden bg-black/70 shrink-0 border border-white/15 shadow-xl ${viewingPlaylist.coverAspectRatio === '16:9' ? 'w-48 aspect-video rounded-xl' : 'w-32 h-32 rounded-2xl'
+            }`}>
             {viewingPlaylist.coverPath ? (
               <img
                 src={viewingPlaylist.coverPath.startsWith('http') ? viewingPlaylist.coverPath : `file://${viewingPlaylist.coverPath}`}
@@ -510,8 +574,7 @@ export const MediaView: React.FC<MediaViewProps> = ({
                     const first = processedItems[0];
                     if (first.type === 'video') setActiveVideo(first);
                     else {
-                      setActiveAudioTrack(first);
-                      onPlayAudio?.(first);
+                      handleOpenAudio(first);
                     }
                   }}
                   className="flex items-center gap-2 px-4 py-2 rounded-xl bg-amber-400 hover:bg-amber-300 text-black text-xs font-bold transition-all shadow-lg shadow-amber-400/20 active:scale-95"
@@ -525,11 +588,10 @@ export const MediaView: React.FC<MediaViewProps> = ({
               {onToggleFavoritePlaylist && (
                 <button
                   onClick={() => onToggleFavoritePlaylist(viewingPlaylist.id)}
-                  className={`flex items-center gap-1.5 px-3 py-2 rounded-xl border text-xs font-semibold transition-all active:scale-95 ${
-                    isPlaylistFavorite
-                      ? 'bg-rose-500/20 border-rose-500/50 text-rose-400'
-                      : 'bg-white/5 border-white/10 text-white/70 hover:text-white'
-                  }`}
+                  className={`flex items-center gap-1.5 px-3 py-2 rounded-xl border text-xs font-semibold transition-all active:scale-95 ${isPlaylistFavorite
+                    ? 'bg-rose-500/20 border-rose-500/50 text-rose-400'
+                    : 'bg-white/5 border-white/10 text-white/70 hover:text-white'
+                    }`}
                   title={isPlaylistFavorite ? 'Đã yêu thích' : 'Lưu vào yêu thích'}
                 >
                   <Heart className={`w-3.5 h-3.5 ${isPlaylistFavorite ? 'fill-current text-rose-500' : ''}`} />
@@ -644,11 +706,10 @@ export const MediaView: React.FC<MediaViewProps> = ({
               setSelectedTag('all');
             }}
             title="Phim & Video"
-            className={`flex items-center gap-2 py-2 rounded-xl text-xs font-bold transition-all duration-300 ${
-              activeTab === 'video'
-                ? 'px-4 bg-blue-600/30 text-blue-400 border border-blue-500/50 shadow-md'
-                : 'px-3 text-ice-subtext hover:text-white hover:bg-white/5 border border-transparent'
-            }`}
+            className={`flex items-center gap-2 py-2 rounded-xl text-xs font-bold transition-all duration-300 ${activeTab === 'video'
+              ? 'px-4 bg-blue-600/30 text-blue-400 border border-blue-500/50 shadow-md'
+              : 'px-3 text-ice-subtext hover:text-white hover:bg-white/5 border border-transparent'
+              }`}
           >
             <Film className="w-4 h-4 shrink-0" />
             {activeTab === 'video' && <span>Phim & Video</span>}
@@ -661,11 +722,10 @@ export const MediaView: React.FC<MediaViewProps> = ({
               setSelectedTag('all');
             }}
             title="Âm Nhạc"
-            className={`flex items-center gap-2 py-2 rounded-xl text-xs font-bold transition-all duration-300 ${
-              activeTab === 'music'
-                ? 'px-4 bg-amber-500/20 text-amber-300 border border-amber-500/50 shadow-md'
-                : 'px-3 text-ice-subtext hover:text-white hover:bg-white/5 border border-transparent'
-            }`}
+            className={`flex items-center gap-2 py-2 rounded-xl text-xs font-bold transition-all duration-300 ${activeTab === 'music'
+              ? 'px-4 bg-amber-500/20 text-amber-300 border border-amber-500/50 shadow-md'
+              : 'px-3 text-ice-subtext hover:text-white hover:bg-white/5 border border-transparent'
+              }`}
           >
             <Music className="w-4 h-4 shrink-0" />
             {activeTab === 'music' && <span>Âm Nhạc</span>}
@@ -678,11 +738,10 @@ export const MediaView: React.FC<MediaViewProps> = ({
               setSelectedTag('all');
             }}
             title="Podcast & Sách Nói"
-            className={`flex items-center gap-2 py-2 rounded-xl text-xs font-bold transition-all duration-300 ${
-              activeTab === 'podcast'
-                ? 'px-4 bg-purple-600/30 text-purple-300 border border-purple-500/50 shadow-md'
-                : 'px-3 text-ice-subtext hover:text-white hover:bg-white/5 border border-transparent'
-            }`}
+            className={`flex items-center gap-2 py-2 rounded-xl text-xs font-bold transition-all duration-300 ${activeTab === 'podcast'
+              ? 'px-4 bg-purple-600/30 text-purple-300 border border-purple-500/50 shadow-md'
+              : 'px-3 text-ice-subtext hover:text-white hover:bg-white/5 border border-transparent'
+              }`}
           >
             <Mic className="w-4 h-4 shrink-0" />
             {activeTab === 'podcast' && <span>Podcast & Sách Nói</span>}
@@ -710,11 +769,10 @@ export const MediaView: React.FC<MediaViewProps> = ({
               sfx.playClick();
               setFilterOfflineOnly(!filterOfflineOnly);
             }}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all ${
-              filterOfflineOnly
-                ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/40 shadow-sm'
-                : 'bg-ice-card text-ice-subtext border-ice-border hover:text-white'
-            }`}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all ${filterOfflineOnly
+              ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/40 shadow-sm'
+              : 'bg-ice-card text-ice-subtext border-ice-border hover:text-white'
+              }`}
           >
             <Download className="w-3.5 h-3.5" />
             <span>Chỉ mục đã tải</span>
@@ -726,11 +784,10 @@ export const MediaView: React.FC<MediaViewProps> = ({
                 sfx.playClick();
                 setShowHiddenOnly(!showHiddenOnly);
               }}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all ${
-                showHiddenOnly
-                  ? 'bg-amber-500/20 text-amber-400 border-amber-500/50 shadow-sm'
-                  : 'bg-ice-card text-ice-subtext border-ice-border hover:text-white'
-              }`}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all ${showHiddenOnly
+                ? 'bg-amber-500/20 text-amber-400 border-amber-500/50 shadow-sm'
+                : 'bg-ice-card text-ice-subtext border-ice-border hover:text-white'
+                }`}
             >
               {showHiddenOnly ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
               <span>{showHiddenOnly ? 'Đang lọc mục ẩn' : 'Xem mục ẩn'}</span>
@@ -793,8 +850,7 @@ export const MediaView: React.FC<MediaViewProps> = ({
             if (item.type === 'video') {
               setActiveVideo(item);
             } else {
-              setActiveAudioTrack(item);
-              onPlayAudio?.(item);
+              handleOpenAudio(item);
             }
           }}
         />
@@ -816,8 +872,7 @@ export const MediaView: React.FC<MediaViewProps> = ({
                 onClick={() => {
                   sfx.playClick();
                   if (isAudio) {
-                    setActiveAudioTrack(item);
-                    onPlayAudio?.(item);
+                    handleOpenAudio(item);
                   } else {
                     setActiveVideo(item);
                   }
@@ -876,11 +931,10 @@ export const MediaView: React.FC<MediaViewProps> = ({
               sfx.playClick();
               setSelectedTag('all');
             }}
-            className={`px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all border ${
-              selectedTag === 'all'
-                ? 'bg-amber-500/20 text-amber-300 border-amber-500/50 shadow-sm'
-                : 'bg-ice-card text-ice-text border-ice-border hover:text-white'
-            }`}
+            className={`px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all border ${selectedTag === 'all'
+              ? 'bg-amber-500/20 text-amber-300 border-amber-500/50 shadow-sm'
+              : 'bg-ice-card text-ice-text border-ice-border hover:text-white'
+              }`}
           >
             Tất cả
           </button>
@@ -891,11 +945,10 @@ export const MediaView: React.FC<MediaViewProps> = ({
                 sfx.playClick();
                 setSelectedTag(tag);
               }}
-              className={`px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all border ${
-                selectedTag === tag
-                  ? 'bg-amber-500/20 text-amber-300 border-amber-500/50 shadow-sm'
-                  : 'bg-ice-card text-ice-text border-ice-border hover:text-white'
-              }`}
+              className={`px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all border ${selectedTag === tag
+                ? 'bg-amber-500/20 text-amber-300 border-amber-500/50 shadow-sm'
+                : 'bg-ice-card text-ice-text border-ice-border hover:text-white'
+                }`}
             >
               {tag}
             </button>
@@ -935,10 +988,10 @@ export const MediaView: React.FC<MediaViewProps> = ({
               {searchQuery
                 ? `Kết quả tìm kiếm cho "${searchQuery}"`
                 : selectedTag !== 'all'
-                ? `Thể loại: ${selectedTag}`
-                : activeTab === 'video'
-                ? 'Kho Phim & Video'
-                : 'Kho Bài Hát & Tuyển Tập'}
+                  ? `Thể loại: ${selectedTag}`
+                  : activeTab === 'video'
+                    ? 'Kho Phim & Video'
+                    : 'Kho Bài Hát & Tuyển Tập'}
             </span>
             <span className="text-xs text-ice-muted font-mono font-normal">({filteredMedia.length})</span>
           </h3>
