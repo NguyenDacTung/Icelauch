@@ -26,6 +26,12 @@
     font-feature-settings: "cv02", "cv03", "cv04", "cv11";
   }
 
+  /* Form controls must allow text selection and editing in Electron & WebKit */
+  input, textarea {
+    user-select: text !important;
+    -webkit-user-select: text !important;
+  }
+
   /* Custom scrollbar for modern gaming app look */
   ::-webkit-scrollbar {
     width: 6px;

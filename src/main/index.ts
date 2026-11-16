@@ -971,12 +971,21 @@ app.whenReady().then(async () => {
 
     try {
       const systemPlaylists = storage.getPlaylists().filter((p) => !p.isUserCustom && !p.ownerProfileId);
+      const appSettings = storage.getSettings();
       const res = await SupabaseSyncService.getInstance().publishCatalog(
         targetUrl,
         targetKey,
         storage.getGames(),
         storage.getMedia(),
-        systemPlaylists
+        systemPlaylists,
+        {
+          gameTags: appSettings.gameTags,
+          movieTags: appSettings.movieTags,
+          musicTags: appSettings.musicTags,
+          podcastTags: appSettings.podcastTags,
+          bannerSettings: appSettings.bannerSettings,
+          globalActionButtons: appSettings.globalActionButtons,
+        }
       );
 
       storage.saveCloudSyncSettings({
@@ -1003,6 +1012,9 @@ app.whenReady().then(async () => {
 
     try {
       const res = await SupabaseSyncService.getInstance().pullCatalog(targetUrl, targetKey);
+      if (res.systemSettings) {
+        storage.updateSettings(res.systemSettings);
+      }
       storage.setAllGames(res.games);
       storage.setAllMedia(res.media);
       storage.setAllPlaylists(res.playlists);

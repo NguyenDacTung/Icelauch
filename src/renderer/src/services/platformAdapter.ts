@@ -81,6 +81,7 @@ export async function fetchDirectCloudCatalog(
   media: MediaItem[];
   profiles: UserProfile[];
   playlists: MediaPlaylist[];
+  systemSettings?: any;
 }> {
   const headers = {
     apikey: anonKey,
@@ -88,17 +89,24 @@ export async function fetchDirectCloudCatalog(
   };
 
   try {
-    const [gamesRes, mediaRes, profilesRes, playlistsRes] = await Promise.all([
+    const [gamesRes, mediaRes, profilesRes, playlistsRes, userDataRes] = await Promise.all([
       fetch(`${supabaseUrl}/rest/v1/icelauch_games?select=*&order=updated_at.desc`, { headers }),
       fetch(`${supabaseUrl}/rest/v1/icelauch_media?select=*&order=updated_at.desc`, { headers }),
       fetch(`${supabaseUrl}/rest/v1/icelauch_profiles?select=*&order=created_at.asc`, { headers }),
       fetch(`${supabaseUrl}/rest/v1/icelauch_playlists?select=*&order=updated_at.desc`, { headers }),
+      fetch(`${supabaseUrl}/rest/v1/icelauch_user_data?select=*`, { headers }),
     ]);
 
     const rawGames = gamesRes.ok ? await gamesRes.json() : [];
     const rawMedia = mediaRes.ok ? await mediaRes.json() : [];
     const rawProfiles = profilesRes.ok ? await profilesRes.json() : [];
     const rawPlaylists = playlistsRes.ok ? await playlistsRes.json() : [];
+    const rawUserData = userDataRes.ok ? await userDataRes.json() : [];
+
+    const userDataMap = new Map<string, any>();
+    (rawUserData || []).forEach((u: any) => {
+      if (u && u.profile_id) userDataMap.set(u.profile_id, u);
+    });
 
     // Map database snake_case to frontend camelCase
     const games: Game[] = (rawGames || []).map((row: any) => ({
@@ -140,19 +148,45 @@ export async function fetchDirectCloudCatalog(
 
     const profiles: UserProfile[] = (rawProfiles || [])
       .filter((row: any) => row.id !== 'icedrop_cloud_hub' && row.id !== 'icelauch_device_registry' && !String(row.id).startsWith('icelauch_'))
-      .map((row: any) => ({
-        id: row.id,
-        nickname: row.nickname,
-        avatar: row.avatar || 'avatar_1',
-        pinHash: row.pin_hash,
-        createdDate: row.created_at,
-        lastActiveDate: row.last_active,
-        library: [],
-        favoriteMedia: [],
-        watchProgress: {},
-      }));
+      .map((row: any) => {
+        const udata = userDataMap.get(row.id);
+        const gs = udata?.game_stats || {};
+        return {
+          id: row.id,
+          username: gs.username || row.nickname?.toLowerCase().replace(/\s+/g, ''),
+          nickname: row.nickname,
+          avatar: row.avatar || 'avatar_1',
+          role: gs.role || 'user',
+          pinHash: row.pin_hash || '',
+          passwordHash: gs.passwordHash,
+          passwordSalt: gs.passwordSalt,
+          requiresPasswordReset: gs.requiresPasswordReset,
+          bannedUntil: gs.bannedUntil,
+          banReason: gs.banReason,
+          createdDate: row.created_at,
+          lastActiveDate: row.last_active,
+          library: Array.isArray(udata?.library) ? udata.library : [],
+          favoriteMedia: Array.isArray(udata?.favorite_media) ? udata.favorite_media : [],
+          favoritePlaylists: Array.isArray(gs.favoritePlaylists) ? gs.favoritePlaylists : [],
+          customPlaylists: Array.isArray(gs.customPlaylists) ? gs.customPlaylists : [],
+          watchProgress: udata?.watch_progress || {},
+          gameStats: gs,
+        };
+      });
 
-    const playlists: MediaPlaylist[] = (rawPlaylists || []).map((row: any) => ({
+    // Extract system catalog settings (tags, banner settings)
+    const settingsItem = (rawPlaylists || []).find((p: any) => p.id === '__system_catalog_settings__');
+    let systemSettings: any = null;
+    if (settingsItem && settingsItem.description) {
+      try {
+        systemSettings = JSON.parse(settingsItem.description);
+      } catch (e) {
+        console.warn('Failed to parse system catalog settings in cloud:', e);
+      }
+    }
+    const filteredPlaylists = (rawPlaylists || []).filter((p: any) => p.id !== '__system_catalog_settings__');
+
+    const playlists: MediaPlaylist[] = filteredPlaylists.map((row: any) => ({
       id: row.id,
       title: row.title,
       name: row.title,
@@ -170,7 +204,7 @@ export async function fetchDirectCloudCatalog(
       console.warn('Could not cache to localStorage:', e);
     }
 
-    return { games, media, profiles, playlists };
+    return { games, media, profiles, playlists, systemSettings };
   } catch (err) {
     console.error('Failed to fetch from Supabase REST API:', err);
     // Return cached data if available

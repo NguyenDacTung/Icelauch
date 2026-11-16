@@ -303,12 +303,21 @@ export class SupabaseSyncService {
 
     if (res.status >= 200 && res.status < 300 && Array.isArray(res.data) && res.data.length > 0) {
       const row = res.data[0];
+      const gs = row.game_stats || {};
       return {
         library: row.library || [],
         watchProgress: row.watch_progress || {},
         favoriteMedia: row.favorite_media || [],
-        favoritePlaylists: row.game_stats?.favoritePlaylists || [],
-        gameStats: row.game_stats || {},
+        favoritePlaylists: gs.favoritePlaylists || [],
+        customPlaylists: gs.customPlaylists || [],
+        username: gs.username,
+        role: gs.role,
+        passwordHash: gs.passwordHash,
+        passwordSalt: gs.passwordSalt,
+        requiresPasswordReset: gs.requiresPasswordReset,
+        bannedUntil: gs.bannedUntil,
+        banReason: gs.banReason,
+        gameStats: gs,
       };
     }
     return null;
@@ -346,7 +355,15 @@ export class SupabaseSyncService {
       favorite_media: profile.favoriteMedia || [],
       game_stats: {
         ...(profile.gameStats || {}),
+        username: profile.username,
+        role: profile.role,
+        passwordHash: profile.passwordHash,
+        passwordSalt: profile.passwordSalt,
+        requiresPasswordReset: profile.requiresPasswordReset,
         favoritePlaylists: profile.favoritePlaylists || [],
+        customPlaylists: profile.customPlaylists || [],
+        bannedUntil: profile.bannedUntil,
+        banReason: profile.banReason,
       },
       updated_at: new Date().toISOString(),
     };
@@ -525,7 +542,15 @@ export class SupabaseSyncService {
     anonKey: string,
     games: Game[],
     media: MediaItem[],
-    playlists: MediaPlaylist[] = []
+    playlists: MediaPlaylist[] = [],
+    systemSettings?: {
+      gameTags?: string[];
+      movieTags?: string[];
+      musicTags?: string[];
+      podcastTags?: string[];
+      bannerSettings?: any;
+      globalActionButtons?: any;
+    }
   ): Promise<{ success: boolean; message: string; count: number }> {
     const test = await this.testConnection(supabaseUrl, anonKey);
     if (!test.success) {
@@ -557,7 +582,7 @@ export class SupabaseSyncService {
     }
 
     // Strict Segregation: Only upload system playlists, NEVER upload user private/custom playlists
-    const systemPlaylists = playlists.filter((p) => !p.isUserCustom && !p.ownerProfileId);
+    const systemPlaylists = playlists.filter((p) => !p.isUserCustom && !p.ownerProfileId && p.id !== '__system_catalog_settings__');
     let playlistCount = 0;
     for (const playlist of systemPlaylists) {
       if (playlist.coverPath && !playlist.coverPath.startsWith('http')) {
@@ -567,9 +592,21 @@ export class SupabaseSyncService {
       if (ok) playlistCount++;
     }
 
+    // Upload global system settings (tags, banner settings, action buttons)
+    if (systemSettings) {
+      await this.upsertPlaylist(supabaseUrl, anonKey, {
+        id: '__system_catalog_settings__',
+        name: '__system_catalog_settings__',
+        type: 'video',
+        description: JSON.stringify(systemSettings),
+        itemIds: [],
+        createdAt: new Date().toISOString(),
+      });
+    }
+
     return {
       success: true,
-      message: `Đã xuất bản thành công ${gameCount} game, ${mediaCount} phim & video và ${playlistCount} playlist hệ thống lên Cloud!`,
+      message: `Đã xuất bản thành công ${gameCount} game, ${mediaCount} phim & video, ${playlistCount} playlist hệ thống và cấu hình thể loại/banner lên Cloud!`,
       count: gameCount + mediaCount + playlistCount,
     };
   }
@@ -581,6 +618,7 @@ export class SupabaseSyncService {
     games: Game[];
     media: MediaItem[];
     playlists: MediaPlaylist[];
+    systemSettings?: any;
     message: string;
   }> {
     const test = await this.testConnection(supabaseUrl, anonKey);
@@ -594,10 +632,22 @@ export class SupabaseSyncService {
       this.pullPlaylists(supabaseUrl, anonKey),
     ]);
 
+    const settingsItem = remotePlaylists.find((p) => p.id === '__system_catalog_settings__');
+    let systemSettings: any = null;
+    if (settingsItem && settingsItem.description) {
+      try {
+        systemSettings = JSON.parse(settingsItem.description);
+      } catch (e) {
+        console.warn('Failed to parse system catalog settings:', e);
+      }
+    }
+    const cleanPlaylists = remotePlaylists.filter((p) => p.id !== '__system_catalog_settings__');
+
     return {
       games: remoteGames,
       media: remoteMedia,
-      playlists: remotePlaylists,
+      playlists: cleanPlaylists,
+      systemSettings,
       message: `Đã tải về thành công ${remoteGames.length} game và ${remoteMedia.length} phim từ Cloud!`,
     };
   }

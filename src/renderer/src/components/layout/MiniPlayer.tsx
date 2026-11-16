@@ -101,12 +101,19 @@ export const MiniPlayer: React.FC<MiniPlayerProps> = ({
   useEffect(() => {
     if (audioRef.current) {
       if (isPlaying && currentTrack) {
-        audioRef.current.play().catch((e) => console.warn('Audio play error:', e));
+        // Trigger explicit reload on track/src changes to prevent Android WebView stalls
+        if (audioRef.current.currentSrc !== audioSrc) {
+          audioRef.current.load();
+        }
+        const playPromise = audioRef.current.play();
+        if (playPromise !== undefined) {
+          playPromise.catch((e) => console.warn('Audio play error:', e));
+        }
       } else {
         audioRef.current.pause();
       }
     }
-  }, [isPlaying, currentTrack, audioSrc]);
+  }, [isPlaying, currentTrack?.id, audioSrc]);
 
   // 3. Web Media Session API sync (lock screen, notification shade, Bluetooth controls, background playback)
   useEffect(() => {
@@ -229,9 +236,12 @@ export const MiniPlayer: React.FC<MiniPlayerProps> = ({
       <audio
         ref={audioRef}
         src={audioSrc || currentTrack.link}
+        preload="auto"
+        playsInline
         onTimeUpdate={handleTimeUpdate}
         onLoadedMetadata={handleLoadedMetadata}
         onEnded={onNext}
+        onError={(e) => console.warn('Audio tag error:', e)}
         loop={isRepeat}
       />
 

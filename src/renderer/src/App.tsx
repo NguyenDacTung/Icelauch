@@ -43,6 +43,7 @@ import { TVUpdateModal } from './components/tv/TVUpdateModal';
 import { DeviceSelectionModal } from './components/common/DeviceSelectionModal';
 import { ExtrasView } from './components/extras/ExtrasView';
 import { AdminUserManagementModal } from './components/admin/AdminUserManagementModal';
+import { UserService } from './services/userService';
 import { GameInstallModal } from './components/home/GameInstallModal';
 import { MobileLandscapeGamepad } from './components/extras/MobileLandscapeGamepad';
 import type { GameControllerConfig } from './types';
@@ -197,6 +198,7 @@ export default function App() {
     config?: GameControllerConfig;
     hostIp: string;
   }>({ isOpen: false, hostIp: '127.0.0.1' });
+  const [adminSyncToast, setAdminSyncToast] = useState<string | null>(null);
 
   // Device Hardware Authorization & Whitelist states
   const [hardwareDeviceId, setHardwareDeviceId] = useState<string>('');
@@ -499,6 +501,7 @@ export default function App() {
       console.log('Running on Android / Web platform (no Electron IPC). Fetching from Supabase Cloud...');
       try {
         const cloudData = await fetchDirectCloudCatalog();
+        const sys = (cloudData as any).systemSettings || {};
         setAppData({
           games: cloudData.games,
           media: cloudData.media,
@@ -509,6 +512,12 @@ export default function App() {
             appRootPath: '/storage/emulated/0/Icelauch',
             gamesPath: '/storage/emulated/0/Icelauch/Games',
             downloadsPath: '/storage/emulated/0/Icelauch/Downloads',
+            gameTags: sys.gameTags,
+            movieTags: sys.movieTags,
+            musicTags: sys.musicTags,
+            podcastTags: sys.podcastTags,
+            bannerSettings: sys.bannerSettings,
+            globalActionButtons: sys.globalActionButtons,
           },
         });
         const fetchedProfiles = cloudData.profiles || [];
@@ -681,8 +690,43 @@ export default function App() {
     };
   }, [isAdmin]);
 
-  const handleLockAdmin = () => {
+  const handleLockAdmin = async () => {
     setIsAdmin(false);
+    // Auto-upload shared catalog data (games, media, playlists, tags, banner) to Supabase Cloud on Admin Lock
+    try {
+      if (window.api?.publishCatalog) {
+        await window.api.publishCatalog();
+      } else {
+        const sysSettings = {
+          gameTags: appData?.settings.gameTags,
+          movieTags: appData?.settings.movieTags,
+          musicTags: appData?.settings.musicTags,
+          podcastTags: appData?.settings.podcastTags,
+          bannerSettings: appData?.settings.bannerSettings,
+          globalActionButtons: appData?.settings.globalActionButtons,
+        };
+        await fetch(`${DEFAULT_SUPABASE_URL}/rest/v1/icelauch_playlists`, {
+          method: 'POST',
+          headers: {
+            apikey: DEFAULT_SUPABASE_ANON_KEY,
+            Authorization: `Bearer ${DEFAULT_SUPABASE_ANON_KEY}`,
+            'Content-Type': 'application/json',
+            Prefer: 'resolution=merge-duplicates',
+          },
+          body: JSON.stringify({
+            id: '__system_catalog_settings__',
+            title: '__system_catalog_settings__',
+            description: JSON.stringify(sysSettings),
+            itemIds: [],
+          }),
+        });
+      }
+      setAdminSyncToast('Đã khóa Admin & tự động cập nhật dữ liệu chung lên Cloud thành công!');
+      setTimeout(() => setAdminSyncToast(null), 4000);
+      sfx.playSuccess();
+    } catch (err) {
+      console.warn('Auto-publish catalog on lock admin failed:', err);
+    }
   };
 
   const handleAdminSuccess = () => {
@@ -817,9 +861,29 @@ export default function App() {
           return p;
         })
       );
-    } else if (window.api) {
-      await window.api.toggleInLibrary(id);
+    } else {
+      const isNowInLibrary = !activeProfile.library?.includes(id);
+      const updatedLibrary = isNowInLibrary
+        ? [...(activeProfile.library || []), id]
+        : (activeProfile.library || []).filter((item) => item !== id);
+      const updatedProfile: UserProfile = {
+        ...activeProfile,
+        library: updatedLibrary,
+        lastActiveDate: new Date().toISOString(),
+      };
+      setActiveProfile(updatedProfile);
+      setProfiles((prev) =>
+        prev.map((p) => (p.id === activeProfile.id ? updatedProfile : p))
+      );
+      UserService.syncUserLibraryToCloud(activeProfile.id, updatedLibrary).catch(console.warn);
+      try {
+        localStorage.setItem(
+          'icelauch_saved_profiles',
+          JSON.stringify(profiles.map((p) => (p.id === activeProfile.id ? updatedProfile : p)))
+        );
+      } catch (e) {}
     }
+    sfx.playSuccess();
   };
 
   const handleToggleFavoriteMedia = async (mediaId: string) => {
@@ -849,6 +913,8 @@ export default function App() {
 
     if (window.api?.saveProfile) {
       await window.api.saveProfile(updatedProfile);
+    } else {
+      UserService.syncUserFavoritesToCloud(activeProfile.id, updatedFavorites).catch(console.warn);
     }
     sfx.playSuccess();
   };
@@ -880,6 +946,8 @@ export default function App() {
 
     if (window.api?.saveProfile) {
       await window.api.saveProfile(updatedProfile);
+    } else {
+      UserService.saveUserProfileToCloud(updatedProfile).catch(console.warn);
     }
     sfx.playSuccess();
   };
@@ -920,10 +988,45 @@ export default function App() {
 
   const handleDeleteGame = async (id: string) => {
     if (confirm('Bạn có chắc chắn muốn xoá game này khỏi danh mục Icelauch?')) {
-      const deleteFiles = confirm('Bạn có muốn xoá luôn thư mục cài đặt game trên đĩa không?');
+      const deleteFiles = window.api ? confirm('Bạn có muốn xoá luôn thư mục cài đặt game trên đĩa không?') : false;
+      // Immediately purge from state & banner settings
+      setAppData((prev) => {
+        if (!prev) return prev;
+        const cleanBanners = prev.settings.bannerSettings
+          ? {
+              ...prev.settings.bannerSettings,
+              games: {
+                ...prev.settings.bannerSettings.games,
+                pinnedItems: (prev.settings.bannerSettings.games.pinnedItems || []).filter((p) => p.id !== id),
+              },
+            }
+          : prev.settings.bannerSettings;
+
+        return {
+          ...prev,
+          games: prev.games.filter((g) => g.id !== id),
+          settings: {
+            ...prev.settings,
+            bannerSettings: cleanBanners,
+          },
+        };
+      });
+
       if (window.api) {
         await window.api.deleteGame(id, deleteFiles);
         await loadData();
+      } else {
+        try {
+          await fetch(`${DEFAULT_SUPABASE_URL}/rest/v1/icelauch_games?id=eq.${encodeURIComponent(id)}`, {
+            method: 'DELETE',
+            headers: {
+              apikey: DEFAULT_SUPABASE_ANON_KEY,
+              Authorization: `Bearer ${DEFAULT_SUPABASE_ANON_KEY}`,
+            },
+          });
+        } catch (e) {
+          console.warn('Failed to delete game on cloud:', e);
+        }
       }
     }
   };
@@ -1368,11 +1471,58 @@ export default function App() {
     }
   };
 
-  const handleDeleteMedia = async (id: string) => {
-    if (confirm('Bạn có chắc muốn xoá mục này?')) {
+  const handleDeleteMedia = async (id: string, skipConfirm = false) => {
+    if (skipConfirm || confirm('Bạn có chắc muốn xoá mục này?')) {
+      // Immediately purge from UI state, playlists and banner settings
+      setAppData((prev) => {
+        if (!prev) return prev;
+        const cleanBanners = prev.settings.bannerSettings
+          ? {
+              ...prev.settings.bannerSettings,
+              videos: {
+                ...prev.settings.bannerSettings.videos,
+                pinnedItems: (prev.settings.bannerSettings.videos.pinnedItems || []).filter((p) => p.id !== id),
+              },
+              music: {
+                ...prev.settings.bannerSettings.music,
+                pinnedItems: (prev.settings.bannerSettings.music.pinnedItems || []).filter((p) => p.id !== id),
+              },
+              podcasts: {
+                ...prev.settings.bannerSettings.podcasts,
+                pinnedItems: (prev.settings.bannerSettings.podcasts.pinnedItems || []).filter((p) => p.id !== id),
+              },
+            }
+          : prev.settings.bannerSettings;
+
+        return {
+          ...prev,
+          media: prev.media.filter((m) => m.id !== id),
+          playlists: (prev.playlists || []).map((p) => ({
+            ...p,
+            itemIds: (p.itemIds || []).filter((itemId) => itemId !== id),
+          })),
+          settings: {
+            ...prev.settings,
+            bannerSettings: cleanBanners,
+          },
+        };
+      });
+
       if (window.api) {
         await window.api.deleteMedia(id);
         await loadData();
+      } else {
+        try {
+          await fetch(`${DEFAULT_SUPABASE_URL}/rest/v1/icelauch_media?id=eq.${encodeURIComponent(id)}`, {
+            method: 'DELETE',
+            headers: {
+              apikey: DEFAULT_SUPABASE_ANON_KEY,
+              Authorization: `Bearer ${DEFAULT_SUPABASE_ANON_KEY}`,
+            },
+          });
+        } catch (e) {
+          console.warn('Failed to delete media on cloud:', e);
+        }
       }
     }
   };
@@ -1473,39 +1623,64 @@ export default function App() {
     password?: string;
     remember: boolean;
   }) => {
+    // 1. Account collision prevention: check if username is already taken by another account
+    const candidateUsername = (data.username || data.nickname).trim().toLowerCase().replace(/\s+/g, '');
+    const isAvail = await UserService.checkUsernameAvailable(candidateUsername, data.id);
+    if (!isAvail.available) {
+      alert(`Tên tài khoản "${candidateUsername}" đã được sử dụng bởi một tài khoản khác. Vui lòng chọn tên đăng nhập khác!`);
+      throw new Error(`Tên tài khoản "${candidateUsername}" đã được sử dụng!`);
+    }
+
+    let pinHash = '';
+    if (data.pin && window.api?.hashPin) {
+      pinHash = await window.api.hashPin(data.pin);
+    } else if (data.pin) {
+      try {
+        const msgBuffer = new TextEncoder().encode(data.pin);
+        const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+        const hashArray = Array.from(new Uint8Array(hashBuffer));
+        pinHash = hashArray.map((b) => b.toString(16).padStart(2, '0')).join('');
+      } catch (e) {}
+    }
+
+    let passwordHash = '';
+    let passwordSalt = '';
+    if (data.password && window.api?.hashPassword) {
+      const hashRes = await window.api.hashPassword({ password: data.password });
+      passwordHash = hashRes.hash;
+      passwordSalt = hashRes.salt;
+    } else if (data.password) {
+      passwordSalt = Math.random().toString(36).substring(2, 10);
+      try {
+        const msgBuffer = new TextEncoder().encode(data.password + passwordSalt);
+        const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+        const hashArray = Array.from(new Uint8Array(hashBuffer));
+        passwordHash = hashArray.map((b) => b.toString(16).padStart(2, '0')).join('');
+      } catch (e) {}
+    }
+
+    const existing = profiles.find((p) => p.id === data.id);
+    const toSave: UserProfile = {
+      id: data.id || `user-${Date.now()}`,
+      username: candidateUsername,
+      role: data.role || existing?.role || 'user',
+      nickname: data.nickname.trim(),
+      avatar: data.avatar,
+      pinHash: pinHash || existing?.pinHash || '',
+      passwordHash: passwordHash || existing?.passwordHash || '',
+      passwordSalt: passwordSalt || existing?.passwordSalt || '',
+      requiresPasswordReset: false,
+      createdDate: existing?.createdDate || new Date().toISOString(),
+      lastActiveDate: new Date().toISOString(),
+      library: existing?.library || [],
+      favoriteMedia: existing?.favoriteMedia || [],
+      favoritePlaylists: existing?.favoritePlaylists || [],
+      customPlaylists: existing?.customPlaylists || [],
+      watchProgress: existing?.watchProgress || {},
+      gameStats: existing?.gameStats || {},
+    };
+
     if (window.api?.saveProfile) {
-      let pinHash = '';
-      if (data.pin && window.api.hashPin) {
-        pinHash = await window.api.hashPin(data.pin);
-      }
-
-      let passwordHash = '';
-      let passwordSalt = '';
-      if (data.password && window.api.hashPassword) {
-        const hashRes = await window.api.hashPassword({ password: data.password });
-        passwordHash = hashRes.hash;
-        passwordSalt = hashRes.salt;
-      }
-
-      const existing = profiles.find((p) => p.id === data.id);
-      const toSave: UserProfile = {
-        id: data.id || `user-${Date.now()}`,
-        username: data.username || existing?.username || data.nickname.toLowerCase().replace(/\s+/g, ''),
-        role: data.role || existing?.role || 'user',
-        nickname: data.nickname,
-        avatar: data.avatar,
-        pinHash: pinHash || existing?.pinHash || '',
-        passwordHash: passwordHash || existing?.passwordHash || '',
-        passwordSalt: passwordSalt || existing?.passwordSalt || '',
-        requiresPasswordReset: false,
-        createdDate: existing?.createdDate || new Date().toISOString(),
-        lastActiveDate: new Date().toISOString(),
-        library: existing?.library || [],
-        favoriteMedia: existing?.favoriteMedia || [],
-        watchProgress: existing?.watchProgress || {},
-        gameStats: existing?.gameStats || {},
-      };
-
       const saved = await window.api.saveProfile(toSave);
       const updatedProfiles = await window.api.getProfiles();
       setProfiles(updatedProfiles);
@@ -1520,9 +1695,23 @@ export default function App() {
           remember: true,
         });
       }
-
-      sfx.playSuccess();
+    } else {
+      // Mobile / Web direct cloud sync
+      await UserService.saveUserProfileToCloud(toSave);
+      const updatedProfiles = [...profiles.filter((p) => p.id !== toSave.id), toSave];
+      setProfiles(updatedProfiles);
+      setActiveProfile(toSave);
+      setIsProfilePickerOpen(false);
+      try {
+        localStorage.setItem('icelauch_active_profile_id', toSave.id);
+        if (data.remember) {
+          localStorage.setItem('icelauch_remembered_profile_id', toSave.id);
+        }
+        localStorage.setItem('icelauch_saved_profiles', JSON.stringify(updatedProfiles));
+      } catch (e) {}
     }
+
+    sfx.playSuccess();
   };
 
   const handleRequestPasswordReset = async (profile: UserProfile): Promise<{ success: boolean; message: string }> => {
@@ -2440,7 +2629,7 @@ export default function App() {
           setEditingMedia(null);
         }}
         onSave={handleSaveMedia}
-        onDeleteMedia={handleDeleteMedia}
+        onDeleteMedia={(id) => handleDeleteMedia(id, true)}
         playlists={appData.playlists || []}
         onBrowseFile={async (type) => {
           return window.api.browseFile({
@@ -2632,6 +2821,13 @@ export default function App() {
 
       {/* Floating In-App OTA Update Toast (PC) */}
       {!isMobileOrTvNative && <UpdateToast onGoToSettings={() => setCurrentTab('settings')} />}
+
+      {/* Toast notification for Admin auto cloud sync */}
+      {adminSyncToast && (
+        <div className="fixed bottom-6 right-6 z-50 px-4 py-3 rounded-xl bg-emerald-500/95 text-white font-bold text-xs shadow-2xl backdrop-blur-md flex items-center gap-2 border border-emerald-400/50 animate-bounce">
+          <span>{adminSyncToast}</span>
+        </div>
+      )}
     </div>
   );
 }

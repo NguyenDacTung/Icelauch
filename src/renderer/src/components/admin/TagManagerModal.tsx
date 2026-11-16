@@ -291,29 +291,59 @@ export const TagManagerModal: React.FC<TagManagerModalProps> = ({
                       <div
                         key={t}
                         className="flex items-center gap-1.5 p-2 rounded-xl bg-amber-500/20 border border-amber-400 shadow-sm"
+                        onClick={(e) => e.stopPropagation()}
                       >
                         <input
                           type="text"
+                          ref={(el) => {
+                            if (el && !el.dataset.focused) {
+                              el.dataset.focused = 'true';
+                              el.focus();
+                              el.select();
+                            }
+                          }}
                           value={editingTag.newName}
-                          onChange={(e) =>
-                            setEditingTag({ ...editingTag, newName: e.target.value })
-                          }
-                          onKeyDown={(e) => e.key === 'Enter' && handleSaveRename()}
-                          autoFocus
-                          className="flex-1 bg-black/80 px-2 py-1 rounded text-xs text-white focus:outline-none border border-amber-400"
+                          onChange={(e) => {
+                            e.stopPropagation();
+                            setEditingTag((prev) =>
+                              prev ? { ...prev, newName: e.target.value } : null
+                            );
+                          }}
+                          onKeyDown={(e) => {
+                            e.stopPropagation();
+                            if (e.key === 'Enter') {
+                              e.preventDefault();
+                              handleSaveRename();
+                            } else if (e.key === 'Escape') {
+                              e.preventDefault();
+                              setEditingTag(null);
+                            }
+                          }}
+                          onClick={(e) => e.stopPropagation()}
+                          onMouseDown={(e) => e.stopPropagation()}
+                          style={{ userSelect: 'text' }}
+                          className="flex-1 bg-black/80 px-2 py-1 rounded text-xs text-white focus:outline-none border border-amber-400 select-text"
                         />
                         <button
-                          onClick={handleSaveRename}
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleSaveRename();
+                          }}
                           disabled={loading}
                           className="p-1 rounded bg-amber-400 text-black hover:bg-amber-300"
-                          title="Lưu tên mới"
+                          title="Lưu tên mới (Enter)"
                         >
                           <Check className="w-3.5 h-3.5 stroke-[3]" />
                         </button>
                         <button
-                          onClick={() => setEditingTag(null)}
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setEditingTag(null);
+                          }}
                           className="p-1 rounded bg-white/10 text-white hover:bg-white/20"
-                          title="Hủy"
+                          title="Hủy (Esc)"
                         >
                           <X className="w-3.5 h-3.5" />
                         </button>

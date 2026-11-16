@@ -2,6 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import crypto from 'crypto';
 import type { AppData, Game, MediaItem, AppSettings, MediaPlaylist, UserProfile, CloudSyncSettings } from '../../renderer/src/types';
+import { SupabaseSyncService } from './supabaseSync';
 
 export const DEFAULT_SUPABASE_URL = 'https://wqmmagfrwwctvipopazx.supabase.co';
 export const DEFAULT_SUPABASE_ANON_KEY = 'sb_publishable_l1vNbLKXXhLNnfi1pI5UnQ_0EaqbXuJ';
@@ -446,7 +447,14 @@ export class StorageService {
     }
 
     this.data.games.splice(idx, 1);
+    // Remove game from banner settings if pinned
+    if (this.data.settings?.bannerSettings?.games?.pinnedItems) {
+      this.data.settings.bannerSettings.games.pinnedItems = 
+        this.data.settings.bannerSettings.games.pinnedItems.filter((p: any) => p.id !== id);
+    }
     this.saveDataAtomic();
+    // Also delete permanently from Supabase Cloud
+    this.deleteFromCloud('icelauch_games', id).catch(console.warn);
     return true;
   }
 
@@ -489,8 +497,51 @@ export class StorageService {
     const idx = this.data.media.findIndex(m => m.id === id);
     if (idx === -1) return false;
     this.data.media.splice(idx, 1);
+
+    // Remove from all playlists itemIds
+    if (this.data.playlists) {
+      this.data.playlists.forEach((p) => {
+        if (p.itemIds) {
+          p.itemIds = p.itemIds.filter((itemId) => itemId !== id);
+        }
+      });
+    }
+
+    // Remove from banner settings (videos, music, podcasts)
+    const bs = this.data.settings?.bannerSettings;
+    if (bs) {
+      ['videos', 'music', 'podcasts'].forEach((sectionKey) => {
+        const sec = (bs as any)[sectionKey];
+        if (sec && sec.pinnedItems) {
+          sec.pinnedItems = sec.pinnedItems.filter((item: any) => item.id !== id);
+        }
+      });
+    }
+
     this.saveDataAtomic();
+    // Also delete permanently from Supabase Cloud
+    this.deleteFromCloud('icelauch_media', id).catch(console.warn);
     return true;
+  }
+
+  public async deleteFromCloud(table: string, id: string): Promise<void> {
+    try {
+      const syncSettings = this.getCloudSyncSettings();
+      const url = (syncSettings.supabaseUrl || DEFAULT_SUPABASE_URL).replace(/\/+$/, '');
+      const key = syncSettings.supabaseAnonKey || DEFAULT_SUPABASE_ANON_KEY;
+      if (!url || !key) return;
+
+      const endpoint = `${url}/rest/v1/${table}?id=eq.${encodeURIComponent(id)}`;
+      await fetch(endpoint, {
+        method: 'DELETE',
+        headers: {
+          'apikey': key,
+          'Authorization': `Bearer ${key}`,
+        },
+      });
+    } catch (err) {
+      console.warn(`[StorageService] Failed to delete ${id} from ${table} in cloud:`, err);
+    }
   }
 
   public updateMediaProgress(id: string, position: number, watched: boolean): void {
@@ -891,7 +942,24 @@ export class StorageService {
     }
 
     this.saveDataAtomic();
+    // Auto-sync profile and private user data to Supabase Cloud
+    this.syncProfileToCloud(profile).catch(console.warn);
     return profile;
+  }
+
+  public async syncProfileToCloud(profile: UserProfile): Promise<void> {
+    try {
+      const syncSettings = this.getCloudSyncSettings();
+      const url = (syncSettings.supabaseUrl || DEFAULT_SUPABASE_URL).replace(/\/+$/, '');
+      const key = syncSettings.supabaseAnonKey || DEFAULT_SUPABASE_ANON_KEY;
+      if (!url || !key) return;
+
+      const sync = SupabaseSyncService.getInstance();
+      await sync.upsertProfile(url, key, profile);
+      await sync.upsertUserData(url, key, profile);
+    } catch (err) {
+      console.warn(`[StorageService] Failed to sync profile ${profile.id} to cloud:`, err);
+    }
   }
 
   public deleteProfile(id: string): boolean {
@@ -907,6 +975,9 @@ export class StorageService {
     }
 
     this.saveDataAtomic();
+    // Delete profile and user data permanently from Supabase
+    this.deleteFromCloud('icelauch_profiles', id).catch(console.warn);
+    this.deleteFromCloud('icelauch_user_data', id).catch(console.warn);
     return this.data.profiles.length < initialLen;
   }
 
@@ -982,6 +1053,7 @@ export class StorageService {
       prof.library = prof.library.filter((id) => id !== gameId);
     }
     this.saveDataAtomic();
+    this.syncProfileToCloud(prof).catch(console.warn);
   }
 
   public updateProfileWatchProgress(
@@ -1002,6 +1074,7 @@ export class StorageService {
       lastWatchedAt: Date.now(),
     };
     this.saveDataAtomic();
+    this.syncProfileToCloud(prof).catch(console.warn);
   }
 
   public updateProfileFavoriteMedia(profileId: string, mediaId: string, isFav: boolean): void {
@@ -1015,6 +1088,7 @@ export class StorageService {
       prof.favoriteMedia = prof.favoriteMedia.filter((id) => id !== mediaId);
     }
     this.saveDataAtomic();
+    this.syncProfileToCloud(prof).catch(console.warn);
   }
 
   public updateProfileGameStats(profileId: string, gameId: string, playedMinutes: number): void {
@@ -1028,6 +1102,7 @@ export class StorageService {
       lastPlayedAt: Date.now(),
     };
     this.saveDataAtomic();
+    this.syncProfileToCloud(prof).catch(console.warn);
   }
 
   public getCloudSyncSettings(): CloudSyncSettings {
