@@ -436,7 +436,7 @@ export default function App() {
         }
 
         // Version update check: require re-login on new app version update; keep auto-login on same version
-        const CURRENT_APP_VERSION = '1.1.7';
+        const CURRENT_APP_VERSION = '1.1.8';
         const isNewVersion = shouldRequireReLoginForNewVersion(CURRENT_APP_VERSION);
         if (isNewVersion) {
           console.log(`[Version Upgrade] New version ${CURRENT_APP_VERSION}: Requiring re-login.`);
@@ -1579,7 +1579,7 @@ export default function App() {
         }
         setActiveProfile(res.profile);
         setIsProfilePickerOpen(false);
-        markCurrentVersionLoggedIn('1.1.7');
+        markCurrentVersionLoggedIn('1.1.8');
         sfx.playSuccess();
         return { success: true };
       }
@@ -1597,7 +1597,7 @@ export default function App() {
     }
     setActiveProfile(profile);
     setIsProfilePickerOpen(false);
-    markCurrentVersionLoggedIn('1.1.7');
+    markCurrentVersionLoggedIn('1.1.8');
     return { success: true };
   };
 
