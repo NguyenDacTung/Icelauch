@@ -19,7 +19,9 @@ import { HorizontalScroller } from '../common/HorizontalScroller';
 import { MobileVideoTheaterView } from './MobileVideoTheaterView';
 import { SafeImage } from '../common/SafeImage';
 import { AddToPlaylistModal } from '../media/AddToPlaylistModal';
+import { SurpriseMediaModal } from '../media/SurpriseMediaModal';
 import { sfx } from '../../utils/sfx';
+import { matchSmartSearch } from '../../utils/searchHelper';
 
 interface MobileMediaViewProps {
   media: MediaItem[];
@@ -72,6 +74,7 @@ export const MobileMediaView: React.FC<MobileMediaViewProps> = ({
   const deferredSearch = useDeferredValue(localSearch);
   const [localActiveTheaterMedia, setLocalActiveTheaterMedia] = useState<MediaItem | null>(null);
   const [targetMediaForPlaylist, setTargetMediaForPlaylist] = useState<MediaItem | null>(null);
+  const [isSurpriseOpen, setIsSurpriseOpen] = useState(false);
 
   useEffect(() => {
     setVisibleCount(10);
@@ -109,14 +112,22 @@ export const MobileMediaView: React.FC<MobileMediaViewProps> = ({
     )
   );
 
-  const effectiveSearch = (deferredSearch || searchQuery).trim().toLowerCase();
+  const effectiveSearch = (deferredSearch || searchQuery).trim();
 
-  // Filtered list by category and search
+  // Filtered list by category and smart multi-token search
   const filteredList = currentList.filter((m) => {
     const matchesSearch =
       !effectiveSearch ||
-      m.title.toLowerCase().includes(effectiveSearch) ||
-      (m.category && m.category.toLowerCase().includes(effectiveSearch));
+      matchSmartSearch(
+        [
+          m.title,
+          m.category,
+          m.artist,
+          m.description,
+          ...(m.tags || []),
+        ],
+        effectiveSearch
+      );
 
     const matchesCat =
       selectedCategory === 'all' ||
@@ -251,9 +262,19 @@ export const MobileMediaView: React.FC<MobileMediaViewProps> = ({
             </button>
           </div>
 
-          <span className="text-[11px] text-slate-400 font-semibold px-2">
-            {filteredList.length} mục
-          </span>
+          {/* Surprise Media Button ("Hôm nay xem gì" / "Hôm nay nghe gì") */}
+          <button
+            type="button"
+            onClick={() => {
+              sfx.playClick();
+              setIsSurpriseOpen(true);
+            }}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-amber-500/20 to-amber-600/20 hover:from-amber-500/30 text-amber-300 border border-amber-500/40 text-xs font-bold transition-all shadow-sm active:scale-95 shrink-0"
+            title={mediaTab === 'video' ? 'Hôm nay xem gì?' : 'Hôm nay nghe gì?'}
+          >
+            <Sparkles className="w-3.5 h-3.5 text-amber-400 animate-pulse" />
+            <span>{mediaTab === 'video' ? 'Xem gì?' : 'Nghe gì?'}</span>
+          </button>
         </div>
       </div>
 
@@ -646,6 +667,29 @@ export const MobileMediaView: React.FC<MobileMediaViewProps> = ({
           userPlaylists={userPlaylists}
           onToggleItemInPlaylist={onToggleItemInUserPlaylist}
           onCreatePlaylist={onCreateUserPlaylist}
+        />
+      )}
+
+      {/* Surprise Media Modal ("Hôm nay xem gì" / "Hôm nay nghe gì") */}
+      {isSurpriseOpen && (
+        <SurpriseMediaModal
+          isOpen={isSurpriseOpen}
+          onClose={() => setIsSurpriseOpen(false)}
+          type={mediaTab === 'video' ? 'movie' : mediaTab === 'music' ? 'music' : 'podcast'}
+          mediaList={
+            mediaTab === 'video'
+              ? videoList
+              : mediaTab === 'music'
+              ? musicList
+              : podcastList
+          }
+          onPlay={(item) => {
+            if (item.type === 'video') {
+              handleSetActiveMedia(item);
+            } else {
+              onPlayAudio?.(item);
+            }
+          }}
         />
       )}
     </div>

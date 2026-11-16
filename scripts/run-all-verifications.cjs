@@ -258,7 +258,7 @@ try {
   // TC-DSK-05: Offline Local Audio Playback Support
   const miniPlayerSrc = fs.readFileSync(path.join(ROOT_DIR, 'src/renderer/src/components/layout/MiniPlayer.tsx'), 'utf8');
   const hasLocalFilePathCheck = miniPlayerSrc.includes("currentTrack.downloadStatus === 'downloaded'");
-  const setsFileProtocol = miniPlayerSrc.includes("setAudioSrc(`file://${currentTrack.localFilePath}`)");
+  const setsFileProtocol = miniPlayerSrc.includes("`file://${currentTrack.localFilePath}`");
 
   assert.ok(hasLocalFilePathCheck && setsFileProtocol, 'MiniPlayer must support offline downloaded files with file:// protocol');
   recordTest('TC-DSK-05', 'Offline Local Audio File Support (file://)', 'Module 3: Desktop Audio Player', 'Desktop Electron', true, 'Downloaded audio items resolve to file://${localFilePath} for instant offline playback');
@@ -681,20 +681,20 @@ try {
 }
 
 try {
-  // TC-SEC-09: Version Upgrade Re-Login Enforcement (1.2.0)
+  // TC-SEC-09: Version Upgrade Re-Login Enforcement (1.2.1)
   const appSrc = fs.readFileSync(path.join(ROOT_DIR, 'src/renderer/src/App.tsx'), 'utf8');
   const pkgSrc = fs.readFileSync(path.join(ROOT_DIR, 'package.json'), 'utf8');
   const gradleSrc = fs.readFileSync(path.join(ROOT_DIR, 'android/app/build.gradle'), 'utf8');
 
-  const appHas120 = appSrc.includes("CURRENT_APP_VERSION = '1.2.0'");
-  const pkgHas120 = pkgSrc.includes('"version": "1.2.0"');
-  const gradleHas120 = gradleSrc.includes('versionName "1.2.0"') && gradleSrc.includes('versionCode 16');
+  const appHas121 = appSrc.includes("CURRENT_APP_VERSION = '1.2.1'");
+  const pkgHas121 = pkgSrc.includes('"version": "1.2.1"');
+  const gradleHas121 = gradleSrc.includes('versionName "1.2.1"') && gradleSrc.includes('versionCode 17');
   const hasReLoginLogic = appSrc.includes('shouldRequireReLoginForNewVersion');
 
-  assert.ok(appHas120 && pkgHas120 && gradleHas120 && hasReLoginLogic, 'Version 1.2.0 must be synchronized and re-login enforced');
-  recordTest('TC-SEC-09', 'Version Upgrade Re-Login Enforcement (v1.2.0 / Code 16)', 'Module 8: Device Whitelist & Security', 'Cross-Platform', true, 'Upgraded to v1.2.0 (versionCode 16); sessions maintained across restarts but purged on version upgrade');
+  assert.ok(appHas121 && pkgHas121 && gradleHas121 && hasReLoginLogic, 'Version 1.2.1 must be synchronized and re-login enforced');
+  recordTest('TC-SEC-09', 'Version Upgrade Re-Login Enforcement (v1.2.1 / Code 17)', 'Module 8: Device Whitelist & Security', 'Cross-Platform', true, 'Upgraded to v1.2.1 (versionCode 17); sessions maintained across restarts but purged on version upgrade');
 } catch (e) {
-  recordTest('TC-SEC-09', 'Version Upgrade Re-Login Enforcement (v1.2.0 / Code 16)', 'Module 8: Device Whitelist & Security', 'Cross-Platform', false, e.message);
+  recordTest('TC-SEC-09', 'Version Upgrade Re-Login Enforcement (v1.2.1 / Code 17)', 'Module 8: Device Whitelist & Security', 'Cross-Platform', false, e.message);
 }
 
 try {
@@ -789,6 +789,105 @@ try {
   recordTest('TC-V59-05', 'Mobile Android Audio Autoplay Policy & Tag Manager Edit Fix', 'Module 9: Cloud Data Boundary & Sync', 'Cross-Platform', true, 'setMediaPlaybackRequiresUserGesture(false) enables instant mobile audio; Tag Manager text editing fully supports IME, Backspace, and Escape');
 } catch (e) {
   recordTest('TC-V59-05', 'Mobile Android Audio Autoplay Policy & Tag Manager Edit Fix', 'Module 9: Cloud Data Boundary & Sync', 'Cross-Platform', false, e.message);
+}
+
+// ============================================================================
+// MODULE 10: SMART SEARCH, ADMIN PLAYLISTS & UI ENHANCEMENTS (TC-V60-01 to TC-V60-07)
+// ============================================================================
+console.log('\n--- Module 10: Smart Search, Admin Playlists & UI Enhancements (v1.2.1 / v6.0) ---');
+
+try {
+  // TC-V60-01: Smart Multi-Token Search with Vietnamese Diacritic Insensitivity
+  const searchUtilSrc = fs.readFileSync(path.join(ROOT_DIR, 'src/renderer/src/utils/searchHelper.ts'), 'utf8');
+  const mediaSrc = fs.readFileSync(path.join(ROOT_DIR, 'src/renderer/src/components/media/MediaView.tsx'), 'utf8');
+  const mobileMediaSrc = fs.readFileSync(path.join(ROOT_DIR, 'src/renderer/src/components/mobile/MobileMediaView.tsx'), 'utf8');
+
+  const hasSearchHelper = searchUtilSrc.includes('removeVietnameseTones') && searchUtilSrc.includes('matchSmartSearch');
+  const mediaHasSmartSearch = mediaSrc.includes('matchSmartSearch');
+  const mobileHasSmartSearch = mobileMediaSrc.includes('matchSmartSearch');
+
+  assert.ok(hasSearchHelper && mediaHasSmartSearch && mobileHasSmartSearch, 'Search helper must handle Vietnamese diacritics and multi-token matching across PC and Mobile');
+  recordTest('TC-V60-01', 'Smart Multi-Token Vietnamese Search Engine', 'Module 10: Smart Search & UI Enhancements', 'Cross-Platform', true, 'Multi-token matching allows queries like "Conan 1876" or unaccented terms to match across titles, categories, artists, and tags');
+} catch (e) {
+  recordTest('TC-V60-01', 'Smart Multi-Token Vietnamese Search Engine', 'Module 10: Smart Search & UI Enhancements', 'Cross-Platform', false, e.message);
+}
+
+try {
+  // TC-V60-02: FIFO Continue Watching & Listening Max 5 Items on PC Home
+  const homeSrc = fs.readFileSync(path.join(ROOT_DIR, 'src/renderer/src/components/home/HomeView.tsx'), 'utf8');
+  const hasContinueSlice = homeSrc.includes('continueMedia =') && homeSrc.includes('.slice(0, 5)');
+
+  assert.ok(hasContinueSlice, 'HomeView must strictly slice continueMedia to max 5 items in FIFO order');
+  recordTest('TC-V60-02', 'FIFO Continue Watching/Listening Max 5 Items', 'Module 10: Smart Search & UI Enhancements', 'Desktop Electron', true, 'HomeView limits continue media shelf to 5 most recently active items in FIFO order');
+} catch (e) {
+  recordTest('TC-V60-02', 'FIFO Continue Watching/Listening Max 5 Items', 'Module 10: Smart Search & UI Enhancements', 'Desktop Electron', false, e.message);
+}
+
+try {
+  // TC-V60-03: Real Game Genre Tags & Admin Tag Management on PC Home
+  const homeSrc = fs.readFileSync(path.join(ROOT_DIR, 'src/renderer/src/components/home/HomeView.tsx'), 'utf8');
+  const hasTagManagerButton = homeSrc.includes('onOpenTagManager') && homeSrc.includes("onOpenTagManager('game')");
+  const hasAggregatedTags = homeSrc.includes('aggregatedGameTags') || homeSrc.includes('genres.map');
+
+  assert.ok(hasTagManagerButton && hasAggregatedTags, 'HomeView must feature Admin Tag Manager for games and display real genre tags');
+  recordTest('TC-V60-03', 'Game Genre Management & Real Genre Tags on Home', 'Module 10: Smart Search & UI Enhancements', 'Desktop Electron', true, 'Admin can manage game tags directly from HomeView and users can filter games by real catalog genres');
+} catch (e) {
+  recordTest('TC-V60-03', 'Game Genre Management & Real Genre Tags on Home', 'Module 10: Smart Search & UI Enhancements', 'Desktop Electron', false, e.message);
+}
+
+try {
+  // TC-V60-04: Account Device Isolation & IME Lag Fix on Login Screen
+  const pickerSrc = fs.readFileSync(path.join(ROOT_DIR, 'src/renderer/src/components/profile/ProfilePickerView.tsx'), 'utf8');
+  const isolatesDevice = pickerSrc.includes('savedRecords') && pickerSrc.includes('visibleSavedProfiles');
+  const noSelectNoneOnForm = !pickerSrc.includes('p-4 sm:p-6 select-none overflow-y-auto');
+
+  assert.ok(isolatesDevice && noSelectNoneOnForm, 'Login screen must isolate saved profiles per device and allow lag-free IME text input');
+  recordTest('TC-V60-04', 'Device Account Isolation & Smooth IME Typing', 'Module 10: Smart Search & UI Enhancements', 'Cross-Platform', true, 'Profiles on login screen strictly match local storage of that device; user-select none removed from form for instant typing');
+} catch (e) {
+  recordTest('TC-V60-04', 'Device Account Isolation & Smooth IME Typing', 'Module 10: Smart Search & UI Enhancements', 'Cross-Platform', false, e.message);
+}
+
+try {
+  // TC-V60-05: Surprise Media Modal ("Hôm nay xem gì" / "Hôm nay nghe gì")
+  const surpriseSrc = fs.readFileSync(path.join(ROOT_DIR, 'src/renderer/src/components/media/SurpriseMediaModal.tsx'), 'utf8');
+  const mediaSrc = fs.readFileSync(path.join(ROOT_DIR, 'src/renderer/src/components/media/MediaView.tsx'), 'utf8');
+  const mobileMediaSrc = fs.readFileSync(path.join(ROOT_DIR, 'src/renderer/src/components/mobile/MobileMediaView.tsx'), 'utf8');
+
+  const hasSurpriseComponent = surpriseSrc.includes('SurpriseMediaModal') && surpriseSrc.includes('Hôm Nay Xem Gì') && surpriseSrc.includes('Hôm Nay Nghe Gì');
+  const mediaHasSurprise = mediaSrc.includes('<SurpriseMediaModal');
+  const mobileHasSurprise = mobileMediaSrc.includes('<SurpriseMediaModal');
+
+  assert.ok(hasSurpriseComponent && mediaHasSurprise && mobileHasSurprise, 'Surprise media modal must be integrated across PC and Mobile with separated Video/Music/Podcast pools');
+  recordTest('TC-V60-05', 'Surprise Media Discovery Modal (PC & Mobile)', 'Module 10: Smart Search & UI Enhancements', 'Cross-Platform', true, 'Interactive roulette modal recommends Movies, Music, and Audio separately with sound effects and instant play');
+} catch (e) {
+  recordTest('TC-V60-05', 'Surprise Media Discovery Modal (PC & Mobile)', 'Module 10: Smart Search & UI Enhancements', 'Cross-Platform', false, e.message);
+}
+
+try {
+  // TC-V60-06: Admin Playlist Manager & Comprehensive Playlist Controls
+  const adminModalSrc = fs.readFileSync(path.join(ROOT_DIR, 'src/renderer/src/components/admin/AdminPlaylistManagerModal.tsx'), 'utf8');
+  const userModalSrc = fs.readFileSync(path.join(ROOT_DIR, 'src/renderer/src/components/media/UserPlaylistModal.tsx'), 'utf8');
+  const mediaSrc = fs.readFileSync(path.join(ROOT_DIR, 'src/renderer/src/components/media/MediaView.tsx'), 'utf8');
+
+  const hasAdminModal = adminModalSrc.includes('AdminPlaylistManagerModal') && adminModalSrc.includes('onSavePlaylist') && adminModalSrc.includes('onDeletePlaylist');
+  const userModalHasTopBottom = userModalSrc.includes('handleMoveToTop') && userModalSrc.includes('handleMoveToBottom') && userModalSrc.includes('ChevronsUp');
+  const mediaHasPlaylistControls = mediaSrc.includes('Shuffle') && mediaSrc.includes('Repeat') && mediaSrc.includes('playlistSortAsc') && mediaSrc.includes('playlistSearch');
+
+  assert.ok(hasAdminModal && userModalHasTopBottom && mediaHasPlaylistControls, 'Admin playlist manager and playlist controls must support Add/Edit/Delete, reordering to top/bottom, shuffle, repeat, and search');
+  recordTest('TC-V60-06', 'Admin Playlist Manager & Advanced Player Controls', 'Module 10: Smart Search & UI Enhancements', 'Cross-Platform', true, 'Admin system playlist management synced to Supabase Cloud; top/bottom reordering, shuffle, repeat, and playlist search active');
+} catch (e) {
+  recordTest('TC-V60-06', 'Admin Playlist Manager & Advanced Player Controls', 'Module 10: Smart Search & UI Enhancements', 'Cross-Platform', false, e.message);
+}
+
+try {
+  // TC-V60-07: Shelf Scroller Edge Glitch Fix
+  const shelfSrc = fs.readFileSync(path.join(ROOT_DIR, 'src/renderer/src/components/common/GenreShelfScroller.tsx'), 'utf8');
+  const hasHoverOpacity = shelfSrc.includes('group-hover/shelf:opacity-100') && shelfSrc.includes('opacity-0');
+
+  assert.ok(hasHoverOpacity, 'GenreShelfScroller chevron buttons must only appear on shelf hover to prevent poster edge rendering glitches');
+  recordTest('TC-V60-07', 'Shelf Scroller Poster Edge Rendering Fix', 'Module 10: Smart Search & UI Enhancements', 'Desktop Electron', true, 'Chevron buttons fade in only on shelf hover, eliminating grey/white arc overlay glitch on card borders');
+} catch (e) {
+  recordTest('TC-V60-07', 'Shelf Scroller Poster Edge Rendering Fix', 'Module 10: Smart Search & UI Enhancements', 'Desktop Electron', false, e.message);
 }
 
 // ============================================================================

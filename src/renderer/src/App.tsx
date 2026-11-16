@@ -436,7 +436,7 @@ export default function App() {
         }
 
         // Version update check: require re-login on new app version update; keep auto-login on same version
-        const CURRENT_APP_VERSION = '1.2.0';
+        const CURRENT_APP_VERSION = '1.2.1';
         const isNewVersion = shouldRequireReLoginForNewVersion(CURRENT_APP_VERSION);
         if (isNewVersion) {
           console.log(`[Version Upgrade] New version ${CURRENT_APP_VERSION}: Requiring re-login.`);
@@ -1579,7 +1579,7 @@ export default function App() {
         }
         setActiveProfile(res.profile);
         setIsProfilePickerOpen(false);
-        markCurrentVersionLoggedIn('1.2.0');
+        markCurrentVersionLoggedIn('1.2.1');
         sfx.playSuccess();
         return { success: true };
       }
@@ -1597,7 +1597,7 @@ export default function App() {
     }
     setActiveProfile(profile);
     setIsProfilePickerOpen(false);
-    markCurrentVersionLoggedIn('1.2.0');
+    markCurrentVersionLoggedIn('1.2.1');
     return { success: true };
   };
 
@@ -1785,6 +1785,59 @@ export default function App() {
     if (window.api && window.api.savePlaylist) {
       await window.api.savePlaylist(playlist);
       await loadData();
+    } else {
+      // Mobile / Web direct cloud sync
+      const id = playlist.id || `pl-${Date.now()}`;
+      const toSave: MediaPlaylist = {
+        id,
+        name: playlist.name || 'Danh Sách Mới',
+        type: playlist.type || 'video',
+        subType: playlist.subType,
+        coverAspectRatio: playlist.coverAspectRatio,
+        description: playlist.description || '',
+        coverPath: playlist.coverPath,
+        itemIds: playlist.itemIds || [],
+        createdAt: playlist.createdAt || new Date().toISOString(),
+      };
+
+      setAppData((prev) => {
+        if (!prev) return prev;
+        const currentPlaylists = prev.playlists || [];
+        const exists = currentPlaylists.some((p) => p.id === id);
+        const updated = exists
+          ? currentPlaylists.map((p) => (p.id === id ? { ...p, ...toSave } : p))
+          : [...currentPlaylists, toSave];
+        return { ...prev, playlists: updated };
+      });
+
+      try {
+        const metaPrefix = `__META:${JSON.stringify({
+          type: toSave.type,
+          subType: toSave.subType,
+          coverAspectRatio: toSave.coverAspectRatio,
+        })}__\n`;
+        const cleanDesc = (toSave.description || '').replace(/^__META:.*?__\n/, '');
+
+        await fetch(`${DEFAULT_SUPABASE_URL}/rest/v1/icelauch_playlists`, {
+          method: 'POST',
+          headers: {
+            apikey: DEFAULT_SUPABASE_ANON_KEY,
+            Authorization: `Bearer ${DEFAULT_SUPABASE_ANON_KEY}`,
+            'Content-Type': 'application/json',
+            Prefer: 'resolution=merge-duplicates',
+          },
+          body: JSON.stringify({
+            id: toSave.id,
+            title: toSave.name,
+            description: metaPrefix + cleanDesc,
+            cover_path: toSave.coverPath || null,
+            item_ids: toSave.itemIds || [],
+            updated_at: new Date().toISOString(),
+          }),
+        });
+      } catch (e) {
+        console.warn('Failed to sync playlist to Supabase cloud from Mobile:', e);
+      }
     }
   };
 
@@ -1792,6 +1845,25 @@ export default function App() {
     if (window.api && window.api.deletePlaylist) {
       await window.api.deletePlaylist(id);
       await loadData();
+    } else {
+      // Mobile / Web direct cloud delete
+      setAppData((prev) => {
+        if (!prev) return prev;
+        const currentPlaylists = prev.playlists || [];
+        return { ...prev, playlists: currentPlaylists.filter((p) => p.id !== id) };
+      });
+
+      try {
+        await fetch(`${DEFAULT_SUPABASE_URL}/rest/v1/icelauch_playlists?id=eq.${encodeURIComponent(id)}`, {
+          method: 'DELETE',
+          headers: {
+            apikey: DEFAULT_SUPABASE_ANON_KEY,
+            Authorization: `Bearer ${DEFAULT_SUPABASE_ANON_KEY}`,
+          },
+        });
+      } catch (e) {
+        console.warn('Failed to delete playlist from Supabase cloud on Mobile:', e);
+      }
     }
   };
 
@@ -2359,7 +2431,7 @@ export default function App() {
                     audioVolume={audioVolume}
                     audioIsMuted={audioIsMuted}
                     onTogglePlayAudio={() => setIsPlayingAudio(!isPlayingAudio)}
-                    onSeekAudio={(val) => setAudioSeekTime(val)}
+                    onSeekAudio={(val: number) => setAudioSeekTime(val)}
                     onNextAudio={handleNextTrack}
                     onPrevAudio={handlePrevTrack}
                     onVolumeChange={setAudioVolume}

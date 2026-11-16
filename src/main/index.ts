@@ -462,11 +462,33 @@ app.whenReady().then(async () => {
 
   // Playlists Handlers
   ipcMain.handle('playlist:save', async (_event, playlistInput: Partial<MediaPlaylist>) => {
-    return storage.savePlaylist(playlistInput);
+    const saved = storage.savePlaylist(playlistInput);
+    try {
+      const syncSettings = storage.getCloudSyncSettings();
+      const targetUrl = (syncSettings?.supabaseUrl && syncSettings.supabaseUrl.trim()) || DEFAULT_SUPABASE_URL;
+      const targetKey = (syncSettings?.supabaseAnonKey && syncSettings.supabaseAnonKey.trim()) || DEFAULT_SUPABASE_ANON_KEY;
+      if (targetUrl && targetKey && !saved.isUserCustom && !saved.ownerProfileId) {
+        SupabaseSyncService.getInstance().upsertPlaylist(targetUrl, targetKey, saved).catch(console.warn);
+      }
+    } catch (e) {
+      console.warn('Failed to sync playlist save to Supabase:', e);
+    }
+    return saved;
   });
 
   ipcMain.handle('playlist:delete', async (_event, id: string) => {
-    return storage.deletePlaylist(id);
+    const deleted = storage.deletePlaylist(id);
+    try {
+      const syncSettings = storage.getCloudSyncSettings();
+      const targetUrl = (syncSettings?.supabaseUrl && syncSettings.supabaseUrl.trim()) || DEFAULT_SUPABASE_URL;
+      const targetKey = (syncSettings?.supabaseAnonKey && syncSettings.supabaseAnonKey.trim()) || DEFAULT_SUPABASE_ANON_KEY;
+      if (targetUrl && targetKey) {
+        SupabaseSyncService.getInstance().deletePlaylist(targetUrl, targetKey, id).catch(console.warn);
+      }
+    } catch (e) {
+      console.warn('Failed to sync playlist delete to Supabase:', e);
+    }
+    return deleted;
   });
 
   // Admin PIN

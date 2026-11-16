@@ -97,14 +97,30 @@ export const ProfilePickerView: React.FC<ProfilePickerViewProps> = ({
   const [showForgotModal, setShowForgotModal] = useState(false);
   const [resetFeedback, setResetFeedback] = useState<string | null>(null);
 
-  // Filter profiles that have been previously logged in on THIS device
-  const visibleSavedProfiles = profiles.filter((p) =>
-    savedRecords.some(
-      (r) =>
-        r.id === p.id ||
-        (p.username && r.username && p.username.toLowerCase() === r.username.toLowerCase())
-    )
-  );
+  // Strictly filter profiles that have been previously logged in on THIS device
+  const visibleSavedProfiles = savedRecords
+    .map((r) => {
+      const full = profiles.find(
+        (p) =>
+          p.id === r.id ||
+          (p.username && r.username && p.username.toLowerCase() === r.username.toLowerCase())
+      );
+      if (full) return full;
+      return {
+        id: r.id,
+        username: r.username,
+        nickname: r.nickname,
+        avatar: r.avatar,
+        role: r.role || 'user',
+        createdDate: new Date().toISOString(),
+        lastActiveDate: new Date().toISOString(),
+        library: [],
+        favoriteMedia: [],
+        watchProgress: {},
+        gameStats: {},
+      } as UserProfile;
+    })
+    .filter(Boolean);
 
   const matchedDirectProfile = profiles.find(
     (p) =>
@@ -386,7 +402,7 @@ export const ProfilePickerView: React.FC<ProfilePickerViewProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-[#0A0C10] flex flex-col items-center justify-center p-4 sm:p-6 select-none overflow-y-auto custom-scrollbar">
+    <div className="fixed inset-0 z-50 bg-[#0A0C10] flex flex-col items-center justify-center p-4 sm:p-6 overflow-y-auto custom-scrollbar">
       {/* Background ambient lighting */}
       <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[350px] bg-gradient-to-r from-ice-accent/15 via-blue-600/10 to-indigo-600/15 rounded-full blur-[120px] pointer-events-none" />
 
@@ -395,7 +411,7 @@ export const ProfilePickerView: React.FC<ProfilePickerViewProps> = ({
         <button
           type="button"
           onClick={() => setShowAdminBypass(true)}
-          className="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-white/30 hover:text-amber-400 transition-colors cursor-pointer"
+          className="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-white/30 hover:text-amber-400 transition-colors cursor-pointer select-none"
           title="Chủ sở hữu (Đăng nhập nhanh bằng PIN Admin)"
         >
           <Lock className="w-4 h-4" />
@@ -405,7 +421,7 @@ export const ProfilePickerView: React.FC<ProfilePickerViewProps> = ({
       {/* Main Content Container */}
       <div className="relative z-10 w-full max-w-4xl flex flex-col items-center text-center space-y-8 animate-fade-in my-auto py-8">
         {/* Brand & Heading */}
-        <div className="space-y-2">
+        <div className="space-y-2 select-none">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-xs font-semibold text-ice-accent tracking-widest uppercase">
             <Sparkles className="w-3.5 h-3.5" />
             <span>Icelauch Profiles</span>
@@ -420,7 +436,7 @@ export const ProfilePickerView: React.FC<ProfilePickerViewProps> = ({
 
         {/* SECTION 1: SAVED ACCOUNTS ON THIS DEVICE (IF ANY) */}
         {visibleSavedProfiles.length > 0 && (
-          <div className="w-full space-y-3">
+          <div className="w-full space-y-3 select-none">
             <span className="text-xs font-bold text-ice-muted uppercase tracking-wider block">
               Tài khoản đã nhớ trên máy này ({visibleSavedProfiles.length}):
             </span>
@@ -463,7 +479,7 @@ export const ProfilePickerView: React.FC<ProfilePickerViewProps> = ({
 
         {/* SECTION 2: DIRECT LOGIN FORM */}
         <div className="w-full max-w-md p-6 rounded-3xl bg-black/40 border border-white/10 shadow-2xl space-y-4 text-left">
-          <div className="flex items-center gap-2 border-b border-white/10 pb-3">
+          <div className="flex items-center gap-2 border-b border-white/10 pb-3 select-none">
             <LogIn className="w-4 h-4 text-amber-400" />
             <span className="text-xs font-bold text-white uppercase tracking-wider">
               Đăng Nhập Tài Khoản
@@ -473,54 +489,60 @@ export const ProfilePickerView: React.FC<ProfilePickerViewProps> = ({
           <form onSubmit={handleDirectLogin} className="space-y-3.5">
             {/* Username Input */}
             <div className="space-y-1">
-              <label className="text-[11px] font-bold text-ice-subtext uppercase tracking-wider">
+              <label className="text-[11px] font-bold text-ice-subtext uppercase tracking-wider select-none">
                 Tên đăng nhập (Username):
               </label>
               <input
                 type="text"
+                autoComplete="username"
+                spellCheck={false}
                 value={loginUsername}
                 onChange={(e) => {
                   setLoginUsername(e.target.value);
                   setLoginError(null);
                 }}
                 placeholder="Ví dụ: dactung hoặc admin"
-                className="w-full h-10 px-3.5 rounded-xl bg-black/50 border border-white/15 text-xs text-white placeholder-ice-muted focus:border-amber-400 focus:outline-none transition-colors font-medium"
+                className="w-full h-10 px-3.5 rounded-xl bg-black/50 border border-white/15 text-xs text-white placeholder-ice-muted focus:border-amber-400 focus:outline-none transition-colors font-medium select-text"
               />
             </div>
 
             {/* Password or Admin PIN Input */}
             {isDirectLoginAdmin ? (
               <div className="space-y-1 animate-fade-in">
-                <label className="text-[11px] font-bold text-amber-400 uppercase tracking-wider flex items-center gap-1.5">
+                <label className="text-[11px] font-bold text-amber-400 uppercase tracking-wider flex items-center gap-1.5 select-none">
                   <ShieldCheck className="w-3.5 h-3.5" />
                   <span>Mã PIN Quản Trị Viên (Admin):</span>
                 </label>
                 <input
                   type="password"
+                  autoComplete="current-password"
+                  spellCheck={false}
                   value={loginPin}
                   onChange={(e) => {
                     setLoginPin(e.target.value);
                     setLoginError(null);
                   }}
                   placeholder="Nhập mã PIN Admin..."
-                  className="w-full h-10 px-3.5 rounded-xl bg-black/50 border border-amber-400/40 text-xs text-white placeholder-ice-muted focus:border-amber-400 focus:outline-none transition-colors font-mono tracking-widest"
+                  className="w-full h-10 px-3.5 rounded-xl bg-black/50 border border-amber-400/40 text-xs text-white placeholder-ice-muted focus:border-amber-400 focus:outline-none transition-colors font-mono tracking-widest select-text"
                 />
               </div>
             ) : (
               <div className="space-y-1">
-                <label className="text-[11px] font-bold text-ice-subtext uppercase tracking-wider">
+                <label className="text-[11px] font-bold text-ice-subtext uppercase tracking-wider select-none">
                   Mật khẩu:
                 </label>
                 <div className="relative">
                   <input
                     type={showLoginPassword ? 'text' : 'password'}
+                    autoComplete="current-password"
+                    spellCheck={false}
                     value={loginPassword}
                     onChange={(e) => {
                       setLoginPassword(e.target.value);
                       setLoginError(null);
                     }}
                     placeholder="Nhập mật khẩu tài khoản..."
-                    className="w-full h-10 pl-3.5 pr-10 rounded-xl bg-black/50 border border-white/15 text-xs text-white placeholder-ice-muted focus:border-amber-400 focus:outline-none transition-colors font-medium"
+                    className="w-full h-10 pl-3.5 pr-10 rounded-xl bg-black/50 border border-white/15 text-xs text-white placeholder-ice-muted focus:border-amber-400 focus:outline-none transition-colors font-medium select-text"
                   />
                   <button
                     type="button"

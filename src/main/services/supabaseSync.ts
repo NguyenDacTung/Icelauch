@@ -505,24 +505,53 @@ export class SupabaseSyncService {
     const res = await this.makeRequest(endpoint, anonKey, { method: 'GET' });
     if (res.status < 200 || res.status >= 300) return [];
     const rows: any[] = Array.isArray(res.data) ? res.data : [];
-    return rows.map((r) => ({
-      id: r.id,
-      name: r.title,
-      type: 'video',
-      description: r.description || '',
-      coverPath: r.cover_path || undefined,
-      itemIds: r.item_ids || [],
-      createdAt: r.updated_at || new Date().toISOString(),
-    }));
+    return rows.map((r) => {
+      let type: 'video' | 'audio' = r.type || 'video';
+      let subType: any = r.sub_type;
+      let coverAspectRatio: '1:1' | '16:9' = r.cover_aspect_ratio || (type === 'video' ? '16:9' : '1:1');
+      let desc = r.description || '';
+
+      if (desc.startsWith('__META:')) {
+        try {
+          const metaEnd = desc.indexOf('__\n');
+          if (metaEnd !== -1) {
+            const meta = JSON.parse(desc.slice(7, metaEnd));
+            if (meta.type) type = meta.type;
+            if (meta.subType) subType = meta.subType;
+            if (meta.coverAspectRatio) coverAspectRatio = meta.coverAspectRatio;
+            desc = desc.slice(metaEnd + 3);
+          }
+        } catch {}
+      }
+
+      return {
+        id: r.id,
+        name: r.title,
+        type,
+        subType,
+        coverAspectRatio,
+        description: desc,
+        coverPath: r.cover_path || undefined,
+        itemIds: Array.isArray(r.item_ids) ? r.item_ids : [],
+        createdAt: r.updated_at || new Date().toISOString(),
+      };
+    });
   }
 
   public async upsertPlaylist(supabaseUrl: string, anonKey: string, playlist: MediaPlaylist): Promise<boolean> {
     const baseUrl = this.cleanUrl(supabaseUrl);
     const endpoint = `${baseUrl}/rest/v1/icelauch_playlists`;
+    const metaPrefix = `__META:${JSON.stringify({
+      type: playlist.type || 'video',
+      subType: playlist.subType,
+      coverAspectRatio: playlist.coverAspectRatio || (playlist.type === 'video' ? '16:9' : '1:1'),
+    })}__\n`;
+    const cleanDesc = (playlist.description || '').replace(/^__META:.*?__\n/, '');
+
     const payload = {
       id: playlist.id,
       title: playlist.name,
-      description: playlist.description || '',
+      description: metaPrefix + cleanDesc,
       cover_path: playlist.coverPath || null,
       item_ids: playlist.itemIds || [],
       updated_at: new Date().toISOString(),
@@ -531,6 +560,15 @@ export class SupabaseSyncService {
       method: 'POST',
       body: payload,
       headers: { 'Prefer': 'resolution=merge-duplicates' },
+    });
+    return res.status >= 200 && res.status < 300;
+  }
+
+  public async deletePlaylist(supabaseUrl: string, anonKey: string, playlistId: string): Promise<boolean> {
+    const baseUrl = this.cleanUrl(supabaseUrl);
+    const endpoint = `${baseUrl}/rest/v1/icelauch_playlists?id=eq.${encodeURIComponent(playlistId)}`;
+    const res = await this.makeRequest(endpoint, anonKey, {
+      method: 'DELETE',
     });
     return res.status >= 200 && res.status < 300;
   }

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, ListMusic, Plus, Trash2, ArrowUp, ArrowDown, Check, Film, Music } from 'lucide-react';
+import { X, ListMusic, Plus, Trash2, ArrowUp, ArrowDown, ChevronsUp, ChevronsDown, Check, Film, Music } from 'lucide-react';
 import type { MediaItem, MediaPlaylist } from '../../types';
 import { sfx } from '../../utils/sfx';
 
@@ -60,6 +60,24 @@ export const UserPlaylistModal: React.FC<UserPlaylistModalProps> = ({
     const temp = updated[index + 1];
     updated[index + 1] = updated[index];
     updated[index] = temp;
+    setItemIds(updated);
+  };
+
+  const handleMoveToTop = (index: number) => {
+    if (index <= 0 || index >= itemIds.length) return;
+    sfx.playClick();
+    const updated = [...itemIds];
+    const [item] = updated.splice(index, 1);
+    updated.unshift(item);
+    setItemIds(updated);
+  };
+
+  const handleMoveToBottom = (index: number) => {
+    if (index < 0 || index >= itemIds.length - 1) return;
+    sfx.playClick();
+    const updated = [...itemIds];
+    const [item] = updated.splice(index, 1);
+    updated.push(item);
     setItemIds(updated);
   };
 
@@ -181,6 +199,15 @@ export const UserPlaylistModal: React.FC<UserPlaylistModalProps> = ({
                           <button
                             type="button"
                             disabled={idx === 0}
+                            onClick={() => handleMoveToTop(idx)}
+                            className="p-1 rounded bg-white/5 hover:bg-white/10 disabled:opacity-20 text-amber-400 hover:text-amber-300 transition-colors"
+                            title="Đưa lên trên cùng"
+                          >
+                            <ChevronsUp className="w-3 h-3" />
+                          </button>
+                          <button
+                            type="button"
+                            disabled={idx === 0}
                             onClick={() => handleMoveUp(idx)}
                             className="p-1 rounded bg-white/5 hover:bg-white/10 disabled:opacity-20 text-slate-300 hover:text-white transition-colors"
                             title="Di chuyển lên"
@@ -195,6 +222,15 @@ export const UserPlaylistModal: React.FC<UserPlaylistModalProps> = ({
                             title="Di chuyển xuống"
                           >
                             <ArrowDown className="w-3 h-3" />
+                          </button>
+                          <button
+                            type="button"
+                            disabled={idx === itemIds.length - 1}
+                            onClick={() => handleMoveToBottom(idx)}
+                            className="p-1 rounded bg-white/5 hover:bg-white/10 disabled:opacity-20 text-amber-400 hover:text-amber-300 transition-colors"
+                            title="Đưa xuống dưới cùng"
+                          >
+                            <ChevronsDown className="w-3 h-3" />
                           </button>
                           <button
                             type="button"

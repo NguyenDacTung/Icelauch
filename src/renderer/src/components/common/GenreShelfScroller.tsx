@@ -92,7 +92,7 @@ export const GenreShelfScroller: React.FC<GenreShelfScrollerProps> = ({
           <button
             type="button"
             onClick={() => handleScroll('left')}
-            className="absolute left-1.5 top-1/2 -translate-y-1/2 z-20 w-9 h-9 rounded-full bg-black/80 hover:bg-amber-400 hover:text-black text-white border border-white/20 shadow-2xl backdrop-blur-md flex items-center justify-center transition-all duration-200 active:scale-90"
+            className="absolute left-1.5 top-1/2 -translate-y-1/2 z-20 w-9 h-9 rounded-full bg-black/90 hover:bg-amber-400 hover:text-black text-white border border-white/20 shadow-2xl backdrop-blur-md flex items-center justify-center opacity-0 group-hover/shelf:opacity-100 transition-all duration-200 active:scale-90"
             title="Cuộn sang trái"
           >
             <ChevronLeft className="w-5 h-5" />
@@ -112,7 +112,7 @@ export const GenreShelfScroller: React.FC<GenreShelfScrollerProps> = ({
           <button
             type="button"
             onClick={() => handleScroll('right')}
-            className="absolute right-1.5 top-1/2 -translate-y-1/2 z-20 w-9 h-9 rounded-full bg-black/80 hover:bg-amber-400 hover:text-black text-white border border-white/20 shadow-2xl backdrop-blur-md flex items-center justify-center transition-all duration-200 active:scale-90"
+            className="absolute right-1.5 top-1/2 -translate-y-1/2 z-20 w-9 h-9 rounded-full bg-black/90 hover:bg-amber-400 hover:text-black text-white border border-white/20 shadow-2xl backdrop-blur-md flex items-center justify-center opacity-0 group-hover/shelf:opacity-100 transition-all duration-200 active:scale-90"
             title="Cuộn sang phải"
           >
             <ChevronRight className="w-5 h-5" />

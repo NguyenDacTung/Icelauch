@@ -28,7 +28,9 @@ import {
   ChevronLeft,
   ArrowLeft,
   X,
-  ListMusic
+  ListMusic,
+  Shuffle,
+  Repeat
 } from 'lucide-react';
 import { VideoTheaterView } from './VideoTheaterView';
 import { VinylTurntablePlayer } from './VinylTurntablePlayer';
@@ -36,9 +38,12 @@ import { MediaHeroBanner } from './MediaHeroBanner';
 import { PlaylistFormModal } from './PlaylistFormModal';
 import { AddToPlaylistModal } from './AddToPlaylistModal';
 import { GenreShelfScroller } from '../common/GenreShelfScroller';
+import { SurpriseMediaModal } from './SurpriseMediaModal';
+import { AdminPlaylistManagerModal } from '../admin/AdminPlaylistManagerModal';
 import { parseMediaUrl } from '../../utils/mediaUrl';
 import type { MediaItem, MediaPlaylist, MediaSubType, AppBannerSettings, AppSettings } from '../../types';
 import { sfx } from '../../utils/sfx';
+import { matchSmartSearch } from '../../utils/searchHelper';
 
 interface MediaViewProps {
   media: MediaItem[];
@@ -95,19 +100,6 @@ export const MediaView: React.FC<MediaViewProps> = ({
   isAdmin,
   searchQuery,
   currentTrack,
-  activeAudioTrack: propActiveAudioTrack,
-  onActiveAudioTrackChange,
-  isPlayingAudio,
-  audioCurrentTime,
-  audioDuration,
-  audioVolume,
-  audioIsMuted,
-  onTogglePlayAudio,
-  onSeekAudio,
-  onNextAudio,
-  onPrevAudio,
-  onVolumeChange,
-  onToggleMuteAudio,
   favoriteMediaIds = [],
   favoritePlaylistIds = [],
   onToggleFavoriteMedia,
@@ -136,27 +128,7 @@ export const MediaView: React.FC<MediaViewProps> = ({
   const [selectedTag, setSelectedTag] = useState<string>('all');
   const [filterOfflineOnly, setFilterOfflineOnly] = useState(false);
   const [activeVideo, setActiveVideo] = useState<MediaItem | null>(null);
-  const [internalActiveAudioTrack, setInternalActiveAudioTrack] = useState<MediaItem | null>(null);
-  const effectiveActiveAudioTrack = propActiveAudioTrack !== undefined ? propActiveAudioTrack : internalActiveAudioTrack;
-
-  const setActiveAudio = (track: MediaItem | null) => {
-    if (onActiveAudioTrackChange) {
-      onActiveAudioTrackChange(track);
-    }
-    setInternalActiveAudioTrack(track);
-  };
-
-  // Auto-switch activeTab to 'podcast' or 'music' when activeAudioTrack is set
-  useEffect(() => {
-    if (effectiveActiveAudioTrack) {
-      if (effectiveActiveAudioTrack.subType === 'podcast') {
-        setActiveTab('podcast');
-      } else {
-        setActiveTab('music');
-      }
-    }
-  }, [effectiveActiveAudioTrack?.id, effectiveActiveAudioTrack?.subType]);
-
+  const [activeAudioTrack, setActiveAudioTrack] = useState<MediaItem | null>(null);
   const [showHiddenOnly, setShowHiddenOnly] = useState(false);
   const [visibleCount, setVisibleCount] = useState<number>(24);
 
@@ -174,6 +146,9 @@ export const MediaView: React.FC<MediaViewProps> = ({
   // Playlist Form Modal state
   const [isPlaylistModalOpen, setIsPlaylistModalOpen] = useState(false);
   const [editingPlaylist, setEditingPlaylist] = useState<MediaPlaylist | null>(null);
+  const [isAdminPlaylistManagerOpen, setIsAdminPlaylistManagerOpen] = useState(false);
+  const [isSurpriseModalOpen, setIsSurpriseModalOpen] = useState(false);
+  const [isPlaylistRepeat, setIsPlaylistRepeat] = useState(false);
 
   // Playback handlers
   const handleOpenVideo = (video: MediaItem) => {
@@ -185,7 +160,7 @@ export const MediaView: React.FC<MediaViewProps> = ({
   const handleOpenAudio = (track: MediaItem) => {
     sfx.playClick();
     onTurntableOpenChange?.(true);
-    setActiveAudio(track);
+    setActiveAudioTrack(track);
     onPlayAudio?.(track);
   };
 
@@ -229,13 +204,12 @@ export const MediaView: React.FC<MediaViewProps> = ({
     )
   ).filter(Boolean);
 
-  // Filter & Search
+  // Filter & Search using smart multi-token matcher
   const filteredMedia = tabMedia.filter((m) => {
-    const matchesSearch =
-      searchQuery === '' ||
-      m.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      m.category?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (m.artist && m.artist.toLowerCase().includes(searchQuery.toLowerCase()));
+    const matchesSearch = matchSmartSearch(
+      [m.title, m.category, m.artist, m.description, m.tags],
+      searchQuery
+    );
 
     const matchesTag =
       selectedTag === 'all' ||
@@ -274,7 +248,6 @@ export const MediaView: React.FC<MediaViewProps> = ({
     const coverImg = item.coverPath || item.bannerPath || (parsed.kind === 'youtube' ? parsed.thumbnailUrl : null);
     const isDownloaded = Boolean(item.localFilePath && item.downloadStatus === 'downloaded');
     const IconComponent = item.type === 'video' ? Film : item.subType === 'podcast' ? Mic : Music;
-
     const isPlayingCurrent = currentTrack && item.id === currentTrack.id;
 
     return (
@@ -306,13 +279,12 @@ export const MediaView: React.FC<MediaViewProps> = ({
             />
           ) : (
             <div
-              className={`w-full h-full flex flex-col items-center justify-center p-3 text-center select-none ${
-                item.type === 'video'
-                  ? 'bg-gradient-to-br from-[#121624] via-[#0E111A] to-[#080B10]'
-                  : item.subType === 'podcast'
+              className={`w-full h-full flex flex-col items-center justify-center p-3 text-center select-none ${item.type === 'video'
+                ? 'bg-gradient-to-br from-[#121624] via-[#0E111A] to-[#080B10]'
+                : item.subType === 'podcast'
                   ? 'bg-gradient-to-br from-[#1E1224] via-[#140A1A] to-[#0A050D]'
                   : 'bg-gradient-to-br from-[#1E1A12] via-[#14110A] to-[#0A0805]'
-              }`}
+                }`}
             >
               <div className="w-12 h-12 rounded-2xl bg-white/10 flex items-center justify-center text-amber-400 shadow-md">
                 <IconComponent className="w-6 h-6" />
@@ -347,9 +319,8 @@ export const MediaView: React.FC<MediaViewProps> = ({
                   sfx.playClick();
                   onToggleFavoriteMedia(item.id);
                 }}
-                className={`p-1.5 rounded-full backdrop-blur-md transition-all ${
-                  isFav ? 'bg-rose-500 text-white' : 'bg-black/60 text-white/70 hover:text-rose-400'
-                }`}
+                className={`p-1.5 rounded-full backdrop-blur-md transition-all ${isFav ? 'bg-rose-500 text-white' : 'bg-black/60 text-white/70 hover:text-rose-400'
+                  }`}
                 title={isFav ? 'Bỏ thích' : 'Yêu thích'}
               >
                 <Heart className={`w-3.5 h-3.5 ${isFav ? 'fill-current' : ''}`} />
@@ -465,27 +436,16 @@ export const MediaView: React.FC<MediaViewProps> = ({
   }
 
   // 2. VINYL TURNTABLE AUDIO PLAYER
-  if (effectiveActiveAudioTrack) {
+  if (activeAudioTrack) {
     return (
       <VinylTurntablePlayer
-        media={effectiveActiveAudioTrack}
+        media={activeAudioTrack}
         allAudio={tabMedia}
         playlists={tabPlaylists}
         isAdmin={isAdmin}
-        isPlaying={isPlayingAudio}
-        currentTime={audioCurrentTime}
-        duration={audioDuration || effectiveActiveAudioTrack.duration || 0}
-        volume={audioVolume}
-        isMuted={audioIsMuted}
-        onTogglePlay={onTogglePlayAudio}
-        onSeek={onSeekAudio}
-        onNext={onNextAudio}
-        onPrev={onPrevAudio}
-        onVolumeChange={onVolumeChange}
-        onToggleMute={onToggleMuteAudio}
         onBack={() => {
           onTurntableOpenChange?.(false);
-          setActiveAudio(null);
+          setActiveAudioTrack(null);
         }}
         onSelectTrack={(item) => handleOpenAudio(item)}
         onUpdateProgress={onUpdateMediaProgress}
@@ -574,7 +534,8 @@ export const MediaView: React.FC<MediaViewProps> = ({
                     const first = processedItems[0];
                     if (first.type === 'video') setActiveVideo(first);
                     else {
-                      handleOpenAudio(first);
+                      setActiveAudioTrack(first);
+                      onPlayAudio?.(first);
                     }
                   }}
                   className="flex items-center gap-2 px-4 py-2 rounded-xl bg-amber-400 hover:bg-amber-300 text-black text-xs font-bold transition-all shadow-lg shadow-amber-400/20 active:scale-95"
@@ -583,6 +544,42 @@ export const MediaView: React.FC<MediaViewProps> = ({
                   <span>Phát Tất Cả</span>
                 </button>
               )}
+
+              {/* Shuffle Play Button */}
+              {processedItems.length > 0 && (
+                <button
+                  onClick={() => {
+                    sfx.playClick();
+                    const shuffled = [...processedItems].sort(() => Math.random() - 0.5);
+                    const first = shuffled[0];
+                    if (first.type === 'video') setActiveVideo(first);
+                    else {
+                      handleOpenAudio(first);
+                    }
+                  }}
+                  className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-white/80 hover:text-white border border-white/10 text-xs font-semibold transition-all active:scale-95"
+                  title="Phát ngẫu nhiên một mục"
+                >
+                  <Shuffle className="w-3.5 h-3.5 text-cyan-400" />
+                  <span>Phát Ngẫu Nhiên</span>
+                </button>
+              )}
+
+              {/* Repeat Playlist Toggle */}
+              <button
+                onClick={() => {
+                  sfx.playClick();
+                  setIsPlaylistRepeat(!isPlaylistRepeat);
+                }}
+                className={`flex items-center gap-1.5 px-3 py-2 rounded-xl border text-xs font-semibold transition-all active:scale-95 ${isPlaylistRepeat
+                  ? 'bg-amber-400/20 border-amber-400/50 text-amber-300'
+                  : 'bg-white/5 border-white/10 text-white/70 hover:text-white'
+                  }`}
+                title={isPlaylistRepeat ? 'Đang bật lặp lại danh sách' : 'Bật lặp lại danh sách'}
+              >
+                <Repeat className="w-3.5 h-3.5" />
+                <span>{isPlaylistRepeat ? 'Lặp: Bật' : 'Lặp Lại'}</span>
+              </button>
 
               {/* Favorite Heart Button */}
               {onToggleFavoritePlaylist && (
@@ -778,6 +775,19 @@ export const MediaView: React.FC<MediaViewProps> = ({
             <span>Chỉ mục đã tải</span>
           </button>
 
+          {/* Surprise Media Button ("Hôm nay xem gì" / "Hôm nay nghe gì") */}
+          <button
+            onClick={() => {
+              sfx.playClick();
+              setIsSurpriseModalOpen(true);
+            }}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-amber-400/20 to-amber-500/20 hover:from-amber-400/30 hover:to-amber-500/30 border border-amber-400/40 text-amber-300 text-xs font-bold transition-all shadow-sm active:scale-95 cursor-pointer"
+            title={activeTab === 'video' ? 'Vòng quay ngẫu nhiên gợi ý phim hay' : 'Gợi ý ngẫu nhiên một giai điệu hay'}
+          >
+            <Sparkles className="w-3.5 h-3.5 text-amber-400 animate-pulse" />
+            <span>{activeTab === 'video' ? 'Hôm Nay Xem Gì?' : 'Hôm Nay Nghe Gì?'}</span>
+          </button>
+
           {isAdmin && (
             <button
               onClick={() => {
@@ -807,6 +817,21 @@ export const MediaView: React.FC<MediaViewProps> = ({
                 >
                   <Tag className="w-3.5 h-3.5 text-amber-400" />
                   <span>Quản Lý Thể Loại</span>
+                </button>
+              )}
+
+              {/* Admin Playlist Manager Button */}
+              {onSavePlaylist && (
+                <button
+                  onClick={() => {
+                    sfx.playClick();
+                    setIsAdminPlaylistManagerOpen(true);
+                  }}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/10 hover:bg-white/15 border border-white/15 text-white text-xs font-bold transition-all shadow-sm active:scale-95"
+                  title="Quản lý danh sách phát Admin cho Phim, Nhạc, Audio"
+                >
+                  <ListMusic className="w-3.5 h-3.5 text-amber-400" />
+                  <span>Quản Lý Playlist</span>
                 </button>
               )}
 
@@ -850,7 +875,8 @@ export const MediaView: React.FC<MediaViewProps> = ({
             if (item.type === 'video') {
               setActiveVideo(item);
             } else {
-              handleOpenAudio(item);
+              setActiveAudioTrack(item);
+              onPlayAudio?.(item);
             }
           }}
         />
@@ -872,7 +898,8 @@ export const MediaView: React.FC<MediaViewProps> = ({
                 onClick={() => {
                   sfx.playClick();
                   if (isAudio) {
-                    handleOpenAudio(item);
+                    setActiveAudioTrack(item);
+                    onPlayAudio?.(item);
                   } else {
                     setActiveVideo(item);
                   }
@@ -1050,6 +1077,39 @@ export const MediaView: React.FC<MediaViewProps> = ({
           userPlaylists={userPlaylists || []}
           onToggleItemInPlaylist={onToggleItemInUserPlaylist}
           onCreatePlaylist={onCreateUserPlaylist}
+        />
+      )}
+
+      {/* Surprise Media Modal ("Hôm nay xem gì" / "Hôm nay nghe gì") */}
+      {isSurpriseModalOpen && (
+        <SurpriseMediaModal
+          isOpen={isSurpriseModalOpen}
+          onClose={() => setIsSurpriseModalOpen(false)}
+          type={activeTab === 'video' ? 'movie' : activeTab === 'music' ? 'music' : 'podcast'}
+          mediaList={
+            activeTab === 'video'
+              ? media.filter((m) => m.type === 'video')
+              : activeTab === 'music'
+                ? media.filter((m) => m.type === 'audio' && (!m.subType || m.subType === 'music'))
+                : media.filter((m) => m.type === 'audio' && m.subType === 'podcast')
+          }
+          onPlay={(item) => {
+            if (item.type === 'video') handleOpenVideo(item);
+            else handleOpenAudio(item);
+          }}
+        />
+      )}
+
+      {/* Admin Playlist Manager Modal */}
+      {isAdminPlaylistManagerOpen && onSavePlaylist && onDeletePlaylist && (
+        <AdminPlaylistManagerModal
+          isOpen={isAdminPlaylistManagerOpen}
+          onClose={() => setIsAdminPlaylistManagerOpen(false)}
+          playlists={playlists}
+          allMedia={media}
+          defaultTab={activeTab}
+          onSavePlaylist={onSavePlaylist}
+          onDeletePlaylist={onDeletePlaylist}
         />
       )}
     </div>

@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useRef, useState, useEffect, useMemo } from 'react';
 import { 
   Play, 
   Pause, 
@@ -72,48 +72,70 @@ export const MiniPlayer: React.FC<MiniPlayerProps> = ({
   const [isMuted, setIsMuted] = useState<boolean>(false);
   const [isRepeat, setIsRepeat] = useState<boolean>(false);
   const [isShuffle, setIsShuffle] = useState<boolean>(false);
-  const [audioSrc, setAudioSrc] = useState<string>(
-    currentTrack?.link ? getDirectAudioStreamUrl(currentTrack.link) : ''
-  );
+  const [proxyAudioSrc, setProxyAudioSrc] = useState<string>('');
 
   const effectiveVolume = externalVolume !== undefined ? externalVolume : volume;
   const effectiveIsMuted = externalIsMuted !== undefined ? externalIsMuted : isMuted;
 
-  // 1. Support offline downloaded files vs proxy vs direct stream URL
-  useEffect(() => {
-    if (!currentTrack) return;
+  // Resolve direct audio stream synchronously, avoiding unnecessary state delay on Android
+  const audioSrc = useMemo(() => {
+    if (!currentTrack) return '';
     if (currentTrack.localFilePath && currentTrack.downloadStatus === 'downloaded') {
-      setAudioSrc(`file://${currentTrack.localFilePath}`);
+      return `file://${currentTrack.localFilePath}`;
+    }
+    if (proxyAudioSrc) return proxyAudioSrc;
+    return getDirectAudioStreamUrl(currentTrack.link);
+  }, [currentTrack, proxyAudioSrc]);
+
+  // Support PC Electron local proxy server when applicable
+  useEffect(() => {
+    if (!currentTrack) {
+      setProxyAudioSrc('');
       return;
     }
     if (window.api && (currentTrack.link.includes('drive.google.com') || currentTrack.link.includes('drive.usercontent.google.com'))) {
       window.api.getStreamUrl(currentTrack.link).then((proxyUrl: string) => {
-        setAudioSrc(proxyUrl);
+        setProxyAudioSrc(proxyUrl);
       }).catch(() => {
-        setAudioSrc(getDirectAudioStreamUrl(currentTrack.link));
+        setProxyAudioSrc('');
       });
     } else {
-      setAudioSrc(getDirectAudioStreamUrl(currentTrack.link));
+      setProxyAudioSrc('');
     }
-  }, [currentTrack?.id, currentTrack?.link, currentTrack?.localFilePath, currentTrack?.downloadStatus]);
+  }, [currentTrack?.id, currentTrack?.link]);
 
-  // 2. Play / Pause - Uninterrupted across tabs, independent of isTurntableActive
+  // Play / Pause - Smooth and stall-free across Android WebView and Desktop
   useEffect(() => {
-    if (audioRef.current) {
-      if (isPlaying && currentTrack) {
-        // Trigger explicit reload on track/src changes to prevent Android WebView stalls
-        if (audioRef.current.currentSrc !== audioSrc) {
-          audioRef.current.load();
-        }
-        const playPromise = audioRef.current.play();
-        if (playPromise !== undefined) {
-          playPromise.catch((e) => console.warn('Audio play error:', e));
-        }
-      } else {
-        audioRef.current.pause();
+    const audio = audioRef.current;
+    if (!audio) return;
+
+    if (isPlaying && currentTrack && audioSrc) {
+      const playPromise = audio.play();
+      if (playPromise !== undefined) {
+        playPromise.catch((err) => {
+          if (err.name !== 'AbortError') {
+            console.warn('Audio play error:', err);
+          }
+        });
       }
+    } else {
+      audio.pause();
     }
   }, [isPlaying, currentTrack?.id, audioSrc]);
+
+  const handleCanPlay = () => {
+    const audio = audioRef.current;
+    if (audio && isPlaying && audio.paused) {
+      const playPromise = audio.play();
+      if (playPromise !== undefined) {
+        playPromise.catch((err) => {
+          if (err.name !== 'AbortError') {
+            console.warn('Audio auto-resume on canplay error:', err);
+          }
+        });
+      }
+    }
+  };
 
   // 3. Web Media Session API sync (lock screen, notification shade, Bluetooth controls, background playback)
   useEffect(() => {
@@ -240,6 +262,7 @@ export const MiniPlayer: React.FC<MiniPlayerProps> = ({
         playsInline
         onTimeUpdate={handleTimeUpdate}
         onLoadedMetadata={handleLoadedMetadata}
+        onCanPlay={handleCanPlay}
         onEnded={onNext}
         onError={(e) => console.warn('Audio tag error:', e)}
         loop={isRepeat}

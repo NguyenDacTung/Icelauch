@@ -26,6 +26,7 @@ import {
 import type { Game, MediaItem, AppSettings } from '../../types';
 import type { DeviceType } from '../../utils/deviceDetector';
 import { sfx } from '../../utils/sfx';
+import { matchSmartSearch } from '../../utils/searchHelper';
 
 interface HomeViewProps {
   games: Game[];
@@ -48,7 +49,7 @@ interface HomeViewProps {
   onEditGame: (game: Game) => void;
   onDeleteGame: (id: string) => void;
   onOpenAddGame: () => void;
-  onOpenTagManager?: () => void;
+  onOpenTagManager?: (mode?: 'game' | 'movie' | 'music' | 'podcast') => void;
   onLoadDemoData: () => void;
 }
 
@@ -111,12 +112,9 @@ export const HomeView: React.FC<HomeViewProps> = ({
     { id: 'story', label: 'Cốt truyện đỉnh cao', icon: BookOpen, keywords: ['nhập vai', 'rpg', 'phiêu lưu', 'story'] },
   ];
 
-  // Filter & Search
+  // Filter & Search using smart multi-token matcher
   let filteredGames = baseGames.filter((g) => {
-    const matchesSearch =
-      searchQuery === '' ||
-      g.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      g.genre?.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesSearch = matchSmartSearch([g.name, g.genre, g.tags, g.description], searchQuery);
 
     const matchesGenre =
       selectedGenre === 'Tất cả' ||
@@ -146,10 +144,15 @@ export const HomeView: React.FC<HomeViewProps> = ({
   // Continue playing games (ready games with lastPlayed)
   const recentGames = games.filter((g) => g.status === 'ready' && g.lastPlayed);
 
-  // Continue watching & listening media (media items with lastPosition > 10 and not watched)
-  const continueMedia = allMedia.filter(
-    (m) => (!m.hidden || isAdmin) && m.lastPosition > 10 && !m.watched
-  );
+  // Continue watching & listening media (max 5 items, FIFO / newest first)
+  const continueMedia = (allMedia || [])
+    .filter((m) => (!m.hidden || isAdmin) && m.lastPosition > 10 && !m.watched)
+    .sort((a, b) => {
+      const timeA = new Date(a.addedAt || 0).getTime();
+      const timeB = new Date(b.addedAt || 0).getTime();
+      return timeB - timeA;
+    })
+    .slice(0, 5);
 
   // Spotlight featured games
   const spotlightGames = baseGames.filter((g) => g.featured);
@@ -190,19 +193,49 @@ export const HomeView: React.FC<HomeViewProps> = ({
           </div>
         </div>
 
-        {/* Quick Action: "Hôm Nay Chơi Gì? / Surprise Me" Button */}
-        <button
-          onClick={() => {
-            sfx.playClick();
-            setIsSurpriseOpen(true);
-          }}
-          className="flex items-center gap-2.5 px-4 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 hover:from-amber-400 hover:to-orange-400 text-black font-extrabold text-xs shadow-xl shadow-amber-500/20 transition-all hover:scale-105 active:scale-95"
-          title="Mở vòng quay ngẫu nhiên chọn game cực vui"
-        >
-          <Dices className="w-4 h-4 animate-bounce" />
-          <span>HÔM NAY CHƠI GÌ?</span>
-          <Sparkles className="w-3.5 h-3.5" />
-        </button>
+        {/* Quick Actions: Admin Controls & "Hôm Nay Chơi Gì? / Surprise Me" Button */}
+        <div className="flex items-center gap-2.5">
+          {isAdmin && onOpenTagManager && (
+            <button
+              onClick={() => {
+                sfx.playClick();
+                onOpenTagManager('game');
+              }}
+              className="flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-white/10 hover:bg-white/15 border border-white/15 text-white text-xs font-bold transition-all shadow-sm active:scale-95"
+              title="Quản lý thể loại / tag game"
+            >
+              <Tag className="w-3.5 h-3.5 text-amber-400" />
+              <span>Quản Lý Thể Loại</span>
+            </button>
+          )}
+
+          {isAdmin && onOpenAddGame && (
+            <button
+              onClick={() => {
+                sfx.playClick();
+                onOpenAddGame();
+              }}
+              className="flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-black text-xs font-bold transition-all shadow-sm active:scale-95"
+              title="Thêm game mới vào hệ thống"
+            >
+              <Plus className="w-3.5 h-3.5 stroke-[3]" />
+              <span>Thêm Game</span>
+            </button>
+          )}
+
+          <button
+            onClick={() => {
+              sfx.playClick();
+              setIsSurpriseOpen(true);
+            }}
+            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 hover:from-amber-400 hover:to-orange-400 text-black font-extrabold text-xs shadow-xl shadow-amber-500/20 transition-all hover:scale-105 active:scale-95"
+            title="Mở vòng quay ngẫu nhiên chọn game cực vui"
+          >
+            <Dices className="w-4 h-4 animate-bounce" />
+            <span>HÔM NAY CHƠI GÌ?</span>
+            <Sparkles className="w-3.5 h-3.5" />
+          </button>
+        </div>
       </div>
 
       {/* 2. Hero Featured Banner (Exact 16:9 Aspect-Video) */}
@@ -344,28 +377,27 @@ export const HomeView: React.FC<HomeViewProps> = ({
         </section>
       )}
 
-      {/* 5. Mood Filter Pills Bar */}
-      {!searchQuery && (
+      {/* 5. Real Genre Tag Filter Pills Bar */}
+      {!searchQuery && genres.length > 1 && (
         <section className="space-y-2">
-          <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-thin">
-            {moods.map((m) => {
-              const Icon = m.icon;
-              const isActive = selectedMood === m.id;
+          <div className="flex items-center gap-2 overflow-x-auto pb-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+            {genres.map((g) => {
+              const isActive = selectedGenre === g;
               return (
                 <button
-                  key={m.id}
+                  key={g}
                   onClick={() => {
                     sfx.playClick();
-                    setSelectedMood(m.id);
+                    setSelectedGenre(g);
                   }}
-                  className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all border ${
+                  className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all border ${
                     isActive
-                      ? 'bg-gradient-to-r from-blue-600/40 to-ice-accent/40 text-white border-ice-accent shadow-md shadow-ice-accent/15'
+                      ? 'bg-amber-500/20 text-amber-300 border-amber-500/50 shadow-sm'
                       : 'bg-ice-card text-ice-text border-ice-border hover:bg-ice-hover hover:text-white'
                   }`}
                 >
-                  <Icon className={`w-3.5 h-3.5 ${isActive ? 'text-ice-accent' : 'text-ice-muted'}`} />
-                  <span>{m.label}</span>
+                  <Tag className={`w-3 h-3 ${isActive ? 'text-amber-400' : 'text-ice-muted'}`} />
+                  <span>{g}</span>
                 </button>
               );
             })}
@@ -517,7 +549,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
                   <button
                     onClick={() => {
                       sfx.playClick();
-                      onOpenTagManager();
+                      onOpenTagManager('game');
                     }}
                     className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/10 hover:bg-white/15 border border-white/15 text-white text-xs font-bold transition-all shadow-sm active:scale-95"
                     title="Quản lý thể loại / tag game"
