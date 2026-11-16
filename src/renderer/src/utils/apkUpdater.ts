@@ -1,6 +1,7 @@
 import { registerPlugin } from '@capacitor/core';
+import { DEFAULT_SUPABASE_URL, DEFAULT_SUPABASE_ANON_KEY } from '../services/platformAdapter';
 
-export const CURRENT_MOBILE_VERSION = '1.1.6';
+export const CURRENT_MOBILE_VERSION = '1.1.7';
 export const CURRENT_TV_VERSION = '1.0.0';
 const GITHUB_REPO = 'NguyenDacTung/Icelauch';
 
@@ -54,6 +55,35 @@ function isNewerVersion(remote: string, current: string): boolean {
 }
 
 export async function checkMobileUpdate(): Promise<MobileUpdateInfo> {
+  // 1. Check Supabase Release Registry first (Works seamlessly even if GitHub is 100% Private!)
+  try {
+    const supaUrl = `${DEFAULT_SUPABASE_URL}/rest/v1/icelauch_user_data?profile_id=eq.icelauch_device_registry&select=game_stats`;
+    const sRes = await fetch(supaUrl, {
+      headers: {
+        apikey: DEFAULT_SUPABASE_ANON_KEY,
+        Authorization: `Bearer ${DEFAULT_SUPABASE_ANON_KEY}`,
+      },
+    });
+    if (sRes.ok) {
+      const rows = await sRes.json();
+      const latestRel = rows[0]?.game_stats?.latest_release;
+      if (latestRel && latestRel.version) {
+        const updateAvailable = isNewerVersion(latestRel.version, CURRENT_MOBILE_VERSION);
+        return {
+          updateAvailable,
+          currentVersion: CURRENT_MOBILE_VERSION,
+          latestVersion: latestRel.version,
+          releaseName: latestRel.name || `Bản Cập Nhật v${latestRel.version}`,
+          releaseNotes: latestRel.releaseNotes || 'Cập nhật phiên bản bảo mật và tính năng mới.',
+          apkUrl: latestRel.phoneApkUrl || latestRel.apkUrl || '',
+        };
+      }
+    }
+  } catch (supaErr) {
+    console.warn('[ApkUpdater] Supabase update check fallback:', supaErr);
+  }
+
+  // 2. Fallback to GitHub Releases API
   try {
     const res = await fetch(`https://api.github.com/repos/${GITHUB_REPO}/releases?per_page=5`, {
       headers: {

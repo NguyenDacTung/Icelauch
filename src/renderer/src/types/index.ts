@@ -365,3 +365,18 @@ export interface TrailerSettings {
   trailers: TrailerItem[];
 }
 
+export type DeviceApprovalStatus = 'pending' | 'approved' | 'revoked';
+
+export interface AuthorizedDevice {
+  deviceId: string;
+  deviceName: string;
+  platform: 'windows_pc' | 'android_mobile' | 'android_tv';
+  status: DeviceApprovalStatus;
+  otpCode?: string | null;
+  otpExpiresAt?: string | null;
+  approvedAt?: string | null;
+  lastActiveAt?: string;
+  createdAt?: string;
+}
+
+

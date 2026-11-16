@@ -29,6 +29,7 @@ export interface TVSettingsViewProps {
   activeProfile?: UserProfile | null;
   onSwitchProfile?: () => void;
   onOpenAdminAuth: () => void;
+  onOpenDeviceManager?: () => void;
   onLockAdmin?: () => void;
   onSaveSettings: (settings: Partial<AppSettings>) => void;
   onSaveCloudSync?: (settings: Partial<CloudSyncSettings>) => void;
@@ -41,6 +42,7 @@ export const TVSettingsView: React.FC<TVSettingsViewProps> = ({
   activeProfile,
   onSwitchProfile,
   onOpenAdminAuth,
+  onOpenDeviceManager,
   onLockAdmin,
   onSaveSettings,
   onSaveCloudSync,

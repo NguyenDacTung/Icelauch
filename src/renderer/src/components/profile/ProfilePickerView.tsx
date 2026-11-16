@@ -106,8 +106,52 @@ export const ProfilePickerView: React.FC<ProfilePickerViewProps> = ({
     )
   );
 
-  const isDirectLoginAdmin = loginUsername.trim().toLowerCase() === 'admin' || loginUsername.trim().toLowerCase() === 'quantri';
+  const matchedDirectProfile = profiles.find(
+    (p) =>
+      (p.username && p.username.toLowerCase() === loginUsername.trim().toLowerCase()) ||
+      p.id.toLowerCase() === loginUsername.trim().toLowerCase() ||
+      p.nickname.toLowerCase() === loginUsername.trim().toLowerCase()
+  );
+  const isDirectLoginAdmin =
+    loginUsername.trim().toLowerCase() === 'admin' ||
+    loginUsername.trim().toLowerCase() === 'quantri' ||
+    matchedDirectProfile?.role === 'admin';
   const isAdminProfile = promptProfile?.role === 'admin' || (promptProfile?.pinHash && !promptProfile?.passwordHash);
+
+  // Emergency Admin Bypass Dialog State
+  const [showAdminBypass, setShowAdminBypass] = useState(false);
+  const [adminBypassPin, setAdminBypassPin] = useState('');
+  const [bypassError, setBypassError] = useState<string | null>(null);
+  const [isBypassing, setIsBypassing] = useState(false);
+
+  const handleAdminBypass = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!adminBypassPin.trim()) {
+      setBypassError('Vui lòng nhập mã PIN Admin');
+      return;
+    }
+    setIsBypassing(true);
+    setBypassError(null);
+    try {
+      const adminProfile = profiles.find((p) => p.role === 'admin' || (p.pinHash && !p.passwordHash));
+      if (!adminProfile) {
+        setBypassError('Không tìm thấy tài khoản Admin trong hệ thống');
+        return;
+      }
+      const res = await onSelectProfile(adminProfile, { pin: adminBypassPin.trim() }, true);
+      if (res.success) {
+        saveToKnownAccounts(adminProfile);
+        setShowAdminBypass(false);
+      } else {
+        setBypassError(res.error || 'Mã PIN Admin không chính xác');
+        setAdminBypassPin('');
+      }
+    } catch (err: any) {
+      setBypassError(err?.message || 'Lỗi xác thực Admin');
+    } finally {
+      setIsBypassing(false);
+    }
+  };
 
   const saveToKnownAccounts = (profile: UserProfile) => {
     const record: SavedAccountRecord = {
@@ -182,10 +226,13 @@ export const ProfilePickerView: React.FC<ProfilePickerViewProps> = ({
 
     const isAdmin = matchedProfile.role === 'admin' || (matchedProfile.pinHash && !matchedProfile.passwordHash);
 
-    if (isAdmin && !loginPin.trim()) {
+    // For Admin: accept PIN from loginPin or loginPassword
+    const pinToUse = loginPin.trim() || loginPassword.trim();
+    if (isAdmin && !pinToUse) {
       setLoginError('Vui lòng nhập mã PIN Quản Trị Viên');
       return;
     }
+    // For Normal Users: strictly require password, NEVER require PIN!
     if (!isAdmin && !loginPassword.trim()) {
       setLoginError('Vui lòng nhập mật khẩu tài khoản');
       return;
@@ -195,7 +242,7 @@ export const ProfilePickerView: React.FC<ProfilePickerViewProps> = ({
     try {
       const res = await onSelectProfile(
         matchedProfile,
-        { pin: loginPin.trim(), password: loginPassword },
+        isAdmin ? { pin: pinToUse } : { password: loginPassword },
         loginRemember
       );
 
@@ -342,6 +389,18 @@ export const ProfilePickerView: React.FC<ProfilePickerViewProps> = ({
     <div className="fixed inset-0 z-50 bg-[#0A0C10] flex flex-col items-center justify-center p-4 sm:p-6 select-none overflow-y-auto custom-scrollbar">
       {/* Background ambient lighting */}
       <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[350px] bg-gradient-to-r from-ice-accent/15 via-blue-600/10 to-indigo-600/15 rounded-full blur-[120px] pointer-events-none" />
+
+      {/* Discreet Admin Lock Button for Owner */}
+      <div className="absolute top-4 right-4 z-20">
+        <button
+          type="button"
+          onClick={() => setShowAdminBypass(true)}
+          className="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-white/30 hover:text-amber-400 transition-colors cursor-pointer"
+          title="Chủ sở hữu (Đăng nhập nhanh bằng PIN Admin)"
+        >
+          <Lock className="w-4 h-4" />
+        </button>
+      </div>
 
       {/* Main Content Container */}
       <div className="relative z-10 w-full max-w-4xl flex flex-col items-center text-center space-y-8 animate-fade-in my-auto py-8">
@@ -507,7 +566,7 @@ export const ProfilePickerView: React.FC<ProfilePickerViewProps> = ({
           </form>
         </div>
 
-        {/* SECTION 3: REGISTER NEW & GUEST ACTIONS */}
+        {/* SECTION 3: REGISTER NEW ACCOUNT */}
         <div className="flex flex-wrap items-center justify-center gap-4 text-xs">
           <button
             type="button"
@@ -515,19 +574,10 @@ export const ProfilePickerView: React.FC<ProfilePickerViewProps> = ({
               setEditingProfile(null);
               setIsCreateModalOpen(true);
             }}
-            className="px-5 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold transition-all flex items-center gap-2 border border-white/10 shadow"
+            className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-amber-400/20 to-amber-500/20 hover:from-amber-400/30 hover:to-amber-500/30 text-white font-bold transition-all flex items-center gap-2 border border-amber-400/30 shadow-lg cursor-pointer"
           >
             <UserPlus className="w-4 h-4 text-amber-400" />
             <span>Đăng Ký Tài Khoản Mới</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={onSelectGuest}
-            className="px-5 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-ice-muted hover:text-white font-bold transition-all flex items-center gap-2 border border-white/5"
-          >
-            <User className="w-4 h-4" />
-            <span>Trải Nghiệm Dưới Dạng Khách (Guest)</span>
           </button>
         </div>
       </div>
@@ -701,6 +751,69 @@ export const ProfilePickerView: React.FC<ProfilePickerViewProps> = ({
           } catch {}
         }}
       />
+
+      {/* Emergency Admin Master PIN Modal */}
+      {showAdminBypass && (
+        <div className="fixed inset-0 z-[10000] flex items-center justify-center bg-black/80 backdrop-blur-md p-4 animate-fade-in">
+          <div className="w-full max-w-sm bg-[#161A24] border border-amber-500/30 rounded-2xl p-6 shadow-2xl space-y-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2 text-amber-400 font-bold text-sm">
+                <Lock className="w-4 h-4" />
+                <span>Đăng Nhập Khẩn Cấp Bằng PIN Admin</span>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  setShowAdminBypass(false);
+                  setBypassError(null);
+                  setAdminBypassPin('');
+                }}
+                className="text-ice-muted hover:text-white transition-colors cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <p className="text-xs text-ice-subtext leading-relaxed">
+              Dành riêng cho Chủ sở hữu: Nhập mã PIN Quản Trị Viên để vào thẳng tài khoản Admin.
+            </p>
+
+            {bypassError && (
+              <div className="p-2.5 rounded-lg bg-rose-500/15 border border-rose-500/30 text-rose-300 text-xs">
+                {bypassError}
+              </div>
+            )}
+
+            <form onSubmit={handleAdminBypass} className="space-y-3.5">
+              <input
+                type="password"
+                value={adminBypassPin}
+                onChange={(e) => setAdminBypassPin(e.target.value)}
+                placeholder="Nhập mã PIN Admin..."
+                className="w-full h-11 px-3.5 rounded-xl bg-black/60 border border-amber-500/40 text-sm text-white focus:border-amber-400 focus:outline-none font-mono tracking-widest text-center"
+                autoFocus
+              />
+
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => setShowAdminBypass(false)}
+                  className="flex-1 h-10 rounded-xl bg-white/10 hover:bg-white/15 text-xs text-ice-subtext font-medium transition-colors"
+                >
+                  Hủy
+                </button>
+                <button
+                  type="submit"
+                  disabled={isBypassing || !adminBypassPin.trim()}
+                  className="flex-1 h-10 rounded-xl bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-400 hover:to-orange-500 text-white text-xs font-semibold shadow-lg shadow-amber-500/20 disabled:opacity-50 transition-all cursor-pointer"
+                >
+                  {isBypassing ? 'Đang kiểm tra...' : 'Vào Quyền Admin'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

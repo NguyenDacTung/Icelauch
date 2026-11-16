@@ -811,6 +811,29 @@ app.whenReady().then(async () => {
     }
   });
 
+  // System Device ID (Hardware Identity for Device Authorization)
+  ipcMain.handle('system:get-device-id', async () => {
+    const deviceIdFile = path.join(app.getPath('userData'), 'device_identity.id');
+    try {
+      if (fs.existsSync(deviceIdFile)) {
+        const stored = fs.readFileSync(deviceIdFile, 'utf8').trim();
+        if (stored && stored.startsWith('ICE-')) return stored;
+      }
+    } catch {}
+    let rawSeed = '';
+    try {
+      rawSeed = child_process.execSync('wmic csproduct get uuid', { timeout: 2000 }).toString();
+    } catch {
+      rawSeed = `${process.env.COMPUTERNAME || ''}-${process.env.USERDOMAIN || ''}`;
+    }
+    const hash = crypto.createHash('sha256').update(rawSeed || 'PC_ICE').digest('hex').slice(0, 10).toUpperCase();
+    const deviceId = `ICE-PC-${hash}`;
+    try {
+      fs.writeFileSync(deviceIdFile, deviceId, 'utf8');
+    } catch {}
+    return deviceId;
+  });
+
   // System Drive Free Space
   ipcMain.handle('system:get-drives-space', () => {
     const letters = ['C:\\', 'D:\\', 'E:\\', 'F:\\', 'G:\\'];

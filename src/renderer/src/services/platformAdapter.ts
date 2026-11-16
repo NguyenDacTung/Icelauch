@@ -138,17 +138,19 @@ export async function fetchDirectCloudCatalog(
       addedAt: row.updated_at || new Date().toISOString(),
     }));
 
-    const profiles: UserProfile[] = (rawProfiles || []).map((row: any) => ({
-      id: row.id,
-      nickname: row.nickname,
-      avatar: row.avatar || 'avatar_1',
-      pinHash: row.pin_hash,
-      createdDate: row.created_at,
-      lastActiveDate: row.last_active,
-      library: [],
-      favoriteMedia: [],
-      watchProgress: {},
-    }));
+    const profiles: UserProfile[] = (rawProfiles || [])
+      .filter((row: any) => row.id !== 'icedrop_cloud_hub' && row.id !== 'icelauch_device_registry' && !String(row.id).startsWith('icelauch_'))
+      .map((row: any) => ({
+        id: row.id,
+        nickname: row.nickname,
+        avatar: row.avatar || 'avatar_1',
+        pinHash: row.pin_hash,
+        createdDate: row.created_at,
+        lastActiveDate: row.last_active,
+        library: [],
+        favoriteMedia: [],
+        watchProgress: {},
+      }));
 
     const playlists: MediaPlaylist[] = (rawPlaylists || []).map((row: any) => ({
       id: row.id,

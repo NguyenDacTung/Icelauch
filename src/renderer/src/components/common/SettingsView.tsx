@@ -6,6 +6,7 @@ import {
   FileDown, 
   FileUp, 
   Sparkles, 
+  Shield,
   ShieldCheck, 
   Check, 
   AlertCircle, 
@@ -59,6 +60,7 @@ interface SettingsViewProps {
   onOpenAdminAuth?: () => void;
   onOpenBannerManager?: () => void;
   onOpenUserManagement?: () => void;
+  onOpenDeviceManager?: () => void;
   onUpdateTags?: (type: 'game' | 'media', tags: string[]) => void;
   onSaveSettings?: (settings: Partial<AppSettings>) => void;
   cloudSync?: CloudSyncSettings;
@@ -76,6 +78,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
   onOpenAdminAuth,
   onOpenBannerManager,
   onOpenUserManagement,
+  onOpenDeviceManager,
   onUpdateTags,
   onSaveSettings,
   cloudSync,
@@ -1686,6 +1689,30 @@ CREATE POLICY "Public Update Assets" ON storage.objects FOR UPDATE TO anon WITH 
                   </div>
                   <p className="text-xs text-ice-subtext leading-relaxed">
                     Xem toàn bộ hồ sơ khách hàng, tìm kiếm, sửa thông tin, đặt lại mật khẩu hoặc cấm tài khoản có thời hạn (1h, 1 ngày, 7 ngày, 30 ngày, vĩnh viễn).
+                  </p>
+                </section>
+              )}
+
+              {/* Device Whitelist & Hardware Authorization Management */}
+              {onOpenDeviceManager && (
+                <section className="bg-ice-card rounded-2xl border border-ice-border p-6 space-y-4">
+                  <div className="flex items-center justify-between border-b border-ice-border/60 pb-3">
+                    <div className="flex items-center gap-2">
+                      <Shield className="w-5 h-5 text-cyan-400" />
+                      <h3 className="text-sm font-bold text-white uppercase tracking-wider">
+                        Quản Lý Thiết Bị Được Cấp Quyền (Device Whitelist)
+                      </h3>
+                    </div>
+                    <button
+                      onClick={onOpenDeviceManager}
+                      className="px-4 py-2 rounded-xl bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white text-xs font-bold transition-all shadow-md flex items-center gap-1.5 cursor-pointer"
+                    >
+                      <Shield className="w-3.5 h-3.5" />
+                      <span>Quản Lý Thiết Bị & OTP</span>
+                    </button>
+                  </div>
+                  <p className="text-xs text-ice-subtext leading-relaxed">
+                    Xem danh sách các thiết bị phần cứng được phép mở app, cấp mã OTP xác thực (hiệu lực 2 phút) hoặc thu hồi quyền truy cập từ xa.
                   </p>
                 </section>
               )}

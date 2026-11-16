@@ -48,6 +48,15 @@ import { MobileLandscapeGamepad } from './components/extras/MobileLandscapeGamep
 import type { GameControllerConfig } from './types';
 import { RequireLoginModal } from './components/common/RequireLoginModal';
 import { FloatingMiniPlayer } from './components/media/FloatingMiniPlayer';
+import { DeviceActivationGateView } from './components/security/DeviceActivationGateView';
+import { DeviceManagerModal } from './components/admin/DeviceManagerModal';
+import {
+  getHardwareDeviceId,
+  getDeviceApprovalStatus,
+  isDeviceLocallyApproved,
+  shouldRequireReLoginForNewVersion,
+  markCurrentVersionLoggedIn,
+} from './services/deviceAuth';
 import { App as CapApp } from '@capacitor/app';
 import {
   isElectron,
@@ -188,6 +197,48 @@ export default function App() {
     config?: GameControllerConfig;
     hostIp: string;
   }>({ isOpen: false, hostIp: '127.0.0.1' });
+
+  // Device Hardware Authorization & Whitelist states
+  const [hardwareDeviceId, setHardwareDeviceId] = useState<string>('');
+  const [isDeviceApproved, setIsDeviceApproved] = useState<boolean>(() => {
+    try {
+      return localStorage.getItem('icelauch_device_approved_status') === 'approved';
+    } catch {
+      return false;
+    }
+  });
+  const [isCheckingDeviceAuth, setIsCheckingDeviceAuth] = useState<boolean>(true);
+  const [isDeviceManagerOpen, setIsDeviceManagerOpen] = useState<boolean>(false);
+
+  // Check Hardware Device Approval on startup
+  useEffect(() => {
+    let isMounted = true;
+    const initDeviceAuth = async () => {
+      try {
+        const devId = await getHardwareDeviceId();
+        if (!isMounted) return;
+        setHardwareDeviceId(devId);
+
+        const res = await getDeviceApprovalStatus(devId);
+        if (!isMounted) return;
+
+        if (res.status === 'approved') {
+          setIsDeviceApproved(true);
+        } else {
+          setIsDeviceApproved(false);
+        }
+      } catch (e) {
+        console.warn('Error verifying device auth on startup:', e);
+      } finally {
+        if (isMounted) setIsCheckingDeviceAuth(false);
+      }
+    };
+
+    initDeviceAuth();
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   // Mobile Controller listener: auto-open landscape gamepad when PC launches game
   useEffect(() => {
@@ -383,14 +434,17 @@ export default function App() {
         }
 
         // Version update check: require re-login on new app version update; keep auto-login on same version
-        const CURRENT_APP_VERSION = '1.1.3';
-        const lastVersion = localStorage.getItem('icelauch_installed_version');
-        const isNewVersion = Boolean(lastVersion && lastVersion !== CURRENT_APP_VERSION);
-        localStorage.setItem('icelauch_installed_version', CURRENT_APP_VERSION);
-
-        if (isNewVersion && window.api?.logoutProfile) {
-          console.log(`[Version Upgrade] From ${lastVersion} to ${CURRENT_APP_VERSION}: Requiring re-login.`);
-          await window.api.logoutProfile();
+        const CURRENT_APP_VERSION = '1.1.7';
+        const isNewVersion = shouldRequireReLoginForNewVersion(CURRENT_APP_VERSION);
+        if (isNewVersion) {
+          console.log(`[Version Upgrade] New version ${CURRENT_APP_VERSION}: Requiring re-login.`);
+          try {
+            localStorage.removeItem('icelauch_active_profile_id');
+            localStorage.removeItem('icelauch_remembered_profile_id');
+            if (window.api?.logoutProfile) {
+              await window.api.logoutProfile();
+            }
+          } catch {}
         }
 
         // Multi-User Profile Auto-Login & Initialization
@@ -1375,6 +1429,7 @@ export default function App() {
         }
         setActiveProfile(res.profile);
         setIsProfilePickerOpen(false);
+        markCurrentVersionLoggedIn('1.1.7');
         sfx.playSuccess();
         return { success: true };
       }
@@ -1392,6 +1447,7 @@ export default function App() {
     }
     setActiveProfile(profile);
     setIsProfilePickerOpen(false);
+    markCurrentVersionLoggedIn('1.1.7');
     return { success: true };
   };
 
@@ -1688,6 +1744,22 @@ export default function App() {
     return Array.from(set);
   }, [appData?.settings.podcastTags, appData?.media]);
 
+  // 0. Hardware Device Authorization Gate: Must be approved before entering the app
+  if (!isDeviceApproved && !isCheckingDeviceAuth) {
+    return (
+      <DeviceActivationGateView
+        deviceId={hardwareDeviceId}
+        deviceType={effectiveDevice}
+        onActivated={() => setIsDeviceApproved(true)}
+        onAdminBypass={() => {
+          setIsDeviceApproved(true);
+          setIsAdmin(true);
+          setAdminTimeRemaining(15 * 60);
+        }}
+      />
+    );
+  }
+
   if (!appData) {
     return (
       <div className="h-screen w-screen bg-ice-bg flex flex-col items-center justify-center text-ice-subtext space-y-3">
@@ -1728,6 +1800,7 @@ export default function App() {
           onLockAdmin={handleLockAdmin}
           onOpenBannerManager={() => setIsBannerManagerOpen(true)}
           onOpenUserManagement={() => setIsAdminUserMgmtOpen(true)}
+          onOpenDeviceManager={() => setIsDeviceManagerOpen(true)}
           activeProfile={activeProfile}
           onSwitchProfile={handleSwitchProfile}
           onEditCurrentProfile={() => setIsEditingCurrentProfile(true)}
@@ -1831,6 +1904,7 @@ export default function App() {
                     onSwitchProfile={handleSwitchProfile}
                     onLockAdmin={handleLockAdmin}
                     onOpenAdminAuth={() => setIsAdminAuthOpen(true)}
+                    onOpenDeviceManager={() => setIsDeviceManagerOpen(true)}
                     onSaveSettings={handleSaveSettings}
                     onSaveCloudSync={handleSaveCloudSync}
                   />
@@ -1968,6 +2042,7 @@ export default function App() {
                     onLockAdmin={handleLockAdmin}
                     onChangePin={() => setIsChangeAdminPinOpen(true)}
                     onOpenAdminAuth={() => setIsAdminAuthOpen(true)}
+                    onOpenDeviceManager={() => setIsDeviceManagerOpen(true)}
                     onSaveSettings={handleSaveSettings}
                     onSaveCloudSync={handleSaveCloudSync}
                   />
@@ -2150,6 +2225,7 @@ export default function App() {
                     onOpenAdminAuth={() => setIsAdminAuthOpen(true)}
                     onOpenBannerManager={() => setIsBannerManagerOpen(true)}
                     onOpenUserManagement={() => setIsAdminUserMgmtOpen(true)}
+                    onOpenDeviceManager={() => setIsDeviceManagerOpen(true)}
                     onSaveSettings={handleSaveSettings}
                     cloudSync={cloudSyncSettings}
                     onSaveCloudSync={handleSaveCloudSync}
@@ -2477,8 +2553,8 @@ export default function App() {
       />
 
 
-      {/* Netflix-Style Profile Picker */}
-      {isProfilePickerOpen && (
+      {/* Netflix-Style Profile Picker (Mandatory Login: stays open until activeProfile exists) */}
+      {(isProfilePickerOpen || !activeProfile) && (
         <ProfilePickerView
           profiles={profiles}
           onSelectProfile={handleSelectProfile}
@@ -2488,6 +2564,12 @@ export default function App() {
           onRequestPasswordReset={handleRequestPasswordReset}
         />
       )}
+
+      {/* Admin Device Whitelist & Hardware Authorization Modal */}
+      <DeviceManagerModal
+        isOpen={isDeviceManagerOpen}
+        onClose={() => setIsDeviceManagerOpen(false)}
+      />
 
       {/* Profile Edit Modal for active profile */}
       {isEditingCurrentProfile && activeProfile && (

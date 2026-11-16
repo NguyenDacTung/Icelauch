@@ -117,6 +117,7 @@ export const API = {
 
   // System External URL opener
   openExternalUrl: (url: string): Promise<boolean> => ipcRenderer.invoke('system:open-external', url),
+  getDeviceId: (): Promise<string> => ipcRenderer.invoke('system:get-device-id'),
 
   // Drives Storage Space
   getDrivesSpace: (): Promise<{ drive: string; freeGB: number; totalGB: number }[]> =>

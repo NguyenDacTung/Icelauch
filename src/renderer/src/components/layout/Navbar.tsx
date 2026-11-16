@@ -12,7 +12,8 @@ import {
   Minus,
   Square,
   Copy,
-  Users
+  Users,
+  Shield
 } from 'lucide-react';
 import { UserMenuWidget } from '../profile/UserMenuWidget';
 import type { NavigationTab, UserProfile } from '../../types';
@@ -31,6 +32,7 @@ interface NavbarProps {
   onLockAdmin: () => void;
   onOpenBannerManager?: () => void;
   onOpenUserManagement?: () => void;
+  onOpenDeviceManager?: () => void;
   activeProfile?: UserProfile | null;
   onSwitchProfile?: () => void;
   onEditCurrentProfile?: () => void;
@@ -51,6 +53,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   onLockAdmin,
   onOpenBannerManager,
   onOpenUserManagement,
+  onOpenDeviceManager,
   activeProfile = null,
   onSwitchProfile,
   onEditCurrentProfile,
@@ -242,11 +245,23 @@ export const Navbar: React.FC<NavbarProps> = ({
           {isAdmin && onOpenUserManagement && (
             <button
               onClick={onOpenUserManagement}
-              className="flex items-center gap-1.5 h-8 px-2.5 rounded text-xs font-semibold bg-blue-500/15 hover:bg-blue-500/25 text-blue-300 border border-blue-500/40 transition-colors shadow-sm"
+              className="flex items-center gap-1.5 h-8 px-2.5 rounded text-xs font-semibold bg-blue-500/15 hover:bg-blue-500/25 text-blue-300 border border-blue-500/40 transition-colors shadow-sm cursor-pointer"
               title="Quản lý người dùng & phân quyền"
             >
               <Users className="w-3.5 h-3.5 text-blue-400" />
               <span className="hidden md:inline">Người Dùng</span>
+            </button>
+          )}
+
+          {/* Admin Device Whitelist Shortcut */}
+          {isAdmin && onOpenDeviceManager && (
+            <button
+              onClick={onOpenDeviceManager}
+              className="flex items-center gap-1.5 h-8 px-2.5 rounded text-xs font-semibold bg-cyan-500/15 hover:bg-cyan-500/25 text-cyan-300 border border-cyan-500/40 transition-colors shadow-sm cursor-pointer"
+              title="Quản lý thiết bị cấp quyền & cấp mã OTP"
+            >
+              <Shield className="w-3.5 h-3.5 text-cyan-400" />
+              <span className="hidden md:inline">Thiết Bị</span>
             </button>
           )}
 

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import {
   Sliders,
   Sparkles,
+  Shield,
   ShieldCheck,
   Cloud,
   KeyRound,
@@ -37,6 +38,7 @@ export interface MobileSettingsViewProps {
   activeProfile?: UserProfile | null;
   onChangePin: () => void;
   onOpenAdminAuth: () => void;
+  onOpenDeviceManager?: () => void;
   onLockAdmin?: () => void;
   onSwitchProfile?: () => void;
   onEditProfile?: () => void;
@@ -51,6 +53,7 @@ export const MobileSettingsView: React.FC<MobileSettingsViewProps> = ({
   activeProfile,
   onChangePin,
   onOpenAdminAuth,
+  onOpenDeviceManager,
   onLockAdmin,
   onSwitchProfile,
   onEditProfile,
@@ -509,6 +512,20 @@ export const MobileSettingsView: React.FC<MobileSettingsViewProps> = ({
             </div>
 
             <div className="grid grid-cols-2 gap-2">
+              {onOpenDeviceManager && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    sfx.playClick();
+                    onOpenDeviceManager();
+                  }}
+                  className="col-span-2 h-10 rounded-xl bg-cyan-600/20 hover:bg-cyan-600/30 border border-cyan-500/40 text-cyan-300 text-xs font-bold flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+                >
+                  <Shield className="w-3.5 h-3.5" />
+                  <span>Quản Lý Thiết Bị Cấp Quyền & OTP</span>
+                </button>
+              )}
+
               <button
                 type="button"
                 onClick={() => {

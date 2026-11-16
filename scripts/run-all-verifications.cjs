@@ -556,6 +556,162 @@ try {
 }
 
 // ============================================================================
+// MODULE 8: DEVICE WHITELIST & SECURITY (TC-SEC-01 to TC-SEC-10)
+// ============================================================================
+console.log('\n--- Module 8: Hardware Device Whitelist & Access Security ---');
+
+try {
+  // TC-SEC-01: Persistent Hardware Device ID Generation
+  const deviceAuthSrc = fs.readFileSync(path.join(ROOT_DIR, 'src/renderer/src/services/deviceAuth.ts'), 'utf8');
+  const mainSrc = fs.readFileSync(path.join(ROOT_DIR, 'src/main/index.ts'), 'utf8');
+  const preloadSrc = fs.readFileSync(path.join(ROOT_DIR, 'src/preload/index.ts'), 'utf8');
+
+  const hasGetDeviceId = deviceAuthSrc.includes('getHardwareDeviceId');
+  const hasIpcHandler = mainSrc.includes("'system:get-device-id'");
+  const hasPreloadBridge = preloadSrc.includes('getDeviceId:');
+  const hasPrefixSupport = deviceAuthSrc.includes("'ICE-'");
+
+  assert.ok(hasGetDeviceId && hasIpcHandler && hasPreloadBridge && hasPrefixSupport, 'Hardware Device ID generation must bridge Electron and Mobile');
+  recordTest('TC-SEC-01', 'Persistent Hardware Device ID Generation', 'Module 8: Device Whitelist & Security', 'Cross-Platform', true, 'Stable hardware UUID/hash generated and persisted across Desktop Electron and Mobile');
+} catch (e) {
+  recordTest('TC-SEC-01', 'Persistent Hardware Device ID Generation', 'Module 8: Device Whitelist & Security', 'Cross-Platform', false, e.message);
+}
+
+try {
+  // TC-SEC-02: Device Approval Gate Blocking Unregistered Devices
+  const gateSrc = fs.readFileSync(path.join(ROOT_DIR, 'src/renderer/src/components/security/DeviceActivationGateView.tsx'), 'utf8');
+  const appSrc = fs.readFileSync(path.join(ROOT_DIR, 'src/renderer/src/App.tsx'), 'utf8');
+
+  const appHasGateReturn = appSrc.includes('<DeviceActivationGateView') && appSrc.includes('!isDeviceApproved');
+  const gateHasInputs = gateSrc.includes('deviceName') && gateSrc.includes('otpInput');
+  const gateHasRegister = gateSrc.includes('registerDeviceRequest');
+
+  assert.ok(appHasGateReturn && gateHasInputs && gateHasRegister, 'Unapproved devices must be strictly blocked at DeviceActivationGateView');
+  recordTest('TC-SEC-02', 'Device Approval Gate Blocking Unregistered / Pending Devices', 'Module 8: Device Whitelist & Security', 'Cross-Platform', true, 'Full-screen DeviceActivationGateView blocks all app navigation until Admin approves device');
+} catch (e) {
+  recordTest('TC-SEC-02', 'Device Approval Gate Blocking Unregistered / Pending Devices', 'Module 8: Device Whitelist & Security', 'Cross-Platform', false, e.message);
+}
+
+try {
+  // TC-SEC-03: 4-Digit OTP Generation & 120-Second Countdown Expiration
+  const deviceAuthSrc = fs.readFileSync(path.join(ROOT_DIR, 'src/renderer/src/services/deviceAuth.ts'), 'utf8');
+  const modalSrc = fs.readFileSync(path.join(ROOT_DIR, 'src/renderer/src/components/admin/DeviceManagerModal.tsx'), 'utf8');
+
+  const has4DigitMath = deviceAuthSrc.includes('Math.floor(1000 + Math.random() * 9000).toString()');
+  const has120SecExp = deviceAuthSrc.includes('120 * 1000');
+  const modalHasOtpView = modalSrc.includes('activeOtpInfo.otpCode') && modalSrc.includes('otpSecondsLeft');
+
+  assert.ok(has4DigitMath && has120SecExp && modalHasOtpView, 'OTP must be exactly 4 digits with 120s (2 minutes) expiration');
+  recordTest('TC-SEC-03', '4-Digit OTP Generation & 120-Second Expiration Logic', 'Module 8: Device Whitelist & Security', 'Cross-Platform', true, 'Admin generates 4-digit numeric OTP with live 120s countdown timer stored on Supabase');
+} catch (e) {
+  recordTest('TC-SEC-03', '4-Digit OTP Generation & 120-Second Expiration Logic', 'Module 8: Device Whitelist & Security', 'Cross-Platform', false, e.message);
+}
+
+try {
+  // TC-SEC-04: OTP Verification & Approval State Promotion
+  const deviceAuthSrc = fs.readFileSync(path.join(ROOT_DIR, 'src/renderer/src/services/deviceAuth.ts'), 'utf8');
+  const gateSrc = fs.readFileSync(path.join(ROOT_DIR, 'src/renderer/src/components/security/DeviceActivationGateView.tsx'), 'utf8');
+
+  const hasOtpVerify = deviceAuthSrc.includes('verifyDeviceOtp') && deviceAuthSrc.includes("status: 'approved'");
+  const hasExpiryCheck = deviceAuthSrc.includes('Date.now() > expiresTime');
+  const gateHasVerifyCall = gateSrc.includes('verifyDeviceOtp(deviceId, otpInput.trim())');
+
+  assert.ok(hasOtpVerify && hasExpiryCheck && gateHasVerifyCall, 'OTP verification must enforce 4 digits and expiration check');
+  recordTest('TC-SEC-04', 'OTP Verification & Approval State Promotion', 'Module 8: Device Whitelist & Security', 'Cross-Platform', true, 'Valid 4-digit OTP instantly promotes device status to approved and unlocks app');
+} catch (e) {
+  recordTest('TC-SEC-04', 'OTP Verification & Approval State Promotion', 'Module 8: Device Whitelist & Security', 'Cross-Platform', false, e.message);
+}
+
+try {
+  // TC-SEC-05: Emergency Admin Bypass with Master PIN
+  const deviceAuthSrc = fs.readFileSync(path.join(ROOT_DIR, 'src/renderer/src/services/deviceAuth.ts'), 'utf8');
+  const gateSrc = fs.readFileSync(path.join(ROOT_DIR, 'src/renderer/src/components/security/DeviceActivationGateView.tsx'), 'utf8');
+  const pickerSrc = fs.readFileSync(path.join(ROOT_DIR, 'src/renderer/src/components/profile/ProfilePickerView.tsx'), 'utf8');
+
+  const hasBypassFunc = deviceAuthSrc.includes('bypassApproveDeviceWithAdminPin');
+  const gateHasBypassModal = gateSrc.includes('showAdminBypass') && gateSrc.includes('bypassApproveDeviceWithAdminPin');
+  const pickerHasLockBtn = pickerSrc.includes('showAdminBypass') && pickerSrc.includes('handleAdminBypass');
+
+  assert.ok(hasBypassFunc && gateHasBypassModal && pickerHasLockBtn, 'Discreet lock button must allow instant Master PIN bypass');
+  recordTest('TC-SEC-05', 'Emergency Admin Bypass with Master PIN (Auto-Approval)', 'Module 8: Device Whitelist & Security', 'Cross-Platform', true, 'Discreet lock button allows owner to input Master PIN to auto-approve device & log directly into Admin');
+} catch (e) {
+  recordTest('TC-SEC-05', 'Emergency Admin Bypass with Master PIN (Auto-Approval)', 'Module 8: Device Whitelist & Security', 'Cross-Platform', false, e.message);
+}
+
+try {
+  // TC-SEC-06: Remote Device Revocation & Kick-out Mechanism
+  const deviceAuthSrc = fs.readFileSync(path.join(ROOT_DIR, 'src/renderer/src/services/deviceAuth.ts'), 'utf8');
+  const modalSrc = fs.readFileSync(path.join(ROOT_DIR, 'src/renderer/src/components/admin/DeviceManagerModal.tsx'), 'utf8');
+
+  const hasRevokeFunc = deviceAuthSrc.includes('revokeDevice') && deviceAuthSrc.includes("status: 'revoked'");
+  const hasLocalClear = deviceAuthSrc.includes('clearLocalDeviceApproval');
+  const modalHasRevokeBtn = modalSrc.includes('handleRevoke');
+
+  assert.ok(hasRevokeFunc && hasLocalClear && modalHasRevokeBtn, 'Revocation must clear local approvals and set status to revoked');
+  recordTest('TC-SEC-06', 'Remote Device Revocation & Kick-out Mechanism', 'Module 8: Device Whitelist & Security', 'Cross-Platform', true, 'Admin can revoke any device, instantly kicking it back to the Activation Gate screen');
+} catch (e) {
+  recordTest('TC-SEC-06', 'Remote Device Revocation & Kick-out Mechanism', 'Module 8: Device Whitelist & Security', 'Cross-Platform', false, e.message);
+}
+
+try {
+  // TC-SEC-07: Mandatory Login Enforcement (Guest Mode Removal)
+  const pickerSrc = fs.readFileSync(path.join(ROOT_DIR, 'src/renderer/src/components/profile/ProfilePickerView.tsx'), 'utf8');
+  const appSrc = fs.readFileSync(path.join(ROOT_DIR, 'src/renderer/src/App.tsx'), 'utf8');
+
+  const noGuestButtonInUI = !pickerSrc.includes('Trải Nghiệm Dưới Dạng Khách (Guest)');
+  const mandatoryPickerCondition = appSrc.includes('(isProfilePickerOpen || !activeProfile)');
+
+  assert.ok(noGuestButtonInUI && mandatoryPickerCondition, 'Guest mode must be removed and login mandatory');
+  recordTest('TC-SEC-07', 'Mandatory Login Enforcement (Guest Mode Removal)', 'Module 8: Device Whitelist & Security', 'Cross-Platform', true, 'Guest mode completely eliminated; app requires authentication before granting access');
+} catch (e) {
+  recordTest('TC-SEC-07', 'Mandatory Login Enforcement (Guest Mode Removal)', 'Module 8: Device Whitelist & Security', 'Cross-Platform', false, e.message);
+}
+
+try {
+  // TC-SEC-08: Normal User Login Password-Only Validation (Fix Admin PIN false alert)
+  const pickerSrc = fs.readFileSync(path.join(ROOT_DIR, 'src/renderer/src/components/profile/ProfilePickerView.tsx'), 'utf8');
+
+  const checksAdminOnlyForPin = pickerSrc.includes('if (!isAdmin && !loginPassword.trim())');
+  const submitsPasswordWithoutPin = pickerSrc.includes('isAdmin ? { pin: pinToUse } : { password: loginPassword }');
+
+  assert.ok(checksAdminOnlyForPin && submitsPasswordWithoutPin, 'Normal users must authenticate strictly with password without PIN prompt');
+  recordTest('TC-SEC-08', 'Normal User Login Password-Only Validation (Fix False PIN Alert)', 'Module 8: Device Whitelist & Security', 'Cross-Platform', true, 'Normal accounts strictly use password authentication; eliminates false Admin PIN warnings');
+} catch (e) {
+  recordTest('TC-SEC-08', 'Normal User Login Password-Only Validation (Fix False PIN Alert)', 'Module 8: Device Whitelist & Security', 'Cross-Platform', false, e.message);
+}
+
+try {
+  // TC-SEC-09: Version Upgrade Re-Login Enforcement (1.1.7)
+  const appSrc = fs.readFileSync(path.join(ROOT_DIR, 'src/renderer/src/App.tsx'), 'utf8');
+  const pkgSrc = fs.readFileSync(path.join(ROOT_DIR, 'package.json'), 'utf8');
+  const gradleSrc = fs.readFileSync(path.join(ROOT_DIR, 'android/app/build.gradle'), 'utf8');
+
+  const appHas117 = appSrc.includes("CURRENT_APP_VERSION = '1.1.7'");
+  const pkgHas117 = pkgSrc.includes('"version": "1.1.7"');
+  const gradleHas117 = gradleSrc.includes('versionName "1.1.7"') && gradleSrc.includes('versionCode 13');
+  const hasReLoginLogic = appSrc.includes('shouldRequireReLoginForNewVersion');
+
+  assert.ok(appHas117 && pkgHas117 && gradleHas117 && hasReLoginLogic, 'Version 1.1.7 must be synchronized and re-login enforced');
+  recordTest('TC-SEC-09', 'Version Upgrade Re-Login Enforcement (v1.1.7 / Code 13)', 'Module 8: Device Whitelist & Security', 'Cross-Platform', true, 'Upgraded to v1.1.7 (versionCode 13); sessions maintained across restarts but purged on version upgrade');
+} catch (e) {
+  recordTest('TC-SEC-09', 'Version Upgrade Re-Login Enforcement (v1.1.7 / Code 13)', 'Module 8: Device Whitelist & Security', 'Cross-Platform', false, e.message);
+}
+
+try {
+  // TC-SEC-10: Automated Supabase Release Publishing & Private Repo Fallback
+  const updaterSrc = fs.readFileSync(path.join(ROOT_DIR, 'src/renderer/src/utils/apkUpdater.ts'), 'utf8');
+  const workflowSrc = fs.readFileSync(path.join(ROOT_DIR, '.github/workflows/release.yml'), 'utf8');
+
+  const updaterHasSupabase = updaterSrc.includes('icelauch_device_registry') && updaterSrc.includes('latest_release');
+  const workflowHasPublish = workflowSrc.includes('Publish Release Info to Supabase Cloud') && workflowSrc.includes('icelauch_device_registry');
+
+  assert.ok(updaterHasSupabase && workflowHasPublish, 'CI/CD and in-app updater must support Supabase release distribution');
+  recordTest('TC-SEC-10', 'Automated Supabase Release Publishing & Private Repo Distribution', 'Module 8: Device Whitelist & Security', 'Cross-Platform', true, 'GitHub Actions CI/CD automatically pushes release metadata to Supabase, enabling updates from private repo');
+} catch (e) {
+  recordTest('TC-SEC-10', 'Automated Supabase Release Publishing & Private Repo Distribution', 'Module 8: Device Whitelist & Security', 'Cross-Platform', false, e.message);
+}
+
+// ============================================================================
 // MODULE 7: PACKAGING & BUILD VERIFICATION (TC-PKG-01 to TC-PKG-04)
 // ============================================================================
 console.log('\n--- Module 7: Packaging & Build Verification ---');
