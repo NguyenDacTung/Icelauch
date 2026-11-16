@@ -681,20 +681,20 @@ try {
 }
 
 try {
-  // TC-SEC-09: Version Upgrade Re-Login Enforcement (1.1.8)
+  // TC-SEC-09: Version Upgrade Re-Login Enforcement (1.1.9)
   const appSrc = fs.readFileSync(path.join(ROOT_DIR, 'src/renderer/src/App.tsx'), 'utf8');
   const pkgSrc = fs.readFileSync(path.join(ROOT_DIR, 'package.json'), 'utf8');
   const gradleSrc = fs.readFileSync(path.join(ROOT_DIR, 'android/app/build.gradle'), 'utf8');
 
-  const appHas118 = appSrc.includes("CURRENT_APP_VERSION = '1.1.8'");
-  const pkgHas118 = pkgSrc.includes('"version": "1.1.8"');
-  const gradleHas118 = gradleSrc.includes('versionName "1.1.8"') && gradleSrc.includes('versionCode 14');
+  const appHas119 = appSrc.includes("CURRENT_APP_VERSION = '1.1.9'");
+  const pkgHas119 = pkgSrc.includes('"version": "1.1.9"');
+  const gradleHas119 = gradleSrc.includes('versionName "1.1.9"') && gradleSrc.includes('versionCode 15');
   const hasReLoginLogic = appSrc.includes('shouldRequireReLoginForNewVersion');
 
-  assert.ok(appHas118 && pkgHas118 && gradleHas118 && hasReLoginLogic, 'Version 1.1.8 must be synchronized and re-login enforced');
-  recordTest('TC-SEC-09', 'Version Upgrade Re-Login Enforcement (v1.1.8 / Code 14)', 'Module 8: Device Whitelist & Security', 'Cross-Platform', true, 'Upgraded to v1.1.8 (versionCode 14); sessions maintained across restarts but purged on version upgrade');
+  assert.ok(appHas119 && pkgHas119 && gradleHas119 && hasReLoginLogic, 'Version 1.1.9 must be synchronized and re-login enforced');
+  recordTest('TC-SEC-09', 'Version Upgrade Re-Login Enforcement (v1.1.9 / Code 15)', 'Module 8: Device Whitelist & Security', 'Cross-Platform', true, 'Upgraded to v1.1.9 (versionCode 15); sessions maintained across restarts but purged on version upgrade');
 } catch (e) {
-  recordTest('TC-SEC-09', 'Version Upgrade Re-Login Enforcement (v1.1.8 / Code 14)', 'Module 8: Device Whitelist & Security', 'Cross-Platform', false, e.message);
+  recordTest('TC-SEC-09', 'Version Upgrade Re-Login Enforcement (v1.1.9 / Code 15)', 'Module 8: Device Whitelist & Security', 'Cross-Platform', false, e.message);
 }
 
 try {

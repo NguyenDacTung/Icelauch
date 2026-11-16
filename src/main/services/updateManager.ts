@@ -116,65 +116,85 @@ export class UpdateManager {
     ipcMain.handle('updater:check', async () => {
       if (this.isChecking) return { success: true, message: 'Đang kiểm tra...' };
       this.isChecking = true;
+      this.send('updater:status', { status: 'checking' } as UpdateStatusPayload);
+
+      // 1. Prioritize Supabase Release Registry first (Eliminates GitHub 404 on private repositories)
+      try {
+        const fetchSupabase = () =>
+          new Promise<any>((resolve) => {
+            const req = https.get(
+              'https://wqmmagfrwwctvipopazx.supabase.co/rest/v1/icelauch_user_data?profile_id=eq.icelauch_device_registry&select=game_stats',
+              {
+                headers: {
+                  apikey: 'sb_publishable_l1vNbLKXXhLNnfi1pI5UnQ_0EaqbXuJ',
+                  Authorization: 'Bearer sb_publishable_l1vNbLKXXhLNnfi1pI5UnQ_0EaqbXuJ',
+                },
+              },
+              (res) => {
+                let d = '';
+                res.on('data', (c) => (d += c));
+                res.on('end', () => {
+                  try {
+                    const rows = JSON.parse(d);
+                    resolve(rows[0]?.game_stats?.latest_release || null);
+                  } catch {
+                    resolve(null);
+                  }
+                });
+              }
+            );
+            req.on('error', () => resolve(null));
+          });
+
+        const rel = await fetchSupabase();
+        if (rel && rel.version) {
+          this.isChecking = false;
+          const currentVer = app.getVersion();
+          // Semantic compare versions
+          const cleanRel = rel.version.replace(/^v/i, '').trim();
+          const cleanCur = currentVer.replace(/^v/i, '').trim();
+          const rParts = cleanRel.split('.').map((n: string) => parseInt(n, 10) || 0);
+          const cParts = cleanCur.split('.').map((n: string) => parseInt(n, 10) || 0);
+          let isNewer = false;
+          for (let i = 0; i < Math.max(rParts.length, cParts.length); i++) {
+            const r = rParts[i] || 0;
+            const c = cParts[i] || 0;
+            if (r > c) { isNewer = true; break; }
+            if (r < c) { isNewer = false; break; }
+          }
+
+          if (isNewer) {
+            this.pendingPcDownloadUrl = rel.pcSetupUrl || '';
+            this.send('updater:status', {
+              status: 'available',
+              version: rel.version,
+              releaseNotes: rel.releaseNotes || `Bản phát hành v${rel.version}`,
+            } as UpdateStatusPayload);
+            return { success: true, version: rel.version };
+          } else {
+            this.send('updater:status', {
+              status: 'not-available',
+              version: currentVer,
+            } as UpdateStatusPayload);
+            return { success: true, version: currentVer };
+          }
+        }
+      } catch (supaErr) {
+        console.warn('[UpdateManager] Supabase check error:', supaErr);
+      }
+
+      // 2. Fallback to autoUpdater only if Supabase had no release records
       try {
         const result = await autoUpdater.checkForUpdates();
         this.isChecking = false;
         return { success: true, version: result?.updateInfo?.version };
       } catch (err: any) {
-        console.log('[UpdateManager] GitHub updater error, falling back to Supabase:', err?.message);
-        // Fallback to Supabase Release Registry
-        try {
-          const fetchSupabase = () =>
-            new Promise<any>((resolve) => {
-              const req = https.get(
-                'https://wqmmagfrwwctvipopazx.supabase.co/rest/v1/icelauch_user_data?profile_id=eq.icelauch_device_registry&select=game_stats',
-                {
-                  headers: {
-                    apikey: 'sb_publishable_l1vNbLKXXhLNnfi1pI5UnQ_0EaqbXuJ',
-                    Authorization: 'Bearer sb_publishable_l1vNbLKXXhLNnfi1pI5UnQ_0EaqbXuJ',
-                  },
-                },
-                (res) => {
-                  let d = '';
-                  res.on('data', (c) => (d += c));
-                  res.on('end', () => {
-                    try {
-                      const rows = JSON.parse(d);
-                      resolve(rows[0]?.game_stats?.latest_release || null);
-                    } catch {
-                      resolve(null);
-                    }
-                  });
-                }
-              );
-              req.on('error', () => resolve(null));
-            });
-
-          const rel = await fetchSupabase();
-          this.isChecking = false;
-          if (rel && rel.version) {
-            const currentVer = app.getVersion();
-            if (rel.version !== currentVer) {
-              this.pendingPcDownloadUrl = rel.pcSetupUrl || '';
-              this.send('updater:status', {
-                status: 'available',
-                version: rel.version,
-                releaseNotes: rel.releaseNotes || `Bản phát hành v${rel.version}`,
-              } as UpdateStatusPayload);
-              return { success: true, version: rel.version };
-            } else {
-              this.send('updater:status', {
-                status: 'not-available',
-                version: currentVer,
-              } as UpdateStatusPayload);
-              return { success: true, version: currentVer };
-            }
-          }
-        } catch (supaErr) {
-          console.warn('[UpdateManager] Supabase check error:', supaErr);
-        }
-
         this.isChecking = false;
+        console.warn('[UpdateManager] GitHub fallback check error:', err?.message || err);
+        this.send('updater:status', {
+          status: 'error',
+          error: err?.message || String(err),
+        } as UpdateStatusPayload);
         return { success: false, error: err?.message || String(err) };
       }
     });

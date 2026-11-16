@@ -173,6 +173,21 @@ function makePublic(accessToken, fileId) {
   });
 }
 
+function getAllFilesRecursively(dir) {
+  let results = [];
+  if (!fs.existsSync(dir)) return results;
+  const list = fs.readdirSync(dir, { withFileTypes: true });
+  for (const dirent of list) {
+    const full = path.join(dir, dirent.name);
+    if (dirent.isDirectory()) {
+      results = results.concat(getAllFilesRecursively(full));
+    } else {
+      results.push(full);
+    }
+  }
+  return results;
+}
+
 /**
  * Main Execution
  */
@@ -184,8 +199,8 @@ async function run() {
     process.exit(0);
   }
 
-  const files = fs.readdirSync(distDir);
-  console.log('[GDrive Uploader] Release binaries available:', files);
+  const allFiles = getAllFilesRecursively(distDir);
+  console.log('[GDrive Uploader] Release binaries available (recursive):', allFiles);
 
   let token;
   try {
@@ -198,9 +213,9 @@ async function run() {
 
   const uploadedUrls = {};
 
-  for (const file of files) {
+  for (const fullPath of allFiles) {
+    const file = path.basename(fullPath);
     if (file.endsWith('.apk') || (file.endsWith('.exe') && file.includes('Setup'))) {
-      const fullPath = path.join(distDir, file);
       console.log(`[GDrive Uploader] Uploading ${file} (${(fs.statSync(fullPath).size / 1024 / 1024).toFixed(1)} MB)...`);
       try {
         const fileId = await uploadFile(token, fullPath, file, FOLDER_ID);
