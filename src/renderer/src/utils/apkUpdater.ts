@@ -55,7 +55,55 @@ function isNewerVersion(remote: string, current: string): boolean {
 }
 
 export async function checkMobileUpdate(): Promise<MobileUpdateInfo> {
-  // 1. Check Supabase Release Registry first (Works seamlessly even if GitHub is 100% Private!)
+  // 1. Direct GitHub Releases API (Fast & native for public repository)
+  try {
+    const res = await fetch(`https://api.github.com/repos/${GITHUB_REPO}/releases?per_page=5`, {
+      headers: {
+        Accept: 'application/vnd.github.v3+json',
+      },
+      cache: 'no-store',
+    });
+
+    if (res.ok) {
+      const releases = await res.json();
+      if (Array.isArray(releases) && releases.length > 0) {
+        const phoneRelease = releases.find((r: any) =>
+          r.assets?.some((a: any) => a.name === 'Icelauch-phone.apk' || a.name.includes('phone') || a.name.endsWith('.apk'))
+        ) || releases[0];
+
+        const tag = (phoneRelease.tag_name || '')
+          .replace(/^(v|phone-v|tv-v)/i, '')
+          .trim();
+
+        const updateAvailable = isNewerVersion(tag, CURRENT_MOBILE_VERSION);
+
+        const phoneAsset = phoneRelease.assets?.find(
+          (a: any) => a.name === 'Icelauch-phone.apk' || a.name.includes('-phone.apk')
+        );
+        const universalAsset = phoneRelease.assets?.find(
+          (a: any) => a.name === 'Icelauch-universal.apk' || a.name.endsWith('.apk')
+        );
+
+        const apkUrl =
+          phoneAsset?.browser_download_url ||
+          universalAsset?.browser_download_url ||
+          `https://github.com/${GITHUB_REPO}/releases/download/${phoneRelease.tag_name}/Icelauch-phone.apk`;
+
+        return {
+          updateAvailable,
+          currentVersion: CURRENT_MOBILE_VERSION,
+          latestVersion: tag || CURRENT_MOBILE_VERSION,
+          releaseName: phoneRelease.name || `Bản Cập Nhật Điện Thoại v${tag}`,
+          releaseNotes: phoneRelease.body || '',
+          apkUrl,
+        };
+      }
+    }
+  } catch (err: any) {
+    console.warn('[ApkUpdater] GitHub API update check warning:', err);
+  }
+
+  // 2. Fallback to Supabase Release Registry if available
   try {
     const supaUrl = `${DEFAULT_SUPABASE_URL}/rest/v1/icelauch_user_data?profile_id=eq.icelauch_device_registry&select=game_stats`;
     const sRes = await fetch(supaUrl, {
@@ -67,7 +115,8 @@ export async function checkMobileUpdate(): Promise<MobileUpdateInfo> {
     if (sRes.ok) {
       const rows = await sRes.json();
       const latestRel = rows[0]?.game_stats?.latest_release;
-      if (latestRel && latestRel.version) {
+      const downloadLink = latestRel?.phoneApkUrl || latestRel?.apkUrl || '';
+      if (latestRel && latestRel.version && downloadLink) {
         const updateAvailable = isNewerVersion(latestRel.version, CURRENT_MOBILE_VERSION);
         return {
           updateAvailable,
@@ -75,7 +124,7 @@ export async function checkMobileUpdate(): Promise<MobileUpdateInfo> {
           latestVersion: latestRel.version,
           releaseName: latestRel.name || `Bản Cập Nhật v${latestRel.version}`,
           releaseNotes: latestRel.releaseNotes || 'Cập nhật phiên bản bảo mật và tính năng mới.',
-          apkUrl: latestRel.phoneApkUrl || latestRel.apkUrl || '',
+          apkUrl: downloadLink,
         };
       }
     }
@@ -83,67 +132,14 @@ export async function checkMobileUpdate(): Promise<MobileUpdateInfo> {
     console.warn('[ApkUpdater] Supabase update check fallback:', supaErr);
   }
 
-  // 2. Fallback to GitHub Releases API
-  try {
-    const res = await fetch(`https://api.github.com/repos/${GITHUB_REPO}/releases?per_page=5`, {
-      headers: {
-        Accept: 'application/vnd.github.v3+json',
-      },
-      cache: 'no-store',
-    });
-
-    if (!res.ok) {
-      throw new Error(`GitHub API HTTP ${res.status}`);
-    }
-
-    const releases = await res.json();
-    if (!Array.isArray(releases) || releases.length === 0) {
-      throw new Error('No releases found');
-    }
-
-    // Find the latest release that contains an Android phone APK asset
-    const phoneRelease = releases.find((r: any) =>
-      r.assets?.some((a: any) => a.name === 'Icelauch-phone.apk' || a.name.includes('phone') || a.name.endsWith('.apk'))
-    ) || releases[0];
-
-    const tag = (phoneRelease.tag_name || '')
-      .replace(/^(v|phone-v|tv-v)/i, '')
-      .trim();
-
-    const updateAvailable = isNewerVersion(tag, CURRENT_MOBILE_VERSION);
-
-    // Look for dedicated Icelauch-phone.apk first, fallback to universal
-    const phoneAsset = phoneRelease.assets?.find(
-      (a: any) => a.name === 'Icelauch-phone.apk' || a.name.includes('-phone.apk')
-    );
-    const universalAsset = phoneRelease.assets?.find(
-      (a: any) => a.name === 'Icelauch-universal.apk' || a.name.endsWith('.apk')
-    );
-
-    const apkUrl =
-      phoneAsset?.browser_download_url ||
-      universalAsset?.browser_download_url ||
-      `https://github.com/${GITHUB_REPO}/releases/download/${phoneRelease.tag_name}/Icelauch-phone.apk`;
-
-    return {
-      updateAvailable,
-      currentVersion: CURRENT_MOBILE_VERSION,
-      latestVersion: tag || CURRENT_MOBILE_VERSION,
-      releaseName: phoneRelease.name || `Bản Cập Nhật Điện Thoại v${tag}`,
-      releaseNotes: phoneRelease.body || '',
-      apkUrl,
-    };
-  } catch (err: any) {
-    console.warn('[ApkUpdater] Check update error:', err);
-    return {
-      updateAvailable: false,
-      currentVersion: CURRENT_MOBILE_VERSION,
-      latestVersion: CURRENT_MOBILE_VERSION,
-      releaseName: '',
-      releaseNotes: '',
-      apkUrl: '',
-    };
-  }
+  return {
+    updateAvailable: false,
+    currentVersion: CURRENT_MOBILE_VERSION,
+    latestVersion: CURRENT_MOBILE_VERSION,
+    releaseName: '',
+    releaseNotes: '',
+    apkUrl: '',
+  };
 }
 
 export async function checkTVUpdate(): Promise<TVUpdateInfo> {

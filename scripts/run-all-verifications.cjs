@@ -698,19 +698,17 @@ try {
 }
 
 try {
-  // TC-SEC-10: Automated Supabase Release Publishing & Private Repo Fallback
+  // TC-SEC-10: Automated GitHub Releases & Supabase Fallback Distribution
   const updaterSrc = fs.readFileSync(path.join(ROOT_DIR, 'src/renderer/src/utils/apkUpdater.ts'), 'utf8');
   const workflowSrc = fs.readFileSync(path.join(ROOT_DIR, '.github/workflows/release.yml'), 'utf8');
-  const gdriveScriptSrc = fs.readFileSync(path.join(ROOT_DIR, 'scripts/upload-to-gdrive.cjs'), 'utf8');
 
-  const updaterHasSupabase = updaterSrc.includes('icelauch_device_registry') && updaterSrc.includes('latest_release');
-  const workflowHasPublish = workflowSrc.includes('upload-to-gdrive.cjs');
-  const gdriveHasSync = gdriveScriptSrc.includes('icelauch_device_registry') && gdriveScriptSrc.includes('latest_release');
+  const updaterHasGithubAndSupabase = updaterSrc.includes('api.github.com/repos') && updaterSrc.includes('icelauch_device_registry');
+  const workflowHasRelease = workflowSrc.includes('softprops/action-gh-release');
 
-  assert.ok(updaterHasSupabase && workflowHasPublish && gdriveHasSync, 'CI/CD and in-app updater must support Google Drive and Supabase release distribution');
-  recordTest('TC-SEC-10', 'Automated Supabase Release Publishing & Private Repo Distribution', 'Module 8: Device Whitelist & Security', 'Cross-Platform', true, 'GitHub Actions CI/CD automatically uploads binaries to Google Drive and syncs metadata to Supabase');
+  assert.ok(updaterHasGithubAndSupabase && workflowHasRelease, 'CI/CD and in-app updater must support native GitHub Releases with fallback');
+  recordTest('TC-SEC-10', 'Native GitHub Releases & Supabase Fallback Distribution', 'Module 8: Device Whitelist & Security', 'Cross-Platform', true, 'GitHub Actions automatically publishes binaries to GitHub Releases and app checks updates via native endpoints');
 } catch (e) {
-  recordTest('TC-SEC-10', 'Automated Supabase Release Publishing & Private Repo Distribution', 'Module 8: Device Whitelist & Security', 'Cross-Platform', false, e.message);
+  recordTest('TC-SEC-10', 'Native GitHub Releases & Supabase Fallback Distribution', 'Module 8: Device Whitelist & Security', 'Cross-Platform', false, e.message);
 }
 
 // ============================================================================
