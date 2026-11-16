@@ -86,63 +86,85 @@ function getAccessToken(creds) {
 }
 
 /**
- * Upload single file to Google Drive folder using multipart
+ * Upload single file to Google Drive folder using Resumable Upload
+ * Supports files of any size (APKs, EXEs) without 5MB multipart limitation
  */
 function uploadFile(accessToken, filePath, fileName, folderId) {
   return new Promise((resolve, reject) => {
-    const boundary = '-------314159265358979323846';
+    const fileSize = fs.statSync(filePath).size;
     const metadata = JSON.stringify({
       name: fileName,
       parents: [folderId],
     });
 
-    const fileBuffer = fs.readFileSync(filePath);
+    console.log(`[GDrive Uploader] Initiating Resumable Session for ${fileName} (${(fileSize / 1024 / 1024).toFixed(1)} MB)...`);
 
-    let prefix = `--${boundary}\r\n`;
-    prefix += 'Content-Type: application/json; charset=UTF-8\r\n\r\n';
-    prefix += `${metadata}\r\n`;
-    prefix += `--${boundary}\r\n`;
-    prefix += 'Content-Type: application/octet-stream\r\n\r\n';
-
-    const suffix = `\r\n--${boundary}--`;
-
-    const prefixBuf = Buffer.from(prefix, 'utf8');
-    const suffixBuf = Buffer.from(suffix, 'utf8');
-    const totalLength = prefixBuf.length + fileBuffer.length + suffixBuf.length;
-
-    const req = https.request(
-      'https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart',
+    // Step 1: Initiate Resumable Session
+    const initReq = https.request(
+      'https://www.googleapis.com/upload/drive/v3/files?uploadType=resumable',
       {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${accessToken}`,
-          'Content-Type': `multipart/related; boundary=${boundary}`,
-          'Content-Length': totalLength,
+          'Content-Type': 'application/json; charset=UTF-8',
+          'X-Upload-Content-Type': 'application/octet-stream',
+          'X-Upload-Content-Length': fileSize,
         },
       },
-      (res) => {
-        let body = '';
-        res.on('data', (d) => (body += d));
-        res.on('end', () => {
-          try {
-            const result = JSON.parse(body);
-            if (result.id) {
-              resolve(result.id);
-            } else {
-              reject(new Error(body));
-            }
-          } catch (e) {
-            reject(e);
+      (initRes) => {
+        if (initRes.statusCode !== 200) {
+          let errBody = '';
+          initRes.on('data', (d) => (errBody += d));
+          initRes.on('end', () => reject(new Error(`Failed to initiate resumable upload: HTTP ${initRes.statusCode} - ${errBody}`)));
+          return;
+        }
+
+        const sessionUri = initRes.headers.location;
+        if (!sessionUri) {
+          reject(new Error('No resumable session location header returned by Google Drive'));
+          return;
+        }
+
+        console.log(`[GDrive Uploader] Resumable session created. Streaming file content...`);
+
+        // Step 2: Upload file stream to session URL
+        const uploadReq = https.request(
+          sessionUri,
+          {
+            method: 'PUT',
+            headers: {
+              'Content-Length': fileSize,
+              'Content-Type': 'application/octet-stream',
+            },
+          },
+          (uploadRes) => {
+            let resBody = '';
+            uploadRes.on('data', (d) => (resBody += d));
+            uploadRes.on('end', () => {
+              try {
+                const data = JSON.parse(resBody);
+                if (data.id) {
+                  resolve(data.id);
+                } else {
+                  reject(new Error(`Upload failed: HTTP ${uploadRes.statusCode} - ${resBody}`));
+                }
+              } catch (e) {
+                reject(new Error(`Failed to parse upload response: HTTP ${uploadRes.statusCode} - ${resBody}`));
+              }
+            });
           }
-        });
+        );
+
+        uploadReq.on('error', reject);
+        const fileStream = fs.createReadStream(filePath);
+        fileStream.on('error', reject);
+        fileStream.pipe(uploadReq);
       }
     );
-    req.on('error', reject);
 
-    req.write(prefixBuf);
-    req.write(fileBuffer);
-    req.write(suffixBuf);
-    req.end();
+    initReq.on('error', reject);
+    initReq.write(metadata);
+    initReq.end();
   });
 }
 
@@ -163,11 +185,22 @@ function makePublic(accessToken, fileId) {
         },
       },
       (res) => {
-        res.on('data', () => {});
-        res.on('end', () => resolve(true));
+        let b = '';
+        res.on('data', (d) => (b += d));
+        res.on('end', () => {
+          if (res.statusCode >= 200 && res.statusCode < 300) {
+            resolve(true);
+          } else {
+            console.warn(`[GDrive Uploader] makePublic warning: HTTP ${res.statusCode} - ${b}`);
+            resolve(false);
+          }
+        });
       }
     );
-    req.on('error', () => resolve(false));
+    req.on('error', (e) => {
+      console.warn('[GDrive Uploader] makePublic error:', e.message);
+      resolve(false);
+    });
     req.write(payload);
     req.end();
   });
