@@ -701,12 +701,14 @@ try {
   // TC-SEC-10: Automated Supabase Release Publishing & Private Repo Fallback
   const updaterSrc = fs.readFileSync(path.join(ROOT_DIR, 'src/renderer/src/utils/apkUpdater.ts'), 'utf8');
   const workflowSrc = fs.readFileSync(path.join(ROOT_DIR, '.github/workflows/release.yml'), 'utf8');
+  const gdriveScriptSrc = fs.readFileSync(path.join(ROOT_DIR, 'scripts/upload-to-gdrive.cjs'), 'utf8');
 
   const updaterHasSupabase = updaterSrc.includes('icelauch_device_registry') && updaterSrc.includes('latest_release');
-  const workflowHasPublish = workflowSrc.includes('Publish Release Info to Supabase Cloud') && workflowSrc.includes('icelauch_device_registry');
+  const workflowHasPublish = workflowSrc.includes('upload-to-gdrive.cjs');
+  const gdriveHasSync = gdriveScriptSrc.includes('icelauch_device_registry') && gdriveScriptSrc.includes('latest_release');
 
-  assert.ok(updaterHasSupabase && workflowHasPublish, 'CI/CD and in-app updater must support Supabase release distribution');
-  recordTest('TC-SEC-10', 'Automated Supabase Release Publishing & Private Repo Distribution', 'Module 8: Device Whitelist & Security', 'Cross-Platform', true, 'GitHub Actions CI/CD automatically pushes release metadata to Supabase, enabling updates from private repo');
+  assert.ok(updaterHasSupabase && workflowHasPublish && gdriveHasSync, 'CI/CD and in-app updater must support Google Drive and Supabase release distribution');
+  recordTest('TC-SEC-10', 'Automated Supabase Release Publishing & Private Repo Distribution', 'Module 8: Device Whitelist & Security', 'Cross-Platform', true, 'GitHub Actions CI/CD automatically uploads binaries to Google Drive and syncs metadata to Supabase');
 } catch (e) {
   recordTest('TC-SEC-10', 'Automated Supabase Release Publishing & Private Repo Distribution', 'Module 8: Device Whitelist & Security', 'Cross-Platform', false, e.message);
 }

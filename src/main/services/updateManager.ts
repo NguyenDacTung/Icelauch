@@ -1,5 +1,9 @@
 import { autoUpdater } from 'electron-updater';
-import { BrowserWindow, ipcMain, app } from 'electron';
+import { BrowserWindow, ipcMain, app, shell } from 'electron';
+import fs from 'fs';
+import path from 'path';
+import https from 'https';
+import http from 'http';
 
 export interface UpdateStatusPayload {
   status: 'checking' | 'available' | 'not-available' | 'downloading' | 'downloaded' | 'error';
@@ -20,6 +24,7 @@ export class UpdateManager {
   private static instance: UpdateManager;
   private mainWindow: BrowserWindow | null = null;
   private isChecking = false;
+  private pendingPcDownloadUrl: string | null = null;
 
   private constructor() {
     // Configure autoUpdater
@@ -110,11 +115,66 @@ export class UpdateManager {
 
     ipcMain.handle('updater:check', async () => {
       if (this.isChecking) return { success: true, message: 'Đang kiểm tra...' };
+      this.isChecking = true;
       try {
         const result = await autoUpdater.checkForUpdates();
+        this.isChecking = false;
         return { success: true, version: result?.updateInfo?.version };
       } catch (err: any) {
-        console.warn('updater:check error:', err?.message);
+        console.log('[UpdateManager] GitHub updater error, falling back to Supabase:', err?.message);
+        // Fallback to Supabase Release Registry
+        try {
+          const fetchSupabase = () =>
+            new Promise<any>((resolve) => {
+              const req = https.get(
+                'https://wqmmagfrwwctvipopazx.supabase.co/rest/v1/icelauch_user_data?profile_id=eq.icelauch_device_registry&select=game_stats',
+                {
+                  headers: {
+                    apikey: 'sb_publishable_l1vNbLKXXhLNnfi1pI5UnQ_0EaqbXuJ',
+                    Authorization: 'Bearer sb_publishable_l1vNbLKXXhLNnfi1pI5UnQ_0EaqbXuJ',
+                  },
+                },
+                (res) => {
+                  let d = '';
+                  res.on('data', (c) => (d += c));
+                  res.on('end', () => {
+                    try {
+                      const rows = JSON.parse(d);
+                      resolve(rows[0]?.game_stats?.latest_release || null);
+                    } catch {
+                      resolve(null);
+                    }
+                  });
+                }
+              );
+              req.on('error', () => resolve(null));
+            });
+
+          const rel = await fetchSupabase();
+          this.isChecking = false;
+          if (rel && rel.version) {
+            const currentVer = app.getVersion();
+            if (rel.version !== currentVer) {
+              this.pendingPcDownloadUrl = rel.pcSetupUrl || '';
+              this.send('updater:status', {
+                status: 'available',
+                version: rel.version,
+                releaseNotes: rel.releaseNotes || `Bản phát hành v${rel.version}`,
+              } as UpdateStatusPayload);
+              return { success: true, version: rel.version };
+            } else {
+              this.send('updater:status', {
+                status: 'not-available',
+                version: currentVer,
+              } as UpdateStatusPayload);
+              return { success: true, version: currentVer };
+            }
+          }
+        } catch (supaErr) {
+          console.warn('[UpdateManager] Supabase check error:', supaErr);
+        }
+
+        this.isChecking = false;
         return { success: false, error: err?.message || String(err) };
       }
     });
@@ -122,6 +182,53 @@ export class UpdateManager {
     ipcMain.handle('updater:download', async () => {
       try {
         this.send('updater:status', { status: 'downloading' } as UpdateStatusPayload);
+
+        // If we have a direct PC Setup URL from Google Drive / Supabase
+        if (this.pendingPcDownloadUrl) {
+          const downloadUrl = this.pendingPcDownloadUrl;
+          const tempPath = path.join(app.getPath('temp'), `Icelauch-Setup-Update.exe`);
+
+          await new Promise<void>((resolve, reject) => {
+            const client = downloadUrl.startsWith('https') ? https : http;
+            const fileStream = fs.createWriteStream(tempPath);
+
+            const downloadReq = (url: string) => {
+              client.get(url, (res) => {
+                // Follow redirects
+                if (res.statusCode && res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {
+                  return downloadReq(res.headers.location);
+                }
+                const totalBytes = parseInt(res.headers['content-length'] || '0', 10);
+                let receivedBytes = 0;
+
+                res.on('data', (chunk) => {
+                  receivedBytes += chunk.length;
+                  if (totalBytes > 0) {
+                    this.send('updater:progress', {
+                      percent: Math.round((receivedBytes / totalBytes) * 1000) / 10,
+                      bytesPerSecond: 0,
+                      transferred: receivedBytes,
+                      total: totalBytes,
+                    } as UpdateProgressPayload);
+                  }
+                });
+
+                res.pipe(fileStream);
+                fileStream.on('finish', () => {
+                  fileStream.close();
+                  resolve();
+                });
+                fileStream.on('error', reject);
+              }).on('error', reject);
+            };
+
+            downloadReq(downloadUrl);
+          });
+
+          this.send('updater:status', { status: 'downloaded' } as UpdateStatusPayload);
+          return { success: true };
+        }
+
         await autoUpdater.downloadUpdate();
         return { success: true };
       } catch (err: any) {
@@ -129,7 +236,15 @@ export class UpdateManager {
       }
     });
 
-    ipcMain.handle('updater:install', () => {
+    ipcMain.handle('updater:install', async () => {
+      const tempPath = path.join(app.getPath('temp'), `Icelauch-Setup-Update.exe`);
+      if (fs.existsSync(tempPath)) {
+        await shell.openPath(tempPath);
+        setTimeout(() => {
+          app.quit();
+        }, 1000);
+        return;
+      }
       autoUpdater.quitAndInstall(false, true);
     });
   }

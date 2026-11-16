@@ -209,35 +209,14 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Publish Release Info to Supabase Cloud
+      - name: Upload Binaries to Google Drive & Sync Supabase
         if: startsWith(github.ref, 'refs/tags/v') || github.event_name == 'workflow_dispatch'
         continue-on-error: true
-        run: |
-          node -e '
-            const tag = "${{ github.event.inputs.release_tag || github.ref_name }}";
-            const ver = tag.replace(/^v/i, "");
-            const payload = {
-              profile_id: "icelauch_device_registry",
-              game_stats: {
-                latest_release: {
-                  version: ver,
-                  name: `Icelauch v${ver}`,
-                  releaseNotes: `Bản phát hành chính thức v${ver}`,
-                  phoneApkUrl: `https://github.com/NguyenDacTung/Icelauch/releases/download/${tag}/Icelauch-phone.apk`,
-                  universalApkUrl: `https://github.com/NguyenDacTung/Icelauch/releases/download/${tag}/Icelauch-universal.apk`
-                }
-              },
-              updated_at: new Date().toISOString()
-            };
-            fetch("https://wqmmagfrwwctvipopazx.supabase.co/rest/v1/icelauch_user_data", {
-              method: "POST",
-              headers: {
-                "apikey": "sb_publishable_l1vNbLKXXhLNnfi1pI5UnQ_0EaqbXuJ",
-                "Authorization": "Bearer sb_publishable_l1vNbLKXXhLNnfi1pI5UnQ_0EaqbXuJ",
-                "Content-Type": "application/json",
-                "Prefer": "resolution=merge-duplicates"
-              },
-              body: JSON.stringify(payload)
-            }).then(r => console.log("Supabase release published:", r.status)).catch(console.warn);
-          '
+        env:
+          GDRIVE_SERVICE_ACCOUNT_KEY: ${{ secrets.GDRIVE_SERVICE_ACCOUNT_KEY }}
+          GDRIVE_RELEASE_FOLDER_ID: ${{ secrets.GDRIVE_RELEASE_FOLDER_ID }}
+          RELEASE_TAG: ${{ github.event.inputs.release_tag || github.ref_name }}
+          SUPABASE_URL: 'https://wqmmagfrwwctvipopazx.supabase.co'
+          SUPABASE_ANON_KEY: 'sb_publishable_l1vNbLKXXhLNnfi1pI5UnQ_0EaqbXuJ'
+        run: node scripts/upload-to-gdrive.cjs
 
