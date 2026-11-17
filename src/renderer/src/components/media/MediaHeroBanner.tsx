@@ -19,6 +19,7 @@ interface MediaHeroBannerProps {
   type: 'video' | 'audio';
   bannerSettings?: SectionBannerSettings;
   onPlayMedia: (item: MediaItem) => void;
+  onActiveBannerChange?: (bannerImg: string) => void;
 }
 
 export const MediaHeroBanner: React.FC<MediaHeroBannerProps> = ({
@@ -26,6 +27,7 @@ export const MediaHeroBanner: React.FC<MediaHeroBannerProps> = ({
   type,
   bannerSettings,
   onPlayMedia,
+  onActiveBannerChange,
 }) => {
   const resolvedList = resolveBannerItems(bannerSettings, mediaList, 'media');
   const displayItems = resolvedList.map((r) => r.item);
@@ -57,6 +59,10 @@ export const MediaHeroBanner: React.FC<MediaHeroBannerProps> = ({
     : 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=1600&q=80';
 
   const bannerImg = currentItem.bannerPath || currentItem.coverPath || parsed.thumbnailUrl || fallbackArtwork;
+
+  useEffect(() => {
+    onActiveBannerChange?.(bannerImg);
+  }, [bannerImg, onActiveBannerChange]);
 
   const tags = currentItem.tags && currentItem.tags.length > 0 
     ? currentItem.tags 

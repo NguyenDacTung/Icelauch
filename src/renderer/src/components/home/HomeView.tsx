@@ -51,6 +51,7 @@ interface HomeViewProps {
   onOpenAddGame: () => void;
   onOpenTagManager?: (mode?: 'game' | 'movie' | 'music' | 'podcast') => void;
   onLoadDemoData: () => void;
+  onActiveBannerChange?: (bannerImg: string) => void;
 }
 
 export const HomeView: React.FC<HomeViewProps> = ({
@@ -76,6 +77,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
   onOpenAddGame,
   onOpenTagManager,
   onLoadDemoData,
+  onActiveBannerChange,
 }) => {
   const [selectedGenre, setSelectedGenre] = useState<string>('Tất cả');
   const [selectedMood, setSelectedMood] = useState<string>('all');
@@ -249,6 +251,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
           onDownload={onDownload}
           onToggleLibrary={onToggleLibrary}
           onIncompatibleClick={onIncompatibleClick}
+          onActiveBannerChange={onActiveBannerChange}
         />
       )}
 

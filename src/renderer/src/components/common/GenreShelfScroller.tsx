@@ -71,33 +71,62 @@ export const GenreShelfScroller: React.FC<GenreShelfScrollerProps> = ({
           )}
         </h3>
 
-        {onViewAll && (
-          <button
-            onClick={() => {
-              sfx.playClick();
-              onViewAll();
-            }}
-            className="text-xs text-amber-400 hover:text-amber-300 font-semibold transition-colors flex items-center gap-1 active:scale-95"
-          >
-            <span>Xem tất cả</span>
-            <span>&rarr;</span>
-          </button>
-        )}
+        <div className="flex items-center gap-2">
+          {/* Header-based Scroll Arrows (Netflix / Steam style, 0 overlap with cards!) */}
+          <div className="flex items-center gap-1 bg-white/5 p-0.5 rounded-lg border border-white/10">
+            <button
+              type="button"
+              disabled={!canScrollLeft}
+              onClick={() => handleScroll('left')}
+              className={`p-1 rounded-md transition-all ${
+                canScrollLeft
+                  ? 'text-white hover:bg-white/10 hover:text-amber-400 active:scale-95 cursor-pointer'
+                  : 'text-white/20 cursor-not-allowed'
+              }`}
+              title="Cuộn sang trái"
+              aria-label="Cuộn sang trái"
+            >
+              <ChevronLeft className="w-4 h-4" />
+            </button>
+            <button
+              type="button"
+              disabled={!canScrollRight}
+              onClick={() => handleScroll('right')}
+              className={`p-1 rounded-md transition-all ${
+                canScrollRight
+                  ? 'text-white hover:bg-white/10 hover:text-amber-400 active:scale-95 cursor-pointer'
+                  : 'text-white/20 cursor-not-allowed'
+              }`}
+              title="Cuộn sang phải"
+              aria-label="Cuộn sang phải"
+            >
+              <ChevronRight className="w-4 h-4" />
+            </button>
+          </div>
+
+          {onViewAll && (
+            <button
+              onClick={() => {
+                sfx.playClick();
+                onViewAll();
+              }}
+              className="text-xs text-amber-400 hover:text-amber-300 font-semibold transition-colors flex items-center gap-1 active:scale-95 cursor-pointer"
+            >
+              <span>Xem tất cả</span>
+              <span>&rarr;</span>
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Scroller Container */}
       <div className="relative group/shelf">
-        {/* Left Arrow Button */}
-        {canScrollLeft && (
-          <button
-            type="button"
-            onClick={() => handleScroll('left')}
-            className="absolute left-1.5 top-1/2 -translate-y-1/2 z-20 w-9 h-9 rounded-full bg-black/90 hover:bg-amber-400 hover:text-black text-white border border-white/20 shadow-2xl backdrop-blur-md flex items-center justify-center opacity-0 group-hover/shelf:opacity-100 transition-all duration-200 active:scale-90"
-            title="Cuộn sang trái"
-          >
-            <ChevronLeft className="w-5 h-5" />
-          </button>
-        )}
+        {/* Soft Left Fader */}
+        <div
+          className={`pointer-events-none absolute left-0 top-0 bottom-2 w-8 bg-gradient-to-r from-[#0F1115] to-transparent z-10 transition-opacity duration-300 ${
+            canScrollLeft ? 'opacity-80' : 'opacity-0'
+          }`}
+        />
 
         {/* Horizontal Track */}
         <div
@@ -107,17 +136,12 @@ export const GenreShelfScroller: React.FC<GenreShelfScrollerProps> = ({
           {children}
         </div>
 
-        {/* Right Arrow Button */}
-        {canScrollRight && (
-          <button
-            type="button"
-            onClick={() => handleScroll('right')}
-            className="absolute right-1.5 top-1/2 -translate-y-1/2 z-20 w-9 h-9 rounded-full bg-black/90 hover:bg-amber-400 hover:text-black text-white border border-white/20 shadow-2xl backdrop-blur-md flex items-center justify-center opacity-0 group-hover/shelf:opacity-100 transition-all duration-200 active:scale-90"
-            title="Cuộn sang phải"
-          >
-            <ChevronRight className="w-5 h-5" />
-          </button>
-        )}
+        {/* Soft Right Fader */}
+        <div
+          className={`pointer-events-none absolute right-0 top-0 bottom-2 w-8 bg-gradient-to-l from-[#0F1115] to-transparent z-10 transition-opacity duration-300 ${
+            canScrollRight ? 'opacity-80' : 'opacity-0'
+          }`}
+        />
       </div>
     </section>
   );

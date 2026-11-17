@@ -27,6 +27,7 @@ interface HeroBannerProps {
   onDownload: (id: string) => void;
   onToggleLibrary: (id: string) => void;
   onIncompatibleClick?: (game: Game) => void;
+  onActiveBannerChange?: (bannerImg: string) => void;
 }
 
 export const HeroBanner: React.FC<HeroBannerProps> = ({
@@ -38,6 +39,7 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({
   onDownload,
   onToggleLibrary,
   onIncompatibleClick,
+  onActiveBannerChange,
 }) => {
   const resolvedList = resolveBannerItems(bannerSettings, games, 'game');
   const displayGames = resolvedList.map((r) => r.item);
@@ -75,6 +77,10 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({
   const mainImage = hoveredScreenshot || currentGame.bannerPath || currentGame.coverPath || 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=1600&q=80';
   const sharpenVal = !hoveredScreenshot ? (currentGame.bannerSharpen || currentGame.coverSharpen || 0) : 0;
   const edgeDarknessVal = !hoveredScreenshot ? (currentGame.bannerEdgeDarkness ?? 0) : 0;
+
+  useEffect(() => {
+    onActiveBannerChange?.(mainImage);
+  }, [mainImage, onActiveBannerChange]);
 
   // Mobile Android Layout: Full-Art Visual Banner (no side text column to maximize vertical screen fit)
   if (isAndroidMobile(deviceType)) {

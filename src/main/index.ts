@@ -1007,6 +1007,8 @@ app.whenReady().then(async () => {
           podcastTags: appSettings.podcastTags,
           bannerSettings: appSettings.bannerSettings,
           globalActionButtons: appSettings.globalActionButtons,
+          adminPinHash: appSettings.pinHash,
+          adminPinSalt: appSettings.pinSalt,
         }
       );
 

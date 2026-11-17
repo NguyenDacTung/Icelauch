@@ -89,10 +89,13 @@ export function parseMediaUrl(url: string, customPort?: number): ParsedMediaUrl 
 /**
  * Extracts driveId from Google Drive links and returns direct binary audio stream URL.
  * Handles drive.google.com/file/d/<id>/..., drive.google.com/open?id=<id>, drive.google.com/uc?id=<id>
- * Returns direct URL: https://drive.usercontent.google.com/download?id=${driveId}&export=download
+ * Supports multiple stream fallback endpoints to bypass virus scan warnings and mobile redirects:
+ * - Level 0: https://drive.usercontent.google.com/download?id=${driveId}&export=download&confirm=t
+ * - Level 1: https://docs.google.com/uc?export=download&id=${driveId}&confirm=t
+ * - Level 2: https://drive.google.com/uc?export=download&id=${driveId}&confirm=t
  * Falls back to rawUrl for direct streams or non-Drive URLs.
  */
-export function getDirectAudioStreamUrl(rawUrl: string): string {
+export function getDirectAudioStreamUrl(rawUrl: string, fallbackLevel: number = 0): string {
   if (!rawUrl) return '';
   const trimmed = rawUrl.trim();
 
@@ -114,6 +117,12 @@ export function getDirectAudioStreamUrl(rawUrl: string): string {
   }
 
   if (driveId) {
+    if (fallbackLevel === 1) {
+      return `https://docs.google.com/uc?export=download&id=${driveId}&confirm=t`;
+    }
+    if (fallbackLevel >= 2) {
+      return `https://drive.google.com/uc?export=download&id=${driveId}&confirm=t`;
+    }
     return `https://drive.usercontent.google.com/download?id=${driveId}&export=download`;
   }
 

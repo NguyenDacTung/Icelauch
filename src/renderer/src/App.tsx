@@ -133,6 +133,7 @@ export default function App() {
   const [audioSeekTime, setAudioSeekTime] = useState<number | null>(null);
   const [isMobileVinylOpen, setIsMobileVinylOpen] = useState(false);
   const isTurntableActive = isTurntableOpen && currentTab === 'media';
+  const [ambientArtworkUrl, setAmbientArtworkUrl] = useState<string>('');
 
   // Multi-User Profile State
   const [profiles, setProfiles] = useState<UserProfile[]>([]);
@@ -436,7 +437,7 @@ export default function App() {
         }
 
         // Version update check: require re-login on new app version update; keep auto-login on same version
-        const CURRENT_APP_VERSION = '1.2.1';
+        const CURRENT_APP_VERSION = '1.2.2';
         const isNewVersion = shouldRequireReLoginForNewVersion(CURRENT_APP_VERSION);
         if (isNewVersion) {
           console.log(`[Version Upgrade] New version ${CURRENT_APP_VERSION}: Requiring re-login.`);
@@ -704,6 +705,8 @@ export default function App() {
           podcastTags: appData?.settings.podcastTags,
           bannerSettings: appData?.settings.bannerSettings,
           globalActionButtons: appData?.settings.globalActionButtons,
+          adminPinHash: appData?.settings.pinHash,
+          adminPinSalt: appData?.settings.pinSalt,
         };
         await fetch(`${DEFAULT_SUPABASE_URL}/rest/v1/icelauch_playlists`, {
           method: 'POST',
@@ -1579,7 +1582,7 @@ export default function App() {
         }
         setActiveProfile(res.profile);
         setIsProfilePickerOpen(false);
-        markCurrentVersionLoggedIn('1.2.1');
+        markCurrentVersionLoggedIn('1.2.2');
         sfx.playSuccess();
         return { success: true };
       }
@@ -1597,7 +1600,7 @@ export default function App() {
     }
     setActiveProfile(profile);
     setIsProfilePickerOpen(false);
-    markCurrentVersionLoggedIn('1.2.1');
+    markCurrentVersionLoggedIn('1.2.2');
     return { success: true };
   };
 
@@ -2313,6 +2316,22 @@ export default function App() {
           </DevicePhoneFrame>
         ) : (
           <>
+            {/* Dynamic Ambient Cinema Backdrop Layer on PC (Steam & Spotify Cinema Style) */}
+            {effectiveDevice === 'windows_pc' && ambientArtworkUrl && !viewingDetailGame && (currentTab === 'home' || currentTab === 'media') && (
+              <div
+                className="fixed inset-0 pointer-events-none z-0 overflow-hidden transition-opacity duration-1000 ease-out"
+                style={{ opacity: 0.16 }}
+              >
+                <div
+                  className="absolute inset-0 bg-cover bg-center transition-all duration-1000 ease-out scale-110 blur-[60px]"
+                  style={{
+                    backgroundImage: `url(${ambientArtworkUrl.startsWith('http') || ambientArtworkUrl.startsWith('data:') ? ambientArtworkUrl : `file://${ambientArtworkUrl}`})`,
+                  }}
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-[#0A0C10] via-[#0A0C10]/85 to-[#0A0C10]/70" />
+              </div>
+            )}
+
             {viewingDetailGame ? (
               <GameDetailView
                 game={viewingDetailGame}
@@ -2372,6 +2391,7 @@ export default function App() {
                       setIsTagManagerOpen(true);
                     }}
                     onLoadDemoData={handleLoadDemoData}
+                    onActiveBannerChange={setAmbientArtworkUrl}
                   />
                 )}
 
@@ -2467,6 +2487,7 @@ export default function App() {
                     onToggleItemInUserPlaylist={handleToggleItemInUserPlaylist}
                     onCreateUserPlaylist={handleCreateUserPlaylist}
                     onNavigateToUserPlaylists={() => setCurrentTab('library')}
+                    onActiveBannerChange={setAmbientArtworkUrl}
                   />
                 )}
 

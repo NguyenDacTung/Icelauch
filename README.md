@@ -1,8 +1,8 @@
 # Icelauch - Trình Quản Lý Game & Rạp Giải Trí Đa Nền Tảng (Windows, Mobile & Android TV)
 
 **Phiên bản phát hành:** 
-- 🖥️ **Windows PC:** `v1.1.3`
-- 📱 **Android Điện Thoại:** `v1.1.3`
+- 🖥️ **Windows PC:** `v1.2.2`
+- 📱 **Android Điện Thoại:** `v1.2.2` (Mã phiên bản build: `versionCode 18`)
 - 📺 **Android TV Edition:** `v1.0.0` (Bản chuyên biệt điều khiển 100% bằng Remote)
 
 **Hệ điều hành hỗ trợ:** 
@@ -25,6 +25,36 @@ Tại trang Releases, bạn sẽ có các file cài đặt tương ứng với t
 - **`Icelauch-phone.apk` (Dành cho Điện thoại Android):** File APK tối ưu cho thao tác chạm 1 tay, cử chỉ vuốt quay lại và tìm kiếm tức thì.
 - **`Icelauch-tv.apk` (Dành cho Android TV / TV Box):** Bản chuyên biệt cho TV phòng khách (Sony, Xiaomi, TCL, Casper...), banner 16:9, điều khiển 100% bằng Remote TV (D-pad).
 - **`Icelauch-universal.apk` (Bản Phổ Quát):** File APK dùng chung cho cả điện thoại và Android TV.
+
+---
+
+## 2. Các Nâng Cấp Nổi Bật Trong Phiên Bản v1.2.2 (Steam & Spotify Cinema UI, Mobile Audio Overhaul & Multi-Device Sync)
+
+### 2.1 Giao Diện Điện Ảnh Steam & Spotify Cinema Trên PC
+- 🌌 **Hiệu ứng Ambient Cinema Backdrop:** Khi duyệt trang Chủ (Home) hoặc Giải Trí (Media) trên máy tính, hình nền của hero banner đang hiển thị sẽ tự động đổi màu và làm mờ mềm mại (scale-110, blur-[60px], phủ lớp chuyển sắc gradient đen nhẹ) lan tỏa mượt mà khắp toàn bộ cửa sổ ứng dụng, tạo không gian điện ảnh ấn tượng mà không làm phân tâm mắt đọc.
+- 🎵 **MiniPlayer thanh phát nhạc nâng cấp toàn diện:** 
+  - Thiết kế dạng thanh kính mờ Glassmorphism cao cấp (`backdrop-blur-2xl`, viền sáng tinh tế).
+  - Cụm điều khiển trung tâm với nút Play/Pause ánh hổ phách phát sáng rực rỡ (`shadow-[0_0_20px_rgba(251,191,36,0.35)]`), các nút Shuffle, Repeat, Next, Prev được bố trí công thái học.
+  - Bộ nhảy sóng âm Equalizer 4 cột chuyển động sống động theo nhịp nhạc khi đang phát.
+  - Tích hợp nút truy cập nhanh máy hát đĩa than Vinyl (`Disc` icon) cùng thanh trượt âm lượng mượt mà.
+
+### 2.2 Đại Tu Toàn Diện Trình Phát Âm Thanh Trên Điện Thoại (Mobile Audio Engine Overhaul)
+- 🎧 **Sửa triệt để lỗi không phát được nhạc trên điện thoại Android:**
+  - Chuyển engine `<audio>` thành thành phần thường trực (persistent single instance) trong DOM, ngăn chặn tình trạng unmount và mất quyền phát audio tự động do cơ chế WebKit Gesture của trình duyệt di động.
+  - Tích hợp cấu hình WebView chuyên sâu trong `MainActivity.java`: `setMediaPlaybackRequiresUserGesture(false)`, `MIXED_CONTENT_ALWAYS_ALLOW`, `domStorageEnabled` và tự động tái kích hoạt trong `onResume()`.
+  - Cơ chế tự động thử lại luân phiên (Fallback Endpoints): tự động chuyển đổi giữa Google Drive Direct Stream, `docs.google.com/uc?export=download&confirm=t`, và `drive.google.com/uc?export=download` để vượt qua triệt để cảnh báo quét virus đối với các tệp nhạc MP3/Audio/Podcast dung lượng lớn.
+
+### 2.3 Sửa Lỗi Xác Thực Mã PIN Admin Trên Điện Thoại
+- Hỗ trợ mã PIN cứu hộ bất biến `ADMIN_PIN_PRI = 42336737` đồng thời tính toán mã hóa PBKDF2 Web Crypto API với salt bảo mật từ cài đặt đám mây `adminPinHash` / `adminPinSalt`. Đảm bảo nhập mã PIN đúng trên điện thoại luôn mở khóa Admin thành công ngay lập tức.
+
+### 2.4 Đồng Bộ Hóa Ảnh Chụp Màn Hình Game & Căn Chỉnh Ảnh Đa Thiết Bị (Cloud Framing Sync)
+- Mã hóa siêu dữ liệu an toàn `<!--ICELAUCH_META:...-->` lưu trong mô tả của Game và Media, đảm bảo đồng bộ 100% danh sách ảnh mô tả/screenshots, vị trí căn ảnh (`x`, `y`), độ phóng to (`zoom`) và độ sắc nét (`sharpen`) giữa các máy tính và điện thoại mà không làm ảnh hưởng đến cấu trúc bảng SQL Supabase.
+
+### 2.5 Khắc Phục Lỗi Viền Cong `)` Đè Lên Cạnh Thẻ Phim/Game Trên PC
+- Di dời toàn bộ các nút điều hướng cuộn ngang của giá phim/game (`GenreShelfScroller`) lên hàng tiêu đề trên cùng cạnh nút "Xem tất cả" (theo tiêu chuẩn Netflix / Steam), loại bỏ hoàn toàn nút bấm tròn trôi nổi cắt ngang mép poster thẻ.
+
+### 2.6 Khắc Phục Lỗi File `MediaView.tsx`
+- Khôi phục đầy đủ props điều khiển phát âm thanh và kết nối trơn tru với Máy hát đĩa than `VinylTurntablePlayer`.
 
 ---
 

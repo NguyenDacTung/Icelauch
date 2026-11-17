@@ -109,6 +109,7 @@ export interface MediaItem {
   subType?: MediaSubType;
   title: string;
   artist?: string;
+  album?: string;
   link: string;
   backupLinks?: string[];
   downloadStatus?: 'idle' | 'downloading' | 'downloaded' | 'error';

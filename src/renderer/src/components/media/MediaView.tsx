@@ -62,10 +62,10 @@ interface MediaViewProps {
   audioVolume?: number;
   audioIsMuted?: boolean;
   onTogglePlayAudio?: () => void;
-  onSeekAudio?: (seconds: number) => void;
+  onSeekAudio?: (time: number) => void;
   onNextAudio?: () => void;
   onPrevAudio?: () => void;
-  onVolumeChange?: (v: number) => void;
+  onVolumeChange?: (volume: number) => void;
   onToggleMuteAudio?: () => void;
   favoriteMediaIds?: string[];
   favoritePlaylistIds?: string[];
@@ -89,6 +89,7 @@ interface MediaViewProps {
   onToggleItemInUserPlaylist?: (playlistId: string, mediaId: string) => Promise<void>;
   onCreateUserPlaylist?: (name: string, type: 'video' | 'audio', initialMediaId?: string) => Promise<void>;
   onNavigateToUserPlaylists?: () => void;
+  onActiveBannerChange?: (bannerImg: string) => void;
 }
 
 export const MediaView: React.FC<MediaViewProps> = ({
@@ -100,6 +101,19 @@ export const MediaView: React.FC<MediaViewProps> = ({
   isAdmin,
   searchQuery,
   currentTrack,
+  activeAudioTrack: propActiveAudioTrack,
+  onActiveAudioTrackChange,
+  isPlayingAudio = false,
+  audioCurrentTime = 0,
+  audioDuration = 0,
+  audioVolume = 0.8,
+  audioIsMuted = false,
+  onTogglePlayAudio,
+  onSeekAudio,
+  onNextAudio,
+  onPrevAudio,
+  onVolumeChange,
+  onToggleMuteAudio,
   favoriteMediaIds = [],
   favoritePlaylistIds = [],
   onToggleFavoriteMedia,
@@ -122,13 +136,34 @@ export const MediaView: React.FC<MediaViewProps> = ({
   onToggleItemInUserPlaylist,
   onCreateUserPlaylist,
   onNavigateToUserPlaylists,
+  onActiveBannerChange,
 }) => {
   // 3 Sub-Tabs: 'video' | 'music' | 'podcast'
   const [activeTab, setActiveTab] = useState<'video' | 'music' | 'podcast'>('video');
   const [selectedTag, setSelectedTag] = useState<string>('all');
   const [filterOfflineOnly, setFilterOfflineOnly] = useState(false);
   const [activeVideo, setActiveVideo] = useState<MediaItem | null>(null);
-  const [activeAudioTrack, setActiveAudioTrack] = useState<MediaItem | null>(null);
+  const [internalActiveAudioTrack, setInternalActiveAudioTrack] = useState<MediaItem | null>(null);
+  const effectiveActiveAudioTrack = propActiveAudioTrack !== undefined ? propActiveAudioTrack : internalActiveAudioTrack;
+
+  const setActiveAudio = (track: MediaItem | null) => {
+    if (onActiveAudioTrackChange) {
+      onActiveAudioTrackChange(track);
+    }
+    setInternalActiveAudioTrack(track);
+  };
+
+  // Auto-switch activeTab to 'podcast' or 'music' when effectiveActiveAudioTrack is set
+  useEffect(() => {
+    if (effectiveActiveAudioTrack) {
+      if (effectiveActiveAudioTrack.subType === 'podcast') {
+        setActiveTab('podcast');
+      } else {
+        setActiveTab('music');
+      }
+    }
+  }, [effectiveActiveAudioTrack?.id, effectiveActiveAudioTrack?.subType]);
+
   const [showHiddenOnly, setShowHiddenOnly] = useState(false);
   const [visibleCount, setVisibleCount] = useState<number>(24);
 
@@ -160,7 +195,8 @@ export const MediaView: React.FC<MediaViewProps> = ({
   const handleOpenAudio = (track: MediaItem) => {
     sfx.playClick();
     onTurntableOpenChange?.(true);
-    setActiveAudioTrack(track);
+    setActiveAudio(track);
+    onActiveAudioTrackChange?.(track);
     onPlayAudio?.(track);
   };
 
@@ -257,15 +293,14 @@ export const MediaView: React.FC<MediaViewProps> = ({
           if (item.type === 'video') handleOpenVideo(item);
           else handleOpenAudio(item);
         }}
-        className={`group relative bg-ice-card rounded-xl overflow-hidden border ${
-          isPlayingCurrent
-            ? 'border-amber-400 ring-2 ring-amber-500/50 shadow-amber-500/20'
-            : 'border-ice-border hover:border-amber-400/80 hover:shadow-xl'
-        } cursor-pointer transition-all duration-300 hover:-translate-y-1 flex flex-col ${
-          isShelf ? 'w-[170px] shrink-0' : ''
-        }`}
+        style={{ isolation: 'isolate' }}
+        className={`group relative bg-ice-card rounded-xl overflow-hidden border ${isPlayingCurrent
+          ? 'border-amber-400 ring-2 ring-amber-500/50 shadow-amber-500/20'
+          : 'border-ice-border hover:border-amber-400/80 hover:shadow-xl'
+          } cursor-pointer transition-all duration-300 hover:-translate-y-1 flex flex-col ${isShelf ? 'w-[170px] shrink-0' : ''
+          }`}
       >
-        <div className="aspect-[2/3] w-full relative overflow-hidden bg-black flex items-center justify-center">
+        <div style={{ isolation: 'isolate' }} className="aspect-[2/3] w-full relative overflow-hidden bg-black flex items-center justify-center">
           {hasCover && coverImg ? (
             <img
               src={coverImg.startsWith('http') ? coverImg : `file://${coverImg}`}
@@ -436,16 +471,27 @@ export const MediaView: React.FC<MediaViewProps> = ({
   }
 
   // 2. VINYL TURNTABLE AUDIO PLAYER
-  if (activeAudioTrack) {
+  if (effectiveActiveAudioTrack) {
     return (
       <VinylTurntablePlayer
-        media={activeAudioTrack}
+        media={effectiveActiveAudioTrack}
         allAudio={tabMedia}
         playlists={tabPlaylists}
         isAdmin={isAdmin}
+        isPlaying={isPlayingAudio}
+        currentTime={audioCurrentTime}
+        duration={audioDuration}
+        volume={audioVolume}
+        isMuted={audioIsMuted}
+        onTogglePlay={onTogglePlayAudio}
+        onSeek={onSeekAudio}
+        onNext={onNextAudio}
+        onPrev={onPrevAudio}
+        onVolumeChange={onVolumeChange}
+        onToggleMute={onToggleMuteAudio}
         onBack={() => {
           onTurntableOpenChange?.(false);
-          setActiveAudioTrack(null);
+          setActiveAudio(null);
         }}
         onSelectTrack={(item) => handleOpenAudio(item)}
         onUpdateProgress={onUpdateMediaProgress}
@@ -534,8 +580,7 @@ export const MediaView: React.FC<MediaViewProps> = ({
                     const first = processedItems[0];
                     if (first.type === 'video') setActiveVideo(first);
                     else {
-                      setActiveAudioTrack(first);
-                      onPlayAudio?.(first);
+                      handleOpenAudio(first);
                     }
                   }}
                   className="flex items-center gap-2 px-4 py-2 rounded-xl bg-amber-400 hover:bg-amber-300 text-black text-xs font-bold transition-all shadow-lg shadow-amber-400/20 active:scale-95"
@@ -875,10 +920,10 @@ export const MediaView: React.FC<MediaViewProps> = ({
             if (item.type === 'video') {
               setActiveVideo(item);
             } else {
-              setActiveAudioTrack(item);
-              onPlayAudio?.(item);
+              handleOpenAudio(item);
             }
           }}
+          onActiveBannerChange={onActiveBannerChange}
         />
       )}
 
@@ -898,8 +943,7 @@ export const MediaView: React.FC<MediaViewProps> = ({
                 onClick={() => {
                   sfx.playClick();
                   if (isAudio) {
-                    setActiveAudioTrack(item);
-                    onPlayAudio?.(item);
+                    handleOpenAudio(item);
                   } else {
                     setActiveVideo(item);
                   }

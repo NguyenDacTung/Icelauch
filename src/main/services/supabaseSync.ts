@@ -18,6 +18,31 @@ function cleanQuestionMarks(text?: string): string {
     .replace(/Vi\?+t/gi, 'Việt');
 }
 
+const META_REGEX = /<!--ICELAUCH_META:([\s\S]*?)-->/;
+
+function encodeDescriptionMetadata(cleanDesc: string = '', meta: Record<string, any>): string {
+  const descWithoutMeta = (cleanDesc || '').replace(META_REGEX, '').trim();
+  const validKeys = Object.keys(meta).filter((k) => meta[k] !== undefined && meta[k] !== null);
+  if (validKeys.length === 0) return descWithoutMeta;
+  const cleanMeta: Record<string, any> = {};
+  for (const k of validKeys) cleanMeta[k] = meta[k];
+  const metaStr = `<!--ICELAUCH_META:${JSON.stringify(cleanMeta)}-->`;
+  return descWithoutMeta ? `${descWithoutMeta}\n${metaStr}` : metaStr;
+}
+
+function decodeDescriptionMetadata(rawDesc: string = ''): { description: string; meta: Record<string, any> } {
+  if (!rawDesc) return { description: '', meta: {} };
+  const match = rawDesc.match(META_REGEX);
+  if (!match) return { description: rawDesc, meta: {} };
+  try {
+    const meta = JSON.parse(match[1]);
+    const cleanDesc = rawDesc.replace(META_REGEX, '').trim();
+    return { description: cleanDesc, meta };
+  } catch (e) {
+    return { description: rawDesc, meta: {} };
+  }
+}
+
 export class SupabaseSyncService {
   private static instance: SupabaseSyncService;
 
@@ -389,32 +414,65 @@ export class SupabaseSyncService {
       return [];
     }
     const rows: any[] = Array.isArray(res.data) ? res.data : [];
-    return rows.map((r) => ({
-      id: r.id,
-      name: cleanQuestionMarks(r.name),
-      coverPath: r.cover_url || '',
-      bannerPath: r.banner_url || undefined,
-      trailerUrl: r.trailer_url || undefined,
-      description: cleanQuestionMarks(r.description),
-      genre: cleanQuestionMarks(r.genre),
-      tags: Array.isArray(r.tags) ? r.tags.map((t: string) => cleanQuestionMarks(t)) : [],
-      actionButtonIds: r.action_buttons || [],
-      downloadLinks: r.drive_url ? r.drive_url.split('\n').map((s: string) => s.trim()).filter(Boolean) : [],
-      backupLinks: r.drive_url ? r.drive_url.split('\n').map((s: string) => s.trim()).filter(Boolean).slice(1) : [],
-      extensions: Array.isArray(r.extensions) ? r.extensions : [],
-      expectedSize: r.file_size ? Number(r.file_size) : undefined,
-      featured: Boolean(r.featured),
-      runAsAdmin: false,
-      deleteArchiveAfterInstall: true,
-      status: 'uninstalled',
-      inLibrary: false,
-      addedAt: r.updated_at || new Date().toISOString(),
-    }));
+    return rows.map((r) => {
+      const decoded = decodeDescriptionMetadata(r.description);
+      const meta = decoded.meta || {};
+      return {
+        id: r.id,
+        name: cleanQuestionMarks(r.name),
+        coverPath: r.cover_url || '',
+        bannerPath: r.banner_url || undefined,
+        trailerUrl: r.trailer_url || undefined,
+        description: cleanQuestionMarks(decoded.description),
+        genre: cleanQuestionMarks(r.genre),
+        tags: Array.isArray(r.tags) ? r.tags.map((t: string) => cleanQuestionMarks(t)) : [],
+        actionButtonIds: r.action_buttons || [],
+        downloadLinks: r.drive_url ? r.drive_url.split('\n').map((s: string) => s.trim()).filter(Boolean) : [],
+        backupLinks: r.drive_url ? r.drive_url.split('\n').map((s: string) => s.trim()).filter(Boolean).slice(1) : [],
+        extensions: Array.isArray(r.extensions) ? r.extensions : [],
+        expectedSize: r.file_size ? Number(r.file_size) : undefined,
+        featured: Boolean(r.featured),
+        runAsAdmin: false,
+        deleteArchiveAfterInstall: true,
+        status: 'uninstalled',
+        inLibrary: false,
+        addedAt: r.updated_at || new Date().toISOString(),
+        screenshots: Array.isArray(meta.screenshots) ? meta.screenshots : [],
+        coverPosition: meta.coverPosition,
+        coverZoom: meta.coverZoom,
+        coverSharpen: meta.coverSharpen,
+        bannerPosition: meta.bannerPosition,
+        bannerZoom: meta.bannerZoom,
+        bannerBlur: meta.bannerBlur,
+        bannerDarkness: meta.bannerDarkness,
+        bannerEdgeDarkness: meta.bannerEdgeDarkness,
+        bannerSharpen: meta.bannerSharpen,
+        listCardPosition: meta.listCardPosition,
+        listCardZoom: meta.listCardZoom,
+      };
+    });
   }
 
   public async upsertGame(supabaseUrl: string, anonKey: string, game: Game): Promise<boolean> {
     const baseUrl = this.cleanUrl(supabaseUrl);
     const endpoint = `${baseUrl}/rest/v1/icelauch_games`;
+
+    const meta: Record<string, any> = {
+      screenshots: game.screenshots,
+      coverPosition: game.coverPosition,
+      coverZoom: game.coverZoom,
+      coverSharpen: game.coverSharpen,
+      bannerPosition: game.bannerPosition,
+      bannerZoom: game.bannerZoom,
+      bannerBlur: game.bannerBlur,
+      bannerDarkness: game.bannerDarkness,
+      bannerEdgeDarkness: game.bannerEdgeDarkness,
+      bannerSharpen: game.bannerSharpen,
+      listCardPosition: game.listCardPosition,
+      listCardZoom: game.listCardZoom,
+    };
+    const finalDescription = encodeDescriptionMetadata(game.description || '', meta);
+
     const payload = {
       id: game.id,
       name: game.name,
@@ -422,7 +480,7 @@ export class SupabaseSyncService {
       trailer_url: game.trailerUrl || null,
       banner_url: game.bannerPath || null,
       cover_url: game.coverPath || null,
-      description: game.description || '',
+      description: finalDescription,
       genre: game.genre || '',
       tags: game.tags || [],
       action_buttons: game.actionButtonIds || [],
@@ -451,15 +509,20 @@ export class SupabaseSyncService {
     const rows: any[] = Array.isArray(res.data) ? res.data : [];
     return rows.map((r) => {
       const links = r.link ? r.link.split('\n').map((s: string) => s.trim()).filter(Boolean) : [];
+      const decoded = decodeDescriptionMetadata(r.description);
+      const meta = decoded.meta || {};
       return {
         id: r.id,
         title: cleanQuestionMarks(r.title),
         type: r.type || 'video',
+        subType: meta.subType || (r.type === 'audio' ? 'music' : undefined),
+        artist: meta.artist,
+        album: meta.album,
         link: links[0] || '',
         backupLinks: links.slice(1),
         coverPath: r.cover_path || undefined,
         bannerPath: r.banner_path || undefined,
-        description: cleanQuestionMarks(r.description),
+        description: cleanQuestionMarks(decoded.description),
         category: cleanQuestionMarks(r.category),
         tags: Array.isArray(r.tags) ? r.tags.map((t: string) => cleanQuestionMarks(t)) : [],
         duration: r.duration || 0,
@@ -467,6 +530,17 @@ export class SupabaseSyncService {
         lastPosition: 0,
         watched: false,
         addedAt: r.updated_at || new Date().toISOString(),
+        coverPosition: meta.coverPosition,
+        coverZoom: meta.coverZoom,
+        coverSharpen: meta.coverSharpen,
+        bannerPosition: meta.bannerPosition,
+        bannerZoom: meta.bannerZoom,
+        bannerBlur: meta.bannerBlur,
+        bannerDarkness: meta.bannerDarkness,
+        bannerEdgeDarkness: meta.bannerEdgeDarkness,
+        bannerSharpen: meta.bannerSharpen,
+        listCardPosition: meta.listCardPosition,
+        listCardZoom: meta.listCardZoom,
       };
     });
   }
@@ -474,6 +548,25 @@ export class SupabaseSyncService {
   public async upsertMediaItem(supabaseUrl: string, anonKey: string, item: MediaItem): Promise<boolean> {
     const baseUrl = this.cleanUrl(supabaseUrl);
     const endpoint = `${baseUrl}/rest/v1/icelauch_media`;
+
+    const meta: Record<string, any> = {
+      subType: item.subType,
+      artist: item.artist,
+      album: item.album,
+      coverPosition: item.coverPosition,
+      coverZoom: item.coverZoom,
+      coverSharpen: item.coverSharpen,
+      bannerPosition: item.bannerPosition,
+      bannerZoom: item.bannerZoom,
+      bannerBlur: item.bannerBlur,
+      bannerDarkness: item.bannerDarkness,
+      bannerEdgeDarkness: item.bannerEdgeDarkness,
+      bannerSharpen: item.bannerSharpen,
+      listCardPosition: item.listCardPosition,
+      listCardZoom: item.listCardZoom,
+    };
+    const finalDescription = encodeDescriptionMetadata(item.description || '', meta);
+
     const payload = {
       id: item.id,
       title: item.title,
@@ -481,7 +574,7 @@ export class SupabaseSyncService {
       link: [item.link, ...(item.backupLinks || [])].filter(Boolean).join('\n'),
       cover_path: item.coverPath || null,
       banner_path: item.bannerPath || null,
-      description: item.description || '',
+      description: finalDescription,
       category: item.category || '',
       tags: item.tags || [],
       duration: item.duration || 0,
@@ -588,6 +681,8 @@ export class SupabaseSyncService {
       podcastTags?: string[];
       bannerSettings?: any;
       globalActionButtons?: any;
+      adminPinHash?: string;
+      adminPinSalt?: string;
     }
   ): Promise<{ success: boolean; message: string; count: number }> {
     const test = await this.testConnection(supabaseUrl, anonKey);
@@ -737,6 +832,14 @@ export class SupabaseSyncService {
         local.coverPath = rg.coverPath || local.coverPath;
         local.bannerPath = rg.bannerPath || local.bannerPath;
         local.description = rg.description || local.description;
+        if (rg.screenshots && rg.screenshots.length > 0) local.screenshots = rg.screenshots;
+        if (rg.coverPosition) local.coverPosition = rg.coverPosition;
+        if (rg.coverZoom) local.coverZoom = rg.coverZoom;
+        if (rg.coverSharpen !== undefined) local.coverSharpen = rg.coverSharpen;
+        if (rg.listCardPosition) local.listCardPosition = rg.listCardPosition;
+        if (rg.listCardZoom) local.listCardZoom = rg.listCardZoom;
+        if (rg.bannerPosition) local.bannerPosition = rg.bannerPosition;
+        if (rg.bannerZoom) local.bannerZoom = rg.bannerZoom;
       }
     }
     const finalGames = Array.from(gameMap.values());
@@ -766,6 +869,16 @@ export class SupabaseSyncService {
         local.bannerPath = rm.bannerPath || local.bannerPath;
         local.description = rm.description || local.description;
         local.tags = rm.tags || local.tags;
+        if (rm.subType) local.subType = rm.subType;
+        if (rm.artist) local.artist = rm.artist;
+        if (rm.album) local.album = rm.album;
+        if (rm.coverPosition) local.coverPosition = rm.coverPosition;
+        if (rm.coverZoom) local.coverZoom = rm.coverZoom;
+        if (rm.coverSharpen !== undefined) local.coverSharpen = rm.coverSharpen;
+        if (rm.listCardPosition) local.listCardPosition = rm.listCardPosition;
+        if (rm.listCardZoom) local.listCardZoom = rm.listCardZoom;
+        if (rm.bannerPosition) local.bannerPosition = rm.bannerPosition;
+        if (rm.bannerZoom) local.bannerZoom = rm.bannerZoom;
       }
     }
     const finalMedia = Array.from(mediaMap.values());
