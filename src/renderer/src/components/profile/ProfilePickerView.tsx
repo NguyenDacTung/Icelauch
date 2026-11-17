@@ -21,6 +21,7 @@ import {
 import { AvatarBadge } from '../common/AvatarBadge';
 import { ProfileModal } from './ProfileModal';
 import type { UserProfile } from '../../types';
+import { DEFAULT_SUPABASE_URL, DEFAULT_SUPABASE_ANON_KEY } from '../../services/platformAdapter';
 
 interface SavedAccountRecord {
   id: string;
@@ -222,6 +223,96 @@ export const ProfilePickerView: React.FC<ProfilePickerViewProps> = ({
     // If typing 'admin', match the admin profile
     if (!matchedProfile && (cleanUser === 'admin' || cleanUser === 'quantri')) {
       matchedProfile = profiles.find((p) => p.role === 'admin' || (p.pinHash && !p.passwordHash));
+    }
+
+    // If not found in local memory, perform on-demand query to Supabase Cloud
+    if (!matchedProfile) {
+      try {
+        setIsSubmittingDirect(true);
+        const [profRes, userDataRes] = await Promise.all([
+          fetch(`${DEFAULT_SUPABASE_URL}/rest/v1/icelauch_profiles?select=*`, {
+            headers: {
+              apikey: DEFAULT_SUPABASE_ANON_KEY,
+              Authorization: `Bearer ${DEFAULT_SUPABASE_ANON_KEY}`,
+            },
+          }).then((r) => (r.ok ? r.json() : [])).catch(() => []),
+          fetch(`${DEFAULT_SUPABASE_URL}/rest/v1/icelauch_user_data?select=*`, {
+            headers: {
+              apikey: DEFAULT_SUPABASE_ANON_KEY,
+              Authorization: `Bearer ${DEFAULT_SUPABASE_ANON_KEY}`,
+            },
+          }).then((r) => (r.ok ? r.json() : [])).catch(() => []),
+        ]);
+
+        const userMap = new Map<string, any>();
+        if (Array.isArray(userDataRes)) {
+          for (const ud of userDataRes) {
+            userMap.set(ud.profile_id, ud);
+          }
+        }
+
+        if (Array.isArray(profRes)) {
+          for (const r of profRes) {
+            if (r.id === 'icedrop_cloud_hub' || r.id === 'icelauch_device_registry' || String(r.id).startsWith('icelauch_')) {
+              continue;
+            }
+            const udata = userMap.get(r.id);
+            const gs = udata?.game_stats || {};
+            const uName = (gs.username || r.nickname?.toLowerCase().replace(/\s+/g, '') || '').toLowerCase();
+            const nick = (r.nickname || '').toLowerCase();
+            const profId = (r.id || '').toLowerCase();
+
+            const isMatch =
+              (uName && uName === cleanUser) ||
+              profId === cleanUser ||
+              nick === cleanUser ||
+              ((cleanUser === 'admin' || cleanUser === 'quantri') && (gs.role === 'admin' || (r.pin_hash && !gs.passwordHash)));
+
+            if (isMatch) {
+              matchedProfile = {
+                id: r.id,
+                username: gs.username || r.nickname?.toLowerCase().replace(/\s+/g, ''),
+                nickname: r.nickname,
+                avatar: r.avatar || 'avatar_1',
+                role: gs.role || (r.pin_hash ? 'admin' : 'user'),
+                pinHash: r.pin_hash || '',
+                passwordHash: gs.passwordHash,
+                passwordSalt: gs.passwordSalt,
+                requiresPasswordReset: gs.requiresPasswordReset,
+                bannedUntil: gs.bannedUntil,
+                banReason: gs.banReason,
+                createdDate: r.created_at || new Date().toISOString(),
+                lastActiveDate: r.last_active || new Date().toISOString(),
+                library: Array.isArray(udata?.library) ? udata.library : [],
+                favoriteMedia: Array.isArray(udata?.favorite_media) ? udata.favorite_media : [],
+                favoritePlaylists: Array.isArray(gs.favoritePlaylists) ? gs.favoritePlaylists : [],
+                customPlaylists: Array.isArray(gs.customPlaylists) ? gs.customPlaylists : [],
+                watchProgress: udata?.watch_progress || {},
+                gameStats: gs,
+              };
+
+              // Cache into PC storage or localStorage
+              if (window.api?.saveProfile) {
+                await window.api.saveProfile(matchedProfile).catch(console.warn);
+              } else {
+                try {
+                  const cached = localStorage.getItem('icelauch_profiles');
+                  const list = cached ? JSON.parse(cached) : [];
+                  if (!list.some((p: any) => p.id === matchedProfile!.id)) {
+                    list.push(matchedProfile);
+                    localStorage.setItem('icelauch_profiles', JSON.stringify(list));
+                  }
+                } catch {}
+              }
+              break;
+            }
+          }
+        }
+      } catch (cloudErr) {
+        console.warn('On-demand Supabase account query error:', cloudErr);
+      } finally {
+        setIsSubmittingDirect(false);
+      }
     }
 
     if (!matchedProfile) {

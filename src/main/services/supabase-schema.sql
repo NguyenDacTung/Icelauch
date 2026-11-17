@@ -69,12 +69,26 @@ CREATE TABLE IF NOT EXISTS icelauch_playlists (
   updated_at TIMESTAMPTZ DEFAULT now()
 );
 
--- 6. Kích hoạt Row Level Security (RLS) & Cho phép truy cập bảo mật qua Anon Key
+-- 6. Bảng Đăng Ký & Phê Duyệt Thiết Bị (Icelauch Device Registry)
+CREATE TABLE IF NOT EXISTS icelauch_device_registry (
+  device_id TEXT PRIMARY KEY,
+  device_name TEXT,
+  platform TEXT,
+  status TEXT DEFAULT 'pending',
+  otp_code TEXT,
+  otp_expires_at TIMESTAMPTZ,
+  created_at TIMESTAMPTZ DEFAULT now(),
+  last_active_at TIMESTAMPTZ DEFAULT now(),
+  approved_at TIMESTAMPTZ
+);
+
+-- 7. Kích hoạt Row Level Security (RLS) & Cho phép truy cập bảo mật qua Anon Key
 ALTER TABLE icelauch_profiles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE icelauch_user_data ENABLE ROW LEVEL SECURITY;
 ALTER TABLE icelauch_games ENABLE ROW LEVEL SECURITY;
 ALTER TABLE icelauch_media ENABLE ROW LEVEL SECURITY;
 ALTER TABLE icelauch_playlists ENABLE ROW LEVEL SECURITY;
+ALTER TABLE icelauch_device_registry ENABLE ROW LEVEL SECURITY;
 
 -- Xoá policy cũ nếu đã tồn tại
 DROP POLICY IF EXISTS "Icelauch Profiles Anon All" ON icelauch_profiles;
@@ -82,6 +96,7 @@ DROP POLICY IF EXISTS "Icelauch User Data Anon All" ON icelauch_user_data;
 DROP POLICY IF EXISTS "Icelauch Games Anon All" ON icelauch_games;
 DROP POLICY IF EXISTS "Icelauch Media Anon All" ON icelauch_media;
 DROP POLICY IF EXISTS "Icelauch Playlists Anon All" ON icelauch_playlists;
+DROP POLICY IF EXISTS "Icelauch Device Registry Anon All" ON icelauch_device_registry;
 
 -- Tạo policy cho phép client Icelauch đọc/ghi với Anon Key
 CREATE POLICY "Icelauch Profiles Anon All" ON icelauch_profiles FOR ALL TO anon USING (true) WITH CHECK (true);
@@ -89,9 +104,10 @@ CREATE POLICY "Icelauch User Data Anon All" ON icelauch_user_data FOR ALL TO ano
 CREATE POLICY "Icelauch Games Anon All" ON icelauch_games FOR ALL TO anon USING (true) WITH CHECK (true);
 CREATE POLICY "Icelauch Media Anon All" ON icelauch_media FOR ALL TO anon USING (true) WITH CHECK (true);
 CREATE POLICY "Icelauch Playlists Anon All" ON icelauch_playlists FOR ALL TO anon USING (true) WITH CHECK (true);
+CREATE POLICY "Icelauch Device Registry Anon All" ON icelauch_device_registry FOR ALL TO anon USING (true) WITH CHECK (true);
 
 -- ==============================================================================
--- 7. KHO LƯU TRỮ ẢNH BÌA & BANNER (SUPABASE STORAGE BUCKET: icelauch-assets)
+-- 8. KHO LƯU TRỮ ẢNH BÌA & BANNER (SUPABASE STORAGE BUCKET: icelauch-assets)
 -- ==============================================================================
 INSERT INTO storage.buckets (id, name, public)
 VALUES ('icelauch-assets', 'icelauch-assets', true)

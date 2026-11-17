@@ -21,7 +21,8 @@ import {
   listAuthorizedDevices,
   generateDeviceOtp,
   revokeDevice,
-  deleteAuthorizedDevice
+  deleteAuthorizedDevice,
+  directApproveDevice
 } from '../../services/deviceAuth';
 
 interface DeviceManagerModalProps {
@@ -107,6 +108,23 @@ export const DeviceManagerModal: React.FC<DeviceManagerModalProps> = ({ isOpen, 
       }
     } catch (e: any) {
       setActionError(e?.message || 'Lỗi kết nối máy chủ');
+    }
+  };
+
+  // Handle direct approval for a pending device
+  const handleDirectApprove = async (device: AuthorizedDevice) => {
+    setActionError(null);
+    setActionSuccess(null);
+    try {
+      const res = await directApproveDevice(device.deviceId);
+      if (res.success) {
+        setActionSuccess(`✓ Đã phê duyệt ngay thiết bị "${device.deviceName}" thành công!`);
+        loadDevices();
+      } else {
+        setActionError(res.error || 'Lỗi phê duyệt thiết bị');
+      }
+    } catch (e: any) {
+      setActionError(e?.message || 'Lỗi phê duyệt');
     }
   };
 
@@ -321,16 +339,28 @@ export const DeviceManagerModal: React.FC<DeviceManagerModalProps> = ({ isOpen, 
 
                   {/* Right Actions */}
                   <div className="flex items-center gap-2 self-end sm:self-center">
-                    {/* If Pending: Button to generate OTP */}
+                    {/* If Pending: Direct Approve or Generate OTP */}
                     {isPending && (
-                      <button
-                        type="button"
-                        onClick={() => handleGenerateOtp(device)}
-                        className="px-3 py-1.5 rounded-lg bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-400 hover:to-orange-500 text-white font-semibold text-xs transition-all shadow-md flex items-center gap-1.5 cursor-pointer"
-                      >
-                        <KeyRound className="w-3.5 h-3.5" />
-                        <span>Cấp Mã OTP (2 Phút)</span>
-                      </button>
+                      <div className="flex items-center gap-1.5">
+                        <button
+                          type="button"
+                          onClick={() => handleDirectApprove(device)}
+                          className="px-3 py-1.5 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-black font-semibold text-xs transition-all shadow-md flex items-center gap-1.5 cursor-pointer"
+                          title="Phê duyệt ngay thiết bị này không cần mã OTP"
+                        >
+                          <CheckCircle2 className="w-3.5 h-3.5" />
+                          <span>Phê Duyệt Ngay</span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleGenerateOtp(device)}
+                          className="px-2.5 py-1.5 rounded-lg bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-400 hover:to-orange-500 text-white font-semibold text-xs transition-all shadow-md flex items-center gap-1.5 cursor-pointer"
+                          title="Cấp mã OTP 2 phút gửi cho bạn bè"
+                        >
+                          <KeyRound className="w-3.5 h-3.5" />
+                          <span>Cấp Mã OTP</span>
+                        </button>
+                      </div>
                     )}
 
                     {/* If Approved: Revoke Button */}

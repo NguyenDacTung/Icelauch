@@ -18,9 +18,23 @@ import { controllerServer } from './services/controllerServer';
 import crypto from 'crypto';
 import type { Game, MediaItem, AppSettings, MediaPlaylist, UserProfile, CloudSyncSettings } from '../renderer/src/types';
 
-// Force dark theme across Windows DWM and remove global application menu
+// Force dark theme across Windows DWM and enable standard Edit role accelerators
 nativeTheme.themeSource = 'dark';
-Menu.setApplicationMenu(null);
+const menuTemplate = [
+  {
+    label: 'Edit',
+    submenu: [
+      { role: 'undo' },
+      { role: 'redo' },
+      { type: 'separator' },
+      { role: 'cut' },
+      { role: 'copy' },
+      { role: 'paste' },
+      { role: 'selectAll' },
+    ],
+  },
+];
+Menu.setApplicationMenu(Menu.buildFromTemplate(menuTemplate as any));
 
 let mainWindow: BrowserWindow | null = null;
 
@@ -62,9 +76,19 @@ async function createWindow() {
   mainWindow.once('ready-to-show', () => {
     mainWindow?.maximize();
     mainWindow?.show();
+    mainWindow?.focus();
+    mainWindow?.webContents.focus();
     if (mainWindow) {
       UpdateManager.getInstance().setMainWindow(mainWindow);
     }
+  });
+
+  mainWindow.on('focus', () => {
+    mainWindow?.webContents.focus();
+  });
+  mainWindow.on('restore', () => {
+    mainWindow?.focus();
+    mainWindow?.webContents.focus();
   });
 
   mainWindow.webContents.setWindowOpenHandler((details) => {
@@ -496,6 +520,16 @@ app.whenReady().then(async () => {
     return storage.verifyPin(pin);
   });
 
+  // Device Approval Handlers
+  ipcMain.handle('device:get-approval', async (_event, deviceId: string) => {
+    return storage.isDeviceApproved(deviceId);
+  });
+
+  ipcMain.handle('device:save-approval', async (_event, { deviceId, approved }: { deviceId: string; approved: boolean }) => {
+    storage.saveApprovedDevice(deviceId, approved);
+    return true;
+  });
+
   ipcMain.handle('admin:change-pin', async (_event, { currentPin, newPin }: { currentPin: string; newPin: string }) => {
     return storage.changeAdminPin(currentPin, newPin);
   });
@@ -566,30 +600,42 @@ app.whenReady().then(async () => {
   });
 
   ipcMain.handle('system:browse-file', async (_event, options) => {
-    const res = await dialog.showOpenDialog(mainWindow!, {
-      title: options?.title || 'Chọn tệp',
-      filters: options?.filters || [{ name: 'All Files', extensions: ['*'] }],
-      properties: ['openFile'],
-    });
-    return res.filePaths?.[0] || null;
+    try {
+      const res = await dialog.showOpenDialog(mainWindow!, {
+        title: options?.title || 'Chọn tệp',
+        filters: options?.filters || [{ name: 'All Files', extensions: ['*'] }],
+        properties: ['openFile'],
+      });
+      return res.filePaths?.[0] || null;
+    } finally {
+      mainWindow?.webContents.focus();
+    }
   });
 
   ipcMain.handle('system:browse-files', async (_event, options) => {
-    const res = await dialog.showOpenDialog(mainWindow!, {
-      title: options?.title || 'Chọn các tệp',
-      filters: options?.filters || [{ name: 'All Files', extensions: ['*'] }],
-      properties: ['openFile', 'multiSelections'],
-    });
-    return res.filePaths || [];
+    try {
+      const res = await dialog.showOpenDialog(mainWindow!, {
+        title: options?.title || 'Chọn các tệp',
+        filters: options?.filters || [{ name: 'All Files', extensions: ['*'] }],
+        properties: ['openFile', 'multiSelections'],
+      });
+      return res.filePaths || [];
+    } finally {
+      mainWindow?.webContents.focus();
+    }
   });
 
   ipcMain.handle('system:browse-folder', async (_event, options) => {
-    const res = await dialog.showOpenDialog(mainWindow!, {
-      title: options?.title || 'Chọn thư mục lưu trữ',
-      defaultPath: options?.defaultPath,
-      properties: ['openDirectory', 'createDirectory'],
-    });
-    return res.filePaths?.[0] || null;
+    try {
+      const res = await dialog.showOpenDialog(mainWindow!, {
+        title: options?.title || 'Chọn thư mục lưu trữ',
+        defaultPath: options?.defaultPath,
+        properties: ['openDirectory', 'createDirectory'],
+      });
+      return res.filePaths?.[0] || null;
+    } finally {
+      mainWindow?.webContents.focus();
+    }
   });
 
   ipcMain.handle('system:get-disk-space', async (_event, targetPath?: string) => {
@@ -943,6 +989,9 @@ app.whenReady().then(async () => {
       );
       storage.setAllGames(res.updatedGames);
       storage.setAllMedia(res.updatedMedia);
+      if (res.updatedProfiles && res.updatedProfiles.length > 0) {
+        storage.setAllProfiles(res.updatedProfiles);
+      }
 
       const existingUserPlaylists = storage.getPlaylists().filter((p) => p.isUserCustom || p.ownerProfileId);
       const playlistMap = new Map<string, MediaPlaylist>();
@@ -1111,6 +1160,9 @@ app.whenReady().then(async () => {
       // Profiles are kept local; update shared catalog items only
       storage.setAllGames(res.updatedGames);
       storage.setAllMedia(res.updatedMedia);
+      if (res.updatedProfiles && res.updatedProfiles.length > 0) {
+        storage.setAllProfiles(res.updatedProfiles);
+      }
 
       const existingUserPlaylists = storage.getPlaylists().filter((p) => p.isUserCustom || p.ownerProfileId);
       const playlistMap = new Map<string, MediaPlaylist>();

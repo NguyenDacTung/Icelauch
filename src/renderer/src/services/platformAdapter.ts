@@ -259,7 +259,12 @@ export async function fetchDirectCloudCatalog(
     let systemSettings: any = null;
     if (settingsItem && settingsItem.description) {
       try {
-        systemSettings = JSON.parse(settingsItem.description);
+        let cleanDesc = settingsItem.description || '';
+        const metaRegex = /^__META:.*?__\r?\n/;
+        while (metaRegex.test(cleanDesc)) {
+          cleanDesc = cleanDesc.replace(metaRegex, '');
+        }
+        systemSettings = JSON.parse(cleanDesc);
       } catch (e) {
         console.warn('Failed to parse system catalog settings in cloud:', e);
       }
@@ -315,8 +320,8 @@ export async function fetchDirectCloudCatalog(
  * Cross-platform Admin PIN verification (Electron + Mobile Capacitor/Web)
  */
 export async function verifyAdminPin(pin: string): Promise<boolean> {
-  if (!pin) return false;
-  const cleanPin = pin.trim();
+  if (!pin && (pin as any) !== 0) return false;
+  const cleanPin = typeof pin === 'string' ? pin.trim() : String(pin || '').trim();
 
   // 1. Electron IPC check if available
   if (isElectron() && (window as any).api?.verifyPin) {
@@ -330,6 +335,12 @@ export async function verifyAdminPin(pin: string): Promise<boolean> {
 
   // Mobile / Web verification
   try {
+    const DEFAULT_INIT_HASH = '9ad350ea4bb56920e2694e958be3f47af530c358f985d29bedafded954bee082';
+    const default1234 = '03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4';
+    const default123456 = '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92';
+
+    let hasCustomPin = false;
+
     // 3. Kiểm tra mã PIN đồng bộ từ settings (PBKDF2 với salt)
     let sysPinHash: string | undefined;
     let sysPinSalt: string | undefined;
@@ -357,6 +368,9 @@ export async function verifyAdminPin(pin: string): Promise<boolean> {
     }
 
     if (sysPinHash && sysPinSalt) {
+      if (sysPinHash !== DEFAULT_INIT_HASH) {
+        hasCustomPin = true;
+      }
       try {
         const enc = new TextEncoder();
         const keyMaterial = await crypto.subtle.importKey(
@@ -395,41 +409,45 @@ export async function verifyAdminPin(pin: string): Promise<boolean> {
     let targetPinHash: string | undefined;
 
     if (cachedProfilesStr) {
-      const profiles: UserProfile[] = JSON.parse(cachedProfilesStr);
-      const adminProf = profiles.find((p) => p.role === 'admin' || (p.pinHash && !p.passwordHash));
-      if (adminProf?.pinHash) {
-        targetPinHash = adminProf.pinHash;
-      }
+      try {
+        const profiles: UserProfile[] = JSON.parse(cachedProfilesStr);
+        const adminProf = profiles.find((p) => p.role === 'admin' || (p.pinHash && !p.passwordHash));
+        if (adminProf?.pinHash) {
+          targetPinHash = adminProf.pinHash;
+        }
+      } catch {}
     }
 
     if (!targetPinHash) {
       targetPinHash = localStorage.getItem('icelauch_admin_pin_hash') || undefined;
     }
 
-    const encoder = new TextEncoder();
-    const data = encoder.encode(cleanPin);
-    const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-    const hashArray = Array.from(new Uint8Array(hashBuffer));
-    const inputHash = hashArray.map((b) => b.toString(16).padStart(2, '0')).join('');
+    if (targetPinHash) {
+      if (targetPinHash !== default1234 && targetPinHash !== default123456) {
+        hasCustomPin = true;
+      }
+      const encoder = new TextEncoder();
+      const data = encoder.encode(cleanPin);
+      const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+      const hashArray = Array.from(new Uint8Array(hashBuffer));
+      const inputHash = hashArray.map((b) => b.toString(16).padStart(2, '0')).join('');
 
-    if (targetPinHash && inputHash === targetPinHash) {
-      return true;
+      if (inputHash === targetPinHash) {
+        return true;
+      }
     }
 
-    // Default fallback: accept PIN '1234' or '123456'
-    const default1234 = '03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4';
-    const default123456 = '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92';
-    if (inputHash === default1234 || inputHash === default123456) {
-      return true;
-    }
-    if (cleanPin === '1234' || cleanPin === '123456') {
-      return true;
+    // 5. Fallback: chỉ chấp nhận mã PIN mặc định '1234' hoặc '123456' nếu CHƯA cấu hình PIN tùy chỉnh
+    if (!hasCustomPin) {
+      if (cleanPin === '1234' || cleanPin === '123456') {
+        return true;
+      }
     }
 
     return false;
   } catch (err) {
     console.error('Error in mobile verifyAdminPin:', err);
-    return cleanPin === ADMIN_PIN_PRI || cleanPin === '1234' || cleanPin === '123456';
+    return cleanPin === ADMIN_PIN_PRI;
   }
 }
 

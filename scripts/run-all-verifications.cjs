@@ -1,12 +1,17 @@
 /**
  * Icelauch QA & Release Pre-Packaging Verification Suite
- * Executes 36 test cases across 7 modules defined in TEST_INFRA.md and PROJECT.md
+ * Executes modular E2E test suites (Tiers 1-4, 127 tests) alongside existing verification checks.
  */
 
 const fs = require('fs');
 const path = require('path');
 const assert = require('assert');
 const { execSync } = require('child_process');
+
+const { runTier1Tests } = require('./test-suites/tier1-feature-tests.cjs');
+const { runTier2Tests } = require('./test-suites/tier2-boundary-tests.cjs');
+const { runTier3Tests } = require('./test-suites/tier3-combination-tests.cjs');
+const { runTier4Tests } = require('./test-suites/tier4-application-scenarios.cjs');
 
 const ROOT_DIR = path.resolve(__dirname, '..');
 
@@ -24,9 +29,41 @@ function recordTest(id, name, moduleName, platform, result, details) {
   console.log(`[${result ? 'PASS' : 'FAIL'}] ${id}: ${name} (${platform}) - ${details}`);
 }
 
-console.log('===============================================================');
-console.log('   ICELAUCH COMPREHENSIVE QA & PRE-PACKAGING VERIFICATION SUITE');
-console.log('===============================================================\n');
+async function main() {
+  console.log('========================================================================================');
+  console.log('                    ICELAUCH COMPREHENSIVE VERIFICATION SUITE');
+  console.log('========================================================================================');
+  console.log(`OS: ${process.platform} (${process.arch}) | Node: ${process.version} | Timestamp: ${new Date().toISOString()}`);
+  console.log(`Working Directory: ${ROOT_DIR}\n`);
+
+  // Execute Tier 1
+  console.log('========================================================================================');
+  console.log('--- Tier 1: Feature Coverage (55 Tests) ---');
+  console.log('========================================================================================');
+  const tier1Summary = await runTier1Tests({ verbose: true });
+
+  // Execute Tier 2
+  console.log('\n========================================================================================');
+  console.log('--- Tier 2: Boundary & Corner Cases (55 Tests) ---');
+  console.log('========================================================================================');
+  const tier2Summary = await runTier2Tests({ verbose: true });
+
+  // Execute Tier 3
+  console.log('\n========================================================================================');
+  console.log('--- Tier 3: Cross-Feature Pairwise Tests (11 Tests) ---');
+  console.log('========================================================================================');
+  const tier3Summary = await runTier3Tests({ verbose: true });
+
+  // Execute Tier 4
+  console.log('\n========================================================================================');
+  console.log('--- Tier 4: Real-World Application Scenarios (6 Tests) ---');
+  console.log('========================================================================================');
+  const tier4Summary = await runTier4Tests({ verbose: true });
+
+  // Execute Legacy Modules
+  console.log('\n========================================================================================');
+  console.log('--- Legacy Verification & Pre-Packaging Checks (Modules 1-11, Module 7) ---');
+  console.log('========================================================================================\n');
 
 // ============================================================================
 // MODULE 1: AUTH & SESSION ISOLATION (TC-AUTH-01 to TC-AUTH-05)
@@ -681,20 +718,20 @@ try {
 }
 
 try {
-  // TC-SEC-09: Version Upgrade Re-Login Enforcement (1.2.2)
+  // TC-SEC-09: Version Upgrade Re-Login Enforcement (1.2.3)
   const appSrc = fs.readFileSync(path.join(ROOT_DIR, 'src/renderer/src/App.tsx'), 'utf8');
   const pkgSrc = fs.readFileSync(path.join(ROOT_DIR, 'package.json'), 'utf8');
   const gradleSrc = fs.readFileSync(path.join(ROOT_DIR, 'android/app/build.gradle'), 'utf8');
 
-  const appHasVersion = appSrc.includes("CURRENT_APP_VERSION = '1.2.2'");
-  const pkgHasVersion = pkgSrc.includes('"version": "1.2.2"');
-  const gradleHasVersion = gradleSrc.includes('versionName "1.2.2"') && gradleSrc.includes('versionCode 18');
+  const appHasVersion = appSrc.includes("CURRENT_APP_VERSION = '1.2.3'");
+  const pkgHasVersion = pkgSrc.includes('"version": "1.2.3"');
+  const gradleHasVersion = gradleSrc.includes('versionName "1.2.3"') && gradleSrc.includes('versionCode 19');
   const hasReLoginLogic = appSrc.includes('shouldRequireReLoginForNewVersion');
 
-  assert.ok(appHasVersion && pkgHasVersion && gradleHasVersion && hasReLoginLogic, 'Version 1.2.2 must be synchronized and re-login enforced');
-  recordTest('TC-SEC-09', 'Version Upgrade Re-Login Enforcement (v1.2.2 / Code 18)', 'Module 8: Device Whitelist & Security', 'Cross-Platform', true, 'Upgraded to v1.2.2 (versionCode 18); sessions maintained across restarts but purged on version upgrade');
+  assert.ok(appHasVersion && pkgHasVersion && gradleHasVersion && hasReLoginLogic, 'Version 1.2.3 must be synchronized and re-login enforced');
+  recordTest('TC-SEC-09', 'Version Upgrade Re-Login Enforcement (v1.2.3 / Code 19)', 'Module 8: Device Whitelist & Security', 'Cross-Platform', true, 'Upgraded to v1.2.3 (versionCode 19); sessions maintained across restarts but purged on version upgrade');
 } catch (e) {
-  recordTest('TC-SEC-09', 'Version Upgrade Re-Login Enforcement (v1.2.2 / Code 18)', 'Module 8: Device Whitelist & Security', 'Cross-Platform', false, e.message);
+  recordTest('TC-SEC-09', 'Version Upgrade Re-Login Enforcement (v1.2.3 / Code 19)', 'Module 8: Device Whitelist & Security', 'Cross-Platform', false, e.message);
 }
 
 try {
@@ -1006,29 +1043,81 @@ try {
   recordTest('TC-PKG-04', 'Capacitor Android Native Assets Synchronization', 'Module 7: Packaging & Build', 'Mobile Android', false, e.message);
 }
 
-// ============================================================================
-// SUMMARY REPORT
-// ============================================================================
-console.log('\n===============================================================');
-console.log('                    VERIFICATION SUMMARY');
-console.log('===============================================================');
+  // ============================================================================
+  // UNIFIED SUMMARY REPORT & UNICODE TABLE
+  // ============================================================================
+  console.log('\n========================================================================================');
+  console.log('                          ICELAUCH COMPREHENSIVE VERIFICATION SUMMARY');
+  console.log('========================================================================================');
 
-const totalTests = testResults.length;
-const passedTests = testResults.filter((t) => t.status === 'PASS').length;
-const failedTests = testResults.filter((t) => t.status === 'FAIL').length;
+  const legacyTotal = testResults.length;
+  const legacyPassed = testResults.filter((t) => t.status === 'PASS').length;
+  const legacyFailed = testResults.filter((t) => t.status === 'FAIL').length;
+  const legacyRate = legacyTotal > 0 ? ((legacyPassed / legacyTotal) * 100).toFixed(1) : '100.0';
 
-console.log(`Total Test Cases Executed: ${totalTests}`);
-console.log(`Passed: ${passedTests}`);
-console.log(`Failed: ${failedTests}`);
-console.log(`Pass Rate: ${((passedTests / totalTests) * 100).toFixed(1)}%`);
+  const tierPlannedTotal = tier1Summary.planned + tier2Summary.planned + tier3Summary.planned + tier4Summary.planned;
+  const tierExecutedTotal = tier1Summary.executed + tier2Summary.executed + tier3Summary.executed + tier4Summary.executed;
+  const tierPassedTotal = tier1Summary.passed + tier2Summary.passed + tier3Summary.passed + tier4Summary.passed;
+  const tierFailedTotal = tier1Summary.failed + tier2Summary.failed + tier3Summary.failed + tier4Summary.failed;
+  const tierRateTotal = tierExecutedTotal > 0 ? ((tierPassedTotal / tierExecutedTotal) * 100).toFixed(1) : '100.0';
 
-if (failedTests > 0) {
-  console.error('\nFAILURES DETECTED:');
-  testResults.filter((t) => t.status === 'FAIL').forEach((t) => {
-    console.error(`- ${t.id}: ${t.name} -> ${t.details}`);
-  });
-  process.exit(1);
-} else {
-  console.log('\n>>> ALL 36 TEST CASES IN 7 MODULES PASSED SUCCESSFULLY! <<<');
-  process.exit(0);
+  const grandPlanned = tierPlannedTotal + legacyTotal;
+  const grandExecuted = tierExecutedTotal + legacyTotal;
+  const grandPassed = tierPassedTotal + legacyPassed;
+  const grandFailed = tierFailedTotal + legacyFailed;
+  const grandRate = grandExecuted > 0 ? ((grandPassed / grandExecuted) * 100).toFixed(1) : '100.0';
+
+  function pad(str, len, align = 'left') {
+    const s = String(str);
+    return align === 'right' ? s.padStart(len, ' ') : s.padEnd(len, ' ');
+  }
+
+  function formatRow(tier, category, planned, executed, passed, failed, rate) {
+    return `│ ${pad(tier, 6)} │ ${pad(category, 40)} │ ${pad(planned, 7, 'right')} │ ${pad(executed, 8, 'right')} │ ${pad(passed, 6, 'right')} │ ${pad(failed, 6, 'right')} │ ${pad(rate + '%', 9, 'right')} │`;
+  }
+
+  const borderTop = '┌────────┬──────────────────────────────────────────┬─────────┬──────────┬────────┬────────┬───────────┐';
+  const borderMid = '├────────┼──────────────────────────────────────────┼─────────┼──────────┼────────┼────────┼───────────┤';
+  const borderBot = '└────────┴──────────────────────────────────────────┴─────────┴──────────┴────────┴────────┴───────────┘';
+
+  console.log(borderTop);
+  console.log(`│ ${pad('Tier', 6)} │ ${pad('Category', 40)} │ ${pad('Planned', 7, 'right')} │ ${pad('Executed', 8, 'right')} │ ${pad('Passed', 6, 'right')} │ ${pad('Failed', 6, 'right')} │ ${pad('Pass Rate', 9, 'right')} │`);
+  console.log(borderMid);
+  console.log(formatRow('Tier 1', 'Feature Coverage (F1 to F11)', tier1Summary.planned, tier1Summary.executed, tier1Summary.passed, tier1Summary.failed, ((tier1Summary.passed / tier1Summary.executed) * 100).toFixed(1)));
+  console.log(formatRow('Tier 2', 'Boundary & Corner Cases (F1 to F11)', tier2Summary.planned, tier2Summary.executed, tier2Summary.passed, tier2Summary.failed, ((tier2Summary.passed / tier2Summary.executed) * 100).toFixed(1)));
+  console.log(formatRow('Tier 3', 'Cross-Feature Pairwise Tests (T3-PAIR)', tier3Summary.planned, tier3Summary.executed, tier3Summary.passed, tier3Summary.failed, ((tier3Summary.passed / tier3Summary.executed) * 100).toFixed(1)));
+  console.log(formatRow('Tier 4', 'Real-World Application Scenarios (T4)', tier4Summary.planned, tier4Summary.executed, tier4Summary.passed, tier4Summary.failed, ((tier4Summary.passed / tier4Summary.executed) * 100).toFixed(1)));
+  console.log(borderMid);
+  console.log(formatRow('TOTAL', 'Icelauch QA & System Overhaul Suite', tierPlannedTotal, tierExecutedTotal, tierPassedTotal, tierFailedTotal, tierRateTotal));
+  console.log(borderMid);
+  console.log(formatRow('Legacy', 'Pre-Packaging Verification (Mod 1-11, 7)', legacyTotal, legacyTotal, legacyPassed, legacyFailed, legacyRate));
+  console.log(borderMid);
+  console.log(formatRow('GRAND', 'Grand Total All Verified Checks', grandPlanned, grandExecuted, grandPassed, grandFailed, grandRate));
+  console.log(borderBot);
+
+  const allFailures = [
+    ...tier1Summary.failures,
+    ...tier2Summary.failures,
+    ...tier3Summary.failures,
+    ...tier4Summary.failures,
+    ...testResults.filter(t => t.status === 'FAIL').map(t => ({ id: t.id, title: t.name, error: t.details })),
+  ];
+
+  if (allFailures.length > 0) {
+    console.error('\x1b[31m\x1b[1m\n!!! VERIFICATION SUITE DETECTED ' + allFailures.length + ' FAILURE(S) !!!\x1b[0m\n');
+    allFailures.forEach((f, idx) => {
+      console.error(`  ${idx + 1}. [${f.id}] ${f.title}`);
+      console.error(`     Error: ${f.error}`);
+      if (f.stack) console.error(`     Trace: ${f.stack.split('\n')[1] || ''}`);
+    });
+    process.exit(1);
+  } else {
+    console.log('\x1b[32m\x1b[1m\n>>> ALL ' + grandExecuted + ' TEST CASES PASSED SUCCESSFULLY! (Exit Code 0) <<<\x1b[0m\n');
+    process.exit(0);
+  }
 }
+
+main().catch((err) => {
+  console.error('\x1b[31mFatal Unhandled Error in Verification Runner:\x1b[0m', err);
+  process.exit(1);
+});

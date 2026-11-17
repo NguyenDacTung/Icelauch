@@ -307,18 +307,50 @@ export class SupabaseSyncService {
     }
 
     const remoteProfiles: any[] = Array.isArray(res.data) ? res.data : [];
-    return remoteProfiles.map((r) => ({
-      id: r.id,
-      nickname: r.nickname,
-      avatar: r.avatar || 'avatar_1',
-      pinHash: r.pin_hash,
-      createdDate: r.created_at || new Date().toISOString(),
-      lastActiveDate: r.last_active || new Date().toISOString(),
-      library: [],
-      favoriteMedia: [],
-      watchProgress: {},
-      gameStats: {},
-    }));
+
+    // Also fetch all user data from icelauch_user_data to merge private credentials and library
+    const userDataMap = new Map<string, any>();
+    try {
+      const userDataEndpoint = `${baseUrl}/rest/v1/icelauch_user_data?select=*`;
+      const userDataRes = await this.makeRequest(userDataEndpoint, anonKey, { method: 'GET' });
+      if (userDataRes.status >= 200 && userDataRes.status < 300 && Array.isArray(userDataRes.data)) {
+        for (const row of userDataRes.data) {
+          if (row.profile_id) {
+            userDataMap.set(row.profile_id, row);
+          }
+        }
+      }
+    } catch (e) {
+      console.warn('Failed to pull user data map in pullProfiles:', e);
+    }
+
+    return remoteProfiles
+      .filter((r) => r.id !== 'icedrop_cloud_hub' && r.id !== 'icelauch_device_registry' && !String(r.id).startsWith('icelauch_'))
+      .map((r) => {
+        const udata = userDataMap.get(r.id);
+        const gs = udata?.game_stats || {};
+        return {
+          id: r.id,
+          username: gs.username || r.nickname?.toLowerCase().replace(/\s+/g, ''),
+          nickname: r.nickname,
+          avatar: r.avatar || 'avatar_1',
+          role: gs.role || (r.pin_hash ? 'admin' : 'user'),
+          pinHash: r.pin_hash || '',
+          passwordHash: gs.passwordHash,
+          passwordSalt: gs.passwordSalt,
+          requiresPasswordReset: gs.requiresPasswordReset,
+          bannedUntil: gs.bannedUntil,
+          banReason: gs.banReason,
+          createdDate: r.created_at || new Date().toISOString(),
+          lastActiveDate: r.last_active || new Date().toISOString(),
+          library: Array.isArray(udata?.library) ? udata.library : [],
+          favoriteMedia: Array.isArray(udata?.favorite_media) ? udata.favorite_media : [],
+          favoritePlaylists: Array.isArray(gs.favoritePlaylists) ? gs.favoritePlaylists : [],
+          customPlaylists: Array.isArray(gs.customPlaylists) ? gs.customPlaylists : [],
+          watchProgress: udata?.watch_progress || {},
+          gameStats: gs,
+        };
+      });
   }
 
   public async pullUserData(supabaseUrl: string, anonKey: string, profileId: string): Promise<any | null> {
@@ -432,6 +464,7 @@ export class SupabaseSyncService {
         extensions: Array.isArray(r.extensions) ? r.extensions : [],
         expectedSize: r.file_size ? Number(r.file_size) : undefined,
         featured: Boolean(r.featured),
+        hidden: Boolean(r.hidden),
         runAsAdmin: false,
         deleteArchiveAfterInstall: true,
         status: 'uninstalled',
@@ -485,6 +518,7 @@ export class SupabaseSyncService {
       tags: game.tags || [],
       action_buttons: game.actionButtonIds || [],
       featured: Boolean(game.featured),
+      hidden: Boolean(game.hidden),
       file_size: game.expectedSize ? Math.round(game.expectedSize) : null,
       updated_at: new Date().toISOString(),
     };
@@ -527,6 +561,7 @@ export class SupabaseSyncService {
         tags: Array.isArray(r.tags) ? r.tags.map((t: string) => cleanQuestionMarks(t)) : [],
         duration: r.duration || 0,
         isBannerPinned: Boolean(r.is_banner_pinned),
+        hidden: Boolean(r.hidden),
         lastPosition: 0,
         watched: false,
         addedAt: r.updated_at || new Date().toISOString(),
@@ -579,6 +614,7 @@ export class SupabaseSyncService {
       tags: item.tags || [],
       duration: item.duration || 0,
       is_banner_pinned: Boolean(item.isBannerPinned),
+      hidden: Boolean(item.hidden),
       updated_at: new Date().toISOString(),
     };
 
@@ -902,13 +938,42 @@ export class SupabaseSyncService {
     // D. User Profiles & Personal Data: Segregated and kept strictly local
     // Do NOT upload user profiles, PIN hashes, or personal data to Supabase public bucket/tables
     const finalProfiles = localProfiles;
+    try {
+      const remoteProfiles = await this.pullProfiles(supabaseUrl, anonKey);
+      const profileMap = new Map<string, UserProfile>();
+      for (const p of finalProfiles) {
+        profileMap.set(p.id, p);
+      }
+      for (const rp of remoteProfiles) {
+        if (!profileMap.has(rp.id)) {
+          profileMap.set(rp.id, rp);
+        } else {
+          // Merge remote fields into existing local profile
+          const existing = profileMap.get(rp.id)!;
+          profileMap.set(rp.id, {
+            ...rp,
+            ...existing,
+            username: existing.username || rp.username,
+            passwordHash: existing.passwordHash || rp.passwordHash,
+            passwordSalt: existing.passwordSalt || rp.passwordSalt,
+            library: Array.from(new Set([...(existing.library || []), ...(rp.library || [])])),
+            favoriteMedia: Array.from(new Set([...(existing.favoriteMedia || []), ...(rp.favoriteMedia || [])])),
+            watchProgress: { ...(rp.watchProgress || {}), ...(existing.watchProgress || {}) },
+          });
+        }
+      }
+      finalProfiles.length = 0;
+      finalProfiles.push(...Array.from(profileMap.values()));
+    } catch (profileErr) {
+      console.warn('Failed to pull profiles during syncAll:', profileErr);
+    }
 
     return {
       updatedProfiles: finalProfiles,
       updatedGames: finalGames,
       updatedMedia: finalMedia,
       updatedPlaylists: finalPlaylists,
-      message: `Đồng bộ thành công danh mục dùng chung (${finalGames.length} game, ${finalMedia.length} phim/media, ${finalPlaylists.length} playlists)! Dữ liệu tài khoản cá nhân được bảo vệ cục bộ.`,
+      message: `Đồng bộ thành công danh mục dùng chung (${finalGames.length} game, ${finalMedia.length} phim/media, ${finalPlaylists.length} playlists, ${finalProfiles.length} tài khoản)!`,
     };
   }
 }

@@ -27,9 +27,15 @@
   }
 
   /* Form controls must allow text selection and editing in Electron & WebKit */
-  input, textarea {
+  input, textarea, [contenteditable="true"] {
     user-select: text !important;
     -webkit-user-select: text !important;
+  }
+
+  /* High-contrast accessible text selection */
+  ::selection {
+    background-color: rgba(79, 140, 255, 0.35);
+    color: #ffffff;
   }
 
   /* Custom scrollbar for modern gaming app look */

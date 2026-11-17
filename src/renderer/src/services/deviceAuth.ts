@@ -46,9 +46,41 @@ export async function getHardwareDeviceId(): Promise<string> {
 }
 
 /**
- * Fetch the central device registry from Supabase
+ * Fetch the central device registry from Supabase (dedicated table first, then fallback)
  */
 async function fetchDeviceRegistry(): Promise<AuthorizedDevice[]> {
+  try {
+    const dedicatedUrl = `${DEFAULT_SUPABASE_URL}/rest/v1/icelauch_device_registry?select=*&order=created_at.desc`;
+    const res = await fetch(dedicatedUrl, {
+      method: 'GET',
+      headers: {
+        apikey: DEFAULT_SUPABASE_ANON_KEY,
+        Authorization: `Bearer ${DEFAULT_SUPABASE_ANON_KEY}`,
+        Accept: 'application/json',
+      },
+    });
+
+    if (res.ok) {
+      const rows = await res.json();
+      if (Array.isArray(rows)) {
+        return rows.map((r: any) => ({
+          deviceId: r.device_id,
+          deviceName: r.device_name,
+          platform: r.platform,
+          status: r.status as DeviceApprovalStatus,
+          otpCode: r.otp_code,
+          otpExpiresAt: r.otp_expires_at,
+          createdAt: r.created_at,
+          lastActiveAt: r.last_active_at,
+          approvedAt: r.approved_at,
+        }));
+      }
+    }
+  } catch (err) {
+    console.warn('Dedicated device registry query error, using fallback:', err);
+  }
+
+  // Fallback to icelauch_user_data
   try {
     const url = `${DEFAULT_SUPABASE_URL}/rest/v1/icelauch_user_data?profile_id=eq.${REGISTRY_PROFILE_ID}&select=game_stats`;
     const res = await fetch(url, {
@@ -61,7 +93,7 @@ async function fetchDeviceRegistry(): Promise<AuthorizedDevice[]> {
     });
 
     if (!res.ok) {
-      console.warn('fetchDeviceRegistry status:', res.status);
+      console.warn('fetchDeviceRegistry fallback status:', res.status);
       return [];
     }
 
@@ -72,24 +104,32 @@ async function fetchDeviceRegistry(): Promise<AuthorizedDevice[]> {
 
     return rows[0].game_stats.devices as AuthorizedDevice[];
   } catch (err) {
-    console.warn('fetchDeviceRegistry error:', err);
+    console.warn('fetchDeviceRegistry fallback error:', err);
     throw err;
   }
 }
 
 /**
- * Save updated device registry to Supabase
+ * Save updated device registry to Supabase (upsert to dedicated table & non-destructive fallback)
  */
 async function saveDeviceRegistry(devices: AuthorizedDevice[]): Promise<boolean> {
+  let dedicatedSaved = false;
+  // 1. Save to dedicated table
   try {
-    const url = `${DEFAULT_SUPABASE_URL}/rest/v1/icelauch_user_data`;
-    const payload = {
-      profile_id: REGISTRY_PROFILE_ID,
-      game_stats: { devices },
-      updated_at: new Date().toISOString(),
-    };
+    const payload = devices.map((d) => ({
+      device_id: d.deviceId,
+      device_name: d.deviceName,
+      platform: d.platform,
+      status: d.status,
+      otp_code: d.otpCode || null,
+      otp_expires_at: d.otpExpiresAt || null,
+      created_at: d.createdAt || new Date().toISOString(),
+      last_active_at: d.lastActiveAt || new Date().toISOString(),
+      approved_at: d.approvedAt || null,
+    }));
 
-    const res = await fetch(url, {
+    const dedicatedUrl = `${DEFAULT_SUPABASE_URL}/rest/v1/icelauch_device_registry`;
+    const res = await fetch(dedicatedUrl, {
       method: 'POST',
       headers: {
         apikey: DEFAULT_SUPABASE_ANON_KEY,
@@ -100,10 +140,97 @@ async function saveDeviceRegistry(devices: AuthorizedDevice[]): Promise<boolean>
       body: JSON.stringify(payload),
     });
 
-    return res.ok;
+    if (res.ok) {
+      dedicatedSaved = true;
+    }
   } catch (err) {
-    console.error('saveDeviceRegistry error:', err);
-    return false;
+    console.warn('Dedicated device registry save error:', err);
+  }
+
+  // 2. Fallback / mirror to icelauch_user_data without clobbering game_stats (e.g. latest_release)
+  try {
+    let existingGameStats: any = {};
+    try {
+      const getUrl = `${DEFAULT_SUPABASE_URL}/rest/v1/icelauch_user_data?profile_id=eq.${REGISTRY_PROFILE_ID}&select=game_stats`;
+      const getRes = await fetch(getUrl, {
+        headers: {
+          apikey: DEFAULT_SUPABASE_ANON_KEY,
+          Authorization: `Bearer ${DEFAULT_SUPABASE_ANON_KEY}`,
+        },
+      });
+      if (getRes.ok) {
+        const rows = await getRes.json();
+        if (rows && rows[0]?.game_stats) {
+          existingGameStats = rows[0].game_stats;
+        }
+      }
+    } catch {}
+
+    const mergedGameStats = {
+      ...existingGameStats,
+      devices,
+    };
+
+    const url = `${DEFAULT_SUPABASE_URL}/rest/v1/icelauch_user_data`;
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: {
+        apikey: DEFAULT_SUPABASE_ANON_KEY,
+        Authorization: `Bearer ${DEFAULT_SUPABASE_ANON_KEY}`,
+        'Content-Type': 'application/json',
+        Prefer: 'resolution=merge-duplicates',
+      },
+      body: JSON.stringify({
+        profile_id: REGISTRY_PROFILE_ID,
+        game_stats: mergedGameStats,
+        updated_at: new Date().toISOString(),
+      }),
+    });
+
+    if (res.ok) {
+      return true;
+    }
+  } catch (fallbackErr) {
+    console.warn('saveDeviceRegistry fallback error:', fallbackErr);
+  }
+
+  return dedicatedSaved;
+}
+
+/**
+ * Check if the device is approved locally or via PC Electron IPC
+ */
+export async function checkDeviceLocallyApproved(deviceId: string): Promise<boolean> {
+  if (isElectron() && typeof window !== 'undefined' && (window as any).api?.getDeviceApproval) {
+    try {
+      const pcApproved = await (window as any).api.getDeviceApproval(deviceId);
+      if (pcApproved) return true;
+    } catch (e) {
+      console.warn('Error reading device approval via IPC:', e);
+    }
+  }
+  return isDeviceLocallyApproved(deviceId);
+}
+
+/**
+ * Persist device approval both to localStorage and Electron IPC (survives localStorage wipes)
+ */
+export async function persistDeviceApproval(deviceId: string, approved: boolean): Promise<void> {
+  try {
+    if (approved) {
+      localStorage.setItem(STORAGE_KEY_DEVICE_APPROVED_STATUS, 'approved');
+      localStorage.setItem(STORAGE_KEY_DEVICE_APPROVED_ID, deviceId);
+    } else {
+      clearLocalDeviceApproval();
+    }
+  } catch {}
+
+  if (isElectron() && typeof window !== 'undefined' && (window as any).api?.saveDeviceApproval) {
+    try {
+      await (window as any).api.saveDeviceApproval(deviceId, approved);
+    } catch (e) {
+      console.warn('Error saving device approval via IPC:', e);
+    }
   }
 }
 
@@ -144,7 +271,8 @@ export async function getDeviceApprovalStatus(deviceId: string): Promise<{
 
     if (!found) {
       // Check offline fallback if previously approved
-      if (isDeviceLocallyApproved(deviceId)) {
+      const locallyApproved = await checkDeviceLocallyApproved(deviceId);
+      if (locallyApproved) {
         return { status: 'approved', isOffline: true };
       }
       return { status: 'unregistered' };
@@ -152,16 +280,13 @@ export async function getDeviceApprovalStatus(deviceId: string): Promise<{
 
     // If revoked, strictly revoke local approval too
     if (found.status === 'revoked') {
-      clearLocalDeviceApproval();
+      await persistDeviceApproval(deviceId, false);
       return { status: 'revoked', device: found };
     }
 
     // If approved, ensure local cache is updated
     if (found.status === 'approved') {
-      try {
-        localStorage.setItem(STORAGE_KEY_DEVICE_APPROVED_STATUS, 'approved');
-        localStorage.setItem(STORAGE_KEY_DEVICE_APPROVED_ID, deviceId);
-      } catch {}
+      await persistDeviceApproval(deviceId, true);
 
       // Update last active in background
       saveDeviceRegistry(
@@ -172,7 +297,8 @@ export async function getDeviceApprovalStatus(deviceId: string): Promise<{
     return { status: found.status, device: found };
   } catch (networkErr) {
     // Network / offline error: check local approval
-    if (isDeviceLocallyApproved(deviceId)) {
+    const locallyApproved = await checkDeviceLocallyApproved(deviceId);
+    if (locallyApproved) {
       return { status: 'approved', isOffline: true };
     }
     return { status: 'pending', isOffline: true };
@@ -325,10 +451,7 @@ export async function verifyDeviceOtp(
       return { success: false, error: 'Lỗi kích hoạt trên máy chủ' };
     }
 
-    try {
-      localStorage.setItem(STORAGE_KEY_DEVICE_APPROVED_STATUS, 'approved');
-      localStorage.setItem(STORAGE_KEY_DEVICE_APPROVED_ID, deviceId);
-    } catch {}
+    await persistDeviceApproval(deviceId, true);
 
     return { success: true };
   } catch (err: any) {
@@ -386,18 +509,56 @@ export async function bypassApproveDeviceWithAdminPin(
       ];
     }
 
-    // Save to Supabase (best effort)
-    saveDeviceRegistry(updatedList).catch(() => {});
+    // Save to Supabase (explicitly awaited)
+    await saveDeviceRegistry(updatedList);
 
-    // Save local approval
-    try {
-      localStorage.setItem(STORAGE_KEY_DEVICE_APPROVED_STATUS, 'approved');
-      localStorage.setItem(STORAGE_KEY_DEVICE_APPROVED_ID, deviceId);
-    } catch {}
+    // Save local and IPC approval
+    await persistDeviceApproval(deviceId, true);
 
     return { success: true };
   } catch (err: any) {
     return { success: false, error: err?.message || 'Lỗi xác thực Master PIN' };
+  }
+}
+
+/**
+ * Admin action: Direct Approve a device immediately
+ */
+export async function directApproveDevice(deviceId: string): Promise<{ success: boolean; error?: string }> {
+  try {
+    const all = await fetchDeviceRegistry();
+    const existing = all.find((d) => d.deviceId === deviceId);
+    if (!existing) {
+      return { success: false, error: 'Không tìm thấy thiết bị để phê duyệt' };
+    }
+
+    const now = new Date().toISOString();
+    const updated = all.map((d) =>
+      d.deviceId === deviceId
+        ? {
+            ...d,
+            status: 'approved' as DeviceApprovalStatus,
+            approvedAt: now,
+            otpCode: null,
+            otpExpiresAt: null,
+            lastActiveAt: now,
+          }
+        : d
+    );
+
+    const saved = await saveDeviceRegistry(updated);
+    if (!saved) {
+      return { success: false, error: 'Lỗi lưu trạng thái phê duyệt lên máy chủ' };
+    }
+
+    const currentId = await getHardwareDeviceId();
+    if (currentId === deviceId) {
+      await persistDeviceApproval(deviceId, true);
+    }
+
+    return { success: true };
+  } catch (err: any) {
+    return { success: false, error: err?.message || 'Lỗi phê duyệt thiết bị' };
   }
 }
 
@@ -427,7 +588,7 @@ export async function revokeDevice(deviceId: string): Promise<{ success: boolean
     // If current machine was revoked, clear local approval
     const currentId = await getHardwareDeviceId();
     if (currentId === deviceId) {
-      clearLocalDeviceApproval();
+      await persistDeviceApproval(deviceId, false);
     }
 
     return { success: true };
@@ -451,7 +612,7 @@ export async function deleteAuthorizedDevice(deviceId: string): Promise<{ succes
 
     const currentId = await getHardwareDeviceId();
     if (currentId === deviceId) {
-      clearLocalDeviceApproval();
+      await persistDeviceApproval(deviceId, false);
     }
 
     return { success: true };

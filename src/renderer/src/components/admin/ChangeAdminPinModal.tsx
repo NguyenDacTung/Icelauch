@@ -10,6 +10,7 @@ import {
   Lock
 } from 'lucide-react';
 import { sfx } from '../../utils/sfx';
+import { verifyAdminPin, DEFAULT_SUPABASE_URL, DEFAULT_SUPABASE_ANON_KEY } from '../../services/platformAdapter';
 
 interface ChangeAdminPinModalProps {
   isOpen: boolean;
@@ -68,6 +69,88 @@ export const ChangeAdminPinModal: React.FC<ChangeAdminPinModalProps> = ({
           sfx.playError();
           setError(res.error || 'Mã PIN hiện tại không chính xác');
         }
+      } else {
+        // Mobile / Capacitor / Web fallback branch
+        const isCurrentValid = await verifyAdminPin(currentPin);
+        if (!isCurrentValid) {
+          sfx.playError();
+          setError('Mã PIN hiện tại không chính xác! Bạn phải nhập đúng mã PIN Admin hiện tại (PIN_PUB hoặc PIN_PRI) để đổi.');
+          return;
+        }
+
+        // Generate 16-byte random salt in hex
+        const saltBytes = new Uint8Array(16);
+        crypto.getRandomValues(saltBytes);
+        const saltHex = Array.from(saltBytes).map((b) => b.toString(16).padStart(2, '0')).join('');
+
+        // Derive PBKDF2 hash (10000 iterations, 32 bytes SHA-256)
+        const enc = new TextEncoder();
+        const keyMaterial = await crypto.subtle.importKey(
+          'raw',
+          enc.encode(newPin.trim()),
+          { name: 'PBKDF2' },
+          false,
+          ['deriveBits']
+        );
+        const derivedBits = await crypto.subtle.deriveBits(
+          {
+            name: 'PBKDF2',
+            salt: saltBytes,
+            iterations: 10000,
+            hash: 'SHA-256',
+          },
+          keyMaterial,
+          256
+        );
+        const pbkdf2Hash = Array.from(new Uint8Array(derivedBits))
+          .map((b) => b.toString(16).padStart(2, '0'))
+          .join('');
+
+        // Also compute simple SHA-256 hash for legacy profile matching
+        const shaBuffer = await crypto.subtle.digest('SHA-256', enc.encode(newPin.trim()));
+        const sha256Hash = Array.from(new Uint8Array(shaBuffer))
+          .map((b) => b.toString(16).padStart(2, '0'))
+          .join('');
+
+        // Save locally
+        localStorage.setItem('icelauch_admin_pin_hash', sha256Hash);
+
+        let sysSettings: any = {};
+        try {
+          const raw = localStorage.getItem('icelauch_system_settings');
+          if (raw) sysSettings = JSON.parse(raw);
+        } catch {}
+        sysSettings.adminPinHash = pbkdf2Hash;
+        sysSettings.adminPinSalt = saltHex;
+        sysSettings.pinHash = pbkdf2Hash;
+        sysSettings.pinSalt = saltHex;
+        localStorage.setItem('icelauch_system_settings', JSON.stringify(sysSettings));
+
+        // Sync to Supabase Cloud __system_catalog_settings__
+        try {
+          await fetch(`${DEFAULT_SUPABASE_URL}/rest/v1/icelauch_playlists`, {
+            method: 'POST',
+            headers: {
+              apikey: DEFAULT_SUPABASE_ANON_KEY,
+              Authorization: `Bearer ${DEFAULT_SUPABASE_ANON_KEY}`,
+              'Content-Type': 'application/json',
+              Prefer: 'resolution=merge-duplicates',
+            },
+            body: JSON.stringify({
+              id: '__system_catalog_settings__',
+              title: '__system_catalog_settings__',
+              description: JSON.stringify(sysSettings),
+              item_ids: [],
+            }),
+          });
+        } catch (cloudErr) {
+          console.warn('Failed to sync new admin PIN to Supabase:', cloudErr);
+        }
+
+        sfx.playSuccess();
+        alert('✓ Đã cập nhật mã PIN Admin (PIN_PUB) thành công!');
+        onSuccess();
+        onClose();
       }
     } catch (err: any) {
       sfx.playError();

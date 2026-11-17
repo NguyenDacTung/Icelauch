@@ -382,5 +382,7 @@
     "lastSyncStatus": "success",
     "lastSyncedAt": "2026-11-09T12:48:14.116Z",
     "lastSyncMessage": "Đồng bộ thành công 0 hồ sơ với Supabase Cloud"
-  }
+  },
+  "iceDropShares": [],
+  "approvedDevices": []
 }

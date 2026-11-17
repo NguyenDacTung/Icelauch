@@ -25,6 +25,7 @@
         <activity
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale|smallestScreenSize|screenLayout|uiMode|navigation|density"
             android:name=".MainActivity"
+            android:windowSoftInputMode="adjustResize"
             android:label="@string/title_activity_main"
             android:banner="@drawable/tv_banner"
             android:theme="@style/AppTheme.NoActionBarLaunch"

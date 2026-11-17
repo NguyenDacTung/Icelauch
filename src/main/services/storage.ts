@@ -15,6 +15,10 @@ export const DEFAULT_SUPABASE_ANON_KEY = 'sb_publishable_l1vNbLKXXhLNnfi1pI5UnQ_
 // =========================================================================
 export const ADMIN_PIN_PRI = '42336737'; // Bạn có thể sửa mã PIN gốc này tuỳ ý tại đây trong code
 
+export interface ExtendedAppData extends AppData {
+  approvedDevices?: string[];
+}
+
 export class StorageService {
   private static instance: StorageService;
   private rootDir: string;
@@ -28,7 +32,7 @@ export class StorageService {
   private toolsDir: string;
   private mediaDownloadsDir: string;
 
-  private data: AppData;
+  private data: ExtendedAppData;
 
   private constructor() {
     // Determine root directory: portable relative to execPath in prod, or project root in dev
@@ -128,13 +132,14 @@ export class StorageService {
     };
   }
 
-  private getDefaultData(): AppData {
+  private getDefaultData(): ExtendedAppData {
     return {
       games: [],
       media: [],
       playlists: [],
       profiles: [],
       iceDropShares: [],
+      approvedDevices: [],
       activeProfileId: null,
       rememberedProfileId: null,
       cloudSync: {
@@ -225,7 +230,7 @@ export class StorageService {
     };
   }
 
-  private loadData(): AppData {
+  private loadData(): ExtendedAppData {
     try {
       if (fs.existsSync(this.dataFile)) {
         const raw = fs.readFileSync(this.dataFile, 'utf-8');
@@ -235,6 +240,7 @@ export class StorageService {
         parsed.playlists = parsed.playlists || [];
         parsed.profiles = parsed.profiles || [];
         parsed.iceDropShares = parsed.iceDropShares || [];
+        parsed.approvedDevices = Array.isArray(parsed.approvedDevices) ? parsed.approvedDevices : [];
         parsed.activeProfileId = parsed.activeProfileId || null;
         parsed.rememberedProfileId = parsed.rememberedProfileId || null;
         parsed.cloudSync = parsed.cloudSync || {
@@ -609,12 +615,15 @@ export class StorageService {
 
   // Admin PIN & Security
   public hashPin(pin: string, salt: string): string {
-    return crypto.pbkdf2Sync(pin, salt, 10000, 32, 'sha256').toString('hex');
+    const saltStr = typeof salt === 'string' ? salt : String(salt || '');
+    const isHex = saltStr.length > 0 && saltStr.length % 2 === 0 && /^[0-9a-fA-F]+$/.test(saltStr);
+    const saltBuf = isHex ? Buffer.from(saltStr, 'hex') : Buffer.from(saltStr, 'utf8');
+    return crypto.pbkdf2Sync(String(pin ?? ''), saltBuf, 10000, 32, 'sha256').toString('hex');
   }
 
   public verifyPin(pin: string): boolean {
-    if (!pin) return false;
-    const clean = pin.trim();
+    if (!pin && (pin as any) !== 0) return false;
+    const clean = typeof pin === 'string' ? pin.trim() : String(pin).trim();
 
     // 1. Kiểm tra mã PIN Gốc Dự Phòng (PIN_PRI) - Bất biến trong code
     if (clean === ADMIN_PIN_PRI) {
@@ -630,7 +639,49 @@ export class StorageService {
       }
     }
 
+    // 3. Fallback: chỉ chấp nhận mã PIN mặc định '1234' hoặc '123456' nếu CHƯA cấu hình PIN tùy chỉnh
+    const DEFAULT_INIT_HASH = '9ad350ea4bb56920e2694e958be3f47af530c358f985d29bedafded954bee082';
+    const isUnconfigured = !pinHash || !pinSalt || pinHash === DEFAULT_INIT_HASH;
+    if (isUnconfigured) {
+      if (clean === '1234' || clean === '123456') {
+        return true;
+      }
+    }
+
     return false;
+  }
+
+  // Device Approval Registry
+  public getApprovedDevices(): string[] {
+    if (!Array.isArray(this.data.approvedDevices)) {
+      this.data.approvedDevices = [];
+    }
+    return [...this.data.approvedDevices];
+  }
+
+  public isDeviceApproved(deviceId: string): boolean {
+    if (!deviceId) return false;
+    const list = this.getApprovedDevices();
+    return list.includes(deviceId);
+  }
+
+  public saveApprovedDevice(deviceId: string, approved: boolean): void {
+    if (!deviceId) return;
+    if (!Array.isArray(this.data.approvedDevices)) {
+      this.data.approvedDevices = [];
+    }
+    if (approved) {
+      if (!this.data.approvedDevices.includes(deviceId)) {
+        this.data.approvedDevices.push(deviceId);
+        this.saveDataAtomic();
+      }
+    } else {
+      const idx = this.data.approvedDevices.indexOf(deviceId);
+      if (idx !== -1) {
+        this.data.approvedDevices.splice(idx, 1);
+        this.saveDataAtomic();
+      }
+    }
   }
 
   public changeAdminPin(currentPin: string, newPin: string): { success: boolean; error?: string } {

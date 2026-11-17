@@ -65,6 +65,9 @@ export const API = {
 
   // Admin & Security
   verifyPin: (pin: string): Promise<boolean> => ipcRenderer.invoke('admin:verify-pin', pin),
+  getDeviceApproval: (deviceId: string): Promise<boolean> => ipcRenderer.invoke('device:get-approval', deviceId),
+  saveDeviceApproval: (deviceId: string, approved: boolean): Promise<boolean> =>
+    ipcRenderer.invoke('device:save-approval', { deviceId, approved }),
   changeAdminPin: (currentPin: string, newPin: string): Promise<{ success: boolean; error?: string }> =>
     ipcRenderer.invoke('admin:change-pin', { currentPin, newPin }),
   setPin: (pin: string): Promise<{ success: boolean; recoveryKey: string }> => ipcRenderer.invoke('admin:set-pin', pin),

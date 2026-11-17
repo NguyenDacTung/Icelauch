@@ -437,7 +437,7 @@ export default function App() {
         }
 
         // Version update check: require re-login on new app version update; keep auto-login on same version
-        const CURRENT_APP_VERSION = '1.2.2';
+        const CURRENT_APP_VERSION = '1.2.3';
         const isNewVersion = shouldRequireReLoginForNewVersion(CURRENT_APP_VERSION);
         if (isNewVersion) {
           console.log(`[Version Upgrade] New version ${CURRENT_APP_VERSION}: Requiring re-login.`);
@@ -482,15 +482,17 @@ export default function App() {
           if (cloud) setCloudSyncSettings(cloud);
         }
 
-        // If local catalog is empty on PC, immediately fetch from Supabase Cloud
-        if (data && data.games.length === 0 && data.media.length === 0 && window.api.syncCloud) {
+        // Always trigger cloud sync on startup so PC populates storage.data.profiles and React state with Cloud accounts
+        if (window.api.syncCloud) {
           window.api.syncCloud().then(async (syncRes: any) => {
             if (syncRes && syncRes.success) {
               const freshData = await window.api.getAppData();
               if (freshData) setAppData(freshData);
               if (window.api.getProfiles) {
                 const freshProfiles = await window.api.getProfiles();
-                if (freshProfiles) setProfiles(freshProfiles);
+                if (freshProfiles && freshProfiles.length > 0) {
+                  setProfiles(freshProfiles);
+                }
               }
             }
           }).catch(console.warn);
@@ -1588,6 +1590,35 @@ export default function App() {
       }
       return { success: false, error: res.error || 'Xác thực không chính xác' };
     }
+
+    // Mobile / Capacitor / Web credential verification
+    if (profile.bannedUntil) {
+      const banDate = new Date(profile.bannedUntil);
+      if (banDate.getTime() > Date.now()) {
+        const timeStr = banDate.toLocaleString('vi-VN', { hour: '2-digit', minute: '2-digit', day: '2-digit', month: '2-digit', year: 'numeric' });
+        const reasonMsg = profile.banReason ? ` (Lý do: ${profile.banReason})` : '';
+        return {
+          success: false,
+          error: `Tài khoản của bạn đã bị tạm khóa đến ${timeStr}${reasonMsg}. Vui lòng liên hệ Admin.`
+        };
+      }
+    }
+
+    if (profile.role === 'admin' || (profile.pinHash && !profile.passwordHash)) {
+      const isValid = await verifyAdminPin(credentials.pin || '');
+      if (!isValid) {
+        return { success: false, error: 'Mã PIN Admin không chính xác' };
+      }
+    } else if (profile.passwordHash) {
+      const salt = profile.passwordSalt || '';
+      const msgBuffer = new TextEncoder().encode((credentials.password || '') + salt);
+      const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+      const hashHex = Array.from(new Uint8Array(hashBuffer)).map((b) => b.toString(16).padStart(2, '0')).join('');
+      if (hashHex !== profile.passwordHash) {
+        return { success: false, error: 'Mật khẩu tài khoản không chính xác' };
+      }
+    }
+
     try {
       localStorage.setItem('icelauch_active_profile_id', profile.id);
       if (remember) {
@@ -1601,6 +1632,7 @@ export default function App() {
     setActiveProfile(profile);
     setIsProfilePickerOpen(false);
     markCurrentVersionLoggedIn('1.2.2');
+    sfx.playSuccess();
     return { success: true };
   };
 

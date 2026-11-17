@@ -1,6 +1,6 @@
 {
   "name": "icelauch",
-  "version": "1.2.2",
+  "version": "1.2.3",
   "description": "Trình quản lý game và giải trí cá nhân cho Windows 10",
   "main": "dist-electron/main/index.js",
   "scripts": {
@@ -8,7 +8,12 @@
     "build": "tsc && vite build",
     "start": "node scripts/launch.cjs",
     "preview": "vite preview",
+    "test": "node scripts/run-all-verifications.cjs",
     "test:verify": "node scripts/run-all-verifications.cjs",
+    "test:tier1": "node scripts/test-suites/tier1-feature-tests.cjs",
+    "test:tier2": "node scripts/test-suites/tier2-boundary-tests.cjs",
+    "test:tier3": "node scripts/test-suites/tier3-combination-tests.cjs",
+    "test:tier4": "node scripts/test-suites/tier4-application-scenarios.cjs",
     "cap:sync": "cap sync android",
     "cap:build:android": "npm run build && cap sync android",
     "dist": "tsc && vite build && electron-builder",
