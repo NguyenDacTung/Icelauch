@@ -1,15 +1,15 @@
 import React, { useState } from 'react';
-import { 
-  Play, 
-  Download, 
-  RotateCcw, 
-  X, 
-  Bookmark, 
-  BookmarkCheck, 
-  MoreVertical, 
-  FolderOpen, 
-  Trash2, 
-  Edit3, 
+import {
+  Play,
+  Download,
+  RotateCcw,
+  X,
+  Bookmark,
+  BookmarkCheck,
+  MoreVertical,
+  FolderOpen,
+  Trash2,
+  Edit3,
   Gamepad2,
   CheckCircle2,
   AlertCircle,
@@ -61,22 +61,22 @@ export const GameCard: React.FC<GameCardProps> = ({
   const progressPercent = isInstalling
     ? game.installProgress?.percentage || 0
     : isDownloading
-    ? game.downloadProgress?.percentage || 0
-    : 0;
+      ? game.downloadProgress?.percentage || 0
+      : 0;
 
   return (
-    <div 
+    <div
       className="group relative flex flex-col bg-ice-card rounded-lg overflow-hidden border border-ice-border hover:border-ice-accent/60 hover:shadow-xl hover:-translate-y-1 transition-all duration-200 select-none"
     >
       {/* Cover Image Container (2:3 Aspect Ratio) */}
-      <div 
+      <div
         onClick={() => onSelectGame(game)}
-        className="relative aspect-cover w-full overflow-hidden cursor-pointer bg-[#12141A]"
+        className="relative aspect-cover w-full overflow-hidden cursor-pointer bg-ice-card"
       >
         <img
           src={game.coverPath || 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=600&q=80'}
           alt={game.name}
-          style={{ 
+          style={{
             objectPosition: game.listCardPosition || game.coverPosition || '50% 50%',
             transform: (game.listCardZoom || game.coverZoom) ? `scale(${game.listCardZoom || game.coverZoom})` : undefined,
             transformOrigin: game.listCardPosition || game.coverPosition || '50% 50%',
@@ -97,11 +97,10 @@ export const GameCard: React.FC<GameCardProps> = ({
                 e.stopPropagation();
                 onToggleLibrary(game.id);
               }}
-              className={`p-1.5 rounded-full backdrop-blur-md transition-colors ${
-                game.inLibrary 
-                  ? 'bg-ice-accent text-white shadow-md' 
-                  : 'bg-black/60 text-white/70 hover:text-white hover:bg-black/80'
-              }`}
+              className={`p-1.5 rounded-full backdrop-blur-md transition-colors ${game.inLibrary
+                ? 'bg-ice-accent text-white shadow-md'
+                : 'bg-black/60 text-white/70 hover:text-white hover:bg-black/80'
+                }`}
               title={game.inLibrary ? 'Đã có trong thư viện' : 'Lưu vào thư viện'}
             >
               {game.inLibrary ? <BookmarkCheck className="w-3.5 h-3.5" /> : <Bookmark className="w-3.5 h-3.5" />}
@@ -137,7 +136,7 @@ export const GameCard: React.FC<GameCardProps> = ({
 
             {/* Dropdown Menu */}
             {showMenu && (
-              <div 
+              <div
                 onClick={(e) => e.stopPropagation()}
                 className="absolute right-0 top-8 w-44 bg-ice-card border border-ice-border rounded-lg shadow-2xl py-1 z-30 text-xs"
               >
@@ -187,9 +186,8 @@ export const GameCard: React.FC<GameCardProps> = ({
                           setShowMenu(false);
                           onToggleHide(game.id);
                         }}
-                        className={`w-full px-3 py-2 text-left hover:bg-ice-hover flex items-center gap-2 ${
-                          game.hidden ? 'text-amber-400 font-bold' : 'text-ice-subtext hover:text-white'
-                        }`}
+                        className={`w-full px-3 py-2 text-left hover:bg-ice-hover flex items-center gap-2 ${game.hidden ? 'text-amber-400 font-bold' : 'text-ice-subtext hover:text-white'
+                          }`}
                       >
                         {game.hidden ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
                         <span>{game.hidden ? 'Bỏ ẩn (Hiện lại)' : 'Ẩn game này'}</span>
@@ -262,7 +260,7 @@ export const GameCard: React.FC<GameCardProps> = ({
         {/* Thin bottom progress bar for downloading / installing */}
         {(isDownloading || isInstalling) && (
           <div className="absolute bottom-0 left-0 right-0 h-1 bg-black/40">
-            <div 
+            <div
               className={`h-full transition-all duration-300 ${isInstalling ? 'bg-amber-400' : 'bg-ice-accent'}`}
               style={{ width: `${progressPercent}%` }}
             />
@@ -272,9 +270,9 @@ export const GameCard: React.FC<GameCardProps> = ({
 
       {/* Card Info & Primary Action Button */}
       <div className="p-3 flex flex-col justify-between flex-1 gap-2">
-        <h3 
+        <h3
           onClick={() => onSelectGame(game)}
-          className="text-sm font-semibold text-white truncate cursor-pointer hover:text-ice-accent transition-colors" 
+          className="text-sm font-semibold text-white truncate cursor-pointer hover:text-ice-accent transition-colors"
           title={game.name}
         >
           {game.name}

@@ -162,15 +162,15 @@ export const ChangeAdminPinModal: React.FC<ChangeAdminPinModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fade-in select-none">
-      <div className="bg-[#14171F] border border-ice-border rounded-2xl w-full max-w-md overflow-hidden shadow-2xl flex flex-col">
+      <div className="bg-ice-card border border-ice-border rounded-2xl w-full max-w-md overflow-hidden shadow-2xl flex flex-col text-ice-text">
         {/* Header */}
-        <div className="px-6 py-4 border-b border-ice-border/60 flex items-center justify-between bg-[#181B24]">
+        <div className="px-6 py-4 border-b border-ice-border/60 flex items-center justify-between bg-ice-card/90">
           <div className="flex items-center gap-2.5">
             <div className="w-8 h-8 rounded-lg bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-400">
               <KeyRound className="w-4 h-4" />
             </div>
             <div>
-              <h3 className="text-base font-bold text-white tracking-wide">
+              <h3 className="text-base font-bold text-ice-text tracking-wide">
                 Đổi Mã PIN Quản Trị (Admin)
               </h3>
               <p className="text-[11px] text-ice-subtext">Cập nhật mã PIN_PUB của hệ thống</p>
@@ -178,7 +178,7 @@ export const ChangeAdminPinModal: React.FC<ChangeAdminPinModalProps> = ({
           </div>
           <button
             onClick={onClose}
-            className="w-8 h-8 rounded-lg flex items-center justify-center text-ice-subtext hover:text-white hover:bg-white/10 transition-colors"
+            className="w-8 h-8 rounded-lg flex items-center justify-center text-ice-subtext hover:text-ice-text hover:bg-ice-hover transition-colors"
           >
             <X className="w-4 h-4" />
           </button>
@@ -207,7 +207,7 @@ export const ChangeAdminPinModal: React.FC<ChangeAdminPinModalProps> = ({
               maxLength={10}
               required
               autoFocus
-              className="w-full h-10 px-3.5 rounded-xl bg-black/40 border border-ice-border text-sm text-white tracking-widest focus:outline-none focus:border-amber-400 font-mono transition-colors"
+              className="w-full h-10 px-3.5 rounded-xl bg-ice-bg border border-ice-border text-sm text-ice-text tracking-widest focus:outline-none focus:border-amber-400 font-mono transition-colors"
             />
             <span className="text-[10px] text-ice-subtext block">
               Bắt buộc phải biết mã PIN hiện tại (PIN_PUB hoặc PIN_PRI gốc) mới được đổi.
@@ -229,7 +229,7 @@ export const ChangeAdminPinModal: React.FC<ChangeAdminPinModalProps> = ({
               placeholder="Nhập 4 đến 10 số mới"
               maxLength={10}
               required
-              className="w-full h-10 px-3.5 rounded-xl bg-black/40 border border-ice-border text-sm text-white tracking-widest focus:outline-none focus:border-ice-accent font-mono transition-colors"
+              className="w-full h-10 px-3.5 rounded-xl bg-ice-bg border border-ice-border text-sm text-ice-text tracking-widest focus:outline-none focus:border-ice-accent font-mono transition-colors"
             />
           </div>
 
@@ -246,7 +246,7 @@ export const ChangeAdminPinModal: React.FC<ChangeAdminPinModalProps> = ({
               placeholder="Nhập lại mã PIN mới"
               maxLength={10}
               required
-              className="w-full h-10 px-3.5 rounded-xl bg-black/40 border border-ice-border text-sm text-white tracking-widest focus:outline-none focus:border-ice-accent font-mono transition-colors"
+              className="w-full h-10 px-3.5 rounded-xl bg-ice-bg border border-ice-border text-sm text-ice-text tracking-widest focus:outline-none focus:border-ice-accent font-mono transition-colors"
             />
           </div>
 

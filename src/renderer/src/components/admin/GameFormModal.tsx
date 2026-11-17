@@ -586,7 +586,7 @@ export const GameFormModal: React.FC<GameFormModalProps> = ({
               value={requirementsText}
               onChange={(e) => setRequirementsText(e.target.value)}
               placeholder="Ví dụ: 1. Cần mở Steam trước khi bấm Chơi;&#10;2. Vào room Discord số 2 để chơi co-op;&#10;3. Tắt Windows Defender nếu game bị chặn..."
-              className="w-full rounded-lg bg-[#0A0D14] border border-ice-border p-2.5 text-white focus:outline-none focus:border-amber-400 text-xs font-sans leading-relaxed"
+              className="w-full rounded-lg bg-ice-bg border border-ice-border p-2.5 text-ice-text focus:outline-none focus:border-amber-400 text-xs font-sans leading-relaxed"
             />
 
             {/* Action buttons selection */}
@@ -603,8 +603,8 @@ export const GameFormModal: React.FC<GameFormModalProps> = ({
                         key={btn.id}
                         className={`flex items-center gap-2 p-2 rounded-lg border cursor-pointer select-none text-xs transition-colors ${
                           isChecked
-                            ? 'bg-amber-500/15 border-amber-500/50 text-white font-medium'
-                            : 'bg-[#0A0D14] border-ice-border/60 text-ice-muted hover:text-white'
+                            ? 'bg-amber-500/15 border-amber-500/50 text-ice-text font-medium'
+                            : 'bg-ice-bg border-ice-border/60 text-ice-subtext hover:text-ice-text'
                         }`}
                       >
                         <input
@@ -646,7 +646,7 @@ export const GameFormModal: React.FC<GameFormModalProps> = ({
                 value={installPath}
                 onChange={(e) => setInstallPath(e.target.value)}
                 placeholder="VD: D:\Games\TenGame hoặc E:\SteamLibrary..."
-                className="flex-1 bg-[#0A0D14] border border-ice-border rounded-lg px-3 py-1.5 text-xs text-white outline-none font-mono focus:border-amber-400"
+                className="flex-1 bg-ice-bg border border-ice-border rounded-lg px-3 py-1.5 text-xs text-ice-text outline-none font-mono focus:border-amber-400"
               />
               <button
                 type="button"

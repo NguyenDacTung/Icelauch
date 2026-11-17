@@ -111,7 +111,7 @@ export const TVGameView: React.FC<TVGameViewProps> = ({
 
       {/* 2. EXACT 16:9 PC GAME TV HERO BANNER (Height ~52% screen for peek-through) */}
       {activeHero && (
-        <div className="relative w-full aspect-video max-h-[52vh] rounded-3xl overflow-hidden border border-white/10 shadow-2xl bg-[#0E1118] group/banner flex items-end p-8">
+        <div className="relative w-full aspect-video max-h-[52vh] rounded-3xl overflow-hidden border border-ice-border shadow-2xl bg-ice-card group/banner flex items-end p-8">
           {/* Background: Auto-preview Trailer (Muted) or 16:9 Artwork */}
           {showTrailerPreview && isYouTubeTrailer ? (
             <iframe
@@ -130,8 +130,8 @@ export const TVGameView: React.FC<TVGameViewProps> = ({
           )}
 
           {/* Gradients */}
-          <div className="absolute inset-0 bg-gradient-to-t from-[#0A0D14] via-[#0A0D14]/70 to-transparent" />
-          <div className="absolute inset-0 bg-gradient-to-r from-[#0A0D14]/95 via-[#0A0D14]/50 to-transparent w-3/4" />
+          <div className="absolute inset-0 bg-gradient-to-t from-ice-bg via-ice-bg/70 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-r from-ice-bg/95 via-ice-bg/50 to-transparent w-3/4" />
 
           {/* Banner Meta */}
           <div className="relative z-10 max-w-2xl space-y-3">
@@ -249,7 +249,7 @@ export const TVGameView: React.FC<TVGameViewProps> = ({
                   sfx.playClick();
                   setSelectedGameModal(game);
                 }}
-                className="group/card relative w-52 lg:w-60 aspect-[16/10] rounded-2xl overflow-hidden bg-[#151924] border border-white/10 shrink-0 cursor-pointer shadow-lg outline-none transition-all hover:scale-102 hover:border-amber-400"
+                className="group/card relative w-52 lg:w-60 aspect-[16/10] rounded-2xl overflow-hidden bg-ice-card border border-ice-border shrink-0 cursor-pointer shadow-lg outline-none transition-all hover:scale-102 hover:border-amber-400"
               >
                 <img
                   src={game.bannerPath || game.coverPath || ''}
@@ -310,7 +310,7 @@ export const TVGameView: React.FC<TVGameViewProps> = ({
                     sfx.playClick();
                     setSelectedGameModal(game);
                   }}
-                  className="group/card relative w-44 lg:w-48 aspect-[3/4] rounded-2xl overflow-hidden bg-[#151924] border border-white/10 shrink-0 cursor-pointer shadow-lg outline-none transition-all hover:scale-102 hover:border-amber-400"
+                  className="group/card relative w-44 lg:w-48 aspect-[3/4] rounded-2xl overflow-hidden bg-ice-card border border-ice-border shrink-0 cursor-pointer shadow-lg outline-none transition-all hover:scale-102 hover:border-amber-400"
                 >
                   <img
                     src={game.coverPath || game.bannerPath || ''}
@@ -343,7 +343,7 @@ export const TVGameView: React.FC<TVGameViewProps> = ({
       {/* 5. MODAL: CHI TIẾT GAME TRÊN TV (TRAILER & SPECS) */}
       {selectedGameModal && (
         <div className="absolute inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-8 animate-fade-in">
-          <div className="w-full max-w-4xl bg-[#131722] border-2 border-amber-500/50 rounded-3xl overflow-hidden shadow-2xl flex flex-col max-h-[85vh]">
+          <div className="w-full max-w-4xl bg-ice-card border-2 border-amber-500/50 rounded-3xl overflow-hidden shadow-2xl flex flex-col max-h-[85vh]">
             {/* Modal Header */}
             <div className="flex items-center justify-between p-5 border-b border-white/10">
               <div className="flex items-center gap-3">
@@ -418,7 +418,7 @@ export const TVGameView: React.FC<TVGameViewProps> = ({
             </div>
 
             {/* Modal Footer CTA */}
-            <div className="p-4 bg-[#0F121B] border-t border-white/10 flex items-center justify-between">
+            <div className="p-4 bg-ice-card/90 border-t border-ice-border flex items-center justify-between">
               <span className="text-xs text-amber-300">
                 ℹ️ Để tải và chơi game, vui lòng mở ứng dụng Icelauch trên máy tính Windows.
               </span>

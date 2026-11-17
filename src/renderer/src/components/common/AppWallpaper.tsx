@@ -1,5 +1,6 @@
 import React from 'react';
 import type { WallpaperConfig } from '../../types';
+import { useTheme } from '../../hooks/useTheme';
 
 interface AppWallpaperProps {
   config?: WallpaperConfig;
@@ -7,6 +8,7 @@ interface AppWallpaperProps {
 }
 
 export const AppWallpaper: React.FC<AppWallpaperProps> = ({ config, lowSpecMode = false }) => {
+  const { isSolar } = useTheme();
   if (!config || !config.enabled || !config.imagePath) {
     return null;
   }
@@ -39,11 +41,11 @@ export const AppWallpaper: React.FC<AppWallpaperProps> = ({ config, lowSpecMode 
           pointerEvents: 'none',
         }}
       />
-      {/* Darkness Tint Overlay */}
+      {/* Darkness / Brightness Tint Overlay */}
       <div
         className="absolute inset-0 transition-opacity duration-300 pointer-events-none"
         style={{
-          backgroundColor: '#07090e',
+          backgroundColor: isSolar ? '#FAF8F5' : '#07090e',
           opacity: darkness / 100,
           pointerEvents: 'none',
         }}

@@ -33,11 +33,11 @@ export const MobileMiniPlayer: React.FC<MobileMiniPlayerProps> = ({
     : '';
 
   return (
-    <div className="w-full max-w-full overflow-hidden bg-[#13161F]/95 backdrop-blur-xl border-t border-white/10 shadow-[0_-4px_20px_rgba(0,0,0,0.5)] z-30 select-none shrink-0 flex flex-col">
+    <div className="w-full max-w-full overflow-hidden glass-panel border-t border-ice-border/60 shadow-[0_-4px_20px_rgba(0,0,0,0.15)] z-30 select-none shrink-0 flex flex-col transition-all duration-300">
       {/* 2px Progress Bar at Top */}
-      <div className="w-full h-[2px] bg-white/10 relative overflow-hidden">
+      <div className="w-full h-[2px] bg-ice-border/40 relative overflow-hidden">
         <div
-          className="h-full bg-gradient-to-r from-cyan-400 to-amber-400 transition-all duration-200"
+          className="h-full bg-gradient-to-r from-ice-accent to-amber-400 transition-all duration-200"
           style={{ width: `${progressPercent}%` }}
         />
       </div>
@@ -53,19 +53,19 @@ export const MobileMiniPlayer: React.FC<MobileMiniPlayerProps> = ({
             <img
               src={resolvedCover}
               alt={currentTrack.title}
-              className="w-[38px] h-[38px] rounded-lg object-cover shrink-0 border border-white/10 shadow-sm"
+              className="w-[38px] h-[38px] rounded-xl object-cover shrink-0 border border-ice-border/60 shadow-sm"
             />
           ) : (
-            <div className="w-[38px] h-[38px] rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-cyan-400 shrink-0">
+            <div className="w-[38px] h-[38px] rounded-xl bg-ice-hover border border-ice-border/60 flex items-center justify-center text-ice-accent shrink-0">
               <Music className="w-5 h-5" />
             </div>
           )}
 
           <div className="flex-1 min-w-0">
-            <p className="text-xs font-bold text-white truncate leading-tight">
+            <p className="text-xs font-bold text-ice-text truncate leading-tight">
               {currentTrack.title}
             </p>
-            <p className="text-[11px] text-slate-400 truncate mt-0.5 leading-tight">
+            <p className="text-[11px] text-ice-subtext truncate mt-0.5 leading-tight">
               {currentTrack.artist || currentTrack.category || 'Âm Nhạc'}
             </p>
           </div>
@@ -79,14 +79,14 @@ export const MobileMiniPlayer: React.FC<MobileMiniPlayerProps> = ({
               e.stopPropagation();
               onPlayPause();
             }}
-            className="w-10 h-10 rounded-full bg-cyan-400 hover:bg-cyan-300 active:scale-95 text-black flex items-center justify-center shadow-md transition-transform"
+            className="w-10 h-10 rounded-full bg-ice-accent hover:opacity-90 active:scale-95 text-white flex items-center justify-center shadow-md transition-transform"
             title={isPlaying ? 'Tạm dừng' : 'Phát'}
             aria-label={isPlaying ? 'Tạm dừng' : 'Phát'}
           >
             {isPlaying ? (
-              <Pause className="w-4 h-4 fill-black text-black" />
+              <Pause className="w-4 h-4 fill-white text-white" />
             ) : (
-              <Play className="w-4 h-4 fill-black text-black ml-0.5" />
+              <Play className="w-4 h-4 fill-white text-white ml-0.5" />
             )}
           </button>
 
@@ -96,7 +96,7 @@ export const MobileMiniPlayer: React.FC<MobileMiniPlayerProps> = ({
               e.stopPropagation();
               onClose();
             }}
-            className="w-9 h-9 rounded-full text-slate-400 hover:text-white active:bg-white/10 flex items-center justify-center transition-colors"
+            className="w-9 h-9 rounded-full text-ice-subtext hover:text-ice-text active:bg-ice-hover flex items-center justify-center transition-colors"
             title="Đóng trình phát"
             aria-label="Đóng trình phát"
           >

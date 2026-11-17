@@ -188,12 +188,12 @@ export const TagManagerModal: React.FC<TagManagerModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-      <div className="bg-[#12151F] border border-ice-border rounded-2xl w-full max-w-3xl overflow-hidden shadow-2xl flex flex-col max-h-[90vh] animate-scale-up">
+      <div className="bg-ice-card border border-ice-border rounded-2xl w-full max-w-3xl overflow-hidden shadow-2xl flex flex-col max-h-[90vh] animate-scale-up">
         {/* Header */}
-        <div className="px-6 py-4 border-b border-ice-border/70 flex items-center justify-between bg-white/5">
+        <div className="px-6 py-4 border-b border-ice-border/70 flex items-center justify-between bg-ice-card/90">
           <div className="flex items-center gap-2.5">
             <Tag className="w-5 h-5 text-amber-400" />
-            <h3 className="text-base font-bold text-white tracking-wide">
+            <h3 className="text-base font-bold text-ice-text tracking-wide">
               Quản Lý Thể Loại{' '}
               {mode === 'game'
                 ? 'Trò Chơi'
@@ -205,26 +205,26 @@ export const TagManagerModal: React.FC<TagManagerModalProps> = ({
                 ? 'Podcast & Audio'
                 : 'Giải Trí'}
             </h3>
-            <span className="text-xs px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-400 font-mono border border-amber-500/30">
+            <span className="text-xs px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-500 dark:text-amber-400 font-mono border border-amber-500/30">
               {tags.length} thể loại
             </span>
           </div>
           <button
             onClick={onClose}
-            className="p-1 rounded-lg text-ice-subtext hover:text-white hover:bg-white/10 transition-colors"
+            className="p-1 rounded-lg text-ice-subtext hover:text-ice-text hover:bg-ice-hover transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Tab Switcher */}
-        <div className="flex border-b border-ice-border/60 bg-black/40 px-6 pt-2">
+        <div className="flex border-b border-ice-border/60 bg-ice-bg px-6 pt-2">
           <button
             onClick={() => setActiveTab('manage')}
             className={`pb-2.5 px-4 text-xs font-bold transition-all border-b-2 flex items-center gap-1.5 ${
               activeTab === 'manage'
-                ? 'border-amber-400 text-amber-400'
-                : 'border-transparent text-ice-muted hover:text-white'
+                ? 'border-amber-400 text-amber-500 dark:text-amber-400'
+                : 'border-transparent text-ice-subtext hover:text-ice-text'
             }`}
           >
             <Tag className="w-3.5 h-3.5" />
@@ -234,8 +234,8 @@ export const TagManagerModal: React.FC<TagManagerModalProps> = ({
             onClick={() => setActiveTab('batch')}
             className={`pb-2.5 px-4 text-xs font-bold transition-all border-b-2 flex items-center gap-1.5 ${
               activeTab === 'batch'
-                ? 'border-amber-400 text-amber-400'
-                : 'border-transparent text-ice-muted hover:text-white'
+                ? 'border-amber-400 text-amber-500 dark:text-amber-400'
+                : 'border-transparent text-ice-subtext hover:text-ice-text'
             }`}
           >
             <Layers className="w-3.5 h-3.5" />
@@ -255,7 +255,7 @@ export const TagManagerModal: React.FC<TagManagerModalProps> = ({
                   onChange={(e) => setNewTagInput(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && handleAddNewTag()}
                   placeholder="Nhập tên thể loại mới..."
-                  className="flex-1 h-9 rounded-xl bg-black/50 border border-ice-border px-3.5 text-white placeholder-ice-muted focus:outline-none focus:border-amber-400 text-xs"
+                  className="flex-1 h-9 rounded-xl bg-ice-bg border border-ice-border px-3.5 text-ice-text placeholder-ice-subtext focus:outline-none focus:border-amber-400 text-xs"
                 />
                 <button
                   type="button"
@@ -269,14 +269,14 @@ export const TagManagerModal: React.FC<TagManagerModalProps> = ({
               </div>
 
               {/* Search Tags */}
-              <div className="flex items-center gap-2 bg-black/40 border border-ice-border/60 rounded-xl px-3 py-1.5">
-                <Search className="w-3.5 h-3.5 text-ice-muted" />
+              <div className="flex items-center gap-2 bg-ice-bg border border-ice-border/60 rounded-xl px-3 py-1.5">
+                <Search className="w-3.5 h-3.5 text-ice-subtext" />
                 <input
                   type="text"
                   value={searchTag}
                   onChange={(e) => setSearchTag(e.target.value)}
                   placeholder="Lọc tìm thể loại..."
-                  className="bg-transparent text-xs text-white placeholder-ice-muted focus:outline-none flex-1"
+                  className="bg-transparent text-xs text-ice-text placeholder-ice-subtext focus:outline-none flex-1"
                 />
               </div>
 
@@ -322,7 +322,7 @@ export const TagManagerModal: React.FC<TagManagerModalProps> = ({
                           onClick={(e) => e.stopPropagation()}
                           onMouseDown={(e) => e.stopPropagation()}
                           style={{ userSelect: 'text' }}
-                          className="flex-1 bg-black/80 px-2 py-1 rounded text-xs text-white focus:outline-none border border-amber-400 select-text"
+                          className="flex-1 bg-ice-bg px-2 py-1 rounded text-xs text-ice-text focus:outline-none border border-amber-400 select-text"
                         />
                         <button
                           type="button"
@@ -342,7 +342,7 @@ export const TagManagerModal: React.FC<TagManagerModalProps> = ({
                             e.stopPropagation();
                             setEditingTag(null);
                           }}
-                          className="p-1 rounded bg-white/10 text-white hover:bg-white/20"
+                          className="p-1 rounded bg-ice-hover text-ice-text hover:bg-ice-hover/80"
                           title="Hủy (Esc)"
                         >
                           <X className="w-3.5 h-3.5" />
@@ -354,12 +354,12 @@ export const TagManagerModal: React.FC<TagManagerModalProps> = ({
                   return (
                     <div
                       key={t}
-                      className="flex items-center justify-between p-2.5 rounded-xl bg-white/5 border border-white/5 hover:border-white/15 transition-all group"
+                      className="flex items-center justify-between p-2.5 rounded-xl bg-ice-bg border border-ice-border hover:border-amber-400/50 transition-all group"
                     >
                       <div className="flex items-center gap-2 min-w-0">
-                        <Tag className="w-3.5 h-3.5 text-amber-400 shrink-0" />
-                        <span className="font-bold text-white truncate text-xs">{t}</span>
-                        <span className="text-[10px] text-ice-muted font-mono shrink-0">
+                        <Tag className="w-3.5 h-3.5 text-amber-500 dark:text-amber-400 shrink-0" />
+                        <span className="font-bold text-ice-text truncate text-xs">{t}</span>
+                        <span className="text-[10px] text-ice-subtext font-mono shrink-0">
                           ({count})
                         </span>
                       </div>
@@ -368,7 +368,7 @@ export const TagManagerModal: React.FC<TagManagerModalProps> = ({
                         <button
                           type="button"
                           onClick={() => setEditingTag({ oldName: t, newName: t })}
-                          className="p-1 rounded text-ice-muted hover:text-amber-400 hover:bg-white/10 transition-colors"
+                          className="p-1 rounded text-ice-subtext hover:text-amber-500 dark:hover:text-amber-400 hover:bg-ice-hover transition-colors"
                           title="Đổi tên thể loại này"
                         >
                           <Edit2 className="w-3 h-3" />
@@ -376,7 +376,7 @@ export const TagManagerModal: React.FC<TagManagerModalProps> = ({
                         <button
                           type="button"
                           onClick={() => handleDeleteTag(t)}
-                          className="p-1 rounded text-ice-muted hover:text-rose-400 hover:bg-white/10 transition-colors"
+                          className="p-1 rounded text-ice-subtext hover:text-rose-500 hover:bg-ice-hover transition-colors"
                           title="Xóa thể loại này"
                         >
                           <Trash2 className="w-3 h-3" />
@@ -399,18 +399,18 @@ export const TagManagerModal: React.FC<TagManagerModalProps> = ({
               )}
 
               {/* Sub-section 1: Choose Tags to Add and Remove */}
-              <div className="p-4 rounded-xl bg-black/40 border border-ice-border/60 space-y-3">
-                <h4 className="text-xs font-bold text-white uppercase tracking-wider">
+              <div className="p-4 rounded-xl bg-ice-bg/50 border border-ice-border space-y-3">
+                <h4 className="text-xs font-bold text-ice-text uppercase tracking-wider">
                   1. Chọn thể loại cần Thêm hoặc Gỡ:
                 </h4>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {/* Add Tag list */}
                   <div className="space-y-1.5">
-                    <span className="text-[11px] text-emerald-400 font-semibold block">
+                    <span className="text-[11px] text-emerald-500 font-semibold block">
                       + Thể loại muốn GÁN THÊM:
                     </span>
-                    <div className="flex flex-wrap gap-1.5 max-h-28 overflow-y-auto p-1.5 bg-black/60 rounded-lg border border-white/5">
+                    <div className="flex flex-wrap gap-1.5 max-h-28 overflow-y-auto p-1.5 bg-ice-card rounded-lg border border-ice-border">
                       {tags.map((t) => {
                         const isAdded = batchTagsToAdd.includes(t);
                         return (
@@ -426,7 +426,7 @@ export const TagManagerModal: React.FC<TagManagerModalProps> = ({
                             className={`px-2 py-1 rounded text-[10px] font-semibold transition-all border ${
                               isAdded
                                 ? 'bg-emerald-500 text-black font-bold border-emerald-400 shadow-sm'
-                                : 'bg-white/5 text-ice-muted border-white/10 hover:text-white'
+                                : 'bg-ice-bg text-ice-subtext border-ice-border hover:text-ice-text'
                             }`}
                           >
                             + {t}
@@ -438,10 +438,10 @@ export const TagManagerModal: React.FC<TagManagerModalProps> = ({
 
                   {/* Remove Tag list */}
                   <div className="space-y-1.5">
-                    <span className="text-[11px] text-rose-400 font-semibold block">
+                    <span className="text-[11px] text-rose-500 font-semibold block">
                       - Thể loại muốn GỠ BỎ:
                     </span>
-                    <div className="flex flex-wrap gap-1.5 max-h-28 overflow-y-auto p-1.5 bg-black/60 rounded-lg border border-white/5">
+                    <div className="flex flex-wrap gap-1.5 max-h-28 overflow-y-auto p-1.5 bg-ice-card rounded-lg border border-ice-border">
                       {tags.map((t) => {
                         const isRemoved = batchTagsToRemove.includes(t);
                         return (
@@ -457,7 +457,7 @@ export const TagManagerModal: React.FC<TagManagerModalProps> = ({
                             className={`px-2 py-1 rounded text-[10px] font-semibold transition-all border ${
                               isRemoved
                                 ? 'bg-rose-500 text-white font-bold border-rose-400 shadow-sm'
-                                : 'bg-white/5 text-ice-muted border-white/10 hover:text-white'
+                                : 'bg-ice-bg text-ice-subtext border-ice-border hover:text-ice-text'
                             }`}
                           >
                             - {t}
@@ -476,25 +476,25 @@ export const TagManagerModal: React.FC<TagManagerModalProps> = ({
                     <button
                       type="button"
                       onClick={handleSelectAllFiltered}
-                      className="flex items-center gap-1.5 text-xs font-semibold text-amber-400 hover:underline"
+                      className="flex items-center gap-1.5 text-xs font-semibold text-amber-500 dark:text-amber-400 hover:underline"
                     >
                       <CheckSquare className="w-3.5 h-3.5" />
                       <span>Chọn tất cả ({filteredItems.length})</span>
                     </button>
-                    <span className="text-ice-muted">|</span>
-                    <span className="text-white font-mono">
+                    <span className="text-ice-subtext">|</span>
+                    <span className="text-ice-text font-mono">
                       Đã chọn: {selectedItemIds.length} mục
                     </span>
                   </div>
 
-                  <div className="flex items-center gap-1.5 bg-black/40 border border-ice-border/60 rounded-lg px-2.5 py-1">
-                    <Search className="w-3 h-3 text-ice-muted" />
+                  <div className="flex items-center gap-1.5 bg-ice-bg border border-ice-border/60 rounded-lg px-2.5 py-1">
+                    <Search className="w-3 h-3 text-ice-subtext" />
                     <input
                       type="text"
                       value={searchItem}
                       onChange={(e) => setSearchItem(e.target.value)}
                       placeholder="Tìm tên game / phim..."
-                      className="bg-transparent text-xs text-white placeholder-ice-muted focus:outline-none w-36"
+                      className="bg-transparent text-xs text-ice-text placeholder-ice-subtext focus:outline-none w-36"
                     />
                   </div>
                 </div>
@@ -511,18 +511,18 @@ export const TagManagerModal: React.FC<TagManagerModalProps> = ({
                         onClick={() => handleToggleSelectItem(item.id)}
                         className={`p-2.5 rounded-xl border flex items-center gap-2.5 cursor-pointer transition-all select-none ${
                           isSelected
-                            ? 'bg-amber-500/20 border-amber-400 text-white shadow-md'
-                            : 'bg-white/5 border-white/5 text-ice-muted hover:border-white/15 hover:text-white'
+                            ? 'bg-amber-500/20 border-amber-400 text-ice-text shadow-md'
+                            : 'bg-ice-bg border-ice-border text-ice-subtext hover:border-amber-400/50 hover:text-ice-text'
                         }`}
                       >
                         {isSelected ? (
-                          <CheckSquare className="w-4 h-4 text-amber-400 shrink-0" />
+                          <CheckSquare className="w-4 h-4 text-amber-500 dark:text-amber-400 shrink-0" />
                         ) : (
-                          <Square className="w-4 h-4 text-ice-muted shrink-0" />
+                          <Square className="w-4 h-4 text-ice-subtext shrink-0" />
                         )}
                         <div className="min-w-0 flex-1">
-                          <h5 className="font-bold text-xs truncate text-white">{title}</h5>
-                          <p className="text-[10px] text-ice-muted truncate mt-0.5">
+                          <h5 className="font-bold text-xs truncate text-ice-text">{title}</h5>
+                          <p className="text-[10px] text-ice-subtext truncate mt-0.5">
                             {itemTags.length > 0 ? itemTags.join(', ') : 'Chưa gắn tag'}
                           </p>
                         </div>

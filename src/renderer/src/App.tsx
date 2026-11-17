@@ -48,6 +48,7 @@ import { GameInstallModal } from './components/home/GameInstallModal';
 import { MobileLandscapeGamepad } from './components/extras/MobileLandscapeGamepad';
 import type { GameControllerConfig } from './types';
 import { RequireLoginModal } from './components/common/RequireLoginModal';
+import { useTheme } from './hooks/useTheme';
 import { FloatingMiniPlayer } from './components/media/FloatingMiniPlayer';
 import { DeviceActivationGateView } from './components/security/DeviceActivationGateView';
 import { DeviceManagerModal } from './components/admin/DeviceManagerModal';
@@ -134,6 +135,7 @@ export default function App() {
   const [isMobileVinylOpen, setIsMobileVinylOpen] = useState(false);
   const isTurntableActive = isTurntableOpen && currentTab === 'media';
   const [ambientArtworkUrl, setAmbientArtworkUrl] = useState<string>('');
+  const { theme } = useTheme();
 
   // Multi-User Profile State
   const [profiles, setProfiles] = useState<UserProfile[]>([]);
@@ -437,7 +439,7 @@ export default function App() {
         }
 
         // Version update check: require re-login on new app version update; keep auto-login on same version
-        const CURRENT_APP_VERSION = '1.2.3';
+        const CURRENT_APP_VERSION = '1.2.4';
         const isNewVersion = shouldRequireReLoginForNewVersion(CURRENT_APP_VERSION);
         if (isNewVersion) {
           console.log(`[Version Upgrade] New version ${CURRENT_APP_VERSION}: Requiring re-login.`);
@@ -2360,7 +2362,7 @@ export default function App() {
                     backgroundImage: `url(${ambientArtworkUrl.startsWith('http') || ambientArtworkUrl.startsWith('data:') ? ambientArtworkUrl : `file://${ambientArtworkUrl}`})`,
                   }}
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-[#0A0C10] via-[#0A0C10]/85 to-[#0A0C10]/70" />
+                <div className="absolute inset-0 bg-gradient-to-t from-ice-bg via-ice-bg/85 to-ice-bg/70" />
               </div>
             )}
 

@@ -59,9 +59,9 @@ export const UserMenuWidget: React.FC<UserMenuWidgetProps> = ({
         </button>
 
         {isOpen && (
-          <div className="absolute right-0 mt-2 w-52 rounded-xl bg-[#14171F] border border-ice-border shadow-2xl p-2 z-50 animate-fade-in space-y-1">
+          <div className="absolute right-0 mt-2 w-52 rounded-xl glass-panel border border-ice-border shadow-2xl p-2 z-50 animate-fade-in space-y-1">
             <div className="px-3 py-2 border-b border-ice-border/50 text-left">
-              <span className="text-[11px] font-bold text-white block">Chế Độ Khách (Guest)</span>
+              <span className="text-[11px] font-bold text-ice-text block">Chế Độ Khách (Guest)</span>
               <span className="text-[10px] text-ice-subtext block">Tiến độ tạm thời không được đồng bộ</span>
             </div>
             <button
@@ -85,7 +85,7 @@ export const UserMenuWidget: React.FC<UserMenuWidgetProps> = ({
     <div className="relative" ref={menuRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-2 h-8 pl-1.5 pr-2.5 rounded-lg bg-ice-card hover:bg-white/10 border border-ice-border hover:border-ice-accent/50 transition-all text-xs font-semibold group"
+        className="flex items-center gap-2 h-8 pl-1.5 pr-2.5 rounded-xl bg-ice-card hover:bg-ice-hover border border-ice-border hover:border-ice-accent/50 transition-all text-xs font-semibold group"
       >
         <AvatarBadge
           avatar={activeProfile.avatar}
@@ -93,21 +93,21 @@ export const UserMenuWidget: React.FC<UserMenuWidgetProps> = ({
           size="xs"
           showBorder={false}
         />
-        <span className="text-white max-w-[100px] truncate">{activeProfile.nickname}</span>
-        <ChevronDown className="w-3 h-3 text-ice-subtext group-hover:text-white transition-colors" />
+        <span className="text-ice-text max-w-[100px] truncate">{activeProfile.nickname}</span>
+        <ChevronDown className="w-3 h-3 text-ice-subtext group-hover:text-ice-text transition-colors" />
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-64 rounded-2xl bg-[#14171F] border border-ice-border shadow-2xl p-3 z-50 animate-fade-in space-y-2">
+        <div className="absolute right-0 mt-2 w-64 rounded-2xl glass-panel border border-ice-border shadow-2xl p-3 z-50 animate-fade-in space-y-2">
           {/* User Profile Mini Header */}
-          <div className="flex items-center gap-3 p-2.5 rounded-xl bg-white/5 border border-white/5">
+          <div className="flex items-center gap-3 p-2.5 rounded-xl bg-ice-hover/50 border border-ice-border/50">
             <AvatarBadge
               avatar={activeProfile.avatar}
               nickname={activeProfile.nickname}
               size="md"
             />
             <div className="overflow-hidden">
-              <span className="font-bold text-sm text-white block truncate">
+              <span className="font-bold text-sm text-ice-text block truncate">
                 {activeProfile.nickname}
               </span>
               <div className="flex items-center gap-2 text-[10px] text-ice-subtext">

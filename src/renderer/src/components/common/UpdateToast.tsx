@@ -56,7 +56,7 @@ export const UpdateToast: React.FC<UpdateToastProps> = ({ onGoToSettings }) => {
 
   return (
     <div className="fixed bottom-20 sm:bottom-6 right-4 sm:right-6 left-4 sm:left-auto z-50 animate-in slide-in-from-bottom-5 duration-300 select-none max-w-sm ml-auto mr-auto sm:mr-0">
-      <div className="bg-[#12161F]/95 backdrop-blur-md border border-amber-500/40 rounded-2xl p-4 shadow-2xl max-w-sm w-full text-white space-y-3 shadow-amber-950/20">
+      <div className="glass-panel border border-amber-500/40 rounded-2xl p-4 shadow-2xl max-w-sm w-full text-ice-text space-y-3 shadow-amber-950/20">
         <div className="flex items-start justify-between gap-3">
           <div className="flex items-center gap-2.5">
             <div className="w-8 h-8 rounded-xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center shrink-0">

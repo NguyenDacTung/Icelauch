@@ -339,7 +339,7 @@ export const MediaTrailerBanner: React.FC<MediaTrailerBannerProps> = ({
   return (
     <div
       ref={containerRef}
-      className={`relative w-full rounded-2xl md:rounded-3xl overflow-hidden bg-[#0A0C10] border border-ice-border/60 shadow-2xl group/trailer select-none ${aspectClass} ${className}`}
+      className={`relative w-full rounded-2xl md:rounded-3xl overflow-hidden bg-ice-card border border-ice-border/60 shadow-2xl group/trailer select-none ${aspectClass} ${className}`}
       data-testid="media-trailer-banner"
     >
       {/* 1. CINEMATIC VIDEO STAGE (Non-seekable) */}
@@ -382,8 +382,8 @@ export const MediaTrailerBanner: React.FC<MediaTrailerBannerProps> = ({
         )}
 
         {/* Ambient Gradient Masks for Cinematic Depth and Text Legibility */}
-        <div className="absolute inset-0 bg-gradient-to-t from-[#0A0D14] via-[#0A0D14]/40 to-black/30 pointer-events-none" />
-        <div className="absolute inset-0 bg-gradient-to-r from-[#0A0D14]/90 via-[#0A0D14]/30 to-transparent w-full md:w-3/4 pointer-events-none" />
+        <div className="absolute inset-0 bg-gradient-to-t from-ice-bg via-ice-bg/40 to-black/30 pointer-events-none" />
+        <div className="absolute inset-0 bg-gradient-to-r from-ice-bg/90 via-ice-bg/30 to-transparent w-full md:w-3/4 pointer-events-none" />
       </div>
 
       {/* 2. TOP METADATA & STATUS BAR */}

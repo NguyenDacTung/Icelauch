@@ -193,16 +193,16 @@ export const DeviceManagerModal: React.FC<DeviceManagerModalProps> = ({ isOpen, 
 
   return (
     <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/80 backdrop-blur-md p-4 animate-fade-in select-none">
-      <div className="relative w-full max-w-2xl max-h-[85vh] bg-[#121620] border border-white/10 rounded-2xl shadow-2xl flex flex-col overflow-hidden">
+      <div className="relative w-full max-w-2xl max-h-[85vh] bg-ice-card border border-ice-border rounded-2xl shadow-2xl flex flex-col overflow-hidden text-ice-text">
         {/* Modal Header */}
-        <div className="px-6 py-4 border-b border-white/10 flex items-center justify-between bg-black/30">
+        <div className="px-6 py-4 border-b border-ice-border flex items-center justify-between bg-ice-card/90">
           <div className="flex items-center gap-3">
             <div className="p-2 rounded-xl bg-cyan-500/10 border border-cyan-500/20 text-cyan-400">
               <Shield className="w-5 h-5" />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h2 className="text-base font-bold text-white">Quản Lý Thiết Bị Được Cấp Quyền</h2>
+                <h2 className="text-base font-bold text-ice-text">Quản Lý Thiết Bị Được Cấp Quyền</h2>
                 {pendingCount > 0 && (
                   <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/20 text-amber-400 border border-amber-500/30 animate-pulse">
                     {pendingCount} chờ duyệt

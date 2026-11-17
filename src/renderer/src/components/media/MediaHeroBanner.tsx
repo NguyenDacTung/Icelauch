@@ -85,7 +85,7 @@ export const MediaHeroBanner: React.FC<MediaHeroBannerProps> = ({
         }}
       />
 
-      <div className="relative w-full rounded-2xl overflow-hidden border border-ice-border/80 shadow-2xl bg-[#111318] flex flex-col md:flex-row items-stretch md:h-[460px] lg:h-[480px]">
+      <div className="relative w-full rounded-2xl overflow-hidden border border-ice-border/80 shadow-2xl bg-ice-card flex flex-col md:flex-row items-stretch md:h-[460px] lg:h-[480px]">
         {/* SVG Convolution Filter for true pixel unsharp masking */}
         <svg className="absolute w-0 h-0 overflow-hidden pointer-events-none" aria-hidden="true">
           <defs>
@@ -183,7 +183,7 @@ export const MediaHeroBanner: React.FC<MediaHeroBannerProps> = ({
       </div>
 
       {/* 2. RIGHT COLUMN: Flexible Space (flex-1) - Information & Action Sidebar */}
-      <div className="relative flex-1 min-w-[320px] p-5 lg:p-6 flex flex-col justify-between bg-gradient-to-b from-[#171A21] via-[#12141A] to-[#0F1115] border-t md:border-t-0 md:border-l border-ice-border/70 z-20">
+      <div className="relative flex-1 min-w-[320px] p-5 lg:p-6 flex flex-col justify-between bg-gradient-to-b from-ice-card via-ice-hover to-ice-bg border-t md:border-t-0 md:border-l border-ice-border/70 z-20">
         {/* Top Header & Title */}
         <div className="space-y-2">
           {/* Tags */}

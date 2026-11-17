@@ -102,17 +102,17 @@ export const AdminPlaylistManagerModal: React.FC<AdminPlaylistManagerModalProps>
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4 sm:p-6 select-none animate-fade-in">
-      <div className="bg-[#10131B] border border-white/10 rounded-3xl w-full max-w-4xl max-h-[90vh] flex flex-col shadow-2xl overflow-hidden">
+    <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4 sm:p-6 select-none animate-fade-in text-ice-text">
+      <div className="bg-ice-card border border-ice-border rounded-3xl w-full max-w-4xl max-h-[90vh] flex flex-col shadow-2xl overflow-hidden">
         {/* Header */}
-        <div className="px-6 py-5 border-b border-white/10 flex items-center justify-between bg-white/[0.02]">
+        <div className="px-6 py-5 border-b border-ice-border flex items-center justify-between bg-ice-card/90">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-2xl bg-amber-400/10 border border-amber-400/30 flex items-center justify-center text-amber-400">
               <ListMusic className="w-5 h-5" />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h2 className="text-base font-black text-white tracking-wide">
+                <h2 className="text-base font-black text-ice-text tracking-wide">
                   Quản Lý Danh Sách Phát Admin
                 </h2>
                 <span className="px-2 py-0.5 rounded-full bg-amber-400/20 text-amber-300 text-[10px] font-bold border border-amber-400/30 flex items-center gap-1">
@@ -129,7 +129,7 @@ export const AdminPlaylistManagerModal: React.FC<AdminPlaylistManagerModalProps>
           <button
             type="button"
             onClick={onClose}
-            className="w-9 h-9 rounded-xl bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white flex items-center justify-center transition-colors"
+            className="w-9 h-9 rounded-xl bg-ice-hover/50 hover:bg-ice-hover text-ice-subtext hover:text-ice-text flex items-center justify-center transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
@@ -144,8 +144,8 @@ export const AdminPlaylistManagerModal: React.FC<AdminPlaylistManagerModalProps>
         )}
 
         {/* Category Sub-Tabs & Action Bar */}
-        <div className="px-6 py-4 border-b border-white/5 flex flex-wrap items-center justify-between gap-3 bg-black/20">
-          <div className="flex items-center gap-2 bg-[#161A26] p-1 rounded-2xl border border-white/10">
+        <div className="px-6 py-4 border-b border-ice-border/60 flex flex-wrap items-center justify-between gap-3 bg-ice-bg/40">
+          <div className="flex items-center gap-2 bg-ice-hover/50 p-1 rounded-2xl border border-ice-border">
             <button
               type="button"
               onClick={() => {

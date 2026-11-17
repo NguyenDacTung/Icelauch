@@ -135,16 +135,16 @@ export const VinylTurntablePlayer: React.FC<VinylTurntablePlayerProps> = ({
     : parsed.thumbnailUrl || '';
 
   return (
-    <div className="flex-1 flex flex-col h-full bg-[#0B0D11] text-white select-none overflow-hidden">
+    <div className="flex-1 flex flex-col h-full bg-ice-bg text-ice-text select-none overflow-hidden">
       {/* Top Header Bar */}
-      <div className="flex items-center justify-between px-6 py-4 border-b border-ice-border/60 bg-ice-card/50 backdrop-blur-md shrink-0">
+      <div className="flex items-center justify-between px-6 py-4 border-b border-ice-border/60 glass-header shrink-0">
         <div className="flex items-center gap-3">
           <button
             onClick={() => {
               sfx.playClick();
               onBack();
             }}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-ice-bg hover:bg-ice-hover text-ice-text hover:text-white border border-ice-border text-xs font-semibold transition-colors"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-ice-card hover:bg-ice-hover text-ice-text border border-ice-border text-xs font-semibold transition-colors"
           >
             <ArrowLeft className="w-4 h-4" />
             <span>Quay lại</span>
@@ -154,7 +154,7 @@ export const VinylTurntablePlayer: React.FC<VinylTurntablePlayerProps> = ({
               <Disc className={`w-3.5 h-3.5 ${isPlaying ? 'animate-spin' : ''}`} style={{ animationDuration: '4s' }} />
               {currentPlaylist ? currentPlaylist.name : 'Đĩa Than Âm Nhạc'}
             </span>
-            <h1 className="text-sm font-bold text-white truncate max-w-md">{media.title}</h1>
+            <h1 className="text-sm font-bold text-ice-text truncate max-w-md">{media.title}</h1>
           </div>
         </div>
 

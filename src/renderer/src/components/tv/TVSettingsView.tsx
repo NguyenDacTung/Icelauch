@@ -144,17 +144,17 @@ export const TVSettingsView: React.FC<TVSettingsViewProps> = ({
   };
 
   return (
-    <div className="flex-1 w-full h-full flex flex-col p-6 overflow-y-auto no-scrollbar select-none bg-[#07090E]">
+    <div className="flex-1 w-full h-full flex flex-col p-6 overflow-y-auto no-scrollbar select-none bg-ice-bg text-ice-text">
       {/* 1. TV SETTINGS HEADER */}
-      <div className="flex items-center justify-between pb-5 border-b border-white/10 shrink-0">
+      <div className="flex items-center justify-between pb-5 border-b border-ice-border shrink-0">
         <div className="flex items-center gap-3.5">
           <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-amber-500 to-amber-300 p-0.5 shadow-lg shadow-amber-500/20 flex items-center justify-center">
             <Tv className="w-6 h-6 text-black" />
           </div>
           <div>
-            <h1 className="text-xl font-black text-white uppercase tracking-wider flex items-center gap-2.5">
+            <h1 className="text-xl font-black text-ice-text uppercase tracking-wider flex items-center gap-2.5">
               <span>Cài Đặt Hệ Thống TV</span>
-              <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30">
+              <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-500 dark:text-amber-300 border border-amber-500/30">
                 10-Foot UI
               </span>
             </h1>
@@ -169,8 +169,8 @@ export const TVSettingsView: React.FC<TVSettingsViewProps> = ({
           <div
             className={`px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 border animate-fade-in ${
               syncToast.type === 'success'
-                ? 'bg-emerald-500/20 border-emerald-500/40 text-emerald-300'
-                : 'bg-rose-500/20 border-rose-500/40 text-rose-300'
+                ? 'bg-emerald-500/20 border-emerald-500/40 text-emerald-400'
+                : 'bg-rose-500/20 border-rose-500/40 text-rose-400'
             }`}
           >
             {syncToast.type === 'success' ? (
@@ -193,7 +193,7 @@ export const TVSettingsView: React.FC<TVSettingsViewProps> = ({
           type="button"
           onClick={handleSyncNow}
           disabled={isSyncing}
-          className="p-5 rounded-2xl bg-[#111520] border-2 border-white/10 hover:border-amber-400/60 text-left transition-all flex flex-col justify-between h-44 shadow-lg group"
+          className="p-5 rounded-2xl bg-ice-card border-2 border-ice-border hover:border-amber-400/60 text-left transition-all flex flex-col justify-between h-44 shadow-lg group"
         >
           <div className="flex items-start justify-between w-full">
             <div className="flex items-center gap-3">
@@ -201,7 +201,7 @@ export const TVSettingsView: React.FC<TVSettingsViewProps> = ({
                 <Cloud className="w-6 h-6" />
               </div>
               <div>
-                <h3 className="text-base font-bold text-white uppercase tracking-wide group-hover:text-amber-300 transition-colors">
+                <h3 className="text-base font-bold text-ice-text uppercase tracking-wide group-hover:text-amber-400 transition-colors">
                   Đồng Bộ Đám Mây Ngay
                 </h3>
                 <span className="text-xs text-ice-subtext block mt-0.5">
@@ -241,15 +241,15 @@ export const TVSettingsView: React.FC<TVSettingsViewProps> = ({
           data-tv-focus="tv-set-sync-interval"
           type="button"
           onClick={handleCycleInterval}
-          className="p-5 rounded-2xl bg-[#111520] border-2 border-white/10 hover:border-amber-400/60 text-left transition-all flex flex-col justify-between h-44 shadow-lg group"
+          className="p-5 rounded-2xl bg-ice-card border-2 border-ice-border hover:border-amber-400/60 text-left transition-all flex flex-col justify-between h-44 shadow-lg group"
         >
           <div className="flex items-start justify-between w-full">
             <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-400 shrink-0">
+              <div className="w-12 h-12 rounded-xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-500 dark:text-amber-400 shrink-0">
                 <Clock className="w-6 h-6" />
               </div>
               <div>
-                <h3 className="text-base font-bold text-white uppercase tracking-wide group-hover:text-amber-300 transition-colors">
+                <h3 className="text-base font-bold text-ice-text uppercase tracking-wide group-hover:text-amber-400 transition-colors">
                   Tự Động Đồng Bộ Ngầm
                 </h3>
                 <span className="text-xs text-ice-subtext block mt-0.5">
@@ -276,7 +276,7 @@ export const TVSettingsView: React.FC<TVSettingsViewProps> = ({
           data-tv-focus="tv-set-toggle-trailer"
           type="button"
           onClick={handleToggleTrailer}
-          className="p-5 rounded-2xl bg-[#111520] border-2 border-white/10 hover:border-amber-400/60 text-left transition-all flex flex-col justify-between h-44 shadow-lg group"
+          className="p-5 rounded-2xl bg-ice-card border-2 border-ice-border hover:border-amber-400/60 text-left transition-all flex flex-col justify-between h-44 shadow-lg group"
         >
           <div className="flex items-start justify-between w-full">
             <div className="flex items-center gap-3">
@@ -284,7 +284,7 @@ export const TVSettingsView: React.FC<TVSettingsViewProps> = ({
                 <PlaySquare className="w-6 h-6" />
               </div>
               <div>
-                <h3 className="text-base font-bold text-white uppercase tracking-wide group-hover:text-amber-300 transition-colors">
+                <h3 className="text-base font-bold text-ice-text uppercase tracking-wide group-hover:text-amber-400 transition-colors">
                   Trailer Preview Banner
                 </h3>
                 <span className="text-xs text-ice-subtext block mt-0.5">
@@ -315,7 +315,7 @@ export const TVSettingsView: React.FC<TVSettingsViewProps> = ({
           data-tv-focus="tv-set-toggle-sfx"
           type="button"
           onClick={handleToggleSfx}
-          className="p-5 rounded-2xl bg-[#111520] border-2 border-white/10 hover:border-amber-400/60 text-left transition-all flex flex-col justify-between h-44 shadow-lg group"
+          className="p-5 rounded-2xl bg-ice-card border-2 border-ice-border hover:border-amber-400/60 text-left transition-all flex flex-col justify-between h-44 shadow-lg group"
         >
           <div className="flex items-start justify-between w-full">
             <div className="flex items-center gap-3">
@@ -323,7 +323,7 @@ export const TVSettingsView: React.FC<TVSettingsViewProps> = ({
                 <Volume2 className="w-6 h-6" />
               </div>
               <div>
-                <h3 className="text-base font-bold text-white uppercase tracking-wide group-hover:text-amber-300 transition-colors">
+                <h3 className="text-base font-bold text-ice-text uppercase tracking-wide group-hover:text-amber-400 transition-colors">
                   Âm Thanh Điều Khiển TV
                 </h3>
                 <span className="text-xs text-ice-subtext block mt-0.5">
@@ -357,7 +357,7 @@ export const TVSettingsView: React.FC<TVSettingsViewProps> = ({
             sfx.playClick();
             onSwitchProfile?.();
           }}
-          className="p-5 rounded-2xl bg-[#111520] border-2 border-white/10 hover:border-amber-400/60 text-left transition-all flex flex-col justify-between h-44 shadow-lg group"
+          className="p-5 rounded-2xl bg-ice-card border-2 border-ice-border hover:border-amber-400/60 text-left transition-all flex flex-col justify-between h-44 shadow-lg group"
         >
           <div className="flex items-start justify-between w-full">
             <div className="flex items-center gap-3">
@@ -367,7 +367,7 @@ export const TVSettingsView: React.FC<TVSettingsViewProps> = ({
                 size="md"
               />
               <div>
-                <h3 className="text-base font-bold text-white uppercase tracking-wide group-hover:text-amber-300 transition-colors">
+                <h3 className="text-base font-bold text-ice-text uppercase tracking-wide group-hover:text-amber-400 transition-colors">
                   {activeProfile?.nickname || 'Người Dùng'}
                 </h3>
                 <span className="text-xs text-ice-subtext block mt-0.5">
@@ -401,15 +401,15 @@ export const TVSettingsView: React.FC<TVSettingsViewProps> = ({
               onOpenAdminAuth();
             }
           }}
-          className="p-5 rounded-2xl bg-[#111520] border-2 border-white/10 hover:border-amber-400/60 text-left transition-all flex flex-col justify-between h-44 shadow-lg group"
+          className="p-5 rounded-2xl bg-ice-card border-2 border-ice-border hover:border-amber-400/60 text-left transition-all flex flex-col justify-between h-44 shadow-lg group"
         >
           <div className="flex items-start justify-between w-full">
             <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-400 shrink-0">
+              <div className="w-12 h-12 rounded-xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-500 dark:text-amber-400 shrink-0">
                 <ShieldCheck className="w-6 h-6" />
               </div>
               <div>
-                <h3 className="text-base font-bold text-white uppercase tracking-wide group-hover:text-amber-300 transition-colors">
+                <h3 className="text-base font-bold text-ice-text uppercase tracking-wide group-hover:text-amber-400 transition-colors">
                   Chế Độ Quản Trị Viên
                 </h3>
                 <span className="text-xs text-ice-subtext block mt-0.5">

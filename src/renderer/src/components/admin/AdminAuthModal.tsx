@@ -169,7 +169,7 @@ export const AdminAuthModal: React.FC<AdminAuthModalProps> = ({
         <div className="px-5 py-4 border-b border-ice-border flex items-center justify-between bg-ice-card/90">
           <div className="flex items-center gap-2">
             <Lock className="w-4 h-4 text-amber-400" />
-            <h3 className="text-sm font-bold text-white tracking-wide">
+            <h3 className="text-sm font-bold text-ice-text tracking-wide">
               {!hasPinSet 
                 ? 'Thiết lập mã PIN Admin' 
                 : isResetMode 
@@ -284,7 +284,7 @@ export const AdminAuthModal: React.FC<AdminAuthModalProps> = ({
                     onClick={() => {
                       if (pin.length < 10) setPin((prev) => prev + num.toString());
                     }}
-                    className="h-10 rounded-lg bg-ice-bg/80 border border-ice-border hover:bg-ice-hover text-white font-bold text-sm transition-all active:scale-95 flex items-center justify-center"
+                    className="h-10 rounded-lg bg-ice-bg/80 border border-ice-border hover:bg-ice-hover text-ice-text font-bold text-sm transition-all active:scale-95 flex items-center justify-center"
                   >
                     {num}
                   </button>
@@ -292,7 +292,7 @@ export const AdminAuthModal: React.FC<AdminAuthModalProps> = ({
                 <button
                   type="button"
                   onClick={() => setPin('')}
-                  className="h-10 rounded-lg bg-ice-bg/80 border border-ice-border hover:bg-ice-hover text-ice-subtext hover:text-white text-xs font-medium transition-all flex items-center justify-center"
+                  className="h-10 rounded-lg bg-ice-bg/80 border border-ice-border hover:bg-ice-hover text-ice-subtext hover:text-ice-text text-xs font-medium transition-all flex items-center justify-center"
                 >
                   Xóa
                 </button>
@@ -301,14 +301,14 @@ export const AdminAuthModal: React.FC<AdminAuthModalProps> = ({
                   onClick={() => {
                     if (pin.length < 10) setPin((prev) => prev + '0');
                   }}
-                  className="h-10 rounded-lg bg-ice-bg/80 border border-ice-border hover:bg-ice-hover text-white font-bold text-sm transition-all active:scale-95 flex items-center justify-center"
+                  className="h-10 rounded-lg bg-ice-bg/80 border border-ice-border hover:bg-ice-hover text-ice-text font-bold text-sm transition-all active:scale-95 flex items-center justify-center"
                 >
                   0
                 </button>
                 <button
                   type="button"
                   onClick={() => setPin((prev) => prev.slice(0, -1))}
-                  className="h-10 rounded-lg bg-ice-bg/80 border border-ice-border hover:bg-ice-hover text-ice-subtext hover:text-white text-xs font-medium transition-all flex items-center justify-center"
+                  className="h-10 rounded-lg bg-ice-bg/80 border border-ice-border hover:bg-ice-hover text-ice-subtext hover:text-ice-text text-xs font-medium transition-all flex items-center justify-center"
                 >
                   ⌫
                 </button>
@@ -367,7 +367,7 @@ export const AdminAuthModal: React.FC<AdminAuthModalProps> = ({
                     key={num}
                     type="button"
                     onClick={() => handleKeypadPress(num.toString())}
-                    className="h-10 rounded-lg bg-ice-bg/80 border border-ice-border hover:bg-ice-hover text-white font-bold text-sm transition-all active:scale-95 flex items-center justify-center"
+                    className="h-10 rounded-lg bg-ice-bg/80 border border-ice-border hover:bg-ice-hover text-ice-text font-bold text-sm transition-all active:scale-95 flex items-center justify-center"
                   >
                     {num}
                   </button>
@@ -375,14 +375,14 @@ export const AdminAuthModal: React.FC<AdminAuthModalProps> = ({
                 <button
                   type="button"
                   onClick={handleKeypadClear}
-                  className="h-10 rounded-lg bg-ice-bg/80 border border-ice-border hover:bg-ice-hover text-ice-subtext hover:text-white text-xs font-medium transition-all flex items-center justify-center"
+                  className="h-10 rounded-lg bg-ice-bg/80 border border-ice-border hover:bg-ice-hover text-ice-subtext hover:text-ice-text text-xs font-medium transition-all flex items-center justify-center"
                 >
                   Xóa
                 </button>
                 <button
                   type="button"
                   onClick={() => handleKeypadPress('0')}
-                  className="h-10 rounded-lg bg-ice-bg/80 border border-ice-border hover:bg-ice-hover text-white font-bold text-sm transition-all active:scale-95 flex items-center justify-center"
+                  className="h-10 rounded-lg bg-ice-bg/80 border border-ice-border hover:bg-ice-hover text-ice-text font-bold text-sm transition-all active:scale-95 flex items-center justify-center"
                 >
                   0
                 </button>
@@ -473,7 +473,7 @@ export const AdminAuthModal: React.FC<AdminAuthModalProps> = ({
                     key={num}
                     type="button"
                     onClick={() => handleKeypadPress(num.toString())}
-                    className="h-11 rounded-xl bg-ice-bg/90 border border-ice-border/80 hover:bg-ice-hover hover:border-amber-400/50 text-white font-bold text-base transition-all active:scale-95 flex items-center justify-center shadow-sm"
+                    className="h-11 rounded-xl bg-ice-bg/90 border border-ice-border/80 hover:bg-ice-hover hover:border-amber-400/50 text-ice-text font-bold text-base transition-all active:scale-95 flex items-center justify-center shadow-sm"
                   >
                     {num}
                   </button>
@@ -481,21 +481,21 @@ export const AdminAuthModal: React.FC<AdminAuthModalProps> = ({
                 <button
                   type="button"
                   onClick={handleKeypadClear}
-                  className="h-11 rounded-xl bg-ice-bg/90 border border-ice-border/80 hover:bg-ice-hover text-ice-subtext hover:text-white text-xs font-semibold transition-all flex items-center justify-center"
+                  className="h-11 rounded-xl bg-ice-bg/90 border border-ice-border/80 hover:bg-ice-hover text-ice-subtext hover:text-ice-text text-xs font-semibold transition-all flex items-center justify-center"
                 >
                   Xóa
                 </button>
                 <button
                   type="button"
                   onClick={() => handleKeypadPress('0')}
-                  className="h-11 rounded-xl bg-ice-bg/90 border border-ice-border/80 hover:bg-ice-hover hover:border-amber-400/50 text-white font-bold text-base transition-all active:scale-95 flex items-center justify-center shadow-sm"
+                  className="h-11 rounded-xl bg-ice-bg/90 border border-ice-border/80 hover:bg-ice-hover hover:border-amber-400/50 text-ice-text font-bold text-base transition-all active:scale-95 flex items-center justify-center shadow-sm"
                 >
                   0
                 </button>
                 <button
                   type="button"
                   onClick={handleKeypadBackspace}
-                  className="h-11 rounded-xl bg-ice-bg/90 border border-ice-border/80 hover:bg-ice-hover text-ice-subtext hover:text-white text-xs font-semibold transition-all flex items-center justify-center"
+                  className="h-11 rounded-xl bg-ice-bg/90 border border-ice-border/80 hover:bg-ice-hover text-ice-subtext hover:text-ice-text text-xs font-semibold transition-all flex items-center justify-center"
                 >
                   ⌫
                 </button>

@@ -92,7 +92,7 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({
           alt={currentGame.name}
           className="absolute inset-0 w-full h-full object-cover transition-transform duration-300"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-[#0A0C10] via-black/40 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-ice-bg via-black/40 to-transparent" />
 
         <div className="relative z-10 flex items-center justify-between">
           <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-ice-accent/30 text-ice-accent border border-ice-accent/40 backdrop-blur-md">
@@ -143,7 +143,7 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({
   }
 
   return (
-    <div className="relative w-full max-w-[1240px] mx-auto rounded-2xl overflow-hidden border border-ice-border/80 shadow-2xl select-none group bg-[#111318] flex flex-col md:flex-row items-stretch md:h-[460px] lg:h-[480px]">
+    <div className="relative w-full max-w-[1240px] mx-auto rounded-2xl overflow-hidden border border-ice-border/80 shadow-2xl select-none group bg-ice-card flex flex-col md:flex-row items-stretch md:h-[460px] lg:h-[480px]">
       {/* SVG Convolution Filter for true pixel unsharp masking */}
       <svg className="absolute w-0 h-0 overflow-hidden pointer-events-none" aria-hidden="true">
         <defs>
@@ -195,7 +195,7 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({
             background: `linear-gradient(to right, rgba(0,0,0,${Math.min(0.35, ((edgeDarknessVal || 25) / 100) * 0.4)}) 0%, transparent 8%, transparent 92%, rgba(0,0,0,${Math.min(0.35, ((edgeDarknessVal || 25) / 100) * 0.4)}) 100%)`
           }}
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-[#12141A]/60 via-transparent to-transparent md:hidden pointer-events-none" />
+        <div className="absolute inset-0 bg-gradient-to-t from-ice-bg/60 via-transparent to-transparent md:hidden pointer-events-none" />
 
         {/* Top-Left Featured Badge with Expiration / Reason */}
         <div className="absolute top-4 left-4 flex flex-wrap items-center gap-2 z-20">
@@ -225,7 +225,7 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({
       </div>
 
       {/* 2. RIGHT COLUMN: Information, Description & Actions (Generous vertical space, zero button clipping) */}
-      <div className="relative flex-1 min-w-[320px] p-5 lg:p-6 flex flex-col justify-between bg-gradient-to-b from-[#171A21] via-[#12141A] to-[#0F1115] border-t md:border-t-0 md:border-l border-ice-border/70 z-20 min-h-0 overflow-hidden">
+      <div className="relative flex-1 min-w-[320px] p-5 lg:p-6 flex flex-col justify-between bg-gradient-to-b from-ice-card via-ice-hover to-ice-bg border-t md:border-t-0 md:border-l border-ice-border/70 z-20 min-h-0 overflow-hidden">
         {/* Top Header & Title */}
         <div className="space-y-2 min-h-0">
           {/* Tags */}

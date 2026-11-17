@@ -199,9 +199,9 @@ export const VideoTheaterView: React.FC<VideoTheaterViewProps> = ({
     : (media.category ? media.category.split(',').map((s) => s.trim()) : ['Phim & Video']);
 
   return (
-    <div className="flex-1 flex flex-col bg-[#0A0C10] text-ice-text overflow-y-auto select-none">
+    <div className="flex-1 flex flex-col bg-ice-bg text-ice-text overflow-y-auto select-none">
       {/* Top Navigation Bar */}
-      <div className="sticky top-0 z-30 flex items-center justify-between px-6 py-3 bg-[#0F1115]/90 backdrop-blur-md border-b border-ice-border/60">
+      <div className="sticky top-0 z-30 flex items-center justify-between px-6 py-3 glass-header border-b border-ice-border/60">
         <div className="flex items-center gap-3">
           <button
             onClick={() => {
@@ -433,30 +433,30 @@ export const VideoTheaterView: React.FC<VideoTheaterViewProps> = ({
                       sfx.playClick();
                       setSourceMode(e.target.value as any);
                     }}
-                    className="bg-[#0B0D13] text-white border border-ice-border hover:border-amber-400 focus:border-amber-400 rounded-xl px-3 py-1.5 text-xs font-bold outline-none cursor-pointer transition-colors pr-8 appearance-none shadow-inner"
+                    className="bg-ice-card text-ice-text border border-ice-border hover:border-amber-400 focus:border-amber-400 rounded-xl px-3 py-1.5 text-xs font-bold outline-none cursor-pointer transition-colors pr-8 appearance-none shadow-inner"
                   >
                     {isDownloaded && (
-                      <option value="offline" className="bg-[#171A21] text-emerald-300">
+                      <option value="offline" className="bg-ice-card text-emerald-400">
                         💾 Bản Offline (Đã tải về máy)
                       </option>
                     )}
                     {isGoogleDrive && (
                       <>
-                        <option value="stream" className="bg-[#171A21] text-blue-300">
+                        <option value="stream" className="bg-ice-card text-blue-400">
                           ⚡ Google Drive Trực Tiếp
                         </option>
-                        <option value="proxy" className="bg-[#171A21] text-amber-300">
+                        <option value="proxy" className="bg-ice-card text-amber-400">
                           🛡️ HTML5 Local Proxy (Chống lỗi Drive)
                         </option>
                       </>
                     )}
                     {isYouTube && (
-                      <option value="youtube" className="bg-[#171A21] text-red-400">
+                      <option value="youtube" className="bg-ice-card text-red-400">
                         ▶️ YouTube HD Player
                       </option>
                     )}
                     {isFacebook && (
-                      <option value="facebook" className="bg-[#171A21] text-blue-400">
+                      <option value="facebook" className="bg-ice-card text-blue-400">
                         🎬 Facebook Video Player
                       </option>
                     )}

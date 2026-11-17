@@ -65,7 +65,7 @@ export const MobileHomeView: React.FC<MobileHomeViewProps> = ({
   };
 
   return (
-    <div className="flex-1 w-full h-full flex flex-col bg-[#07090E] select-none overflow-y-auto no-scrollbar p-3.5 space-y-4">
+    <div className="flex-1 w-full h-full flex flex-col bg-ice-bg text-ice-text select-none overflow-y-auto no-scrollbar p-3.5 space-y-4">
       {/* 0. TOP MOBILE SEARCH FORM */}
       <form
         action=""
@@ -76,7 +76,7 @@ export const MobileHomeView: React.FC<MobileHomeViewProps> = ({
         className="flex items-center gap-2 w-full pt-1"
       >
         <div className="relative flex-1">
-          <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+          <Search className="w-4 h-4 text-ice-subtext absolute left-3.5 top-1/2 -translate-y-1/2" />
           <input
             type="search"
             enterKeyHint="search"
@@ -88,13 +88,13 @@ export const MobileHomeView: React.FC<MobileHomeViewProps> = ({
             value={localSearch}
             onChange={(e) => setLocalSearch(e.target.value)}
             placeholder="Tìm kiếm trong kho Game PC..."
-            className="w-full h-10 pl-9.5 pr-8 rounded-2xl bg-[#141722] border border-white/10 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500/50 shadow-inner"
+            className="w-full h-10 pl-9.5 pr-8 rounded-full bg-ice-card border border-ice-border text-xs text-ice-text placeholder-ice-subtext focus:outline-none focus:border-ice-accent shadow-inner transition-colors"
           />
           {localSearch && (
             <button
               type="button"
               onClick={() => setLocalSearch('')}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white p-1"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-ice-subtext hover:text-ice-text p-1"
               title="Xóa tìm kiếm"
             >
               <X className="w-3.5 h-3.5" />
@@ -104,7 +104,7 @@ export const MobileHomeView: React.FC<MobileHomeViewProps> = ({
 
         <button
           type="submit"
-          className="h-10 px-3.5 rounded-2xl bg-cyan-500/15 hover:bg-cyan-500/25 active:scale-95 text-cyan-400 font-bold text-xs border border-cyan-500/30 flex items-center gap-1.5 transition-all shrink-0"
+          className="h-10 px-4 rounded-full bg-ice-accent/15 hover:bg-ice-accent/25 active:scale-95 text-ice-accent font-bold text-xs border border-ice-accent/30 flex items-center gap-1.5 transition-all shrink-0"
         >
           <Search className="w-3.5 h-3.5" />
           <span>Tìm</span>
@@ -174,7 +174,7 @@ export const MobileHomeView: React.FC<MobileHomeViewProps> = ({
                 <div
                   key={game.id}
                   onClick={() => onSelectGame(game)}
-                  className="rounded-xl overflow-hidden bg-[#14171F] border border-ice-border/70 cursor-pointer group hover:border-ice-accent/60 transition-all shadow-md flex flex-col"
+                  className="rounded-2xl overflow-hidden bg-ice-card border border-ice-border cursor-pointer group hover:border-ice-accent/60 transition-all shadow-md flex flex-col"
                 >
                   {/* 16:9 Thumbnail Cover */}
                   <div className="relative aspect-video w-full bg-black overflow-hidden">
@@ -229,7 +229,7 @@ export const MobileHomeView: React.FC<MobileHomeViewProps> = ({
                 <button
                   type="button"
                   onClick={() => setVisibleCount((prev) => prev + 10)}
-                  className="w-full py-2.5 rounded-xl bg-white/10 hover:bg-white/15 border border-white/10 text-white font-bold text-xs tracking-wide transition-all shadow-sm active:scale-98 flex items-center justify-center gap-1.5"
+                  className="w-full py-2.5 rounded-xl bg-ice-card hover:bg-ice-hover border border-ice-border text-ice-text font-bold text-xs tracking-wide transition-all shadow-sm active:scale-98 flex items-center justify-center gap-1.5"
                 >
                   <Plus className="w-4 h-4 text-cyan-400" />
                   <span>Xem Thêm (+10 Game • Còn lại {filteredGames.length - visibleCount})</span>

@@ -189,20 +189,20 @@ export const MobileVideoTheaterView: React.FC<MobileVideoTheaterViewProps> = ({
   return (
     <div
       ref={containerRef}
-      className="flex-1 w-full h-full flex flex-col bg-[#07090E] select-none overflow-y-auto no-scrollbar"
+      className="flex-1 w-full h-full flex flex-col bg-ice-bg text-ice-text select-none overflow-y-auto no-scrollbar"
     >
       {/* 1. TOP HEADER BAR (DEDICATED, SAFE FROM NOTCH, NEVER BLOCKS VIDEO CONTROLS) */}
-      <div className="sticky top-0 z-40 w-full bg-[#0D1017]/95 backdrop-blur-md border-b border-white/10 px-3 py-2 flex items-center justify-between pt-[max(0.5rem,env(safe-area-inset-top,0px))] shrink-0 shadow-md">
+      <div className="sticky top-0 z-40 w-full glass-header border-b border-ice-border/60 px-3 py-2 flex items-center justify-between pt-[max(0.5rem,env(safe-area-inset-top,0px))] shrink-0 shadow-md">
         <button
           type="button"
           onClick={() => {
             sfx.playClick();
             onBack();
           }}
-          className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-white font-medium text-xs border border-white/10 active:scale-95 transition-all shrink-0"
+          className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-ice-card hover:bg-ice-hover text-ice-text font-medium text-xs border border-ice-border active:scale-95 transition-all shrink-0"
           title="Quay lại danh sách"
         >
-          <ArrowLeft className="w-4 h-4 text-cyan-400" />
+          <ArrowLeft className="w-4 h-4 text-cyan-500 dark:text-cyan-400" />
           <span>Quay lại</span>
         </button>
 
@@ -431,7 +431,7 @@ export const MobileVideoTheaterView: React.FC<MobileVideoTheaterViewProps> = ({
       </div>
 
       {/* 3. PLAYBACK ENGINE SWITCHER (3 ENGINES ON MOBILE) */}
-      <div className="bg-[#12151F] px-3 py-2.5 border-b border-white/5 flex flex-col gap-1.5 shrink-0">
+      <div className="bg-ice-card px-3 py-2.5 border-b border-ice-border/60 flex flex-col gap-1.5 shrink-0">
         <div className="flex items-center justify-between gap-2 overflow-x-auto no-scrollbar">
           <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider shrink-0 flex items-center gap-1">
             <Tv className="w-3.5 h-3.5 text-cyan-400" />
@@ -446,11 +446,10 @@ export const MobileVideoTheaterView: React.FC<MobileVideoTheaterViewProps> = ({
                 sfx.playClick();
                 setPlaybackMode('external');
               }}
-              className={`px-2.5 py-1 rounded-lg text-xs font-bold flex items-center gap-1 transition-all ${
-                playbackMode === 'external'
-                  ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-black shadow-md shadow-cyan-500/25'
-                  : 'bg-white/5 text-slate-400 hover:text-white border border-white/10'
-              }`}
+              className={`px-2.5 py-1 rounded-lg text-xs font-bold flex items-center gap-1 transition-all ${playbackMode === 'external'
+                ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-black shadow-md shadow-cyan-500/25'
+                : 'bg-white/5 text-slate-400 hover:text-white border border-white/10'
+                }`}
             >
               <Smartphone className="w-3.5 h-3.5" />
               <span>🚀 App Ngoài (VLC/Drive)</span>
@@ -463,11 +462,10 @@ export const MobileVideoTheaterView: React.FC<MobileVideoTheaterViewProps> = ({
                 sfx.playClick();
                 setPlaybackMode('desktop');
               }}
-              className={`px-2.5 py-1 rounded-lg text-xs font-bold flex items-center gap-1 transition-all ${
-                playbackMode === 'desktop'
-                  ? 'bg-cyan-500 text-black shadow-md shadow-cyan-500/25'
-                  : 'bg-white/5 text-slate-400 hover:text-white border border-white/10'
-              }`}
+              className={`px-2.5 py-1 rounded-lg text-xs font-bold flex items-center gap-1 transition-all ${playbackMode === 'desktop'
+                ? 'bg-cyan-500 text-black shadow-md shadow-cyan-500/25'
+                : 'bg-white/5 text-slate-400 hover:text-white border border-white/10'
+                }`}
             >
               <Zap className="w-3.5 h-3.5" />
               <span>🎬 Rạp Desktop (Đáy)</span>
@@ -481,11 +479,10 @@ export const MobileVideoTheaterView: React.FC<MobileVideoTheaterViewProps> = ({
                   sfx.playClick();
                   setPlaybackMode('embed');
                 }}
-                className={`px-2.5 py-1 rounded-lg text-xs font-bold flex items-center gap-1 transition-all ${
-                  playbackMode === 'embed'
-                    ? 'bg-cyan-500 text-black shadow-md shadow-cyan-500/25'
-                    : 'bg-white/5 text-slate-400 hover:text-white border border-white/10'
-                }`}
+                className={`px-2.5 py-1 rounded-lg text-xs font-bold flex items-center gap-1 transition-all ${playbackMode === 'embed'
+                  ? 'bg-cyan-500 text-black shadow-md shadow-cyan-500/25'
+                  : 'bg-white/5 text-slate-400 hover:text-white border border-white/10'
+                  }`}
               >
                 <Globe className="w-3.5 h-3.5" />
                 <span>{isGoogleDrive ? '🌐 Drive Gốc' : 'YouTube Player'}</span>
@@ -500,11 +497,10 @@ export const MobileVideoTheaterView: React.FC<MobileVideoTheaterViewProps> = ({
                   sfx.playClick();
                   setPlaybackMode('proxy');
                 }}
-                className={`px-2.5 py-1 rounded-lg text-xs font-bold flex items-center gap-1 transition-all ${
-                  playbackMode === 'proxy'
-                    ? 'bg-amber-500 text-black shadow-md'
-                    : 'bg-white/5 text-slate-400 hover:text-white border border-white/10'
-                }`}
+                className={`px-2.5 py-1 rounded-lg text-xs font-bold flex items-center gap-1 transition-all ${playbackMode === 'proxy'
+                  ? 'bg-amber-500 text-black shadow-md'
+                  : 'bg-white/5 text-slate-400 hover:text-white border border-white/10'
+                  }`}
               >
                 <span>🚀 Proxy VIP</span>
               </button>
@@ -534,11 +530,10 @@ export const MobileVideoTheaterView: React.FC<MobileVideoTheaterViewProps> = ({
                   sfx.playClick();
                   setActiveLinkIndex(idx);
                 }}
-                className={`px-2 py-0.5 rounded text-[10px] font-bold transition-all ${
-                  activeLinkIndex === idx
-                    ? 'bg-amber-400 text-black shadow-sm'
-                    : 'bg-white/5 text-slate-400 hover:text-white'
-                }`}
+                className={`px-2 py-0.5 rounded text-[10px] font-bold transition-all ${activeLinkIndex === idx
+                  ? 'bg-amber-400 text-black shadow-sm'
+                  : 'bg-white/5 text-slate-400 hover:text-white'
+                  }`}
               >
                 {idx === 0 ? 'Nguồn 1 (Chính)' : `Nguồn ${idx + 1} (Dự phòng)`}
               </button>
@@ -548,7 +543,7 @@ export const MobileVideoTheaterView: React.FC<MobileVideoTheaterViewProps> = ({
       </div>
 
       {/* Prominent Quick-Action Card for VLC / MX Player */}
-      <div className="mx-3.5 mt-3 p-3 rounded-2xl bg-gradient-to-r from-cyan-950/40 via-blue-950/40 to-[#121520] border border-cyan-500/30 flex items-center justify-between gap-3 shadow-lg">
+      <div className="mx-3.5 mt-3 p-3 rounded-2xl bg-ice-card border border-cyan-500/30 flex items-center justify-between gap-3 shadow-lg">
         <div className="flex items-center gap-2.5 min-w-0">
           <div className="w-9 h-9 rounded-xl bg-cyan-500/20 border border-cyan-500/40 flex items-center justify-center shrink-0">
             <ExternalLink className="w-4 h-4 text-cyan-400" />
@@ -670,7 +665,7 @@ export const MobileVideoTheaterView: React.FC<MobileVideoTheaterViewProps> = ({
                     className={`flex items-center gap-3 p-2 rounded-xl cursor-pointer transition-all border ${
                       isCurrent
                         ? 'bg-cyan-500/20 border-cyan-500/50 text-white font-bold'
-                        : 'bg-[#12151D] hover:bg-white/5 border-white/5 text-slate-300'
+                        : 'bg-ice-card hover:bg-ice-hover border-ice-border/60 text-ice-subtext'
                     }`}
                   >
                     <div className="relative w-16 aspect-video rounded-lg overflow-hidden bg-black shrink-0">
@@ -689,7 +684,7 @@ export const MobileVideoTheaterView: React.FC<MobileVideoTheaterViewProps> = ({
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-xs font-bold line-clamp-1">{item.title}</p>
-                      <span className="text-[10px] text-slate-400">Tập {idx + 1}</span>
+                      <span className="text-[10px] text-ice-subtext">Tập {idx + 1}</span>
                     </div>
                   </div>
                 );
@@ -700,8 +695,8 @@ export const MobileVideoTheaterView: React.FC<MobileVideoTheaterViewProps> = ({
 
         {/* 6. RELATED / DISCOVER MORE VIDEOS */}
         {relatedVideos.length > 0 && (
-          <div className="space-y-2 pt-2 border-t border-white/5">
-            <span className="text-xs font-bold text-white flex items-center gap-1.5">
+          <div className="space-y-2 pt-2 border-t border-ice-border/60">
+            <span className="text-xs font-bold text-ice-text flex items-center gap-1.5">
               <Film className="w-4 h-4 text-cyan-400" />
               <span>Phim & Video liên quan</span>
             </span>
@@ -714,7 +709,7 @@ export const MobileVideoTheaterView: React.FC<MobileVideoTheaterViewProps> = ({
                     sfx.playClick();
                     onSelectVideo(item);
                   }}
-                  className="flex items-center gap-3 p-2 rounded-xl bg-[#12151D] hover:bg-white/5 border border-white/5 cursor-pointer transition-all active:scale-98"
+                  className="flex items-center gap-3 p-2 rounded-xl bg-ice-card hover:bg-ice-hover border border-ice-border/60 cursor-pointer transition-all active:scale-98"
                 >
                   <div className="w-20 aspect-video rounded-lg overflow-hidden bg-black shrink-0">
                     <SafeImage

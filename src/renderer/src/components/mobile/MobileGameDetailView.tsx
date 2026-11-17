@@ -61,9 +61,9 @@ export const MobileGameDetailView: React.FC<MobileGameDetailViewProps> = ({
     : [game.bannerPath, game.coverPath].filter(Boolean) as string[];
 
   return (
-    <div className="flex-1 w-full h-full flex flex-col bg-[#0A0C10] select-none overflow-hidden">
+    <div className="flex-1 w-full h-full flex flex-col bg-ice-bg text-ice-text select-none overflow-hidden">
       {/* 1. TOP HEADER BAR (FIXED, NEVER BLOCKS TRAILER) */}
-      <div className="w-full bg-[#0D1017] border-b border-white/10 px-3 py-2.5 flex items-center justify-between shrink-0 z-10 shadow-md">
+      <div className="w-full glass-header border-b border-ice-border/60 px-3 py-2.5 flex items-center justify-between shrink-0 z-10 shadow-md">
         <button
           type="button"
           onClick={onBack}
@@ -176,8 +176,8 @@ export const MobileGameDetailView: React.FC<MobileGameDetailViewProps> = ({
 
         {/* Description */}
         {game.description && (
-          <div className="p-3 rounded-xl bg-[#14171F] border border-ice-border/70 text-xs text-ice-subtext leading-relaxed space-y-1">
-            <span className="text-[11px] font-bold text-white uppercase tracking-wider block">
+          <div className="p-3 rounded-xl bg-ice-card border border-ice-border/70 text-xs text-ice-subtext leading-relaxed space-y-1">
+            <span className="text-[11px] font-bold text-ice-text uppercase tracking-wider block">
               Mô tả trò chơi
             </span>
             <p className={showFullDesc ? '' : 'line-clamp-3'}>
@@ -197,7 +197,7 @@ export const MobileGameDetailView: React.FC<MobileGameDetailViewProps> = ({
 
         {/* Action Buttons / Requirements (Steam, Discord, Hướng dẫn chơi) */}
         <div className="space-y-1.5">
-          <span className="text-[11px] font-bold text-white uppercase tracking-wider block">
+          <span className="text-[11px] font-bold text-ice-text uppercase tracking-wider block">
             Yêu cầu & Nút khởi chạy nhanh
           </span>
           <GameActionsWidget
@@ -210,7 +210,7 @@ export const MobileGameDetailView: React.FC<MobileGameDetailViewProps> = ({
         </div>
 
         {/* Technical Specs Card */}
-        <div className="p-3 rounded-xl bg-[#14171F] border border-ice-border/70 text-xs text-ice-subtext space-y-2">
+        <div className="p-3 rounded-xl bg-ice-card border border-ice-border/70 text-xs text-ice-subtext space-y-2">
           <div className="flex items-center justify-between">
             <span className="flex items-center gap-1.5">
               <HardDrive className="w-3.5 h-3.5 text-ice-accent" />

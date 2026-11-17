@@ -16,6 +16,7 @@ import {
   Shield
 } from 'lucide-react';
 import { UserMenuWidget } from '../profile/UserMenuWidget';
+import { ThemeToggleSwitch } from '../common/ThemeToggleSwitch';
 import type { NavigationTab, UserProfile } from '../../types';
 
 interface NavbarProps {
@@ -96,10 +97,10 @@ export const Navbar: React.FC<NavbarProps> = ({
   ];
 
   return (
-    <header className="relative flex-shrink-0 z-30 select-none">
+    <header className="relative flex-shrink-0 z-30 select-none px-4 pt-2.5 pb-1">
       {/* Top Admin banner if active */}
       {isAdmin && (
-        <div className="h-6 bg-amber-500/15 border-b border-amber-500/30 px-4 flex items-center justify-between text-xs text-amber-300">
+        <div className="mb-2 h-7 bg-amber-500/15 border border-amber-500/30 rounded-xl px-3.5 flex items-center justify-between text-xs text-amber-300 shadow-sm backdrop-blur-md">
           <div className="flex items-center gap-1.5 font-medium">
             <ShieldAlert className="w-3.5 h-3.5 text-amber-400" />
             <span>Chế độ Admin đang bật — Tự khoá sau {formatTime(adminTimeRemaining)}</span>
@@ -108,7 +109,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             {onOpenBannerManager && (
               <button
                 onClick={onOpenBannerManager}
-                className="hover:text-white transition-colors underline text-[11px] flex items-center gap-1 font-semibold"
+                className="hover:text-amber-200 transition-colors underline text-[11px] flex items-center gap-1 font-semibold"
               >
                 <Sparkles className="w-3 h-3 text-amber-400" />
                 <span>Quản Lý Banner</span>
@@ -116,7 +117,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             )}
             <button 
               onClick={onLockAdmin}
-              className="hover:text-white transition-colors underline text-[11px]"
+              className="hover:text-amber-200 transition-colors underline text-[11px]"
             >
               Khoá ngay
             </button>
@@ -124,14 +125,14 @@ export const Navbar: React.FC<NavbarProps> = ({
         </div>
       )}
 
-      {/* Main 56px Navigation Bar with window drag support */}
+      {/* Main Full-Width Floating Island Navigation Bar with window drag support */}
       <div 
-        className="h-14 bg-ice-card border-b border-ice-border px-4 flex items-center justify-between"
+        className="h-15 glass-header rounded-2xl px-4 flex items-center justify-between shadow-[0_8px_30px_rgba(0,0,0,0.12)] border border-ice-border/60 transition-all duration-300"
         style={{ WebkitAppRegion: 'drag' } as React.CSSProperties}
         onDoubleClick={handleMaximize}
       >
         {/* Brand & Tabs */}
-        <div className="flex items-center gap-8" style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}>
+        <div className="flex items-center gap-6" style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}>
           {/* Logo */}
           <div 
             onClick={() => onTabChange('home')}
@@ -148,80 +149,80 @@ export const Navbar: React.FC<NavbarProps> = ({
                     e.currentTarget.src = './icon.png';
                   }
                 }}
-                className="w-8 h-8 rounded-lg object-contain shadow-md group-hover:scale-105 transition-transform" 
+                className="w-8 h-8 rounded-xl object-contain shadow-md group-hover:scale-105 transition-transform" 
               />
             ) : (
-              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-900 to-[#0A1628] border border-cyan-400/40 flex items-center justify-center shadow-md group-hover:scale-105 transition-transform">
+              <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-blue-900 to-[#0A1628] border border-cyan-400/40 flex items-center justify-center shadow-md group-hover:scale-105 transition-transform">
                 <Gamepad2 className="w-4 h-4 text-cyan-300" />
               </div>
             )}
             <div className="flex flex-col">
-              <span className="font-bold text-base tracking-wider text-white group-hover:text-ice-accent transition-colors flex items-center gap-1">
+              <span className="font-extrabold text-sm tracking-wider text-ice-text group-hover:text-ice-accent transition-colors flex items-center gap-1">
                 ICELAUCH
                 <Sparkles className="w-3 h-3 text-ice-accent opacity-0 group-hover:opacity-100 transition-opacity" />
               </span>
             </div>
           </div>
 
-          {/* Navigation Links */}
-          <nav className="flex items-center gap-1">
+          {/* Navigation Links with Spacious Floating Pills */}
+          <nav className="flex items-center gap-1.5 bg-ice-bg/40 p-1 rounded-xl border border-ice-border/40">
             {navItems.map((item) => {
               const isActive = currentTab === item.id;
               return (
                 <button
                   key={item.id}
                   onClick={() => onTabChange(item.id)}
-                  className={`relative px-4 py-4 text-sm font-semibold tracking-wide transition-colors ${
+                  className={`relative px-3.5 py-1.5 text-xs font-bold tracking-wide rounded-lg transition-all ${
                     isActive 
-                      ? 'text-white' 
-                      : 'text-ice-subtext hover:text-white'
+                      ? 'bg-ice-accent text-white shadow-sm' 
+                      : 'text-ice-subtext hover:text-ice-text hover:bg-ice-hover/60'
                   }`}
                 >
                   {item.label}
-                  {isActive && (
-                    <div className="absolute bottom-0 left-2 right-2 h-0.5 bg-ice-accent rounded-full shadow-[0_0_8px_rgba(79,140,255,0.8)]" />
-                  )}
                 </button>
               );
             })}
           </nav>
         </div>
 
-        {/* Right Section: Search, Downloads, Admin, Window Controls */}
-        <div className="flex items-center gap-2.5" style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}>
-          {/* Search Bar */}
-          <div className="relative w-56 lg:w-64">
-            <Search className="w-4 h-4 text-ice-subtext absolute left-3 top-1/2 -translate-y-1/2" />
+        {/* Right Section: Search, Theme Toggle, Downloads, Admin, Window Controls */}
+        <div className="flex items-center gap-2" style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}>
+          {/* Search Bar - Concentric Pill Shape */}
+          <div className="relative w-52 lg:w-60">
+            <Search className="w-3.5 h-3.5 text-ice-subtext absolute left-3 top-1/2 -translate-y-1/2" />
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => onSearchChange(e.target.value)}
               placeholder="Tìm kiếm..."
-              className="w-full h-8 pl-9 pr-7 rounded bg-ice-bg/80 border border-ice-border text-xs text-ice-text placeholder-ice-subtext focus:outline-none focus:border-ice-accent transition-colors"
+              className="w-full h-8 pl-8 pr-7 rounded-full bg-ice-bg/70 border border-ice-border text-xs text-ice-text placeholder-ice-subtext focus:outline-none focus:border-ice-accent focus:bg-ice-bg transition-colors shadow-inner"
             />
             {searchQuery && (
               <button
                 onClick={() => onSearchChange('')}
-                className="absolute right-2 top-1/2 -translate-y-1/2 text-ice-subtext hover:text-white"
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-ice-subtext hover:text-ice-text"
               >
                 <X className="w-3.5 h-3.5" />
               </button>
             )}
           </div>
 
+          {/* Solar / Lunar Morphing Theme Switch */}
+          <ThemeToggleSwitch size="sm" />
+
           {/* Download Tray Toggle Button */}
           <button
             onClick={onToggleDownloadTray}
-            className={`relative flex items-center gap-2 h-8 px-3 rounded text-xs font-medium border transition-colors ${
+            className={`relative flex items-center gap-1.5 h-8 px-2.5 rounded-xl text-xs font-semibold border transition-all ${
               isDownloadTrayOpen
                 ? 'bg-ice-accent text-white border-ice-accent shadow-sm'
                 : activeDownloadsCount > 0
                 ? 'bg-ice-accent/15 text-ice-accent border-ice-accent/40 hover:bg-ice-accent/25'
-                : 'bg-ice-bg/60 text-ice-subtext border-ice-border hover:text-white hover:border-ice-subtext'
+                : 'bg-ice-bg/60 text-ice-subtext border-ice-border hover:text-ice-text hover:border-ice-subtext'
             }`}
           >
             <Download className="w-3.5 h-3.5" />
-            <span>Tải xuống</span>
+            <span className="hidden sm:inline">Tải xuống</span>
             {activeDownloadsCount > 0 && (
               <span className="flex items-center justify-center min-w-[18px] h-[18px] px-1 text-[10px] font-bold bg-ice-accent text-white rounded-full">
                 {activeDownloadsCount}
@@ -233,7 +234,7 @@ export const Navbar: React.FC<NavbarProps> = ({
           {isAdmin && onOpenBannerManager && (
             <button
               onClick={onOpenBannerManager}
-              className="flex items-center gap-1.5 h-8 px-3 rounded text-xs font-semibold bg-amber-500/15 hover:bg-amber-500/25 text-amber-300 border border-amber-500/40 transition-colors shadow-sm"
+              className="flex items-center gap-1.5 h-8 px-2.5 rounded-xl text-xs font-semibold bg-amber-500/15 hover:bg-amber-500/25 text-amber-300 border border-amber-500/40 transition-colors shadow-sm"
               title="Quản lý Banner nổi bật toàn hệ thống"
             >
               <Sparkles className="w-3.5 h-3.5 text-amber-400" />
@@ -245,7 +246,7 @@ export const Navbar: React.FC<NavbarProps> = ({
           {isAdmin && onOpenUserManagement && (
             <button
               onClick={onOpenUserManagement}
-              className="flex items-center gap-1.5 h-8 px-2.5 rounded text-xs font-semibold bg-blue-500/15 hover:bg-blue-500/25 text-blue-300 border border-blue-500/40 transition-colors shadow-sm cursor-pointer"
+              className="flex items-center gap-1.5 h-8 px-2.5 rounded-xl text-xs font-semibold bg-blue-500/15 hover:bg-blue-500/25 text-blue-300 border border-blue-500/40 transition-colors shadow-sm cursor-pointer"
               title="Quản lý người dùng & phân quyền"
             >
               <Users className="w-3.5 h-3.5 text-blue-400" />
@@ -257,7 +258,7 @@ export const Navbar: React.FC<NavbarProps> = ({
           {isAdmin && onOpenDeviceManager && (
             <button
               onClick={onOpenDeviceManager}
-              className="flex items-center gap-1.5 h-8 px-2.5 rounded text-xs font-semibold bg-cyan-500/15 hover:bg-cyan-500/25 text-cyan-300 border border-cyan-500/40 transition-colors shadow-sm cursor-pointer"
+              className="flex items-center gap-1.5 h-8 px-2.5 rounded-xl text-xs font-semibold bg-cyan-500/15 hover:bg-cyan-500/25 text-cyan-300 border border-cyan-500/40 transition-colors shadow-sm cursor-pointer"
               title="Quản lý thiết bị cấp quyền & cấp mã OTP"
             >
               <Shield className="w-3.5 h-3.5 text-cyan-400" />
@@ -278,10 +279,10 @@ export const Navbar: React.FC<NavbarProps> = ({
           {/* Admin Lock Button */}
           <button
             onClick={isAdmin ? onLockAdmin : onOpenAdminAuth}
-            className={`flex items-center gap-1.5 h-8 px-3 rounded text-xs font-medium border transition-colors ${
+            className={`flex items-center gap-1.5 h-8 px-2.5 rounded-xl text-xs font-medium border transition-colors ${
               isAdmin
-                ? 'bg-amber-500/20 text-amber-300 border-amber-500/50 hover:bg-amber-500/30'
-                : 'bg-ice-bg/60 text-ice-subtext border-ice-border hover:text-white hover:border-ice-subtext'
+                ? 'bg-amber-500/20 text-amber-300 border-amber-500/50 hover:bg-amber-500/30 font-semibold'
+                : 'bg-ice-bg/60 text-ice-subtext border-ice-border hover:text-ice-text hover:border-ice-subtext'
             }`}
             title={isAdmin ? 'Nhấp để khoá Chế độ Admin' : 'Mở Chế độ Admin'}
           >
@@ -299,17 +300,17 @@ export const Navbar: React.FC<NavbarProps> = ({
           </button>
 
           {/* Modern Frameless Window Caption Controls */}
-          <div className="flex items-center ml-1 pl-2.5 border-l border-ice-border/60 gap-1">
+          <div className="flex items-center ml-1 pl-2 border-l border-ice-border/60 gap-1">
             <button
               onClick={handleMinimize}
-              className="w-8 h-8 rounded-lg flex items-center justify-center text-ice-subtext hover:text-white hover:bg-white/10 transition-colors"
+              className="w-7 h-7 rounded-lg flex items-center justify-center text-ice-subtext hover:text-ice-text hover:bg-ice-hover transition-colors"
               title="Thu nhỏ cửa sổ"
             >
               <Minus className="w-3.5 h-3.5" />
             </button>
             <button
               onClick={handleMaximize}
-              className="w-8 h-8 rounded-lg flex items-center justify-center text-ice-subtext hover:text-white hover:bg-white/10 transition-colors"
+              className="w-7 h-7 rounded-lg flex items-center justify-center text-ice-subtext hover:text-ice-text hover:bg-ice-hover transition-colors"
               title={isMaximized ? "Khôi phục kích thước cửa sổ" : "Phóng to toàn màn hình"}
             >
               {isMaximized ? (
@@ -320,7 +321,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             </button>
             <button
               onClick={handleClose}
-              className="w-8 h-8 rounded-lg flex items-center justify-center text-ice-subtext hover:text-white hover:bg-rose-600 transition-colors"
+              className="w-7 h-7 rounded-lg flex items-center justify-center text-ice-subtext hover:text-white hover:bg-rose-600 transition-colors"
               title="Đóng ứng dụng"
             >
               <X className="w-4 h-4" />

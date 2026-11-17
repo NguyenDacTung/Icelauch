@@ -148,7 +148,7 @@ export const CustomLayoutEditorModal: React.FC<CustomLayoutEditorModalProps> = (
             ref={containerRef}
             onPointerMove={handlePointerMove}
             onPointerUp={handlePointerUp}
-            className="w-full max-w-4xl aspect-[18/9] bg-[#07090e] rounded-2xl border-2 border-dashed border-white/20 relative overflow-hidden shadow-2xl flex items-center justify-center"
+            className="w-full max-w-4xl aspect-[18/9] bg-ice-bg rounded-2xl border-2 border-dashed border-ice-border/60 relative overflow-hidden shadow-2xl flex items-center justify-center"
             style={{ touchAction: 'none' }}
           >
             {/* Guide Grid & Center Line */}

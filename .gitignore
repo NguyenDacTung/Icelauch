@@ -15,4 +15,5 @@ Data/covers/*
 Data/data.json.bak
 .DS_Store
 *.log
+agents/
 

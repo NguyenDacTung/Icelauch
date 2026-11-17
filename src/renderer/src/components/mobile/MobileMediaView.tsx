@@ -159,10 +159,10 @@ export const MobileMediaView: React.FC<MobileMediaViewProps> = ({
   }
 
   return (
-    <div className="flex-1 w-full h-full flex flex-col bg-[#07090E] select-none overflow-y-auto no-scrollbar p-3.5 space-y-4">
+    <div className="flex-1 w-full h-full flex flex-col bg-ice-bg text-ice-text select-none overflow-y-auto no-scrollbar p-3.5 space-y-4">
       {/* 1. TOP MOBILE SEARCH BAR & SUB-TABS */}
       <div className="space-y-2.5 shrink-0 pt-1">
-        {/* Search Input Form */}
+        {/* Search Input Form - Adaptive Pill Bar */}
         <form
           action=""
           onSubmit={(e) => {
@@ -172,7 +172,7 @@ export const MobileMediaView: React.FC<MobileMediaViewProps> = ({
           className="flex items-center gap-2 w-full"
         >
           <div className="relative flex-1">
-            <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+            <Search className="w-4 h-4 text-ice-subtext absolute left-3.5 top-1/2 -translate-y-1/2" />
             <input
               type="search"
               enterKeyHint="search"
@@ -184,13 +184,13 @@ export const MobileMediaView: React.FC<MobileMediaViewProps> = ({
               value={localSearch}
               onChange={(e) => setLocalSearch(e.target.value)}
               placeholder={`Tìm kiếm ${mediaTab === 'video' ? 'phim & video' : mediaTab === 'music' ? 'bài hát' : 'podcast'}...`}
-              className="w-full h-10 pl-9.5 pr-8 rounded-2xl bg-[#141722] border border-white/10 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500/50 shadow-inner"
+              className="w-full h-10 pl-9.5 pr-8 rounded-full bg-ice-card border border-ice-border text-xs text-ice-text placeholder-ice-subtext focus:outline-none focus:border-ice-accent shadow-inner transition-colors"
             />
             {localSearch && (
               <button
                 type="button"
                 onClick={() => setLocalSearch('')}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white p-1"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-ice-subtext hover:text-ice-text p-1"
                 title="Xóa tìm kiếm"
               >
                 <X className="w-3.5 h-3.5" />
@@ -200,16 +200,16 @@ export const MobileMediaView: React.FC<MobileMediaViewProps> = ({
 
           <button
             type="submit"
-            className="h-10 px-3.5 rounded-2xl bg-cyan-500/15 hover:bg-cyan-500/25 active:scale-95 text-cyan-400 font-bold text-xs border border-cyan-500/30 flex items-center gap-1.5 transition-all shrink-0"
+            className="h-10 px-4 rounded-full bg-ice-accent/15 hover:bg-ice-accent/25 active:scale-95 text-ice-accent font-bold text-xs border border-ice-accent/30 flex items-center gap-1.5 transition-all shrink-0"
           >
             <Search className="w-3.5 h-3.5" />
             <span>Tìm</span>
           </button>
         </form>
 
-        {/* Media Sub-Tabs (Phim, Nhạc, Audio) */}
+        {/* Media Sub-Tabs (Phim, Nhạc, Audio) - Concentric Pill Container */}
         <div className="flex items-center justify-between gap-2">
-          <div className="flex items-center gap-1 bg-[#12151F] p-1 rounded-2xl border border-white/5">
+          <div className="flex items-center gap-1 bg-ice-card p-1 rounded-full border border-ice-border shadow-sm">
             <button
               type="button"
               onClick={() => {
@@ -315,7 +315,7 @@ export const MobileMediaView: React.FC<MobileMediaViewProps> = ({
                     if (item.type === 'video') handleSetActiveMedia(item);
                     else onPlayAudio?.(item);
                   }}
-                  className="w-32 aspect-[2/3] rounded-2xl overflow-hidden bg-[#12151F] border border-white/10 relative shrink-0 cursor-pointer group shadow-md active:scale-98 transition-all flex flex-col"
+                  className="w-32 aspect-[2/3] rounded-2xl overflow-hidden bg-ice-card border border-ice-border relative shrink-0 cursor-pointer group shadow-md active:scale-98 transition-all flex flex-col"
                 >
                   <div className="relative w-full h-full bg-black">
                     <SafeImage
@@ -496,7 +496,7 @@ export const MobileMediaView: React.FC<MobileMediaViewProps> = ({
                         sfx.playClick();
                         handleSetActiveMedia(item);
                       }}
-                      className="w-36 aspect-[2/3] rounded-2xl overflow-hidden bg-[#12151F] border border-white/10 relative shrink-0 cursor-pointer group shadow-md active:scale-98 transition-all flex flex-col"
+                      className="w-36 aspect-[2/3] rounded-2xl overflow-hidden bg-ice-card border border-ice-border relative shrink-0 cursor-pointer group shadow-md active:scale-98 transition-all flex flex-col"
                     >
                       <div className="relative w-full h-full bg-black">
                         <SafeImage
@@ -554,7 +554,7 @@ export const MobileMediaView: React.FC<MobileMediaViewProps> = ({
                       if (item.type === 'video') handleSetActiveMedia(item);
                       else onPlayAudio?.(item);
                     }}
-                    className="rounded-2xl overflow-hidden bg-[#12151F] border border-white/10 cursor-pointer group hover:border-cyan-500/50 transition-all shadow-md flex flex-col active:scale-98"
+                    className="rounded-2xl overflow-hidden bg-ice-card border border-ice-border cursor-pointer group hover:border-ice-accent/60 transition-all shadow-md flex flex-col active:scale-98"
                   >
                     {/* 4:6 (2:3) List Card Poster */}
                     <div className="relative aspect-[2/3] w-full bg-black overflow-hidden">

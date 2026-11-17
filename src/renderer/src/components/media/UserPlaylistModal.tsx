@@ -99,19 +99,19 @@ export const UserPlaylistModal: React.FC<UserPlaylistModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 select-none">
-      <div className="bg-[#121620] border border-white/10 rounded-2xl w-full max-w-md overflow-hidden shadow-2xl flex flex-col max-h-[88vh] animate-fade-in">
+    <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 select-none text-ice-text">
+      <div className="bg-ice-card border border-ice-border rounded-2xl w-full max-w-md overflow-hidden shadow-2xl flex flex-col max-h-[88vh] animate-fade-in">
         {/* Header */}
-        <div className="px-5 py-4 border-b border-white/10 flex items-center justify-between bg-white/[0.03]">
+        <div className="px-5 py-4 border-b border-ice-border flex items-center justify-between bg-ice-card/90">
           <div className="flex items-center gap-2.5">
             <ListMusic className="w-4 h-4 text-amber-400" />
-            <h3 className="text-xs font-bold text-white tracking-wide uppercase">
+            <h3 className="text-xs font-bold text-ice-text tracking-wide uppercase">
               {playlist ? 'Chỉnh Sửa Danh Sách Phát' : 'Tạo Danh Sách Phát Mới'}
             </h3>
           </div>
           <button
             onClick={onClose}
-            className="p-1 rounded-lg text-slate-400 hover:text-white hover:bg-white/10 transition-colors"
+            className="p-1 rounded-lg text-ice-subtext hover:text-ice-text hover:bg-ice-hover transition-colors"
           >
             <X className="w-4 h-4" />
           </button>

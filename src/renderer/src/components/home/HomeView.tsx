@@ -174,7 +174,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
         {/* Gamer Profile Card */}
         <div className="flex items-center gap-3.5">
           <div className="w-11 h-11 rounded-xl bg-gradient-to-tr from-blue-600 via-ice-accent to-purple-600 p-0.5 shadow-md flex items-center justify-center">
-            <div className="w-full h-full bg-[#0F1115] rounded-[10px] flex items-center justify-center">
+            <div className="w-full h-full bg-ice-card rounded-[10px] flex items-center justify-center">
               <Trophy className="w-5 h-5 text-amber-400" />
             </div>
           </div>

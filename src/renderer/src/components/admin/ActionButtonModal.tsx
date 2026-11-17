@@ -88,12 +88,12 @@ export const ActionButtonModal: React.FC<ActionButtonModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm select-none animate-fadeIn">
-      <div className="w-full max-w-lg bg-[#12151D] border border-ice-border rounded-2xl shadow-2xl overflow-hidden flex flex-col">
+      <div className="w-full max-w-lg bg-ice-card border border-ice-border rounded-2xl shadow-2xl overflow-hidden flex flex-col">
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-ice-border/60 bg-[#171A21]">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-ice-border/60 bg-ice-card/90">
           <div className="flex items-center gap-2">
             <Sparkles className="w-5 h-5 text-amber-400" />
-            <h2 className="text-base font-bold text-white">
+            <h2 className="text-base font-bold text-ice-text">
               {button ? 'Chỉnh Sửa Nút Liên Kết & Mở App' : 'Thêm Nút Liên Kết Mới'}
             </h2>
           </div>
@@ -102,7 +102,7 @@ export const ActionButtonModal: React.FC<ActionButtonModalProps> = ({
               sfx.playClick();
               onClose();
             }}
-            className="p-1.5 rounded-lg text-ice-muted hover:text-white hover:bg-white/10 transition-colors"
+            className="p-1.5 rounded-lg text-ice-subtext hover:text-ice-text hover:bg-ice-hover transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
@@ -111,7 +111,7 @@ export const ActionButtonModal: React.FC<ActionButtonModalProps> = ({
         {/* Form Body */}
         <form onSubmit={handleSubmit} className="p-6 space-y-4 overflow-y-auto max-h-[80vh]">
           {error && (
-            <div className="p-3 bg-red-500/20 border border-red-500/40 rounded-xl text-red-300 text-xs font-semibold">
+            <div className="p-3 bg-red-500/20 border border-red-500/40 rounded-xl text-red-400 text-xs font-semibold">
               {error}
             </div>
           )}
@@ -126,7 +126,7 @@ export const ActionButtonModal: React.FC<ActionButtonModalProps> = ({
               value={label}
               onChange={(e) => setLabel(e.target.value)}
               placeholder="VD: Mở Steam, Kênh Thoại Discord, Xem Mod..."
-              className="w-full bg-[#0A0C10] border border-ice-border focus:border-amber-400 rounded-xl px-3.5 py-2 text-xs text-white outline-none transition-colors"
+              className="w-full bg-ice-bg border border-ice-border focus:border-amber-400 rounded-xl px-3.5 py-2 text-xs text-ice-text outline-none transition-colors"
             />
           </div>
 
@@ -140,7 +140,7 @@ export const ActionButtonModal: React.FC<ActionButtonModalProps> = ({
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               placeholder="VD: Yêu cầu mở trước khi khởi động game, vào phòng #3..."
-              className="w-full bg-[#0A0C10] border border-ice-border focus:border-amber-400 rounded-xl px-3.5 py-2 text-xs text-white outline-none transition-colors"
+              className="w-full bg-ice-bg border border-ice-border focus:border-amber-400 rounded-xl px-3.5 py-2 text-xs text-ice-text outline-none transition-colors"
             />
           </div>
 
@@ -158,8 +158,8 @@ export const ActionButtonModal: React.FC<ActionButtonModalProps> = ({
                 }}
                 className={`flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl border text-xs font-bold transition-all ${
                   type === 'app'
-                    ? 'bg-blue-600/25 border-blue-500 text-blue-300 shadow-sm'
-                    : 'bg-[#0A0C10] border-ice-border text-ice-subtext hover:text-white'
+                    ? 'bg-blue-600/25 border-blue-500 text-blue-400 shadow-sm'
+                    : 'bg-ice-bg border-ice-border text-ice-subtext hover:text-ice-text'
                 }`}
               >
                 <AppWindow className="w-4 h-4 text-blue-400" />
@@ -174,8 +174,8 @@ export const ActionButtonModal: React.FC<ActionButtonModalProps> = ({
                 }}
                 className={`flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl border text-xs font-bold transition-all ${
                   type === 'link'
-                    ? 'bg-amber-500/25 border-amber-500 text-amber-300 shadow-sm'
-                    : 'bg-[#0A0C10] border-ice-border text-ice-subtext hover:text-white'
+                    ? 'bg-amber-500/25 border-amber-500 text-amber-500 dark:text-amber-300 shadow-sm'
+                    : 'bg-ice-bg border-ice-border text-ice-subtext hover:text-ice-text'
                 }`}
               >
                 <ExternalLink className="w-4 h-4 text-amber-400" />
@@ -200,8 +200,8 @@ export const ActionButtonModal: React.FC<ActionButtonModalProps> = ({
                   }}
                   className={`flex items-center gap-2 p-2 rounded-xl border text-xs font-medium transition-all ${
                     icon === opt.id
-                      ? 'bg-amber-500/20 border-amber-500/50 text-white font-bold'
-                      : 'bg-[#0A0C10] border-ice-border/60 text-ice-muted hover:text-white'
+                      ? 'bg-amber-500/20 border-amber-500/50 text-ice-text font-bold'
+                      : 'bg-ice-bg border-ice-border/60 text-ice-subtext hover:text-ice-text'
                   }`}
                 >
                   {opt.id === 'steam' && <span className="text-blue-400 font-bold">🎮 Steam</span>}
@@ -231,20 +231,20 @@ export const ActionButtonModal: React.FC<ActionButtonModalProps> = ({
                     ? 'VD: steam://open/main hoặc C:\\Program Files\\...\\app.exe'
                     : 'VD: https://discord.gg/... hoặc https://linkneverdie.com'
                 }
-                className="flex-1 bg-[#0A0C10] border border-ice-border focus:border-amber-400 rounded-xl px-3.5 py-2 text-xs text-white outline-none font-mono"
+                className="flex-1 bg-ice-bg border border-ice-border focus:border-amber-400 rounded-xl px-3.5 py-2 text-xs text-ice-text outline-none font-mono"
               />
               {type === 'app' && (
                 <button
                   type="button"
                   onClick={handleBrowseFile}
-                  className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-ice-card hover:bg-ice-hover text-white text-xs font-semibold border border-ice-border transition-colors shrink-0"
+                  className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-ice-card hover:bg-ice-hover text-ice-text text-xs font-semibold border border-ice-border transition-colors shrink-0"
                 >
                   <FolderSearch className="w-3.5 h-3.5 text-amber-400" />
                   <span>Chọn file</span>
                 </button>
               )}
             </div>
-            <p className="text-[11px] text-ice-muted mt-1">
+            <p className="text-[11px] text-ice-subtext mt-1">
               {type === 'app'
                 ? 'Hỗ trợ giao thức steam://, discord://, spotify:// hoặc đường dẫn file .exe trên máy'
                 : 'Đường dẫn liên kết web, tự động mở bằng trình duyệt mặc định'}
@@ -253,7 +253,7 @@ export const ActionButtonModal: React.FC<ActionButtonModalProps> = ({
 
           {/* Options: Default for new games & Admin rights */}
           <div className="pt-2 space-y-2 border-t border-ice-border/40">
-            <label className="flex items-center gap-2 cursor-pointer text-xs text-white select-none">
+            <label className="flex items-center gap-2 cursor-pointer text-xs text-ice-text select-none">
               <input
                 type="checkbox"
                 checked={isDefault}
@@ -264,7 +264,7 @@ export const ActionButtonModal: React.FC<ActionButtonModalProps> = ({
             </label>
 
             {type === 'app' && (
-              <label className="flex items-center gap-2 cursor-pointer text-xs text-white select-none">
+              <label className="flex items-center gap-2 cursor-pointer text-xs text-ice-text select-none">
                 <input
                   type="checkbox"
                   checked={runAsAdmin}
@@ -285,7 +285,7 @@ export const ActionButtonModal: React.FC<ActionButtonModalProps> = ({
                 sfx.playClick();
                 onClose();
               }}
-              className="px-4 py-2 rounded-xl bg-ice-card hover:bg-ice-hover text-ice-subtext hover:text-white text-xs font-semibold border border-ice-border transition-colors"
+              className="px-4 py-2 rounded-xl bg-ice-card hover:bg-ice-hover text-ice-subtext hover:text-ice-text text-xs font-semibold border border-ice-border transition-colors"
             >
               Hủy
             </button>

@@ -63,25 +63,25 @@ export const GenreShelfScroller: React.FC<GenreShelfScrollerProps> = ({
     <section className={`space-y-3 ${className}`}>
       {/* Header */}
       <div className="flex items-center justify-between">
-        <h3 className="text-sm font-bold text-white tracking-wide uppercase flex items-center gap-2">
+        <h3 className="text-sm font-bold text-ice-text tracking-wide uppercase flex items-center gap-2">
           <span className={`w-1.5 h-3.5 ${iconAccentColor} rounded-sm`} />
           <span>{title}</span>
           {typeof count === 'number' && (
-            <span className="text-xs text-ice-muted font-mono font-normal">({count})</span>
+            <span className="text-xs text-ice-subtext font-mono font-normal">({count})</span>
           )}
         </h3>
 
         <div className="flex items-center gap-2">
           {/* Header-based Scroll Arrows (Netflix / Steam style, 0 overlap with cards!) */}
-          <div className="flex items-center gap-1 bg-white/5 p-0.5 rounded-lg border border-white/10">
+          <div className="flex items-center gap-1 bg-ice-card p-0.5 rounded-lg border border-ice-border/70">
             <button
               type="button"
               disabled={!canScrollLeft}
               onClick={() => handleScroll('left')}
               className={`p-1 rounded-md transition-all ${
                 canScrollLeft
-                  ? 'text-white hover:bg-white/10 hover:text-amber-400 active:scale-95 cursor-pointer'
-                  : 'text-white/20 cursor-not-allowed'
+                  ? 'text-ice-text hover:bg-ice-hover hover:text-amber-400 active:scale-95 cursor-pointer'
+                  : 'text-ice-subtext/30 cursor-not-allowed'
               }`}
               title="Cuộn sang trái"
               aria-label="Cuộn sang trái"
@@ -94,8 +94,8 @@ export const GenreShelfScroller: React.FC<GenreShelfScrollerProps> = ({
               onClick={() => handleScroll('right')}
               className={`p-1 rounded-md transition-all ${
                 canScrollRight
-                  ? 'text-white hover:bg-white/10 hover:text-amber-400 active:scale-95 cursor-pointer'
-                  : 'text-white/20 cursor-not-allowed'
+                  ? 'text-ice-text hover:bg-ice-hover hover:text-amber-400 active:scale-95 cursor-pointer'
+                  : 'text-ice-subtext/30 cursor-not-allowed'
               }`}
               title="Cuộn sang phải"
               aria-label="Cuộn sang phải"
@@ -123,7 +123,7 @@ export const GenreShelfScroller: React.FC<GenreShelfScrollerProps> = ({
       <div className="relative group/shelf">
         {/* Soft Left Fader */}
         <div
-          className={`pointer-events-none absolute left-0 top-0 bottom-2 w-8 bg-gradient-to-r from-[#0F1115] to-transparent z-10 transition-opacity duration-300 ${
+          className={`pointer-events-none absolute left-0 top-0 bottom-2 w-8 bg-gradient-to-r from-ice-bg to-transparent z-10 transition-opacity duration-300 ${
             canScrollLeft ? 'opacity-80' : 'opacity-0'
           }`}
         />
@@ -138,7 +138,7 @@ export const GenreShelfScroller: React.FC<GenreShelfScrollerProps> = ({
 
         {/* Soft Right Fader */}
         <div
-          className={`pointer-events-none absolute right-0 top-0 bottom-2 w-8 bg-gradient-to-l from-[#0F1115] to-transparent z-10 transition-opacity duration-300 ${
+          className={`pointer-events-none absolute right-0 top-0 bottom-2 w-8 bg-gradient-to-l from-ice-bg to-transparent z-10 transition-opacity duration-300 ${
             canScrollRight ? 'opacity-80' : 'opacity-0'
           }`}
         />

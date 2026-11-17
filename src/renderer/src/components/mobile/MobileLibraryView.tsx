@@ -106,9 +106,9 @@ export const MobileLibraryView: React.FC<MobileLibraryViewProps> = ({
   });
 
   return (
-    <div className="flex-1 w-full h-full flex flex-col bg-[#07090E] select-none overflow-hidden relative">
+    <div className="flex-1 w-full h-full flex flex-col bg-ice-bg text-ice-text select-none overflow-hidden relative">
       {/* 1. TOP MOBILE HEADER */}
-      <header className="px-3.5 pt-3 pb-2.5 bg-[#12151F] border-b border-white/5 flex flex-col gap-2.5 shrink-0">
+      <header className="px-3.5 pt-3 pb-2.5 glass-panel border-b border-ice-border/60 flex flex-col gap-2.5 shrink-0">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-xl bg-cyan-500/15 border border-cyan-500/30 flex items-center justify-center text-cyan-400">
@@ -139,7 +139,7 @@ export const MobileLibraryView: React.FC<MobileLibraryViewProps> = ({
         </div>
 
         {/* 4 Sub-tab pills: Phim, Nhạc, Audio, Game (Default: Phim) */}
-        <div className="flex items-center bg-black/40 p-1 rounded-xl border border-white/5 overflow-x-auto no-scrollbar">
+        <div className="flex items-center bg-ice-hover/50 p-1 rounded-full border border-ice-border/60 overflow-x-auto no-scrollbar">
           <button
             type="button"
             onClick={() => {
@@ -213,7 +213,7 @@ export const MobileLibraryView: React.FC<MobileLibraryViewProps> = ({
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Tìm kiếm trong thư viện của bạn..."
-            className="w-full h-8 pl-8 pr-3 rounded-xl bg-black/40 border border-white/10 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500/50"
+            className="w-full h-8 pl-8 pr-3 rounded-full bg-ice-hover/50 border border-ice-border text-xs text-ice-text placeholder-ice-subtext focus:outline-none focus:border-ice-accent transition-colors"
           />
         </div>
       </header>
@@ -256,7 +256,7 @@ export const MobileLibraryView: React.FC<MobileLibraryViewProps> = ({
                 {filteredGames.map((game) => (
                   <div
                     key={game.id}
-                    className="group relative rounded-2xl bg-[#12151D] border border-white/10 overflow-hidden flex flex-col shadow-md active:scale-98 transition-all"
+                    className="group relative rounded-2xl bg-ice-card border border-ice-border overflow-hidden flex flex-col shadow-md active:scale-98 transition-all"
                   >
                     {/* Game Cover Aspect 3:4 */}
                     <div
@@ -368,7 +368,7 @@ export const MobileLibraryView: React.FC<MobileLibraryViewProps> = ({
                     return (
                       <div
                         key={pl.id}
-                        className="flex items-center justify-between p-3 rounded-2xl bg-[#12151F] border border-white/10 hover:border-cyan-500/40 transition-all shadow-md"
+                        className="flex items-center justify-between p-3 rounded-2xl bg-ice-card border border-ice-border hover:border-ice-accent/40 transition-all shadow-md"
                       >
                         <div className="flex items-center gap-3 min-w-0 flex-1">
                           <div className="w-12 h-12 rounded-xl bg-black/60 border border-white/10 flex items-center justify-center shrink-0 overflow-hidden relative">
@@ -482,7 +482,7 @@ export const MobileLibraryView: React.FC<MobileLibraryViewProps> = ({
                         if (item.type === 'video') onSelectMedia?.(item);
                         else onPlayAudio?.(item);
                       }}
-                      className="rounded-2xl overflow-hidden bg-[#12151F] border border-white/10 cursor-pointer group hover:border-cyan-500/50 transition-all shadow-md flex flex-col active:scale-98"
+                      className="rounded-2xl overflow-hidden bg-ice-card border border-ice-border cursor-pointer group hover:border-ice-accent/50 transition-all shadow-md flex flex-col active:scale-98"
                     >
                       <div className="relative aspect-[2/3] w-full bg-black overflow-hidden">
                         <SafeImage

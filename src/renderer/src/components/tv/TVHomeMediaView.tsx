@@ -96,7 +96,7 @@ export const TVHomeMediaView: React.FC<TVHomeMediaViewProps> = ({
     <div className="flex-1 overflow-y-auto no-scrollbar p-6 space-y-8 select-none">
       {/* 1. EXACT 16:9 NETFLIX-STYLE TV HERO BANNER */}
       {activeHero && (
-        <div className="relative w-full aspect-video rounded-3xl overflow-hidden border border-white/10 shadow-2xl bg-[#0E1118] group/banner flex items-end p-8 sm:p-10">
+        <div className="relative w-full aspect-video rounded-3xl overflow-hidden border border-ice-border shadow-2xl bg-ice-card group/banner flex items-end p-8 sm:p-10">
           {/* Background: Auto-preview Trailer (Muted) or 16:9 Artwork */}
           {showTrailerPreview && isYouTubeHero ? (
             <iframe
@@ -115,8 +115,8 @@ export const TVHomeMediaView: React.FC<TVHomeMediaViewProps> = ({
           )}
 
           {/* Cinematic Directional Gradients for 100% Text Legibility */}
-          <div className="absolute inset-0 bg-gradient-to-t from-[#0A0D14] via-[#0A0D14]/70 to-transparent" />
-          <div className="absolute inset-0 bg-gradient-to-r from-[#0A0D14]/95 via-[#0A0D14]/50 to-transparent w-3/4" />
+          <div className="absolute inset-0 bg-gradient-to-t from-ice-bg via-ice-bg/70 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-r from-ice-bg/95 via-ice-bg/50 to-transparent w-3/4" />
 
           {/* Banner Meta & Action Buttons */}
           <div className="relative z-10 max-w-2xl space-y-3">
@@ -246,7 +246,7 @@ export const TVHomeMediaView: React.FC<TVHomeMediaViewProps> = ({
                     sfx.playClick();
                     onPlayMedia(item);
                   }}
-                  className="group/card relative w-60 lg:w-72 aspect-video rounded-2xl overflow-hidden bg-[#151924] border border-white/10 shrink-0 cursor-pointer shadow-lg outline-none transition-all hover:scale-102 hover:border-amber-400"
+                  className="group/card relative w-60 lg:w-72 aspect-video rounded-2xl overflow-hidden bg-ice-card border border-ice-border shrink-0 cursor-pointer shadow-lg outline-none transition-all hover:scale-102 hover:border-amber-400"
                 >
                   <img
                     src={thumb}
@@ -301,7 +301,7 @@ export const TVHomeMediaView: React.FC<TVHomeMediaViewProps> = ({
                     sfx.playClick();
                     onPlayMedia(item);
                   }}
-                  className="group/card relative w-56 lg:w-64 aspect-video rounded-2xl overflow-hidden bg-[#151924] border border-white/10 shrink-0 cursor-pointer shadow-lg outline-none transition-all hover:scale-102"
+                  className="group/card relative w-56 lg:w-64 aspect-video rounded-2xl overflow-hidden bg-ice-card border border-ice-border shrink-0 cursor-pointer shadow-lg outline-none transition-all hover:scale-102"
                 >
                   <img
                     src={thumb}
@@ -362,7 +362,7 @@ export const TVHomeMediaView: React.FC<TVHomeMediaViewProps> = ({
                       sfx.playClick();
                       onPlayMedia(item);
                     }}
-                    className="group/card relative w-56 lg:w-64 aspect-video rounded-2xl overflow-hidden bg-[#151924] border border-white/10 shrink-0 cursor-pointer shadow-lg outline-none transition-all hover:scale-102 hover:border-amber-400"
+                    className="group/card relative w-56 lg:w-64 aspect-video rounded-2xl overflow-hidden bg-ice-card border border-ice-border shrink-0 cursor-pointer shadow-lg outline-none transition-all hover:scale-102 hover:border-amber-400"
                   >
                     <img
                       src={thumb}
@@ -412,7 +412,7 @@ export const TVHomeMediaView: React.FC<TVHomeMediaViewProps> = ({
                     sfx.playClick();
                     onPlayMedia(item);
                   }}
-                  className="group/card relative w-44 lg:w-48 aspect-square rounded-2xl overflow-hidden bg-[#151924] border border-white/10 shrink-0 cursor-pointer shadow-lg outline-none transition-all hover:scale-102"
+                  className="group/card relative w-44 lg:w-48 aspect-square rounded-2xl overflow-hidden bg-ice-card border border-ice-border shrink-0 cursor-pointer shadow-lg outline-none transition-all hover:scale-102"
                 >
                   <img
                     src={thumb}

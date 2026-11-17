@@ -314,12 +314,7 @@ export const MediaView: React.FC<MediaViewProps> = ({
             />
           ) : (
             <div
-              className={`w-full h-full flex flex-col items-center justify-center p-3 text-center select-none ${item.type === 'video'
-                ? 'bg-gradient-to-br from-[#121624] via-[#0E111A] to-[#080B10]'
-                : item.subType === 'podcast'
-                  ? 'bg-gradient-to-br from-[#1E1224] via-[#140A1A] to-[#0A050D]'
-                  : 'bg-gradient-to-br from-[#1E1A12] via-[#14110A] to-[#0A0805]'
-                }`}
+              className={`w-full h-full flex flex-col items-center justify-center p-3 text-center select-none bg-gradient-to-br from-ice-card via-ice-hover to-ice-bg`}
             >
               <div className="w-12 h-12 rounded-2xl bg-white/10 flex items-center justify-center text-amber-400 shadow-md">
                 <IconComponent className="w-6 h-6" />
@@ -537,7 +532,7 @@ export const MediaView: React.FC<MediaViewProps> = ({
         </button>
 
         {/* Playlist Header Card */}
-        <div className="p-6 rounded-2xl bg-gradient-to-r from-[#141824] via-[#10141E] to-[#161B29] border border-white/10 shadow-2xl flex flex-wrap md:flex-nowrap items-center gap-6">
+        <div className="p-6 rounded-2xl bg-gradient-to-r from-ice-card via-ice-hover/70 to-ice-card border border-ice-border shadow-xl flex flex-wrap md:flex-nowrap items-center gap-6">
           <div className={`overflow-hidden bg-black/70 shrink-0 border border-white/15 shadow-xl ${viewingPlaylist.coverAspectRatio === '16:9' ? 'w-48 aspect-video rounded-xl' : 'w-32 h-32 rounded-2xl'
             }`}>
             {viewingPlaylist.coverPath ? (
@@ -683,7 +678,7 @@ export const MediaView: React.FC<MediaViewProps> = ({
             {/* Mini Search Button & Input */}
             <div className="relative flex items-center">
               {isPlaylistSearchOpen ? (
-                <div className="flex items-center gap-1 bg-[#12151F] border border-amber-400/50 rounded-lg px-2.5 py-1 animate-fade-in shadow-md">
+                <div className="flex items-center gap-1 bg-ice-card border border-amber-400/50 rounded-lg px-2.5 py-1 animate-fade-in shadow-md">
                   <Search className="w-3.5 h-3.5 text-amber-400" />
                   <input
                     type="text"

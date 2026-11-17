@@ -20,6 +20,7 @@ import {
 } from 'lucide-react';
 import { AvatarBadge } from '../common/AvatarBadge';
 import { ProfileModal } from './ProfileModal';
+import { ThemeToggleSwitch } from '../common/ThemeToggleSwitch';
 import type { UserProfile } from '../../types';
 import { DEFAULT_SUPABASE_URL, DEFAULT_SUPABASE_ANON_KEY } from '../../services/platformAdapter';
 
@@ -493,16 +494,17 @@ export const ProfilePickerView: React.FC<ProfilePickerViewProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-[#0A0C10] flex flex-col items-center justify-center p-4 sm:p-6 overflow-y-auto custom-scrollbar">
+    <div className="fixed inset-0 z-50 bg-ice-bg text-ice-text flex flex-col items-center justify-center p-4 sm:p-6 overflow-y-auto custom-scrollbar">
       {/* Background ambient lighting */}
       <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[350px] bg-gradient-to-r from-ice-accent/15 via-blue-600/10 to-indigo-600/15 rounded-full blur-[120px] pointer-events-none" />
 
-      {/* Discreet Admin Lock Button for Owner */}
-      <div className="absolute top-4 right-4 z-20">
+      {/* Top Controls: Solar / Lunar Switch & Discreet Admin Lock Button */}
+      <div className="absolute top-4 right-4 z-20 flex items-center gap-3">
+        <ThemeToggleSwitch size="sm" />
         <button
           type="button"
           onClick={() => setShowAdminBypass(true)}
-          className="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-white/30 hover:text-amber-400 transition-colors cursor-pointer select-none"
+          className="p-2 rounded-xl bg-ice-card/60 hover:bg-ice-hover text-ice-subtext hover:text-amber-400 border border-ice-border/60 transition-colors cursor-pointer select-none"
           title="Chủ sở hữu (Đăng nhập nhanh bằng PIN Admin)"
         >
           <Lock className="w-4 h-4" />
@@ -698,7 +700,7 @@ export const ProfilePickerView: React.FC<ProfilePickerViewProps> = ({
       {/* Dual Login Modal for Selected Saved Profile Card */}
       {promptProfile && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md animate-fade-in select-none">
-          <div className={`bg-[#14171F] border border-ice-border rounded-3xl w-full max-w-sm overflow-hidden shadow-2xl p-6 flex flex-col items-center space-y-5 ${
+          <div className={`bg-ice-card border border-ice-border rounded-3xl w-full max-w-sm overflow-hidden shadow-2xl p-6 flex flex-col items-center space-y-5 ${
             isShaking ? 'animate-shake' : ''
           }`}>
             <div className="flex flex-col items-center space-y-2">
@@ -868,7 +870,7 @@ export const ProfilePickerView: React.FC<ProfilePickerViewProps> = ({
       {/* Emergency Admin Master PIN Modal */}
       {showAdminBypass && (
         <div className="fixed inset-0 z-[10000] flex items-center justify-center bg-black/80 backdrop-blur-md p-4 animate-fade-in">
-          <div className="w-full max-w-sm bg-[#161A24] border border-amber-500/30 rounded-2xl p-6 shadow-2xl space-y-4">
+          <div className="w-full max-w-sm bg-ice-card border border-amber-500/30 rounded-2xl p-6 shadow-2xl space-y-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2 text-amber-400 font-bold text-sm">
                 <Lock className="w-4 h-4" />

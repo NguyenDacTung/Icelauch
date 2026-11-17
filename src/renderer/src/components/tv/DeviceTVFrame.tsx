@@ -249,10 +249,10 @@ export const DeviceTVFrame: React.FC<DeviceTVFrameProps> = ({
       {/* 1. TV SCREEN CONTAINER (16:9 High-Tech Smart TV Design) */}
       <div
         ref={tvContainerRef}
-        className="relative w-full max-w-[1520px] aspect-[16/9] bg-[#0A0D14] rounded-2xl border-4 border-[#1E2330] shadow-[0_25px_80px_rgba(0,0,0,0.9)] overflow-hidden flex flex-col"
+        className="relative w-full max-w-[1520px] aspect-[16/9] bg-ice-bg text-ice-text rounded-2xl border-4 border-ice-border shadow-[0_25px_80px_rgba(0,0,0,0.9)] overflow-hidden flex flex-col"
       >
         {/* TOP TV LEANBACK NAVIGATION BAR */}
-        <header className="h-16 px-6 bg-gradient-to-b from-[#10141D] to-[#0A0D14]/90 backdrop-blur-xl border-b border-white/10 flex items-center justify-between shrink-0 z-30">
+        <header className="h-16 px-6 glass-header border-b border-ice-border/60 flex items-center justify-between shrink-0 z-30">
           {/* Logo & Platform Badge */}
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-2">
@@ -345,14 +345,14 @@ export const DeviceTVFrame: React.FC<DeviceTVFrameProps> = ({
         </header>
 
         {/* TV MAIN CONTENT VIEW AREA */}
-        <div className="flex-1 w-full overflow-hidden flex flex-col relative bg-[#0A0D14]">
+        <div className="flex-1 w-full overflow-hidden flex flex-col relative bg-ice-bg">
           {children}
         </div>
 
         {/* ACCOUNT / PROFILE TV OVERLAY MODAL */}
         {isAccountMenuOpen && (
           <div className="absolute inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center animate-fade-in p-6">
-            <div className="w-full max-w-md bg-[#131722] border-2 border-amber-500/50 rounded-3xl p-6 shadow-2xl space-y-4">
+            <div className="w-full max-w-md bg-ice-card border-2 border-amber-500/50 rounded-3xl p-6 shadow-2xl space-y-4 text-ice-text">
               <div className="flex items-center justify-between pb-3 border-b border-white/10">
                 <div className="flex items-center gap-3">
                   <AvatarBadge avatar={activeProfile?.avatar} nickname={activeProfile?.nickname} size="md" />
@@ -442,7 +442,7 @@ export const DeviceTVFrame: React.FC<DeviceTVFrameProps> = ({
       {/* 3. VIRTUAL TV REMOTE CONTROLLER HELPER (For PC & Mouse Simulation Testing) */}
       <div className="fixed bottom-4 right-4 z-50 flex flex-col items-end">
         {showRemoteHelper ? (
-          <div className="bg-[#141722]/95 border border-amber-500/50 rounded-2xl p-3 shadow-2xl backdrop-blur-md space-y-2.5 w-60 animate-in slide-in-from-bottom-3 text-white">
+          <div className="bg-ice-card/95 border border-amber-500/50 rounded-2xl p-3 shadow-2xl backdrop-blur-md space-y-2.5 w-60 animate-in slide-in-from-bottom-3 text-ice-text">
             <div className="flex items-center justify-between border-b border-white/10 pb-1.5">
               <span className="text-[11px] font-black uppercase text-amber-400 tracking-wider flex items-center gap-1.5">
                 <Tv className="w-3.5 h-3.5" />

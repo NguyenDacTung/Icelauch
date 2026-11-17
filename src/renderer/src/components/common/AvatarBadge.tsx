@@ -38,7 +38,7 @@ export const AvatarBadge: React.FC<AvatarBadgeProps> = ({
     return (
       <div
         onClick={onClick}
-        className={`relative rounded-2xl overflow-hidden bg-[#161922] flex items-center justify-center flex-shrink-0 select-none ${sizeClasses} ${borderClass} ${className}`}
+        className={`relative rounded-2xl overflow-hidden bg-ice-card flex items-center justify-center flex-shrink-0 select-none ${sizeClasses} ${borderClass} ${className}`}
       >
         <img
           src={avatar}

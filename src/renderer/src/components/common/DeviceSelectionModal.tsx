@@ -18,15 +18,15 @@ export const DeviceSelectionModal: React.FC<DeviceSelectionModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4 animate-fade-in select-none">
-      <div className="w-full max-w-2xl bg-[#0E121B] border-2 border-amber-500/50 rounded-3xl p-6 sm:p-8 shadow-[0_20px_70px_rgba(0,0,0,0.9)] space-y-6 text-white text-center">
+      <div className="w-full max-w-2xl bg-ice-card border-2 border-amber-500/50 rounded-3xl p-6 sm:p-8 shadow-[0_20px_70px_rgba(0,0,0,0.9)] space-y-6 text-ice-text text-center">
         {/* Header */}
         <div className="space-y-2">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30 text-xs font-mono font-bold uppercase tracking-wider">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/20 text-amber-500 dark:text-amber-300 border border-amber-500/30 text-xs font-mono font-bold uppercase tracking-wider">
             <Sparkles className="w-3.5 h-3.5" />
             <span>Chào mừng đến với Icelauch</span>
           </div>
 
-          <h2 className="text-xl sm:text-2xl font-black tracking-wide uppercase">
+          <h2 className="text-xl sm:text-2xl font-black tracking-wide uppercase text-ice-text">
             Chọn Chế Độ Thiết Bị Của Bạn
           </h2>
           <p className="text-xs sm:text-sm text-ice-subtext max-w-lg mx-auto">
@@ -43,14 +43,14 @@ export const DeviceSelectionModal: React.FC<DeviceSelectionModalProps> = ({
               sfx.playClick();
               onSelectDevice('android_mobile');
             }}
-            className="p-6 rounded-2xl bg-[#141824] hover:bg-[#1A2030] border-2 border-white/10 hover:border-amber-400 text-left transition-all group flex flex-col justify-between h-56 shadow-lg active:scale-98"
+            className="p-6 rounded-2xl bg-ice-bg hover:bg-ice-hover border-2 border-ice-border hover:border-amber-400 text-left transition-all group flex flex-col justify-between h-56 shadow-lg active:scale-98"
           >
             <div className="space-y-3">
-              <div className="w-14 h-14 rounded-2xl bg-cyan-500/20 border border-cyan-500/40 flex items-center justify-center text-cyan-400 group-hover:scale-110 transition-transform">
+              <div className="w-14 h-14 rounded-2xl bg-cyan-500/20 border border-cyan-500/40 flex items-center justify-center text-cyan-500 dark:text-cyan-400 group-hover:scale-110 transition-transform">
                 <Smartphone className="w-8 h-8" />
               </div>
               <div>
-                <h3 className="text-base font-bold text-white group-hover:text-amber-300 transition-colors uppercase">
+                <h3 className="text-base font-bold text-ice-text group-hover:text-amber-500 dark:group-hover:text-amber-300 transition-colors uppercase">
                   Điện Thoại Di Động
                 </h3>
                 <p className="text-xs text-ice-subtext mt-1 leading-relaxed">
@@ -59,11 +59,11 @@ export const DeviceSelectionModal: React.FC<DeviceSelectionModalProps> = ({
               </div>
             </div>
 
-            <div className="flex items-center justify-between pt-3 border-t border-white/10 text-xs">
-              <span className="font-mono text-[10px] text-cyan-300 bg-cyan-500/10 px-2 py-0.5 rounded-md font-bold">
+            <div className="flex items-center justify-between pt-3 border-t border-ice-border text-xs">
+              <span className="font-mono text-[10px] text-cyan-600 dark:text-cyan-300 bg-cyan-500/10 px-2 py-0.5 rounded-md font-bold">
                 CẢM ỨNG (TOUCH)
               </span>
-              <span className="text-amber-400 font-bold group-hover:underline">Chọn chế độ này →</span>
+              <span className="text-amber-500 dark:text-amber-400 font-bold group-hover:underline">Chọn chế độ này →</span>
             </div>
           </button>
 
@@ -74,14 +74,14 @@ export const DeviceSelectionModal: React.FC<DeviceSelectionModalProps> = ({
               sfx.playClick();
               onSelectDevice('android_tv');
             }}
-            className="p-6 rounded-2xl bg-[#141824] hover:bg-[#1A2030] border-2 border-white/10 hover:border-amber-400 text-left transition-all group flex flex-col justify-between h-56 shadow-lg active:scale-98"
+            className="p-6 rounded-2xl bg-ice-bg hover:bg-ice-hover border-2 border-ice-border hover:border-amber-400 text-left transition-all group flex flex-col justify-between h-56 shadow-lg active:scale-98"
           >
             <div className="space-y-3">
-              <div className="w-14 h-14 rounded-2xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-400 group-hover:scale-110 transition-transform">
+              <div className="w-14 h-14 rounded-2xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-500 dark:text-amber-400 group-hover:scale-110 transition-transform">
                 <Tv className="w-8 h-8" />
               </div>
               <div>
-                <h3 className="text-base font-bold text-white group-hover:text-amber-300 transition-colors uppercase">
+                <h3 className="text-base font-bold text-ice-text group-hover:text-amber-500 dark:group-hover:text-amber-300 transition-colors uppercase">
                   Android TV / Smart TV
                 </h3>
                 <p className="text-xs text-ice-subtext mt-1 leading-relaxed">
@@ -90,11 +90,11 @@ export const DeviceSelectionModal: React.FC<DeviceSelectionModalProps> = ({
               </div>
             </div>
 
-            <div className="flex items-center justify-between pt-3 border-t border-white/10 text-xs">
-              <span className="font-mono text-[10px] text-amber-300 bg-amber-500/10 px-2 py-0.5 rounded-md font-bold">
+            <div className="flex items-center justify-between pt-3 border-t border-ice-border text-xs">
+              <span className="font-mono text-[10px] text-amber-600 dark:text-amber-300 bg-amber-500/10 px-2 py-0.5 rounded-md font-bold">
                 ĐIỀU KHIỂN (REMOTE D-PAD)
               </span>
-              <span className="text-amber-400 font-bold group-hover:underline">Chọn chế độ này →</span>
+              <span className="text-amber-500 dark:text-amber-400 font-bold group-hover:underline">Chọn chế độ này →</span>
             </div>
           </button>
         </div>

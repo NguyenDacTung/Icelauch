@@ -48,7 +48,7 @@ export const DevicePhoneFrame: React.FC<DevicePhoneFrameProps> = ({
 
   const renderBottomNav = () => (
     <div className="w-full px-4 pb-2 pt-1 shrink-0 z-40 select-none bg-transparent">
-      <nav className="h-15 w-full max-w-md mx-auto rounded-full bg-[#151822]/95 backdrop-blur-xl border border-white/10 shadow-[0_10px_35px_rgba(0,0,0,0.85)] flex items-center justify-around px-2 py-1">
+      <nav className="h-15 w-full max-w-md mx-auto rounded-full glass-panel flex items-center justify-around px-2 py-1 shadow-[0_10px_35px_rgba(0,0,0,0.25)] border border-ice-border/70 transition-all duration-300">
         {mobileNavItems.map((item) => {
           const isActive = currentTab === item.id;
           const Icon = item.icon;
@@ -59,16 +59,16 @@ export const DevicePhoneFrame: React.FC<DevicePhoneFrameProps> = ({
               onClick={() => handleTabClick(item.id)}
               className={`flex-1 flex flex-col items-center justify-center py-1.5 px-1 rounded-full transition-all duration-200 active:scale-95 ${
                 isActive
-                  ? 'bg-white/10 text-cyan-400 font-bold shadow-sm'
-                  : 'text-slate-400 hover:text-white font-medium'
+                  ? 'bg-ice-accent/15 text-ice-accent font-bold shadow-sm'
+                  : 'text-ice-subtext hover:text-ice-text font-medium'
               }`}
             >
               <Icon
                 className={`w-5 h-5 transition-transform duration-200 ${
-                  isActive ? 'scale-110 drop-shadow-[0_0_6px_rgba(34,211,238,0.6)]' : ''
+                  isActive ? 'scale-110 drop-shadow-[0_0_6px_rgba(245,158,11,0.5)]' : ''
                 }`}
               />
-              <span className={`text-[10px] mt-0.5 tracking-tight ${isActive ? 'text-cyan-300 font-bold' : ''}`}>
+              <span className={`text-[10px] mt-0.5 tracking-tight ${isActive ? 'text-ice-accent font-bold' : ''}`}>
                 {item.label}
               </span>
             </button>
@@ -98,8 +98,8 @@ export const DevicePhoneFrame: React.FC<DevicePhoneFrameProps> = ({
         </div>
 
         {/* Realistic Phone Frame */}
-        <div className="relative w-[390px] h-[820px] max-h-[92vh] rounded-[48px] p-2.5 bg-gradient-to-b from-[#2E3342] via-[#1A1D26] to-[#12141A] shadow-[0_0_50px_rgba(0,0,0,0.9),0_20px_40px_rgba(0,0,0,0.7)] border border-white/15 flex flex-col">
-          <div className="relative w-full h-full rounded-[38px] overflow-hidden bg-[#0A0C10] flex flex-col border border-black/80 shadow-inner">
+        <div className="relative w-[390px] h-[820px] max-h-[92vh] rounded-[48px] p-2.5 bg-gradient-to-b from-ice-card via-ice-card/90 to-ice-bg shadow-[0_0_50px_rgba(0,0,0,0.45),0_20px_40px_rgba(0,0,0,0.3)] border border-ice-border/40 flex flex-col">
+          <div className="relative w-full h-full rounded-[38px] overflow-hidden bg-ice-bg flex flex-col border border-ice-border/60 shadow-inner">
             {/* Top Simulated Notch */}
             <div className="h-7 w-full flex items-center justify-center shrink-0 z-30 select-none">
               <div className="w-24 h-4 rounded-full bg-black flex items-center justify-end px-2 border border-white/10 shadow-sm">
@@ -108,7 +108,7 @@ export const DevicePhoneFrame: React.FC<DevicePhoneFrameProps> = ({
             </div>
 
             {/* App Screen Content */}
-            <div className="flex-1 w-full overflow-hidden flex flex-col relative">
+            <div className="flex-1 w-full overflow-hidden flex flex-col relative text-ice-text">
               {children}
             </div>
 
@@ -119,8 +119,8 @@ export const DevicePhoneFrame: React.FC<DevicePhoneFrameProps> = ({
             {renderBottomNav()}
 
             {/* Bottom Home Line */}
-            <div className="h-3 flex items-center justify-center bg-[#10131B] shrink-0">
-              <div className="w-28 h-1 rounded-full bg-white/20" />
+            <div className="h-3 flex items-center justify-center bg-transparent shrink-0">
+              <div className="w-28 h-1 rounded-full bg-ice-subtext/30" />
             </div>
           </div>
         </div>
@@ -130,7 +130,7 @@ export const DevicePhoneFrame: React.FC<DevicePhoneFrameProps> = ({
 
   // 2. REAL MOBILE NATIVE MODE (Edge-to-Edge 100% Fullscreen)
   return (
-    <div className="w-full h-full flex flex-col bg-[#0A0C10] text-white select-none overflow-hidden relative">
+    <div className="w-full h-full flex flex-col bg-ice-bg text-ice-text select-none overflow-hidden relative">
       {/* Native Safe-Area-Inset Top (For Phone Notch / Hole Punch) */}
       <div className="h-[env(safe-area-inset-top,0px)] bg-transparent shrink-0" />
 
@@ -145,8 +145,8 @@ export const DevicePhoneFrame: React.FC<DevicePhoneFrameProps> = ({
       {/* Native Mobile Bottom Navigation Bar */}
       {renderBottomNav()}
 
-      {/* Native Safe-Area-Inset Bottom (For Phone Navigation Gesture Bar) */}
-      <div className="h-[env(safe-area-inset-bottom,0px)] bg-[#10131B] shrink-0" />
+      {/* Native Safe-Area-Inset Bottom (For Phone Navigation Gesture Bar / Home Indicator) */}
+      <div className="h-[env(safe-area-inset-bottom,0px)] bg-transparent shrink-0" />
     </div>
   );
 };

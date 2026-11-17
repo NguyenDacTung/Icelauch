@@ -122,15 +122,15 @@ export const IceControllerStation: React.FC<IceControllerStationProps> = () => {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           {/* Left Column: QR Code & Connection (7 cols) */}
           <div className="lg:col-span-7 space-y-5">
-            <div className="p-6 rounded-3xl bg-black/40 border border-white/10 shadow-xl space-y-4">
-              <div className="flex items-center justify-between border-b border-white/10 pb-3">
+            <div className="p-6 rounded-3xl bg-ice-card border border-ice-border shadow-xl space-y-4">
+              <div className="flex items-center justify-between border-b border-ice-border pb-3">
                 <div className="flex items-center gap-2.5">
                   <div className="w-8 h-8 rounded-xl bg-blue-500/20 text-blue-400 border border-blue-500/30 flex items-center justify-center">
                     <Laptop className="w-4 h-4" />
                   </div>
                   <div>
-                    <h3 className="text-sm font-bold text-white">Trạm Máy Chủ Điều Khiển PC</h3>
-                    <p className="text-[10px] text-ice-muted">Nhận tín hiệu tay cầm không dây từ điện thoại</p>
+                    <h3 className="text-sm font-bold text-ice-text">Trạm Máy Chủ Điều Khiển PC</h3>
+                    <p className="text-[10px] text-ice-subtext">Nhận tín hiệu tay cầm không dây từ điện thoại</p>
                   </div>
                 </div>
 
@@ -143,7 +143,7 @@ export const IceControllerStation: React.FC<IceControllerStationProps> = () => {
               </div>
 
               {/* Pairing QR Code Card */}
-              <div className="flex flex-col sm:flex-row items-center gap-6 p-4 rounded-2xl bg-white/[0.02] border border-white/10">
+              <div className="flex flex-col sm:flex-row items-center gap-6 p-4 rounded-2xl bg-ice-bg border border-ice-border">
                 <div className="bg-white p-2.5 rounded-2xl shadow-xl flex-shrink-0">
                   {qrCodeDataUrl ? (
                     <img src={qrCodeDataUrl} alt="Mã QR Ghép Nối" className="w-40 h-40 object-contain rounded-lg" />
@@ -158,13 +158,13 @@ export const IceControllerStation: React.FC<IceControllerStationProps> = () => {
                   <span className="px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-amber-400 text-black shadow">
                     Ghép Nối Nhanh 1 Lần
                   </span>
-                  <h4 className="text-base font-bold text-white leading-snug">
+                  <h4 className="text-base font-bold text-ice-text leading-snug">
                     Dùng điện thoại quét mã QR để kết nối
                   </h4>
-                  <p className="text-xs text-ice-muted leading-relaxed">
+                  <p className="text-xs text-ice-subtext leading-relaxed">
                     Mở Icelauch trên điện thoại $\rightarrow$ vào mục <b>Tiện Ích</b> $\rightarrow$ bấm <b>Quét Mã QR</b>. Sau khi ghép một lần, hai thiết bị sẽ tự động ghi nhớ nhau.
                   </p>
-                  <div className="flex items-center gap-2 text-xs font-mono text-amber-300">
+                  <div className="flex items-center gap-2 text-xs font-mono text-amber-500 dark:text-amber-300">
                     <Wifi className="w-3.5 h-3.5" />
                     <span>IP Máy Tính: {hostStatus.localIps[0] || '127.0.0.1'}</span>
                   </div>
@@ -173,18 +173,18 @@ export const IceControllerStation: React.FC<IceControllerStationProps> = () => {
 
               {/* Connected Clients Counter */}
               <div className="grid grid-cols-2 gap-3 pt-2">
-                <div className="p-3.5 rounded-2xl bg-black/30 border border-white/10 flex items-center gap-3">
+                <div className="p-3.5 rounded-2xl bg-ice-bg border border-ice-border flex items-center gap-3">
                   <Smartphone className="w-5 h-5 text-indigo-400" />
                   <div>
-                    <span className="text-[10px] text-ice-muted uppercase font-bold tracking-wider">Tay Cầm Đang Kết Nối</span>
-                    <h5 className="text-base font-black text-white">{hostStatus.connectedClients} thiết bị</h5>
+                    <span className="text-[10px] text-ice-subtext uppercase font-bold tracking-wider">Tay Cầm Đang Kết Nối</span>
+                    <h5 className="text-base font-black text-ice-text">{hostStatus.connectedClients} thiết bị</h5>
                   </div>
                 </div>
 
-                <div className="p-3.5 rounded-2xl bg-black/30 border border-white/10 flex items-center gap-3">
+                <div className="p-3.5 rounded-2xl bg-ice-bg border border-ice-border flex items-center gap-3">
                   <Gamepad2 className="w-5 h-5 text-amber-400" />
                   <div>
-                    <span className="text-[10px] text-ice-muted uppercase font-bold tracking-wider">Độ Trễ Tín Hiệu</span>
+                    <span className="text-[10px] text-ice-subtext uppercase font-bold tracking-wider">Độ Trễ Tín Hiệu</span>
                     <h5 className="text-base font-black text-emerald-400">&lt; 5 ms (Cực thấp)</h5>
                   </div>
                 </div>
@@ -194,13 +194,13 @@ export const IceControllerStation: React.FC<IceControllerStationProps> = () => {
 
           {/* Right Column: Presets & Tester (5 cols) */}
           <div className="lg:col-span-5 space-y-5">
-            <div className="p-6 rounded-3xl bg-black/40 border border-white/10 shadow-xl space-y-4">
-              <div className="flex items-center justify-between border-b border-white/10 pb-3">
-                <h3 className="text-sm font-bold text-white flex items-center gap-2">
+            <div className="p-6 rounded-3xl bg-ice-card border border-ice-border shadow-xl space-y-4">
+              <div className="flex items-center justify-between border-b border-ice-border pb-3">
+                <h3 className="text-sm font-bold text-ice-text flex items-center gap-2">
                   <Sliders className="w-4 h-4 text-amber-400" />
                   <span>Mẫu Bố Cục Nút Dùng Chung</span>
                 </h3>
-                <span className="text-[10px] text-ice-muted">Áp dụng cho game</span>
+                <span className="text-[10px] text-ice-subtext">Áp dụng cho game</span>
               </div>
 
               {/* Preset Selector */}
@@ -213,7 +213,7 @@ export const IceControllerStation: React.FC<IceControllerStationProps> = () => {
                     className={`py-2 px-2.5 rounded-xl text-xs font-bold transition-all text-center ${
                       selectedPreviewPreset === pName
                         ? 'bg-amber-400 text-black shadow-lg font-black'
-                        : 'bg-white/10 text-ice-muted hover:text-white'
+                        : 'bg-ice-bg text-ice-subtext border border-ice-border hover:text-ice-text'
                     }`}
                   >
                     {pName}
@@ -222,15 +222,15 @@ export const IceControllerStation: React.FC<IceControllerStationProps> = () => {
               </div>
 
               {/* Buttons Summary List */}
-              <div className="p-4 rounded-2xl bg-black/30 border border-white/10 space-y-2">
-                <span className="text-[11px] font-bold text-white uppercase tracking-wider block">
+              <div className="p-4 rounded-2xl bg-ice-bg border border-ice-border space-y-2">
+                <span className="text-[11px] font-bold text-ice-text uppercase tracking-wider block">
                   Danh sách phím trong mẫu ({PRESET_MAP[selectedPreviewPreset]?.length || 0} nút):
                 </span>
                 <div className="flex flex-wrap gap-1.5 max-h-36 overflow-y-auto custom-scrollbar">
                   {PRESET_MAP[selectedPreviewPreset]?.map((b) => (
                     <span
                       key={b.id}
-                      className="px-2.5 py-1 rounded-lg bg-white/10 text-[11px] font-mono text-white/90 border border-white/15"
+                      className="px-2.5 py-1 rounded-lg bg-ice-card text-[11px] font-mono text-ice-text border border-ice-border"
                     >
                       {b.label} {b.targetKey ? `(${b.targetKey.replace(/Key|Digit/, '')})` : ''}
                     </span>
@@ -252,51 +252,51 @@ export const IceControllerStation: React.FC<IceControllerStationProps> = () => {
         /* MOBILE VIEW */
         <div className="max-w-xl mx-auto space-y-5">
           {/* Mobile Pairing Status Card */}
-          <div className="p-6 rounded-3xl bg-gradient-to-b from-ice-card to-[#0e121a] border border-white/15 shadow-2xl space-y-5 text-center">
-            <div className="w-16 h-16 rounded-3xl bg-amber-500/20 text-amber-400 border border-amber-500/30 mx-auto flex items-center justify-center shadow-lg">
+          <div className="p-6 rounded-3xl bg-ice-card border border-ice-border shadow-2xl space-y-5 text-center">
+            <div className="w-16 h-16 rounded-3xl bg-amber-500/20 text-amber-500 dark:text-amber-400 border border-amber-500/30 mx-auto flex items-center justify-center shadow-lg">
               <Gamepad2 className="w-8 h-8" />
             </div>
 
             <div>
-              <h2 className="text-lg font-black text-white tracking-wide">Trạm Điều Khiển Tay Cầm</h2>
-              <p className="text-xs text-ice-muted mt-1">
+              <h2 className="text-lg font-black text-ice-text tracking-wide">Trạm Điều Khiển Tay Cầm</h2>
+              <p className="text-xs text-ice-subtext mt-1">
                 Biến điện thoại thành tay cầm chơi game không dây cho máy tính
               </p>
             </div>
 
             {/* Paired Device Card */}
             {pairedDevice ? (
-              <div className="p-4 rounded-2xl bg-white/[0.04] border border-emerald-500/30 text-left space-y-3">
+              <div className="p-4 rounded-2xl bg-ice-bg border border-emerald-500/30 text-left space-y-3">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2.5">
                     <div className="w-9 h-9 rounded-xl bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center justify-center">
                       <Laptop className="w-5 h-5" />
                     </div>
                     <div>
-                      <h4 className="text-sm font-bold text-white">{pairedDevice.name}</h4>
+                      <h4 className="text-sm font-bold text-ice-text">{pairedDevice.name}</h4>
                       <p className="text-[11px] font-mono text-emerald-400">IP: {pairedDevice.ip}</p>
                     </div>
                   </div>
                   <button
                     type="button"
                     onClick={handleUnpair}
-                    className="p-2 rounded-xl text-ice-muted hover:text-red-400 hover:bg-red-500/10 transition-colors"
+                    className="p-2 rounded-xl text-ice-subtext hover:text-red-400 hover:bg-red-500/10 transition-colors"
                     title="Huỷ ghép nối"
                   >
                     <Trash2 className="w-4 h-4" />
                   </button>
                 </div>
 
-                <div className="flex items-center gap-2 text-[11px] text-ice-muted pt-2 border-t border-white/10">
+                <div className="flex items-center gap-2 text-[11px] text-ice-subtext pt-2 border-t border-ice-border">
                   <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
                   <span>Đã ghép nối thành công. Sẵn sàng nhận lệnh chơi game từ PC.</span>
                 </div>
               </div>
             ) : (
-              <div className="p-5 rounded-2xl bg-black/40 border border-dashed border-white/20 text-center space-y-3">
-                <QrCode className="w-8 h-8 mx-auto text-ice-muted opacity-70" />
-                <h4 className="text-sm font-bold text-white">Chưa Ghép Nối Với Máy Tính</h4>
-                <p className="text-xs text-ice-muted max-w-xs mx-auto">
+              <div className="p-5 rounded-2xl bg-ice-bg border border-dashed border-ice-border text-center space-y-3">
+                <QrCode className="w-8 h-8 mx-auto text-ice-subtext opacity-70" />
+                <h4 className="text-sm font-bold text-ice-text">Chưa Ghép Nối Với Máy Tính</h4>
+                <p className="text-xs text-ice-subtext max-w-xs mx-auto">
                   Trên máy tính, mở mục Tiện Ích để thấy mã QR, sau đó bấm nút bên dưới để quét kết nối.
                 </p>
               </div>
@@ -325,15 +325,15 @@ export const IceControllerStation: React.FC<IceControllerStationProps> = () => {
 
             {/* Connection Type Switcher */}
             <div className="flex items-center justify-center gap-3 pt-2">
-              <span className="text-xs text-ice-muted">Phương thức truyền:</span>
-              <div className="flex items-center gap-1 p-1 rounded-xl bg-black/40 border border-white/10 text-xs">
+              <span className="text-xs text-ice-subtext">Phương thức truyền:</span>
+              <div className="flex items-center gap-1 p-1 rounded-xl bg-ice-bg border border-ice-border text-xs">
                 <button
                   type="button"
                   onClick={() => setConnectionType('wifi')}
                   className={`px-3 py-1 rounded-lg font-bold flex items-center gap-1.5 transition-all ${
                     connectionType === 'wifi'
                       ? 'bg-amber-400 text-black shadow'
-                      : 'text-ice-muted hover:text-white'
+                      : 'text-ice-subtext hover:text-ice-text'
                   }`}
                 >
                   <Wifi className="w-3.5 h-3.5" />
@@ -345,7 +345,7 @@ export const IceControllerStation: React.FC<IceControllerStationProps> = () => {
                   className={`px-3 py-1 rounded-lg font-bold flex items-center gap-1.5 transition-all ${
                     connectionType === 'bluetooth'
                       ? 'bg-amber-400 text-black shadow'
-                      : 'text-ice-muted hover:text-white'
+                      : 'text-ice-subtext hover:text-ice-text'
                   }`}
                 >
                   <Bluetooth className="w-3.5 h-3.5" />
@@ -354,7 +354,7 @@ export const IceControllerStation: React.FC<IceControllerStationProps> = () => {
               </div>
             </div>
 
-            <p className="text-[11px] text-ice-muted/90 italic leading-relaxed pt-2 border-t border-white/10">
+            <p className="text-[11px] text-ice-subtext italic leading-relaxed pt-2 border-t border-ice-border">
               💡 <b>Lưu ý:</b> Trong màn hình này không hiện sẵn tay cầm để tránh choán chỗ. Tay cầm ảo sẽ tự động mở và <b>xoay ngang điện thoại</b> khi bạn bấm <b>"Thử Tay Cầm"</b> hoặc khi PC khởi chạy game có thiết lập tay cầm.
             </p>
           </div>

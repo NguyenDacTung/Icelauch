@@ -89,21 +89,21 @@ export const TVUpdateModal: React.FC<TVUpdateModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-8 select-none animate-fade-in">
-      <div className="w-full max-w-2xl bg-[#0F1420] border-2 border-amber-500/60 rounded-3xl p-7 shadow-2xl shadow-amber-500/20 flex flex-col gap-6 relative">
+      <div className="w-full max-w-2xl bg-ice-card border-2 border-amber-500/60 rounded-3xl p-7 shadow-2xl shadow-amber-500/20 flex flex-col gap-6 relative text-ice-text">
         {/* Header */}
-        <div className="flex items-center justify-between pb-4 border-b border-white/10">
+        <div className="flex items-center justify-between pb-4 border-b border-ice-border">
           <div className="flex items-center gap-3.5">
             <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-amber-500 to-amber-300 p-0.5 shadow-lg shadow-amber-500/30 flex items-center justify-center shrink-0">
               <Tv className="w-7 h-7 text-black" />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <span className="text-[11px] font-mono font-black uppercase px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/40">
+                <span className="text-[11px] font-mono font-black uppercase px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-500 dark:text-amber-300 border border-amber-500/40">
                   ANDROID TV EDITION OTA
                 </span>
                 <span className="text-xs text-ice-subtext">10-Foot UI</span>
               </div>
-              <h2 className="text-2xl font-black text-white uppercase tracking-wider mt-1">
+              <h2 className="text-2xl font-black text-ice-text uppercase tracking-wider mt-1">
                 Phát Hiện Phiên Bản TV Mới
               </h2>
             </div>
@@ -116,7 +116,7 @@ export const TVUpdateModal: React.FC<TVUpdateModalProps> = ({
                 sfx.playClick();
                 onClose();
               }}
-              className="p-2.5 rounded-2xl bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white border border-white/10"
+              className="p-2.5 rounded-2xl bg-ice-hover hover:bg-ice-hover/80 text-ice-subtext hover:text-ice-text border border-ice-border"
               title="Đóng"
             >
               <X className="w-6 h-6" />
@@ -125,19 +125,19 @@ export const TVUpdateModal: React.FC<TVUpdateModalProps> = ({
         </div>
 
         {/* Version Badge comparison */}
-        <div className="grid grid-cols-2 gap-4 p-4 rounded-2xl bg-black/40 border border-white/10 text-center">
+        <div className="grid grid-cols-2 gap-4 p-4 rounded-2xl bg-ice-bg border border-ice-border text-center">
           <div className="flex flex-col items-center">
-            <span className="text-xs font-bold text-slate-400 uppercase">Phiên Bản Hiện Tại</span>
-            <span className="text-xl font-mono font-black text-slate-300 mt-1">
+            <span className="text-xs font-bold text-ice-subtext uppercase">Phiên Bản Hiện Tại</span>
+            <span className="text-xl font-mono font-black text-ice-text mt-1">
               v{updateInfo.currentVersion}
             </span>
           </div>
-          <div className="flex flex-col items-center border-l border-white/10">
-            <span className="text-xs font-bold text-amber-400 uppercase flex items-center gap-1">
+          <div className="flex flex-col items-center border-l border-ice-border">
+            <span className="text-xs font-bold text-amber-500 dark:text-amber-400 uppercase flex items-center gap-1">
               <Sparkles className="w-3.5 h-3.5" />
               Phiên Bản Mới Nhất
             </span>
-            <span className="text-xl font-mono font-black text-amber-300 mt-1">
+            <span className="text-xl font-mono font-black text-amber-500 dark:text-amber-300 mt-1">
               v{updateInfo.latestVersion}
             </span>
           </div>
@@ -145,9 +145,9 @@ export const TVUpdateModal: React.FC<TVUpdateModalProps> = ({
 
         {/* Release Notes */}
         {updateInfo.releaseNotes && (
-          <div className="p-4 rounded-2xl bg-black/30 border border-white/5 max-h-36 overflow-y-auto no-scrollbar">
-            <p className="text-xs font-bold text-slate-400 uppercase mb-2">Chi tiết cập nhật:</p>
-            <p className="text-xs text-slate-200 whitespace-pre-wrap leading-relaxed">
+          <div className="p-4 rounded-2xl bg-ice-bg border border-ice-border max-h-36 overflow-y-auto no-scrollbar">
+            <p className="text-xs font-bold text-ice-subtext uppercase mb-2">Chi tiết cập nhật:</p>
+            <p className="text-xs text-ice-text whitespace-pre-wrap leading-relaxed">
               {updateInfo.releaseNotes}
             </p>
           </div>

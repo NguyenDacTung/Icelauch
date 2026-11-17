@@ -297,196 +297,198 @@ export const MiniPlayer: React.FC<MiniPlayerProps> = ({
         loop={isRepeat}
       />
 
-      {/* Steam & Spotify Cinema Redesigned PC MiniPlayer Bar */}
+      {/* Floating Pill MiniPlayer (Centered at bottom 16px, auto slide-up animation) */}
       {currentTrack && !isTurntableActive && !hideVisualBar && (
-        <div className="h-18 bg-[#0D1017]/95 backdrop-blur-2xl border-t border-white/10 px-6 flex items-center justify-between z-40 select-none shadow-[0_-8px_32px_rgba(0,0,0,0.65)]">
-          {/* Left: Track Info & Artwork */}
-          <div
-            onClick={onNavigateToTrack}
-            className={`flex items-center gap-3.5 w-1/4 min-w-[220px] ${
-              onNavigateToTrack ? 'cursor-pointer group' : ''
-            }`}
-            title={onNavigateToTrack ? 'Nhấp để mở Máy Hát Đĩa Than' : undefined}
-          >
-            <div className="relative shrink-0">
-              {coverUrl ? (
-                <img
-                  src={coverUrl}
-                  alt={currentTrack.title}
-                  className="w-11 h-11 object-cover rounded-xl shadow-lg border border-white/10 group-hover:border-amber-400/80 transition-all group-hover:scale-105"
-                />
-              ) : (
-                <div className="w-11 h-11 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-amber-400 group-hover:border-amber-400/80 transition-all">
-                  <Music className="w-5 h-5" />
-                </div>
-              )}
-              {isPlaying && (
-                <span className="absolute -bottom-1 -right-1 w-3.5 h-3.5 rounded-full bg-amber-400 border-2 border-[#0D1017] flex items-center justify-center animate-ping" />
-              )}
-            </div>
-
-            <div className="min-w-0 flex-1">
-              <div className="flex items-center gap-2">
-                <p className="text-xs font-bold text-white truncate group-hover:text-amber-400 transition-colors">
-                  {currentTrack.title}
-                </p>
-                {/* Dancing Equalizer next to title */}
-                {isPlaying && (
-                  <div className="flex items-end gap-0.5 h-3 shrink-0" title="Đang phát">
-                    <span className="w-0.5 bg-amber-400 rounded-full animate-pulse" style={{ height: '50%', animationDuration: '400ms' }} />
-                    <span className="w-0.5 bg-amber-400 rounded-full animate-pulse" style={{ height: '100%', animationDuration: '600ms' }} />
-                    <span className="w-0.5 bg-amber-400 rounded-full animate-pulse" style={{ height: '30%', animationDuration: '500ms' }} />
-                    <span className="w-0.5 bg-amber-400 rounded-full animate-pulse" style={{ height: '80%', animationDuration: '450ms' }} />
+        <div className="fixed bottom-4 left-1/2 -translate-x-1/2 w-[94%] max-w-3xl z-40 select-none pointer-events-auto transition-all duration-300 animate-in fade-in slide-in-from-bottom-6">
+          <div className="glass-pill rounded-2xl px-4 py-2 flex items-center justify-between gap-3 border border-ice-border/70 shadow-[0_16px_40px_rgba(0,0,0,0.35)] backdrop-blur-2xl">
+            {/* Left: Track Info & Artwork */}
+            <div
+              onClick={onNavigateToTrack}
+              className={`flex items-center gap-3 w-1/4 min-w-[180px] max-w-[240px] ${
+                onNavigateToTrack ? 'cursor-pointer group' : ''
+              }`}
+              title={onNavigateToTrack ? 'Nhấp để mở Máy Hát Đĩa Than' : undefined}
+            >
+              <div className="relative shrink-0">
+                {coverUrl ? (
+                  <img
+                    src={coverUrl}
+                    alt={currentTrack.title}
+                    className="w-10 h-10 object-cover rounded-xl shadow-md border border-ice-border/70 group-hover:border-amber-400/80 transition-all group-hover:scale-105"
+                  />
+                ) : (
+                  <div className="w-10 h-10 rounded-xl bg-ice-hover/60 border border-ice-border/70 flex items-center justify-center text-amber-400 group-hover:border-amber-400/80 transition-all">
+                    <Music className="w-5 h-5" />
                   </div>
                 )}
-              </div>
-              <p className="text-[11px] text-gray-400 truncate mt-0.5 flex items-center gap-1.5">
-                <span>{currentTrack.artist || currentTrack.album || currentTrack.category || 'Âm Nhạc'}</span>
-                {currentTrack.subType === 'podcast' && (
-                  <span className="text-[9px] px-1 py-0.2 rounded bg-purple-500/20 text-purple-300 border border-purple-500/30 font-semibold">
-                    PODCAST
-                  </span>
+                {isPlaying && (
+                  <span className="absolute -bottom-1 -right-1 w-3 h-3 rounded-full bg-amber-400 border-2 border-ice-card flex items-center justify-center animate-ping" />
                 )}
-              </p>
-            </div>
-
-            {/* Quick Vinyl Turntable Icon Button */}
-            {onNavigateToTrack && (
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onNavigateToTrack();
-                }}
-                className="p-1.5 rounded-lg text-gray-400 hover:text-amber-400 hover:bg-white/10 active:scale-95 transition-all ml-1 shrink-0"
-                title="Mở toàn màn hình Máy Hát Đĩa Than"
-              >
-                <Disc className={`w-4 h-4 ${isPlaying ? 'animate-spin' : ''}`} style={{ animationDuration: '5s' }} />
-              </button>
-            )}
-          </div>
-
-          {/* Center: Controls & Scrub Bar (Spotify Cinema Style) */}
-          <div className="flex flex-col items-center gap-1.5 flex-1 max-w-xl px-6">
-            <div className="flex items-center gap-5">
-              <button
-                type="button"
-                onClick={() => setIsShuffle(!isShuffle)}
-                className={`p-1.5 rounded-full transition-colors ${
-                  isShuffle ? 'text-amber-400 bg-amber-400/10' : 'text-gray-400 hover:text-white hover:bg-white/5'
-                }`}
-                title={isShuffle ? 'Tắt phát ngẫu nhiên' : 'Bật phát ngẫu nhiên'}
-              >
-                <Shuffle className="w-3.5 h-3.5" />
-              </button>
-
-              <button
-                type="button"
-                onClick={onPrev}
-                className="p-1.5 rounded-full text-gray-300 hover:text-white hover:bg-white/10 active:scale-90 transition-all"
-                title="Bài trước"
-              >
-                <SkipBack className="w-4 h-4" />
-              </button>
-
-              {/* Glowing Amber Play/Pause button */}
-              <button
-                type="button"
-                onClick={onPlayPause}
-                className="w-10 h-10 rounded-full bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-black flex items-center justify-center shadow-[0_0_20px_rgba(251,191,36,0.35)] transition-all hover:scale-105 active:scale-95"
-                title={isPlaying ? 'Tạm dừng' : 'Phát'}
-              >
-                {isPlaying ? (
-                  <Pause className="w-4 h-4 fill-black text-black" />
-                ) : (
-                  <Play className="w-4 h-4 fill-black text-black ml-0.5" />
-                )}
-              </button>
-
-              <button
-                type="button"
-                onClick={onNext}
-                className="p-1.5 rounded-full text-gray-300 hover:text-white hover:bg-white/10 active:scale-90 transition-all"
-                title="Bài tiếp theo"
-              >
-                <SkipForward className="w-4 h-4" />
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setIsRepeat(!isRepeat)}
-                className={`p-1.5 rounded-full transition-colors ${
-                  isRepeat ? 'text-amber-400 bg-amber-400/10' : 'text-gray-400 hover:text-white hover:bg-white/5'
-                }`}
-                title={isRepeat ? 'Tắt lặp lại' : 'Lặp lại bài này'}
-              >
-                <Repeat className="w-3.5 h-3.5" />
-              </button>
-            </div>
-
-            {/* Seek Bar */}
-            <div className="flex items-center gap-2.5 w-full text-[11px] font-mono text-gray-400">
-              <span className="w-9 text-right tabular-nums">{formatTime(currentTime)}</span>
-              <div className="relative flex-1 flex items-center group/seek">
-                <input
-                  type="range"
-                  min={0}
-                  max={duration || 100}
-                  step={0.5}
-                  value={currentTime}
-                  onChange={handleSeek}
-                  className="w-full h-1 bg-white/15 rounded-lg appearance-none cursor-pointer accent-amber-400 hover:h-1.5 transition-all"
-                />
               </div>
-              <span className="w-9 text-left tabular-nums">{formatTime(duration)}</span>
-            </div>
-          </div>
 
-          {/* Right: Equalizer, Volume Slider & Close Button */}
-          <div className="flex items-center gap-3 w-1/4 justify-end">
-            <button
-              type="button"
-              onClick={toggleMute}
-              className="p-1.5 rounded-lg text-gray-400 hover:text-white hover:bg-white/10 transition-colors"
-              title={effectiveIsMuted || effectiveVolume === 0 ? 'Bật âm thanh' : 'Tắt âm thanh'}
-            >
-              {effectiveIsMuted || effectiveVolume === 0 ? (
-                <VolumeX className="w-4 h-4 text-rose-400" />
-              ) : (
-                <Volume2 className="w-4 h-4 text-gray-300" />
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center gap-1.5">
+                  <p className="text-xs font-bold text-ice-text truncate group-hover:text-amber-400 transition-colors">
+                    {currentTrack.title}
+                  </p>
+                  {/* Dancing Equalizer next to title */}
+                  {isPlaying && (
+                    <div className="flex items-end gap-0.5 h-3 shrink-0" title="Đang phát">
+                      <span className="w-0.5 bg-amber-400 rounded-full animate-pulse" style={{ height: '50%', animationDuration: '400ms' }} />
+                      <span className="w-0.5 bg-amber-400 rounded-full animate-pulse" style={{ height: '100%', animationDuration: '600ms' }} />
+                      <span className="w-0.5 bg-amber-400 rounded-full animate-pulse" style={{ height: '30%', animationDuration: '500ms' }} />
+                      <span className="w-0.5 bg-amber-400 rounded-full animate-pulse" style={{ height: '80%', animationDuration: '450ms' }} />
+                    </div>
+                  )}
+                </div>
+                <p className="text-[11px] text-ice-subtext truncate mt-0.5 flex items-center gap-1.5">
+                  <span>{currentTrack.artist || currentTrack.album || currentTrack.category || 'Âm Nhạc'}</span>
+                  {currentTrack.subType === 'podcast' && (
+                    <span className="text-[9px] px-1 py-0.2 rounded bg-purple-500/20 text-purple-400 border border-purple-500/30 font-semibold">
+                      PODCAST
+                    </span>
+                  )}
+                </p>
+              </div>
+
+              {/* Quick Vinyl Turntable Icon Button */}
+              {onNavigateToTrack && (
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onNavigateToTrack();
+                  }}
+                  className="p-1.5 rounded-lg text-ice-subtext hover:text-amber-400 hover:bg-ice-hover/60 active:scale-95 transition-all ml-0.5 shrink-0"
+                  title="Mở toàn màn hình Máy Hát Đĩa Than"
+                >
+                  <Disc className={`w-4 h-4 ${isPlaying ? 'animate-spin' : ''}`} style={{ animationDuration: '5s' }} />
+                </button>
               )}
-            </button>
-            <input
-              type="range"
-              min={0}
-              max={1}
-              step={0.05}
-              value={effectiveIsMuted ? 0 : effectiveVolume}
-              onChange={handleVolumeChange}
-              className="w-20 h-1 bg-white/15 rounded-lg appearance-none cursor-pointer accent-amber-400 hover:h-1.5 transition-all"
-              title={`Âm lượng: ${Math.round((effectiveIsMuted ? 0 : effectiveVolume) * 100)}%`}
-            />
+            </div>
 
-            {/* Maximize to Turntable shortcut */}
-            {onNavigateToTrack && (
+            {/* Center: Controls & Scrub Bar */}
+            <div className="flex flex-col items-center gap-1 flex-1 max-w-md px-2">
+              <div className="flex items-center gap-4">
+                <button
+                  type="button"
+                  onClick={() => setIsShuffle(!isShuffle)}
+                  className={`p-1.5 rounded-full transition-colors ${
+                    isShuffle ? 'text-amber-400 bg-amber-400/10' : 'text-ice-subtext hover:text-ice-text hover:bg-ice-hover/50'
+                  }`}
+                  title={isShuffle ? 'Tắt phát ngẫu nhiên' : 'Bật phát ngẫu nhiên'}
+                >
+                  <Shuffle className="w-3.5 h-3.5" />
+                </button>
+
+                <button
+                  type="button"
+                  onClick={onPrev}
+                  className="p-1.5 rounded-full text-ice-subtext hover:text-ice-text hover:bg-ice-hover/60 active:scale-90 transition-all"
+                  title="Bài trước"
+                >
+                  <SkipBack className="w-4 h-4" />
+                </button>
+
+                {/* Glowing Amber Play/Pause button */}
+                <button
+                  type="button"
+                  onClick={onPlayPause}
+                  className="w-9 h-9 rounded-full bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-black flex items-center justify-center shadow-[0_0_16px_rgba(251,191,36,0.35)] transition-all hover:scale-105 active:scale-95"
+                  title={isPlaying ? 'Tạm dừng' : 'Phát'}
+                >
+                  {isPlaying ? (
+                    <Pause className="w-4 h-4 fill-black text-black" />
+                  ) : (
+                    <Play className="w-4 h-4 fill-black text-black ml-0.5" />
+                  )}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={onNext}
+                  className="p-1.5 rounded-full text-ice-subtext hover:text-ice-text hover:bg-ice-hover/60 active:scale-90 transition-all"
+                  title="Bài tiếp theo"
+                >
+                  <SkipForward className="w-4 h-4" />
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setIsRepeat(!isRepeat)}
+                  className={`p-1.5 rounded-full transition-colors ${
+                    isRepeat ? 'text-amber-400 bg-amber-400/10' : 'text-ice-subtext hover:text-ice-text hover:bg-ice-hover/50'
+                  }`}
+                  title={isRepeat ? 'Tắt lặp lại' : 'Lặp lại bài này'}
+                >
+                  <Repeat className="w-3.5 h-3.5" />
+                </button>
+              </div>
+
+              {/* Seek Bar */}
+              <div className="flex items-center gap-2 w-full text-[10px] font-mono text-ice-subtext">
+                <span className="w-8 text-right tabular-nums">{formatTime(currentTime)}</span>
+                <div className="relative flex-1 flex items-center group/seek">
+                  <input
+                    type="range"
+                    min={0}
+                    max={duration || 100}
+                    step={0.5}
+                    value={currentTime}
+                    onChange={handleSeek}
+                    className="w-full h-1 bg-ice-border/60 rounded-lg appearance-none cursor-pointer accent-amber-400 hover:h-1.5 transition-all"
+                  />
+                </div>
+                <span className="w-8 text-left tabular-nums">{formatTime(duration)}</span>
+              </div>
+            </div>
+
+            {/* Right: Volume Slider, Maximize & Close Button */}
+            <div className="flex items-center gap-2 w-1/4 justify-end">
               <button
                 type="button"
-                onClick={onNavigateToTrack}
-                className="p-1.5 rounded-lg text-gray-400 hover:text-white hover:bg-white/10 transition-colors ml-1"
-                title="Mở toàn màn hình trình phát"
+                onClick={toggleMute}
+                className="p-1.5 rounded-lg text-ice-subtext hover:text-ice-text hover:bg-ice-hover/60 transition-colors"
+                title={effectiveIsMuted || effectiveVolume === 0 ? 'Bật âm thanh' : 'Tắt âm thanh'}
               >
-                <Maximize2 className="w-4 h-4" />
+                {effectiveIsMuted || effectiveVolume === 0 ? (
+                  <VolumeX className="w-4 h-4 text-rose-400" />
+                ) : (
+                  <Volume2 className="w-4 h-4 text-ice-subtext hover:text-ice-text" />
+                )}
               </button>
-            )}
+              <input
+                type="range"
+                min={0}
+                max={1}
+                step={0.05}
+                value={effectiveIsMuted ? 0 : effectiveVolume}
+                onChange={handleVolumeChange}
+                className="w-16 h-1 bg-ice-border/60 rounded-lg appearance-none cursor-pointer accent-amber-400 hover:h-1.5 transition-all"
+                title={`Âm lượng: ${Math.round((effectiveIsMuted ? 0 : effectiveVolume) * 100)}%`}
+              />
 
-            <button
-              type="button"
-              onClick={onClose}
-              className="p-1.5 rounded-lg text-gray-400 hover:text-rose-400 hover:bg-white/10 transition-colors ml-1"
-              title="Đóng trình phát"
-            >
-              <X className="w-4 h-4" />
-            </button>
+              {/* Maximize to Turntable shortcut */}
+              {onNavigateToTrack && (
+                <button
+                  type="button"
+                  onClick={onNavigateToTrack}
+                  className="p-1.5 rounded-lg text-ice-subtext hover:text-ice-text hover:bg-ice-hover/60 transition-colors ml-0.5"
+                  title="Mở toàn màn hình trình phát"
+                >
+                  <Maximize2 className="w-4 h-4" />
+                </button>
+              )}
+
+              <button
+                type="button"
+                onClick={onClose}
+                className="p-1.5 rounded-lg text-ice-subtext hover:text-rose-400 hover:bg-ice-hover/60 transition-colors ml-0.5"
+                title="Đóng trình phát"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
           </div>
         </div>
       )}

@@ -153,21 +153,21 @@ export const GameExtensionsModal: React.FC<GameExtensionsModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-3 sm:p-5 select-none animate-fade-in">
-      <div className="w-full max-w-2xl bg-[#0F1420] border border-white/10 rounded-3xl overflow-hidden shadow-2xl flex flex-col max-h-[90vh]">
+      <div className="w-full max-w-2xl bg-ice-card border border-ice-border rounded-3xl overflow-hidden shadow-2xl flex flex-col max-h-[90vh] text-ice-text">
         {/* Header */}
-        <div className="px-5 py-4 border-b border-white/10 flex items-center justify-between bg-[#151B2B]/60">
+        <div className="px-5 py-4 border-b border-ice-border/60 flex items-center justify-between glass-header">
           <div className="flex items-center gap-3 min-w-0">
             <div className="w-10 h-10 rounded-xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-400 shrink-0">
               <Puzzle className="w-5 h-5" />
             </div>
             <div className="min-w-0">
               <div className="flex items-center gap-2">
-                <h3 className="text-base font-bold text-white truncate">Gói Mở Rộng & Việt Hóa</h3>
+                <h3 className="text-base font-bold text-ice-text truncate">Gói Mở Rộng & Việt Hóa</h3>
                 <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 shrink-0">
                   {extensions.length} gói
                 </span>
               </div>
-              <p className="text-xs text-slate-400 truncate">{game.name}</p>
+              <p className="text-xs text-ice-subtext truncate">{game.name}</p>
             </div>
           </div>
 
@@ -220,16 +220,16 @@ export const GameExtensionsModal: React.FC<GameExtensionsModalProps> = ({
                     value={extName}
                     onChange={(e) => setExtName(e.target.value)}
                     placeholder="Ví dụ: Bản Việt Hóa Full (The Red Team)"
-                    className="w-full px-3 py-2 rounded-xl bg-[#171D2A] border border-white/10 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500"
+                    className="w-full px-3 py-2 rounded-xl bg-ice-bg border border-ice-border text-xs text-ice-text placeholder-ice-subtext/60 focus:outline-none focus:border-cyan-500"
                   />
                 </div>
 
                 <div className="space-y-1">
-                  <label className="text-[11px] font-semibold text-slate-300">Loại mở rộng</label>
+                  <label className="text-[11px] font-semibold text-ice-subtext">Loại mở rộng</label>
                   <select
                     value={extCategory}
                     onChange={(e) => setExtCategory(e.target.value as any)}
-                    className="w-full px-3 py-2 rounded-xl bg-[#171D2A] border border-white/10 text-xs text-white focus:outline-none focus:border-cyan-500"
+                    className="w-full px-3 py-2 rounded-xl bg-ice-bg border border-ice-border text-xs text-ice-text focus:outline-none focus:border-cyan-500"
                   >
                     <option value="viethoa">Việt Hóa</option>
                     <option value="dlc">Bản Mở Rộng DLC</option>
@@ -242,7 +242,7 @@ export const GameExtensionsModal: React.FC<GameExtensionsModalProps> = ({
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <div className="sm:col-span-2 space-y-1">
-                  <label className="text-[11px] font-semibold text-slate-300">
+                  <label className="text-[11px] font-semibold text-ice-subtext">
                     Danh sách link tải (Mỗi dòng 1 link: dòng 1 là link chính, các dòng sau là dự phòng)
                   </label>
                   <textarea
@@ -250,30 +250,30 @@ export const GameExtensionsModal: React.FC<GameExtensionsModalProps> = ({
                     value={extLinks}
                     onChange={(e) => setExtLinks(e.target.value)}
                     placeholder="https://drive.google.com/...\nhttps://mega.nz/..."
-                    className="w-full px-3 py-2 rounded-xl bg-[#171D2A] border border-white/10 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500 font-mono"
+                    className="w-full px-3 py-2 rounded-xl bg-ice-bg border border-ice-border text-xs text-ice-text placeholder-ice-subtext/60 focus:outline-none focus:border-cyan-500 font-mono"
                   />
                 </div>
 
                 <div className="space-y-1">
-                  <label className="text-[11px] font-semibold text-slate-300">Phiên bản / Ghi chú</label>
+                  <label className="text-[11px] font-semibold text-ice-subtext">Phiên bản / Ghi chú</label>
                   <input
                     type="text"
                     value={extVersion}
                     onChange={(e) => setExtVersion(e.target.value)}
                     placeholder="v1.2 hoặc Build 2026"
-                    className="w-full px-3 py-2 rounded-xl bg-[#171D2A] border border-white/10 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500"
+                    className="w-full px-3 py-2 rounded-xl bg-ice-bg border border-ice-border text-xs text-ice-text placeholder-ice-subtext/60 focus:outline-none focus:border-cyan-500"
                   />
                 </div>
               </div>
 
               <div className="space-y-1">
-                <label className="text-[11px] font-semibold text-slate-300">Mô tả / Hướng dẫn cài đặt</label>
+                <label className="text-[11px] font-semibold text-ice-subtext">Mô tả / Hướng dẫn cài đặt</label>
                 <textarea
                   rows={2}
                   value={extDesc}
                   onChange={(e) => setExtDesc(e.target.value)}
                   placeholder="Ví dụ: Tải về giải nén và chép đè thư mục vào đường dẫn cài đặt game..."
-                  className="w-full px-3 py-2 rounded-xl bg-[#171D2A] border border-white/10 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500"
+                  className="w-full px-3 py-2 rounded-xl bg-ice-bg border border-ice-border text-xs text-ice-text placeholder-ice-subtext/60 focus:outline-none focus:border-cyan-500"
                 />
               </div>
 
@@ -315,7 +315,7 @@ export const GameExtensionsModal: React.FC<GameExtensionsModalProps> = ({
               {extensions.map((ext, idx) => (
                 <div
                   key={ext.id || idx}
-                  className="p-4 rounded-2xl bg-[#141926] border border-white/10 hover:border-white/20 transition-all flex flex-col gap-3 shadow-lg"
+                  className="p-4 rounded-2xl bg-ice-card border border-ice-border hover:border-cyan-400/50 transition-all flex flex-col gap-3 shadow-lg"
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div className="space-y-1 min-w-0">

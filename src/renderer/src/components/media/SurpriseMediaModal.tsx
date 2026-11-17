@@ -94,28 +94,28 @@ export const SurpriseMediaModal: React.FC<SurpriseMediaModalProps> = ({
     : '';
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fade-in select-none">
-      <div className="relative w-full max-w-lg bg-gradient-to-b from-[#181B24] to-[#0F1117] border border-white/15 rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6 text-center overflow-hidden">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-md animate-fade-in select-none">
+      <div className="relative w-full max-w-lg bg-ice-card border border-ice-border rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6 text-center overflow-hidden">
         {/* Glow ambient background */}
-        <div className="absolute -top-24 left-1/2 -translate-x-1/2 w-64 h-64 bg-amber-500/20 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute -top-24 left-1/2 -translate-x-1/2 w-64 h-64 bg-amber-500/15 rounded-full blur-3xl pointer-events-none" />
 
         {/* Close Button */}
         <button
           type="button"
           onClick={onClose}
-          className="absolute top-4 right-4 p-2 rounded-full bg-white/5 hover:bg-white/10 text-white/60 hover:text-white transition-colors"
+          className="absolute top-4 right-4 p-2 rounded-full bg-ice-hover/50 hover:bg-ice-hover text-ice-subtext hover:text-ice-text transition-colors"
         >
           <X className="w-5 h-5" />
         </button>
 
         {/* Header Title */}
         <div className="space-y-1">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-400 text-xs font-bold uppercase tracking-wider">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-500 dark:text-amber-400 text-xs font-bold uppercase tracking-wider">
             <Dices className="w-4 h-4 animate-bounce" />
             <span>{titleText}</span>
             <Sparkles className="w-3.5 h-3.5" />
           </div>
-          <p className="text-xs text-ice-muted">{subText}</p>
+          <p className="text-xs text-ice-subtext">{subText}</p>
         </div>
 
         {/* Result Card */}
@@ -147,10 +147,10 @@ export const SurpriseMediaModal: React.FC<SurpriseMediaModalProps> = ({
 
             {/* Metadata */}
             <div className="w-full space-y-1.5 px-2">
-              <h3 className="text-lg font-black text-white truncate">
+              <h3 className="text-lg font-black text-ice-text truncate">
                 {selectedItem.title}
               </h3>
-              <p className="text-xs text-amber-300/80 font-medium truncate">
+              <p className="text-xs text-amber-600 dark:text-amber-300/80 font-medium truncate">
                 {selectedItem.artist || selectedItem.category || 'Nhiều nghệ sĩ'}
               </p>
               {selectedItem.tags && selectedItem.tags.length > 0 && (
@@ -158,7 +158,7 @@ export const SurpriseMediaModal: React.FC<SurpriseMediaModalProps> = ({
                   {selectedItem.tags.slice(0, 3).map((t) => (
                     <span
                       key={t}
-                      className="px-2 py-0.5 rounded-md bg-white/5 text-[10px] font-semibold text-white/70 border border-white/10"
+                      className="px-2 py-0.5 rounded-md bg-ice-bg text-[10px] font-semibold text-ice-subtext border border-ice-border"
                     >
                       {t}
                     </span>
@@ -168,7 +168,7 @@ export const SurpriseMediaModal: React.FC<SurpriseMediaModalProps> = ({
             </div>
           </div>
         ) : (
-          <div className="py-12 text-center text-ice-muted text-sm">
+          <div className="py-12 text-center text-ice-subtext text-sm">
             Chưa có nội dung nào trong kho thể loại này
           </div>
         )}
@@ -179,7 +179,7 @@ export const SurpriseMediaModal: React.FC<SurpriseMediaModalProps> = ({
             type="button"
             disabled={isRolling || !selectedItem}
             onClick={rollRandom}
-            className="flex items-center gap-2 px-5 py-3 rounded-2xl bg-white/10 hover:bg-white/15 text-white text-xs font-bold border border-white/15 transition-all active:scale-95 disabled:opacity-50"
+            className="flex items-center gap-2 px-5 py-3 rounded-2xl bg-ice-hover hover:bg-ice-hover/80 text-ice-text text-xs font-bold border border-ice-border transition-all active:scale-95 disabled:opacity-50"
           >
             <RotateCcw className={`w-4 h-4 ${isRolling ? 'animate-spin' : ''}`} />
             <span>Đổi Mục Khác</span>

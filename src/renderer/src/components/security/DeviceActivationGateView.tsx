@@ -218,13 +218,13 @@ export const DeviceActivationGateView: React.FC<DeviceActivationGateViewProps> =
   };
 
   return (
-    <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-[#0B0D11] text-white p-4 select-none overflow-y-auto">
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-ice-bg text-ice-text p-4 select-none overflow-y-auto">
       {/* Background ambient lighting */}
       <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-cyan-600/10 rounded-full blur-[120px] pointer-events-none" />
       <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-amber-600/10 rounded-full blur-[120px] pointer-events-none" />
 
       {/* Main Container Card */}
-      <div className="relative w-full max-w-md bg-[#131720]/90 border border-white/10 rounded-2xl p-6 sm:p-8 backdrop-blur-xl shadow-2xl space-y-6">
+      <div className="relative w-full max-w-md bg-ice-card border border-ice-border rounded-2xl p-6 sm:p-8 backdrop-blur-xl shadow-2xl space-y-6">
         {/* Top Header */}
         <div className="text-center space-y-2">
           <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-br from-cyan-500/20 to-blue-600/20 border border-cyan-500/30 text-cyan-400 mb-2">
@@ -236,7 +236,7 @@ export const DeviceActivationGateView: React.FC<DeviceActivationGateViewProps> =
               <Shield className="w-7 h-7" />
             )}
           </div>
-          <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-white">
+          <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-ice-text">
             Xác Thực Thiết Bị Phần Cứng
           </h1>
           <p className="text-xs sm:text-sm text-ice-subtext leading-relaxed">
@@ -245,18 +245,18 @@ export const DeviceActivationGateView: React.FC<DeviceActivationGateViewProps> =
         </div>
 
         {/* Device ID Badge */}
-        <div className="bg-black/40 border border-white/10 rounded-xl p-3 flex items-center justify-between text-xs font-mono">
+        <div className="bg-ice-bg border border-ice-border rounded-xl p-3 flex items-center justify-between text-xs font-mono">
           <div className="flex items-center gap-2 overflow-hidden mr-2">
             {getPlatformIcon()}
             <div className="truncate">
-              <span className="text-ice-muted text-[10px] block uppercase font-sans">Mã Phần Cứng (Device ID):</span>
-              <span className="text-white font-bold tracking-wider">{deviceId}</span>
+              <span className="text-ice-subtext text-[10px] block uppercase font-sans">Mã Phần Cứng (Device ID):</span>
+              <span className="text-ice-text font-bold tracking-wider">{deviceId}</span>
             </div>
           </div>
           <button
             type="button"
             onClick={handleCopyId}
-            className="flex-shrink-0 px-2.5 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-ice-subtext hover:text-white transition-colors flex items-center gap-1"
+            className="flex-shrink-0 px-2.5 py-1.5 rounded-lg bg-ice-hover hover:bg-ice-hover/80 text-ice-subtext hover:text-ice-text transition-colors flex items-center gap-1 border border-ice-border"
             title="Sao chép Device ID"
           >
             {copiedId ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
@@ -296,7 +296,7 @@ export const DeviceActivationGateView: React.FC<DeviceActivationGateViewProps> =
                 value={deviceName}
                 onChange={(e) => setDeviceName(e.target.value)}
                 placeholder="Ví dụ: Laptop Tuấn, Điện thoại Nam..."
-                className="w-full h-11 px-3.5 rounded-xl bg-black/50 border border-white/15 text-sm text-white placeholder-ice-muted focus:border-cyan-400 focus:outline-none transition-colors"
+                className="w-full h-11 px-3.5 rounded-xl bg-ice-bg border border-ice-border text-sm text-ice-text placeholder-ice-subtext focus:border-cyan-400 focus:outline-none transition-colors"
                 disabled={isSubmittingName}
               />
             </div>
@@ -360,7 +360,7 @@ export const DeviceActivationGateView: React.FC<DeviceActivationGateViewProps> =
                     }
                   }}
                   placeholder="----"
-                  className="w-48 h-14 text-center text-3xl font-mono tracking-[0.5em] rounded-xl bg-black/60 border border-cyan-500/50 text-cyan-300 focus:border-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-500/20 transition-all font-bold"
+                  className="w-48 h-14 text-center text-3xl font-mono tracking-[0.5em] rounded-xl bg-ice-bg border border-cyan-500/50 text-cyan-500 dark:text-cyan-300 focus:border-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-500/20 transition-all font-bold"
                   autoFocus
                 />
               </div>
@@ -416,9 +416,9 @@ export const DeviceActivationGateView: React.FC<DeviceActivationGateViewProps> =
       {/* Emergency Admin Master PIN Modal */}
       {showAdminBypass && (
         <div className="fixed inset-0 z-[10000] flex items-center justify-center bg-black/80 backdrop-blur-md p-4">
-          <div className="w-full max-w-sm bg-[#181D28] border border-amber-500/30 rounded-2xl p-6 shadow-2xl space-y-4 animate-scale-up">
+          <div className="w-full max-w-sm bg-ice-card border border-amber-500/30 rounded-2xl p-6 shadow-2xl space-y-4 animate-scale-up">
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2 text-amber-400 font-bold text-sm">
+              <div className="flex items-center gap-2 text-amber-500 dark:text-amber-400 font-bold text-sm">
                 <Lock className="w-4 h-4" />
                 <span>Xác Thực Chủ Sở Hữu (Admin)</span>
               </div>
@@ -429,7 +429,7 @@ export const DeviceActivationGateView: React.FC<DeviceActivationGateViewProps> =
                   setBypassError(null);
                   setAdminPinInput('');
                 }}
-                className="text-ice-muted hover:text-white transition-colors"
+                className="text-ice-subtext hover:text-ice-text transition-colors"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -440,7 +440,7 @@ export const DeviceActivationGateView: React.FC<DeviceActivationGateViewProps> =
             </p>
 
             {bypassError && (
-              <div className="p-2.5 rounded-lg bg-rose-500/15 border border-rose-500/30 text-rose-300 text-xs">
+              <div className="p-2.5 rounded-lg bg-rose-500/15 border border-rose-500/30 text-rose-400 text-xs">
                 {bypassError}
               </div>
             )}
@@ -451,7 +451,7 @@ export const DeviceActivationGateView: React.FC<DeviceActivationGateViewProps> =
                 value={adminPinInput}
                 onChange={(e) => setAdminPinInput(e.target.value)}
                 placeholder="Nhập mã PIN Admin..."
-                className="w-full h-11 px-3.5 rounded-xl bg-black/60 border border-amber-500/40 text-sm text-white focus:border-amber-400 focus:outline-none font-mono tracking-widest text-center"
+                className="w-full h-11 px-3.5 rounded-xl bg-ice-bg border border-amber-500/40 text-sm text-ice-text focus:border-amber-400 focus:outline-none font-mono tracking-widest text-center"
                 autoFocus
               />
 

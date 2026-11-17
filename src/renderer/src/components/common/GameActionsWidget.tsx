@@ -92,7 +92,7 @@ export const GameActionsWidget: React.FC<GameActionsWidgetProps> = ({
 
       {/* Guidance Text Block */}
       {requirementsText && (
-        <div className="bg-[#0A0D14]/70 border border-amber-500/20 rounded-xl p-3 text-xs text-ice-text leading-relaxed whitespace-pre-line flex items-start gap-2.5">
+        <div className="bg-ice-card border border-amber-500/20 rounded-xl p-3 text-xs text-ice-text leading-relaxed whitespace-pre-line flex items-start gap-2.5">
           <span className="text-amber-400 shrink-0 text-sm mt-0.5">📌</span>
           <div className="flex-1 text-xs leading-relaxed">{requirementsText}</div>
         </div>
@@ -122,7 +122,7 @@ export const GameActionsWidget: React.FC<GameActionsWidgetProps> = ({
                         ? 'bg-red-500/20 border-red-500/50 text-red-200'
                         : feedback
                         ? 'bg-emerald-500/20 border-emerald-500/50 text-emerald-200'
-                        : 'bg-[#181C28] hover:bg-[#202538] border-white/10 hover:border-amber-400 text-white'
+                        : 'bg-ice-card hover:bg-ice-hover border-ice-border hover:border-amber-400 text-ice-text'
                     }`}
                   >
                     <div className="w-4 h-4 flex items-center justify-center shrink-0">
@@ -164,7 +164,7 @@ export const GameActionsWidget: React.FC<GameActionsWidgetProps> = ({
                         ? 'bg-red-500/20 border-red-500/50'
                         : feedback
                         ? 'bg-emerald-500/20 border-emerald-500/50'
-                        : 'bg-[#181C28] hover:bg-[#202538] border-white/10 hover:border-amber-400'
+                        : 'bg-ice-card hover:bg-ice-hover border-ice-border hover:border-amber-400 text-ice-text'
                     }`}
                   >
                     {feedback?.isError ? (
@@ -193,7 +193,7 @@ export const GameActionsWidget: React.FC<GameActionsWidgetProps> = ({
                         ? 'bg-red-500/15 border-red-500/50 text-red-200'
                         : feedback
                         ? 'bg-emerald-500/15 border-emerald-500/50 text-emerald-200'
-                        : 'bg-[#181C28] hover:bg-[#1E2333] border-ice-border hover:border-amber-400/60 text-white'
+                        : 'bg-ice-card hover:bg-ice-hover border-ice-border hover:border-amber-400/60 text-ice-text'
                     }`}
                   >
                     <div className="w-8 h-8 rounded-lg bg-black/40 flex items-center justify-center shrink-0 border border-white/5 group-hover:scale-110 transition-transform">

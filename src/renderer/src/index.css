@@ -1,17 +1,86 @@
 @import "tailwindcss";
 
+/* ============================================================================
+   SOLAR & LUNAR DESIGN SYSTEM TOKENS (Cross-Platform)
+   ============================================================================ */
+:root, [data-theme="lunar"] {
+  --theme-bg: #0B0F19;
+  --theme-card: #151C2C;
+  --theme-card-elevated: #1B2438;
+  --theme-hover: #1E293B;
+  --theme-border: #1E293B;
+  --theme-border-light: rgba(255, 255, 255, 0.08);
+  --theme-accent: #818CF8;
+  --theme-accentHover: #6366F1;
+  --theme-accent-warm: #FBBF24;
+  --theme-success: #3FB950;
+  --theme-warning: #D29922;
+  --theme-error: #F85149;
+  --theme-text: #F1F5F9;
+  --theme-subtext: #94A3B8;
+
+  /* Glassmorphism & Floating Tokens */
+  --glass-bg: rgba(21, 28, 44, 0.85);
+  --glass-header-bg: rgba(15, 21, 35, 0.82);
+  --glass-border: rgba(255, 255, 255, 0.10);
+  --glass-shadow: 0 16px 40px rgba(0, 0, 0, 0.7);
+  --glass-inner-glow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+
+  /* Scrollbar & Selection */
+  --scrollbar-track: #0B0F19;
+  --scrollbar-thumb: #1E293B;
+  --scrollbar-thumb-hover: #818CF8;
+  --selection-bg: rgba(129, 140, 248, 0.35);
+
+  /* Ambient Cinema Backdrop Tint */
+  --ambient-overlay: rgba(11, 15, 25, 0.72);
+}
+
+[data-theme="solar"] {
+  --theme-bg: #FAF8F5;
+  --theme-card: #FFFFFF;
+  --theme-card-elevated: #F5F3EF;
+  --theme-hover: #F0ECE4;
+  --theme-border: #E7E5E4;
+  --theme-border-light: rgba(0, 0, 0, 0.06);
+  --theme-accent: #F59E0B;
+  --theme-accentHover: #D97706;
+  --theme-accent-warm: #D97706;
+  --theme-success: #16A34A;
+  --theme-warning: #D97706;
+  --theme-error: #DC2626;
+  --theme-text: #1C1917;
+  --theme-subtext: #78716C;
+
+  /* Glassmorphism & Floating Tokens */
+  --glass-bg: rgba(255, 255, 255, 0.88);
+  --glass-header-bg: rgba(255, 255, 255, 0.85);
+  --glass-border: rgba(0, 0, 0, 0.08);
+  --glass-shadow: 0 16px 35px rgba(28, 25, 23, 0.08);
+  --glass-inner-glow: inset 0 1px 0 rgba(255, 255, 255, 0.95);
+
+  /* Scrollbar & Selection */
+  --scrollbar-track: #FAF8F5;
+  --scrollbar-thumb: #E7E5E4;
+  --scrollbar-thumb-hover: #F59E0B;
+  --selection-bg: rgba(245, 158, 11, 0.30);
+
+  /* Ambient Cinema Backdrop Tint */
+  --ambient-overlay: rgba(250, 248, 245, 0.80);
+}
+
 @theme {
-  --color-ice-bg: #0F1115;
-  --color-ice-card: #171A21;
-  --color-ice-hover: #1F242D;
-  --color-ice-border: #2A303B;
-  --color-ice-accent: #4F8CFF;
-  --color-ice-accentHover: #3b74e6;
-  --color-ice-success: #3FB950;
-  --color-ice-warning: #D29922;
-  --color-ice-error: #F85149;
-  --color-ice-text: #E6EAF0;
-  --color-ice-subtext: #8B94A3;
+  --color-ice-bg: var(--theme-bg);
+  --color-ice-card: var(--theme-card);
+  --color-ice-hover: var(--theme-hover);
+  --color-ice-border: var(--theme-border);
+  --color-ice-accent: var(--theme-accent);
+  --color-ice-accentHover: var(--theme-accentHover);
+  --color-ice-success: var(--theme-success);
+  --color-ice-warning: var(--theme-warning);
+  --color-ice-error: var(--theme-error);
+  --color-ice-text: var(--theme-text);
+  --color-ice-subtext: var(--theme-subtext);
 
   --aspect-cover: 2 / 3;
   --aspect-banner: 16 / 9;
@@ -34,8 +103,8 @@
 
   /* High-contrast accessible text selection */
   ::selection {
-    background-color: rgba(79, 140, 255, 0.35);
-    color: #ffffff;
+    background-color: var(--selection-bg);
+    color: var(--color-ice-text);
   }
 
   /* Custom scrollbar for modern gaming app look */
@@ -44,23 +113,40 @@
     height: 6px;
   }
   ::-webkit-scrollbar-track {
-    background: #0F1115;
+    background: var(--scrollbar-track);
   }
   ::-webkit-scrollbar-thumb {
-    background: #2A303B;
+    background: var(--scrollbar-thumb);
     border-radius: 9999px;
   }
   ::-webkit-scrollbar-thumb:hover {
-    background: #4F8CFF;
+    background: var(--scrollbar-thumb-hover);
   }
 }
 
-/* Glassmorphism & utilities */
+/* Glassmorphism & Floating utilities */
 .glass-panel {
-  background: rgba(23, 26, 33, 0.85);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(42, 48, 59, 0.6);
+  background: var(--glass-bg);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow);
+}
+
+.glass-header {
+  background: var(--glass-header-bg);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow);
+}
+
+.glass-pill {
+  background: var(--glass-bg);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow);
 }
 
 /* Hide scrollbars for mobile carousels */

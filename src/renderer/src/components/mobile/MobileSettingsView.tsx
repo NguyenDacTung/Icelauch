@@ -23,6 +23,7 @@ import {
 } from 'lucide-react';
 import type { AppSettings, CloudSyncSettings, SeasonTheme, UserProfile } from '../../types';
 import { AvatarBadge } from '../common/AvatarBadge';
+import { ThemeToggleSwitch } from '../common/ThemeToggleSwitch';
 import { sfx } from '../../utils/sfx';
 import {
   checkMobileUpdate,
@@ -303,14 +304,14 @@ export const MobileSettingsView: React.FC<MobileSettingsViewProps> = ({
       </div>
 
       {/* 3. CLOUD SYNC CARD (MOBILE FIRST) */}
-      <div className="p-4 rounded-2xl bg-[#10141D] border border-indigo-500/30 shadow-md space-y-3.5">
+      <div className="p-4 rounded-2xl bg-ice-card border border-indigo-500/30 shadow-md space-y-3.5">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-xl bg-indigo-500/20 text-indigo-400 flex items-center justify-center">
               <Cloud className="w-4 h-4" />
             </div>
             <div>
-              <h3 className="text-xs font-bold text-white uppercase tracking-wider">
+              <h3 className="text-xs font-bold text-ice-text uppercase tracking-wider">
                 Đồng Bộ Đám Mây (Supabase)
               </h3>
               <p className="text-[10px] text-ice-subtext">Tự động sao lưu tiến độ & yêu thích</p>
@@ -406,27 +407,39 @@ export const MobileSettingsView: React.FC<MobileSettingsViewProps> = ({
       </div>
 
       {/* 4. APPEARANCE & THEME CARD */}
-      <div className="p-4 rounded-2xl bg-[#10141D] border border-ice-border/70 shadow-md space-y-3.5">
+      <div className="p-4 rounded-2xl bg-ice-card border border-ice-border/70 shadow-md space-y-3.5">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-xl bg-amber-500/15 text-amber-400 flex items-center justify-center">
               <Palette className="w-4 h-4" />
             </div>
             <div>
-              <h3 className="text-xs font-bold text-white uppercase tracking-wider">
+              <h3 className="text-xs font-bold text-ice-text uppercase tracking-wider">
                 Giao Diện & Trải Nghiệm
               </h3>
-              <p className="text-[10px] text-ice-subtext">Hiệu ứng mùa & âm thanh tương tác</p>
+              <p className="text-[10px] text-ice-subtext">Hệ thống Theme Solar/Lunar & Âm thanh</p>
             </div>
           </div>
         </div>
 
+        {/* Solar / Lunar Theme Toggle Row */}
+        <div className="flex items-center justify-between p-3 rounded-xl bg-ice-hover/40 border border-ice-border/60">
+          <div className="flex items-center gap-2.5">
+            <Palette className="w-4 h-4 text-ice-accent" />
+            <div>
+              <span className="text-xs font-bold text-ice-text block">Chế độ giao diện (Solar / Lunar)</span>
+              <span className="text-[10px] text-ice-subtext">Gạt để đổi giữa Ban ngày và Ban đêm</span>
+            </div>
+          </div>
+          <ThemeToggleSwitch size="sm" />
+        </div>
+
         {/* SFX Toggle Row */}
-        <div className="flex items-center justify-between p-3 rounded-xl bg-black/30 border border-white/5">
+        <div className="flex items-center justify-between p-3 rounded-xl bg-ice-hover/40 border border-ice-border/60">
           <div className="flex items-center gap-2.5">
             <Volume2 className="w-4 h-4 text-amber-400" />
             <div>
-              <span className="text-xs font-bold text-white block">Âm thanh tương tác</span>
+              <span className="text-xs font-bold text-ice-text block">Âm thanh tương tác</span>
               <span className="text-[10px] text-ice-subtext">Hiệu ứng click & chạm phản hồi</span>
             </div>
           </div>
@@ -482,14 +495,14 @@ export const MobileSettingsView: React.FC<MobileSettingsViewProps> = ({
       </div>
 
       {/* 5. ADMIN MANAGEMENT CARD */}
-      <div className="p-4 rounded-2xl bg-[#10141D] border border-ice-border/70 shadow-md space-y-3">
+      <div className="p-4 rounded-2xl bg-ice-card border border-ice-border/70 shadow-md space-y-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-xl bg-amber-500/15 text-amber-400 flex items-center justify-center">
               <ShieldCheck className="w-4 h-4" />
             </div>
             <div>
-              <h3 className="text-xs font-bold text-white uppercase tracking-wider">
+              <h3 className="text-xs font-bold text-ice-text uppercase tracking-wider">
                 Bảo Mật Quản Trị Viên (Admin)
               </h3>
               <p className="text-[10px] text-ice-subtext">Quyền chỉnh sửa danh mục & phim</p>
@@ -569,14 +582,14 @@ export const MobileSettingsView: React.FC<MobileSettingsViewProps> = ({
       </div>
 
       {/* 6. APP VERSION & OTA UPDATE CARD */}
-      <div className="p-4 rounded-2xl bg-[#10141D] border border-ice-border/70 shadow-md space-y-3">
+      <div className="p-4 rounded-2xl bg-ice-card border border-ice-border/70 shadow-md space-y-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-xl bg-cyan-500/15 text-cyan-400 flex items-center justify-center">
               <Smartphone className="w-4 h-4" />
             </div>
             <div>
-              <h3 className="text-xs font-bold text-white uppercase tracking-wider">
+              <h3 className="text-xs font-bold text-ice-text uppercase tracking-wider">
                 Phiên Bản & Cập Nhật (OTA)
               </h3>
               <p className="text-[10px] text-ice-subtext">Icelauch Android Edition v{CURRENT_MOBILE_VERSION}</p>

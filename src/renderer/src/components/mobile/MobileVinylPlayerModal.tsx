@@ -59,20 +59,20 @@ export const MobileVinylPlayerModal: React.FC<MobileVinylPlayerModalProps> = ({
     : '';
 
   return (
-    <div className="fixed inset-0 z-50 bg-[#0A0C10]/98 backdrop-blur-2xl flex flex-col justify-between p-4 pt-[max(1rem,env(safe-area-inset-top))] pb-[max(1rem,env(safe-area-inset-bottom))] animate-scale-up select-none overflow-hidden">
+    <div className="fixed inset-0 z-50 bg-ice-bg/95 backdrop-blur-2xl text-ice-text flex flex-col justify-between p-4 pt-[max(1rem,env(safe-area-inset-top))] pb-[max(1rem,env(safe-area-inset-bottom))] animate-scale-up select-none overflow-hidden">
       {/* Top Header: Minimize Chevron Down & Close Button (>= 44x44px touch targets) */}
       <div className="flex items-center justify-between pb-2 shrink-0">
         <button
           type="button"
           onClick={onClose}
-          className="w-11 h-11 rounded-full bg-white/10 hover:bg-white/20 active:scale-95 text-white flex items-center justify-center transition-all"
+          className="w-11 h-11 rounded-full bg-ice-card hover:bg-ice-hover border border-ice-border active:scale-95 text-ice-text flex items-center justify-center transition-all"
           title="Thu nhỏ về mini player"
           aria-label="Thu nhỏ về mini player"
         >
-          <ChevronDown className="w-6 h-6 text-slate-300" />
+          <ChevronDown className="w-6 h-6 text-ice-text" />
         </button>
 
-        <div className="flex items-center gap-1.5 text-xs text-amber-400 font-bold uppercase tracking-wider">
+        <div className="flex items-center gap-1.5 text-xs text-amber-500 dark:text-amber-400 font-bold uppercase tracking-wider">
           <Disc className={`w-4 h-4 ${isPlaying ? 'animate-spin' : ''}`} style={{ animationDuration: '4s' }} />
           <span>Máy Hát Đĩa Than</span>
         </div>
@@ -80,11 +80,11 @@ export const MobileVinylPlayerModal: React.FC<MobileVinylPlayerModalProps> = ({
         <button
           type="button"
           onClick={onClose}
-          className="w-11 h-11 rounded-full bg-white/10 hover:bg-white/20 active:scale-95 text-white flex items-center justify-center transition-all"
+          className="w-11 h-11 rounded-full bg-ice-card hover:bg-ice-hover border border-ice-border active:scale-95 text-ice-text flex items-center justify-center transition-all"
           title="Đóng trình phát"
           aria-label="Đóng trình phát"
         >
-          <X className="w-5 h-5 text-slate-300" />
+          <X className="w-5 h-5 text-ice-text" />
         </button>
       </div>
 
@@ -134,13 +134,13 @@ export const MobileVinylPlayerModal: React.FC<MobileVinylPlayerModalProps> = ({
 
       {/* Track Info */}
       <div className="text-center space-y-1 py-1.5 shrink-0 px-4">
-        <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30 uppercase tracking-wider inline-block">
+        <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/20 text-amber-500 dark:text-amber-300 border border-amber-500/30 uppercase tracking-wider inline-block">
           {track.subType === 'podcast' ? 'Podcast' : 'Bài Hát'}
         </span>
-        <h2 className="text-lg font-black text-white line-clamp-1">
+        <h2 className="text-lg font-black text-ice-text line-clamp-1">
           {track.title}
         </h2>
-        <p className="text-xs text-slate-400 line-clamp-1">
+        <p className="text-xs text-ice-subtext line-clamp-1">
           {track.artist || track.category || 'Nghệ sĩ ẩn danh'}
         </p>
       </div>
@@ -155,11 +155,11 @@ export const MobileVinylPlayerModal: React.FC<MobileVinylPlayerModalProps> = ({
             step={0.5}
             value={currentTime}
             onChange={(e) => onSeek?.(parseFloat(e.target.value))}
-            className="w-full h-2 bg-white/10 rounded-lg appearance-none cursor-pointer accent-amber-400 active:accent-amber-300 touch-pan-x"
+            className="w-full h-2 bg-ice-card border border-ice-border rounded-lg appearance-none cursor-pointer accent-amber-500 dark:accent-amber-400 active:accent-amber-300 touch-pan-x"
             aria-label="Thanh trượt thời gian bài hát"
           />
         </div>
-        <div className="flex items-center justify-between text-xs font-medium text-slate-400 px-0.5">
+        <div className="flex items-center justify-between text-xs font-medium text-ice-subtext px-0.5">
           <span>{formatTime(currentTime)}</span>
           <span>{formatTime(duration)}</span>
         </div>
@@ -170,11 +170,11 @@ export const MobileVinylPlayerModal: React.FC<MobileVinylPlayerModalProps> = ({
         <button
           type="button"
           onClick={onPrev}
-          className="w-12 h-12 rounded-full bg-white/10 hover:bg-white/20 active:scale-95 text-white flex items-center justify-center transition-all"
+          className="w-12 h-12 rounded-full bg-ice-card hover:bg-ice-hover border border-ice-border active:scale-95 text-ice-text flex items-center justify-center transition-all"
           title="Bài trước"
           aria-label="Bài trước"
         >
-          <SkipBack className="w-5 h-5 text-slate-200" />
+          <SkipBack className="w-5 h-5 text-ice-text" />
         </button>
 
         <button
@@ -194,35 +194,35 @@ export const MobileVinylPlayerModal: React.FC<MobileVinylPlayerModalProps> = ({
         <button
           type="button"
           onClick={onNext}
-          className="w-12 h-12 rounded-full bg-white/10 hover:bg-white/20 active:scale-95 text-white flex items-center justify-center transition-all"
+          className="w-12 h-12 rounded-full bg-ice-card hover:bg-ice-hover border border-ice-border active:scale-95 text-ice-text flex items-center justify-center transition-all"
           title="Bài tiếp theo"
           aria-label="Bài tiếp theo"
         >
-          <SkipForward className="w-5 h-5 text-slate-200" />
+          <SkipForward className="w-5 h-5 text-ice-text" />
         </button>
       </div>
 
       {/* Bottom Playlist Toggle & Drawer */}
-      <div className="pt-2 border-t border-white/10 shrink-0">
+      <div className="pt-2 border-t border-ice-border shrink-0">
         <button
           type="button"
           onClick={() => setShowPlaylist(!showPlaylist)}
-          className="w-full h-11 rounded-xl bg-white/5 hover:bg-white/10 active:bg-white/15 text-white text-xs font-semibold flex items-center justify-center gap-2 border border-white/10 transition-colors"
+          className="w-full h-11 rounded-xl bg-ice-card hover:bg-ice-hover active:bg-ice-hover text-ice-text text-xs font-semibold flex items-center justify-center gap-2 border border-ice-border transition-colors"
         >
-          <ListMusic className="w-4 h-4 text-amber-400" />
+          <ListMusic className="w-4 h-4 text-amber-500 dark:text-amber-400" />
           <span>Danh sách phát ({playlist.length} bài)</span>
         </button>
 
         {showPlaylist && (
-          <div className="max-h-36 overflow-y-auto no-scrollbar space-y-1 mt-2 p-1 rounded-xl bg-black/40 border border-white/5">
+          <div className="max-h-36 overflow-y-auto no-scrollbar space-y-1 mt-2 p-1 rounded-xl bg-ice-card border border-ice-border">
             {playlist.map((item) => (
               <div
                 key={item.id}
                 onClick={() => onSelectTrack(item)}
                 className={`flex items-center justify-between p-2.5 rounded-lg text-xs cursor-pointer active:scale-[0.99] transition-all min-h-[44px] ${
                   item.id === track.id
-                    ? 'bg-amber-500/20 text-amber-300 font-bold border border-amber-500/30'
-                    : 'text-slate-400 hover:text-white hover:bg-white/5'
+                    ? 'bg-amber-500/20 text-amber-500 dark:text-amber-300 font-bold border border-amber-500/30'
+                    : 'text-ice-subtext hover:text-ice-text hover:bg-ice-hover'
                 }`}
               >
                 <span className="line-clamp-1 flex-1 pr-2">{item.title}</span>

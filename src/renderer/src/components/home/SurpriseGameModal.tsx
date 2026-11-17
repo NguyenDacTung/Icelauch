@@ -82,7 +82,7 @@ export const SurpriseGameModal: React.FC<SurpriseGameModalProps> = ({
           </div>
           <button
             onClick={onClose}
-            className="p-1 rounded-lg text-ice-muted hover:text-white hover:bg-white/10 transition-colors"
+            className="p-1.5 rounded-lg text-ice-subtext hover:text-ice-text hover:bg-ice-hover transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
@@ -111,7 +111,7 @@ export const SurpriseGameModal: React.FC<SurpriseGameModalProps> = ({
           </div>
 
           <div className="space-y-1">
-            <h3 className="text-xl font-bold text-white tracking-wide truncate">
+            <h3 className="text-xl font-bold text-ice-text tracking-wide truncate">
               {currentDisplayGame ? currentDisplayGame.name : 'Đang chọn game...'}
             </h3>
             <p className="text-xs text-ice-accent font-medium">

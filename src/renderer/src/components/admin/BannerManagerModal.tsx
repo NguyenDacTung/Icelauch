@@ -191,15 +191,15 @@ export const BannerManagerModal: React.FC<BannerManagerModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
-      <div className="bg-[#12141A] border border-ice-border rounded-2xl w-full max-w-4xl overflow-hidden shadow-2xl flex flex-col max-h-[92vh]">
+      <div className="bg-ice-card border border-ice-border rounded-2xl w-full max-w-4xl overflow-hidden shadow-2xl flex flex-col max-h-[92vh]">
         {/* Header */}
-        <div className="px-6 py-4 border-b border-ice-border flex items-center justify-between bg-[#171A21]">
+        <div className="px-6 py-4 border-b border-ice-border flex items-center justify-between bg-ice-card/90">
           <div className="flex items-center gap-2.5">
             <div className="p-2 rounded-xl bg-amber-500/20 text-amber-400 border border-amber-500/30">
               <Sparkles className="w-5 h-5" />
             </div>
             <div>
-              <h3 className="text-base font-bold text-white tracking-wide">
+              <h3 className="text-base font-bold text-ice-text tracking-wide">
                 Trung Tâm Quản Lý Banner Nổi Bật (Admin)
               </h3>
               <p className="text-xs text-ice-subtext">
@@ -207,19 +207,19 @@ export const BannerManagerModal: React.FC<BannerManagerModalProps> = ({
               </p>
             </div>
           </div>
-          <button onClick={onClose} className="p-1.5 rounded-lg text-ice-subtext hover:text-white hover:bg-white/10 transition-colors">
+          <button onClick={onClose} className="p-1.5 rounded-lg text-ice-subtext hover:text-ice-text hover:bg-ice-hover transition-colors">
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* 4 Section Tabs */}
-        <div className="flex border-b border-ice-border bg-[#0E1015] px-6 gap-2 pt-2">
+        <div className="flex border-b border-ice-border bg-ice-bg px-6 gap-2 pt-2">
           <button
             onClick={() => { setActiveTab('games'); sfx.playClick(); }}
             className={`flex items-center gap-2 px-4 py-2.5 rounded-t-xl text-xs font-bold transition-all border-t border-x ${
               activeTab === 'games'
-                ? 'bg-[#12141A] text-amber-400 border-ice-border border-b-transparent shadow-md'
-                : 'text-ice-subtext hover:text-white border-transparent'
+                ? 'bg-ice-card text-amber-400 border-ice-border border-b-transparent shadow-md'
+                : 'text-ice-subtext hover:text-ice-text border-transparent'
             }`}
           >
             <Gamepad2 className="w-4 h-4" />
@@ -230,8 +230,8 @@ export const BannerManagerModal: React.FC<BannerManagerModalProps> = ({
             onClick={() => { setActiveTab('videos'); sfx.playClick(); }}
             className={`flex items-center gap-2 px-4 py-2.5 rounded-t-xl text-xs font-bold transition-all border-t border-x ${
               activeTab === 'videos'
-                ? 'bg-[#12141A] text-amber-400 border-ice-border border-b-transparent shadow-md'
-                : 'text-ice-subtext hover:text-white border-transparent'
+                ? 'bg-ice-card text-amber-400 border-ice-border border-b-transparent shadow-md'
+                : 'text-ice-subtext hover:text-ice-text border-transparent'
             }`}
           >
             <Film className="w-4 h-4" />
@@ -242,8 +242,8 @@ export const BannerManagerModal: React.FC<BannerManagerModalProps> = ({
             onClick={() => { setActiveTab('music'); sfx.playClick(); }}
             className={`flex items-center gap-2 px-4 py-2.5 rounded-t-xl text-xs font-bold transition-all border-t border-x ${
               activeTab === 'music'
-                ? 'bg-[#12141A] text-amber-400 border-ice-border border-b-transparent shadow-md'
-                : 'text-ice-subtext hover:text-white border-transparent'
+                ? 'bg-ice-card text-amber-400 border-ice-border border-b-transparent shadow-md'
+                : 'text-ice-subtext hover:text-ice-text border-transparent'
             }`}
           >
             <Music className="w-4 h-4" />
@@ -254,8 +254,8 @@ export const BannerManagerModal: React.FC<BannerManagerModalProps> = ({
             onClick={() => { setActiveTab('podcasts'); sfx.playClick(); }}
             className={`flex items-center gap-2 px-4 py-2.5 rounded-t-xl text-xs font-bold transition-all border-t border-x ${
               activeTab === 'podcasts'
-                ? 'bg-[#12141A] text-amber-400 border-ice-border border-b-transparent shadow-md'
-                : 'text-ice-subtext hover:text-white border-transparent'
+                ? 'bg-ice-card text-amber-400 border-ice-border border-b-transparent shadow-md'
+                : 'text-ice-subtext hover:text-ice-text border-transparent'
             }`}
           >
             <Mic className="w-4 h-4" />
@@ -336,7 +336,7 @@ export const BannerManagerModal: React.FC<BannerManagerModalProps> = ({
                 <select
                   value={currentSectionSettings.fallbackMode}
                   onChange={(e) => handleUpdateSection((prev) => ({ ...prev, fallbackMode: e.target.value as any }))}
-                  className="w-full bg-[#0A0D14] border border-ice-border rounded-lg px-3 py-1.5 text-white text-xs outline-none focus:border-amber-400"
+                  className="w-full bg-ice-bg border border-ice-border rounded-lg px-3 py-1.5 text-ice-text text-xs outline-none focus:border-amber-400"
                 >
                   <option value="views_then_random">Ưu tiên lượt xem/chơi nhiều nhất ➔ Bù ngẫu nhiên (Khuyên dùng)</option>
                   <option value="views_only">Chỉ lấy theo lượt xem/chơi cao nhất</option>
@@ -346,7 +346,7 @@ export const BannerManagerModal: React.FC<BannerManagerModalProps> = ({
 
               {/* Auto Add New Toggle */}
               <div className="flex items-center gap-3 pt-4">
-                <label className="flex items-center gap-2 cursor-pointer text-white">
+                <label className="flex items-center gap-2 cursor-pointer text-ice-text">
                   <input
                     type="checkbox"
                     checked={currentSectionSettings.autoAddNew}
@@ -362,10 +362,10 @@ export const BannerManagerModal: React.FC<BannerManagerModalProps> = ({
           {/* Action Bar & Add Banner Button */}
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <span className="text-xs font-bold text-white">
+              <span className="text-xs font-bold text-ice-text">
                 Các Slot Banner Đang Chạy Thực Tế ({liveResolvedList.length} / {currentSectionSettings.maxBanners})
               </span>
-              <span className="text-[10px] text-ice-muted">
+              <span className="text-[10px] text-ice-subtext">
                 (Được giải quyết tự động theo thứ tự ưu tiên)
               </span>
             </div>
@@ -381,13 +381,13 @@ export const BannerManagerModal: React.FC<BannerManagerModalProps> = ({
 
           {/* Add New Item Sub-Modal / Form */}
           {isAddingNew && (
-            <div className="p-4 rounded-xl bg-[#171A21] border-2 border-amber-500/50 space-y-3 animate-in fade-in duration-200">
+            <div className="p-4 rounded-xl bg-ice-card border-2 border-amber-500/50 space-y-3 animate-in fade-in duration-200">
               <div className="flex items-center justify-between">
-                <h4 className="text-xs font-bold text-amber-300 flex items-center gap-1.5">
+                <h4 className="text-xs font-bold text-amber-500 dark:text-amber-300 flex items-center gap-1.5">
                   <Plus className="w-4 h-4" />
                   <span>Chọn mục cần ghim lên Banner:</span>
                 </h4>
-                <button onClick={() => setIsAddingNew(false)} className="text-ice-subtext hover:text-white">
+                <button onClick={() => setIsAddingNew(false)} className="text-ice-subtext hover:text-ice-text">
                   <X className="w-4 h-4" />
                 </button>
               </div>
@@ -399,7 +399,7 @@ export const BannerManagerModal: React.FC<BannerManagerModalProps> = ({
                   <select
                     value={selectedItemIdToAdd}
                     onChange={(e) => setSelectedItemIdToAdd(e.target.value)}
-                    className="w-full bg-[#0A0D14] border border-ice-border rounded-lg px-3 py-2 text-white outline-none focus:border-amber-400"
+                    className="w-full bg-ice-bg border border-ice-border rounded-lg px-3 py-2 text-ice-text outline-none focus:border-amber-400"
                   >
                     <option value="">-- Chọn một mục từ danh sách ({availableCandidates.length}) --</option>
                     {availableCandidates.map((c) => (
@@ -418,7 +418,7 @@ export const BannerManagerModal: React.FC<BannerManagerModalProps> = ({
                       disabled={addIsPermanent}
                       value={addDurationDays}
                       onChange={(e) => setAddDurationDays(parseInt(e.target.value, 10))}
-                      className="bg-[#0A0D14] border border-ice-border rounded-lg px-2.5 py-2 text-white flex-1 disabled:opacity-50"
+                      className="bg-ice-bg border border-ice-border rounded-lg px-2.5 py-2 text-ice-text flex-1 disabled:opacity-50"
                     >
                       <option value={3}>3 ngày</option>
                       <option value={7}>7 ngày</option>
@@ -471,8 +471,8 @@ export const BannerManagerModal: React.FC<BannerManagerModalProps> = ({
                   key={item.id}
                   className={`flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 p-3 rounded-xl border transition-all ${
                     isPinned
-                      ? 'bg-[#151922] border-amber-500/30 shadow-md'
-                      : 'bg-[#0E1015] border-ice-border/60 opacity-90'
+                      ? 'bg-ice-hover border-amber-500/40 shadow-md'
+                      : 'bg-ice-bg border-ice-border/70 opacity-90'
                   }`}
                 >
                   {/* Left: Slot Number + 16:9 Thumbnail + Title */}
@@ -600,7 +600,7 @@ export const BannerManagerModal: React.FC<BannerManagerModalProps> = ({
         </div>
 
         {/* Footer */}
-        <div className="px-6 py-3.5 border-t border-ice-border bg-[#171A21] flex items-center justify-between">
+        <div className="px-6 py-3.5 border-t border-ice-border bg-ice-card/90 flex items-center justify-between">
           <button
             type="button"
             onClick={() => {
@@ -612,7 +612,7 @@ export const BannerManagerModal: React.FC<BannerManagerModalProps> = ({
                 podcasts: { ...DEFAULT_APP_BANNER_SETTINGS.podcasts },
               });
             }}
-            className="text-xs text-ice-muted hover:text-amber-400 flex items-center gap-1.5 transition-colors"
+            className="text-xs text-ice-subtext hover:text-amber-500 flex items-center gap-1.5 transition-colors"
           >
             <RotateCcw className="w-3.5 h-3.5" />
             <span>Khôi phục mặc định toàn bộ</span>
@@ -622,7 +622,7 @@ export const BannerManagerModal: React.FC<BannerManagerModalProps> = ({
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 rounded-xl text-xs font-semibold text-ice-subtext hover:text-white hover:bg-white/5 transition-colors"
+              className="px-4 py-2 rounded-xl text-xs font-semibold text-ice-subtext hover:text-ice-text hover:bg-ice-hover transition-colors"
             >
               Hủy bỏ
             </button>

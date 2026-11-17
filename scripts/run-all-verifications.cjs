@@ -718,20 +718,20 @@ try {
 }
 
 try {
-  // TC-SEC-09: Version Upgrade Re-Login Enforcement (1.2.3)
+  // TC-SEC-09: Version Upgrade Re-Login Enforcement (1.2.4)
   const appSrc = fs.readFileSync(path.join(ROOT_DIR, 'src/renderer/src/App.tsx'), 'utf8');
   const pkgSrc = fs.readFileSync(path.join(ROOT_DIR, 'package.json'), 'utf8');
   const gradleSrc = fs.readFileSync(path.join(ROOT_DIR, 'android/app/build.gradle'), 'utf8');
 
-  const appHasVersion = appSrc.includes("CURRENT_APP_VERSION = '1.2.3'");
-  const pkgHasVersion = pkgSrc.includes('"version": "1.2.3"');
-  const gradleHasVersion = gradleSrc.includes('versionName "1.2.3"') && gradleSrc.includes('versionCode 19');
+  const appHasVersion = appSrc.includes("CURRENT_APP_VERSION = '1.2.4'");
+  const pkgHasVersion = pkgSrc.includes('"version": "1.2.4"');
+  const gradleHasVersion = gradleSrc.includes('versionName "1.2.4"') && gradleSrc.includes('versionCode 20');
   const hasReLoginLogic = appSrc.includes('shouldRequireReLoginForNewVersion');
 
-  assert.ok(appHasVersion && pkgHasVersion && gradleHasVersion && hasReLoginLogic, 'Version 1.2.3 must be synchronized and re-login enforced');
-  recordTest('TC-SEC-09', 'Version Upgrade Re-Login Enforcement (v1.2.3 / Code 19)', 'Module 8: Device Whitelist & Security', 'Cross-Platform', true, 'Upgraded to v1.2.3 (versionCode 19); sessions maintained across restarts but purged on version upgrade');
+  assert.ok(appHasVersion && pkgHasVersion && gradleHasVersion && hasReLoginLogic, 'Version 1.2.4 must be synchronized and re-login enforced');
+  recordTest('TC-SEC-09', 'Version Upgrade Re-Login Enforcement (v1.2.4 / Code 20)', 'Module 8: Device Whitelist & Security', 'Cross-Platform', true, 'Upgraded to v1.2.4 (versionCode 20); sessions maintained across restarts but purged on version upgrade');
 } catch (e) {
-  recordTest('TC-SEC-09', 'Version Upgrade Re-Login Enforcement (v1.2.3 / Code 19)', 'Module 8: Device Whitelist & Security', 'Cross-Platform', false, e.message);
+  recordTest('TC-SEC-09', 'Version Upgrade Re-Login Enforcement (v1.2.4 / Code 20)', 'Module 8: Device Whitelist & Security', 'Cross-Platform', false, e.message);
 }
 
 try {

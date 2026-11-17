@@ -16,20 +16,20 @@ export const DeviceSimulatorBar: React.FC<DeviceSimulatorBarProps> = ({
   if (!isAdmin) return null;
 
   return (
-    <div className="bg-[#161A23] border-b border-amber-500/30 px-4 py-1.5 flex items-center justify-between text-xs select-none z-40">
-      <div className="flex items-center gap-2 text-amber-300 font-semibold text-[11px]">
+    <div className="bg-ice-card border-b border-ice-border/70 px-4 py-1.5 flex items-center justify-between text-xs select-none z-40">
+      <div className="flex items-center gap-2 text-amber-500 dark:text-amber-300 font-semibold text-[11px]">
         <Sparkles className="w-3.5 h-3.5 text-amber-400" />
         <span className="hidden sm:inline">Giả Lập Thiết Bị Admin:</span>
       </div>
 
-      <div className="flex items-center gap-1.5 bg-black/40 p-0.5 rounded-xl border border-white/10">
+      <div className="flex items-center gap-1.5 bg-ice-bg p-0.5 rounded-xl border border-ice-border/70">
         <button
           type="button"
           onClick={() => onChangeDevice('windows_pc')}
           className={`flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-bold transition-all ${
             currentDevice === 'windows_pc'
               ? 'bg-ice-accent text-white shadow-sm'
-              : 'text-ice-subtext hover:text-white'
+              : 'text-ice-subtext hover:text-ice-text'
           }`}
           title="Giao diện máy tính Windows PC mặc định"
         >
@@ -43,7 +43,7 @@ export const DeviceSimulatorBar: React.FC<DeviceSimulatorBarProps> = ({
           className={`flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-bold transition-all ${
             currentDevice === 'android_mobile'
               ? 'bg-amber-500 text-black shadow-sm'
-              : 'text-ice-subtext hover:text-white'
+              : 'text-ice-subtext hover:text-ice-text'
           }`}
           title="Giả lập khung điện thoại Android (Tỉ lệ 9:19.5, Full-Art banner, Media lên đầu)"
         >
@@ -57,7 +57,7 @@ export const DeviceSimulatorBar: React.FC<DeviceSimulatorBarProps> = ({
           className={`flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-bold transition-all ${
             currentDevice === 'android_tv'
               ? 'bg-purple-600 text-white shadow-sm'
-              : 'text-ice-subtext hover:text-white'
+              : 'text-ice-subtext hover:text-ice-text'
           }`}
           title="Giả lập Android TV (Khung rạp chiếu 16:9, tối ưu D-Pad Remote)"
         >

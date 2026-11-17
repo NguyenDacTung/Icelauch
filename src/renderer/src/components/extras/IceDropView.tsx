@@ -254,33 +254,33 @@ export const IceDropView: React.FC<IceDropViewProps> = ({ activeProfile }) => {
   return (
     <div className="space-y-6 animate-fade-in select-none">
       {/* Top Channel Toggle Header */}
-      <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-4 rounded-3xl bg-black/40 border border-white/10 shadow-xl">
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-4 rounded-3xl bg-ice-card border border-ice-border shadow-xl">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-amber-500 to-orange-500 flex items-center justify-center text-black font-black shadow-lg">
             <Share2 className="w-5 h-5" />
           </div>
           <div>
-            <h2 className="text-base font-bold text-white flex items-center gap-2">
+            <h2 className="text-base font-bold text-ice-text flex items-center gap-2">
               <span>IceDrop - Chia Sẻ Dữ Liệu Tức Thì</span>
-              <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-400/20 text-amber-300 border border-amber-400/30 font-bold">
+              <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-400/20 text-amber-500 dark:text-amber-300 border border-amber-400/30 font-bold">
                 Bảo Mật Cao
               </span>
             </h2>
-            <p className="text-xs text-ice-muted">
+            <p className="text-xs text-ice-subtext">
               {activeProfile ? `Đang đăng nhập: ${activeProfile.nickname}` : 'Đang sử dụng chế độ Khách (Guest)'}
             </p>
           </div>
         </div>
 
         {/* Channel Selector */}
-        <div className="flex items-center gap-1.5 p-1 rounded-2xl bg-black/50 border border-white/10">
+        <div className="flex items-center gap-1.5 p-1 rounded-2xl bg-ice-bg border border-ice-border">
           <button
             type="button"
             onClick={() => setChannel('cloud')}
             className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 ${
               channel === 'cloud'
                 ? 'bg-amber-400 text-black shadow-lg font-black'
-                : 'text-ice-muted hover:text-white'
+                : 'text-ice-subtext hover:text-ice-text'
             }`}
           >
             <Cloud className="w-4 h-4" />
@@ -292,7 +292,7 @@ export const IceDropView: React.FC<IceDropViewProps> = ({ activeProfile }) => {
             className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 ${
               channel === 'direct'
                 ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg font-black'
-                : 'text-ice-muted hover:text-white'
+                : 'text-ice-subtext hover:text-ice-text'
             }`}
           >
             <QrCode className="w-4 h-4" />
@@ -308,13 +308,13 @@ export const IceDropView: React.FC<IceDropViewProps> = ({ activeProfile }) => {
           <div className="lg:col-span-5 space-y-5">
             {/* If Logged-in: Create Share Card */}
             {activeProfile ? (
-              <div className="p-6 rounded-3xl bg-black/40 border border-white/10 shadow-xl space-y-4">
-                <div className="flex items-center justify-between border-b border-white/10 pb-3">
-                  <span className="text-xs font-bold text-white flex items-center gap-1.5 uppercase tracking-wider">
-                    <Send className="w-3.5 h-3.5 text-amber-400" />
+              <div className="p-6 rounded-3xl bg-ice-card border border-ice-border shadow-xl space-y-4">
+                <div className="flex items-center justify-between border-b border-ice-border pb-3">
+                  <span className="text-xs font-bold text-ice-text flex items-center gap-1.5 uppercase tracking-wider">
+                    <Send className="w-3.5 h-3.5 text-amber-500 dark:text-amber-400" />
                     <span>Tạo Chia Sẻ Đám Mây Mới</span>
                   </span>
-                  <span className="text-[10px] text-amber-300 font-mono">
+                  <span className="text-[10px] text-amber-500 dark:text-amber-300 font-mono">
                     Đã dùng: {myShares.length}/5 (Của bạn)
                   </span>
                 </div>
@@ -326,8 +326,8 @@ export const IceDropView: React.FC<IceDropViewProps> = ({ activeProfile }) => {
                     onClick={() => setShareType('text')}
                     className={`py-2 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 border transition-all ${
                       shareType === 'text'
-                        ? 'bg-amber-400/20 text-amber-300 border-amber-400/40 shadow'
-                        : 'bg-black/30 text-ice-muted border-white/10 hover:text-white'
+                        ? 'bg-amber-400/20 text-amber-500 dark:text-amber-300 border-amber-400/40 shadow'
+                        : 'bg-ice-bg text-ice-subtext border-ice-border hover:text-ice-text'
                     }`}
                   >
                     <FileText className="w-3.5 h-3.5" />
@@ -338,8 +338,8 @@ export const IceDropView: React.FC<IceDropViewProps> = ({ activeProfile }) => {
                     onClick={() => setShareType('link')}
                     className={`py-2 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 border transition-all ${
                       shareType === 'link'
-                        ? 'bg-amber-400/20 text-amber-300 border-amber-400/40 shadow'
-                        : 'bg-black/30 text-ice-muted border-white/10 hover:text-white'
+                        ? 'bg-amber-400/20 text-amber-500 dark:text-amber-300 border-amber-400/40 shadow'
+                        : 'bg-ice-bg text-ice-subtext border-ice-border hover:text-ice-text'
                     }`}
                   >
                     <LinkIcon className="w-3.5 h-3.5" />
@@ -358,11 +358,11 @@ export const IceDropView: React.FC<IceDropViewProps> = ({ activeProfile }) => {
                         : 'Dán đường dẫn link (ví dụ: https://youtube.com/...)'
                     }
                     rows={4}
-                    className="w-full p-3.5 rounded-2xl bg-black/50 border border-white/15 text-xs text-white placeholder-ice-muted focus:border-amber-400 focus:outline-none transition-colors resize-none"
+                    className="w-full p-3.5 rounded-2xl bg-ice-bg border border-ice-border text-xs text-ice-text placeholder-ice-subtext focus:border-amber-400 focus:outline-none transition-colors resize-none"
                   />
 
                   {cloudError && (
-                    <p className="text-[11px] text-red-400 flex items-center gap-1.5">
+                    <p className="text-[11px] text-red-500 flex items-center gap-1.5">
                       <AlertCircle className="w-3.5 h-3.5 shrink-0" />
                       <span>{cloudError}</span>
                     </p>
@@ -386,21 +386,21 @@ export const IceDropView: React.FC<IceDropViewProps> = ({ activeProfile }) => {
             ) : (
               /* Guest Notice: Cannot post, only receive */
               <div className="p-6 rounded-3xl bg-amber-500/10 border border-amber-500/30 shadow-xl space-y-3 text-center">
-                <div className="w-12 h-12 rounded-2xl bg-amber-400/20 text-amber-400 border border-amber-400/30 mx-auto flex items-center justify-center">
+                <div className="w-12 h-12 rounded-2xl bg-amber-400/20 text-amber-500 dark:text-amber-400 border border-amber-400/30 mx-auto flex items-center justify-center">
                   <Lock className="w-6 h-6" />
                 </div>
-                <h3 className="text-sm font-bold text-white">Chế Độ Khách (Guest)</h3>
-                <p className="text-xs text-ice-muted leading-relaxed">
+                <h3 className="text-sm font-bold text-ice-text">Chế Độ Khách (Guest)</h3>
+                <p className="text-xs text-ice-subtext leading-relaxed">
                   Ở chế độ Khách, bạn có thể tra cứu và nhận chia sẻ từ người khác bằng <b>Mã PIN 4 số</b> bên dưới. Vui lòng đăng nhập tài khoản nếu muốn tạo chia sẻ của riêng bạn.
                 </p>
               </div>
             )}
 
             {/* Quick Receive by 4-digit PIN Code */}
-            <div className="p-6 rounded-3xl bg-black/40 border border-white/10 shadow-xl space-y-4">
-              <div className="flex items-center gap-2 border-b border-white/10 pb-3">
-                <KeyRound className="w-4 h-4 text-emerald-400" />
-                <span className="text-xs font-bold text-white uppercase tracking-wider">
+            <div className="p-6 rounded-3xl bg-ice-card border border-ice-border shadow-xl space-y-4">
+              <div className="flex items-center gap-2 border-b border-ice-border pb-3">
+                <KeyRound className="w-4 h-4 text-emerald-500" />
+                <span className="text-xs font-bold text-ice-text uppercase tracking-wider">
                   Nhận Chia Sẻ Bằng Mã PIN 4 Số
                 </span>
               </div>
@@ -412,7 +412,7 @@ export const IceDropView: React.FC<IceDropViewProps> = ({ activeProfile }) => {
                   value={receivePin}
                   onChange={(e) => setReceivePin(e.target.value.replace(/\D/g, ''))}
                   placeholder="Nhập 4 số (vd: 7291)"
-                  className="w-40 h-10 px-3.5 rounded-2xl bg-black/50 border border-white/20 text-center text-sm font-black text-amber-300 tracking-widest placeholder-ice-muted focus:border-emerald-400 focus:outline-none font-mono"
+                  className="w-40 h-10 px-3.5 rounded-2xl bg-ice-bg border border-ice-border text-center text-sm font-black text-amber-500 dark:text-amber-300 tracking-widest placeholder-ice-subtext focus:border-emerald-400 focus:outline-none font-mono"
                 />
                 <button
                   type="submit"
@@ -429,18 +429,18 @@ export const IceDropView: React.FC<IceDropViewProps> = ({ activeProfile }) => {
           <div className="lg:col-span-7 space-y-5">
             {/* 1. My Shares Section (Visible only when logged in) */}
             {activeProfile && (
-              <div className="p-6 rounded-3xl bg-black/40 border border-white/10 shadow-xl space-y-4">
-                <div className="flex items-center justify-between border-b border-white/10 pb-3">
+              <div className="p-6 rounded-3xl bg-ice-card border border-ice-border shadow-xl space-y-4">
+                <div className="flex items-center justify-between border-b border-ice-border pb-3">
                   <div className="flex items-center gap-2">
-                    <UserCheck className="w-4 h-4 text-amber-400" />
-                    <h3 className="text-sm font-bold text-white">
+                    <UserCheck className="w-4 h-4 text-amber-500 dark:text-amber-400" />
+                    <h3 className="text-sm font-bold text-ice-text">
                       Chia Sẻ Của Bạn ({myShares.length}/5)
                     </h3>
                   </div>
                   <button
                     type="button"
                     onClick={loadMyShares}
-                    className="p-1.5 rounded-lg text-ice-muted hover:text-white hover:bg-white/10 transition-colors"
+                    className="p-1.5 rounded-lg text-ice-subtext hover:text-ice-text hover:bg-ice-hover transition-colors"
                     title="Làm mới danh sách"
                   >
                     <RefreshCw className="w-4 h-4" />
@@ -449,9 +449,9 @@ export const IceDropView: React.FC<IceDropViewProps> = ({ activeProfile }) => {
 
                 {myShares.length === 0 ? (
                   <div className="py-8 text-center space-y-2">
-                    <Clock className="w-8 h-8 text-ice-muted/40 mx-auto" />
-                    <p className="text-xs text-ice-muted">Bạn chưa có chia sẻ nào đang hoạt động.</p>
-                    <p className="text-[11px] text-ice-muted/70">
+                    <Clock className="w-8 h-8 text-ice-subtext/40 mx-auto" />
+                    <p className="text-xs text-ice-subtext">Bạn chưa có chia sẻ nào đang hoạt động.</p>
+                    <p className="text-[11px] text-ice-subtext/70">
                       Tạo chia sẻ ở khung bên trái. Người khác chỉ có thể xem khi bạn đưa cho họ mã PIN 4 số.
                     </p>
                   </div>
@@ -468,16 +468,16 @@ export const IceDropView: React.FC<IceDropViewProps> = ({ activeProfile }) => {
                       return (
                         <div
                           key={item.id}
-                          className="p-4 rounded-2xl bg-white/[0.03] border border-white/10 hover:border-amber-400/50 transition-all space-y-3 group"
+                          className="p-4 rounded-2xl bg-ice-bg border border-ice-border hover:border-amber-400/50 transition-all space-y-3 group"
                         >
                           <div className="flex items-center justify-between">
                             <div className="flex items-center gap-2">
-                              <span className="w-7 h-7 rounded-lg bg-amber-400/20 text-amber-300 border border-amber-400/30 flex items-center justify-center text-xs font-black">
+                              <span className="w-7 h-7 rounded-lg bg-amber-400/20 text-amber-500 dark:text-amber-300 border border-amber-400/30 flex items-center justify-center text-xs font-black">
                                 {item.type === 'link' ? <LinkIcon className="w-3.5 h-3.5" /> : <FileText className="w-3.5 h-3.5" />}
                               </span>
                               <div>
-                                <span className="text-xs font-bold text-white">{item.senderName}</span>
-                                <span className="text-[10px] text-ice-muted block">
+                                <span className="text-xs font-bold text-ice-text">{item.senderName}</span>
+                                <span className="text-[10px] text-ice-subtext block">
                                   {new Date(item.createdAt).toLocaleTimeString()}
                                 </span>
                               </div>
@@ -485,26 +485,26 @@ export const IceDropView: React.FC<IceDropViewProps> = ({ activeProfile }) => {
 
                             {/* 4-digit PIN Badge */}
                             <div className="flex items-center gap-2">
-                              <div className="px-2.5 py-1 rounded-xl bg-black/60 border border-amber-400/60 flex items-center gap-1.5 shadow">
-                                <KeyRound className="w-3 h-3 text-amber-400" />
-                                <span className="text-xs font-mono font-black text-amber-300 tracking-wider">
+                              <div className="px-2.5 py-1 rounded-xl bg-ice-card border border-amber-400/60 flex items-center gap-1.5 shadow">
+                                <KeyRound className="w-3 h-3 text-amber-500 dark:text-amber-400" />
+                                <span className="text-xs font-mono font-black text-amber-500 dark:text-amber-300 tracking-wider">
                                   {item.pinCode}
                                 </span>
                               </div>
-                              <span className="text-[10px] text-ice-muted flex items-center gap-1">
-                                <Clock className="w-3 h-3 text-ice-muted" />
+                              <span className="text-[10px] text-ice-subtext flex items-center gap-1">
+                                <Clock className="w-3 h-3 text-ice-subtext" />
                                 <span>Còn ~{timeLeftMin}p</span>
                               </span>
                             </div>
                           </div>
 
                           {/* Content text (Clickable if link) */}
-                          <div className="p-3 rounded-xl bg-black/40 border border-white/5 text-xs text-ice-text break-all select-text font-mono">
+                          <div className="p-3 rounded-xl bg-ice-card border border-ice-border/60 text-xs text-ice-text break-all select-text font-mono">
                             {isUrl ? (
                               <button
                                 type="button"
                                 onClick={() => handleOpenUrl(item.content)}
-                                className="text-blue-400 hover:text-blue-300 underline font-bold flex items-center gap-1 text-left inline-flex"
+                                className="text-blue-500 hover:text-blue-400 underline font-bold flex items-center gap-1 text-left inline-flex"
                               >
                                 <span>{item.content}</span>
                                 <ExternalLink className="w-3 h-3 shrink-0" />
@@ -520,7 +520,7 @@ export const IceDropView: React.FC<IceDropViewProps> = ({ activeProfile }) => {
                               <button
                                 type="button"
                                 onClick={() => handleOpenUrl(item.content)}
-                                className="px-3 py-1 rounded-lg bg-blue-500/20 hover:bg-blue-500/30 text-blue-300 text-xs font-bold flex items-center gap-1.5 transition-colors border border-blue-500/30"
+                                className="px-3 py-1 rounded-lg bg-blue-500/20 hover:bg-blue-500/30 text-blue-500 dark:text-blue-300 text-xs font-bold flex items-center gap-1.5 transition-colors border border-blue-500/30"
                               >
                                 <ExternalLink className="w-3 h-3" />
                                 <span>Mở Link Trực Tiếp</span>
@@ -530,7 +530,7 @@ export const IceDropView: React.FC<IceDropViewProps> = ({ activeProfile }) => {
                             <button
                               type="button"
                               onClick={() => handleCopy(item.id, item.content)}
-                              className="px-3 py-1 rounded-lg bg-white/10 hover:bg-white/20 text-xs text-white font-bold flex items-center gap-1.5 transition-colors"
+                              className="px-3 py-1 rounded-lg bg-ice-hover hover:bg-ice-hover/80 text-xs text-ice-text font-bold flex items-center gap-1.5 transition-colors border border-ice-border"
                             >
                               <Copy className="w-3 h-3" />
                               <span>{isCopied ? 'Đã chép!' : 'Sao chép'}</span>
@@ -539,7 +539,7 @@ export const IceDropView: React.FC<IceDropViewProps> = ({ activeProfile }) => {
                             <button
                               type="button"
                               onClick={() => IceDropCloudService.deleteShare(item.id).then(loadMyShares)}
-                              className="p-1 rounded-lg text-ice-muted hover:text-red-400 transition-colors"
+                              className="p-1 rounded-lg text-ice-subtext hover:text-red-500 transition-colors"
                               title="Xóa chia sẻ này"
                             >
                               <Trash2 className="w-3.5 h-3.5" />
@@ -554,11 +554,11 @@ export const IceDropView: React.FC<IceDropViewProps> = ({ activeProfile }) => {
             )}
 
             {/* 2. Received Items History (For both Guest & Logged-in Users) */}
-            <div className="p-6 rounded-3xl bg-black/40 border border-white/10 shadow-xl space-y-4">
-              <div className="flex items-center justify-between border-b border-white/10 pb-3">
+            <div className="p-6 rounded-3xl bg-ice-card border border-ice-border shadow-xl space-y-4">
+              <div className="flex items-center justify-between border-b border-ice-border pb-3">
                 <div className="flex items-center gap-2">
-                  <Download className="w-4 h-4 text-emerald-400" />
-                  <h3 className="text-sm font-bold text-white">
+                  <Download className="w-4 h-4 text-emerald-500" />
+                  <h3 className="text-sm font-bold text-ice-text">
                     Đã Nhận Bằng Mã PIN Gần Đây ({receivedItems.length})
                   </h3>
                 </div>
@@ -569,7 +569,7 @@ export const IceDropView: React.FC<IceDropViewProps> = ({ activeProfile }) => {
                       setReceivedItems([]);
                       sessionStorage.removeItem('icelauch_received_icedrop_items');
                     }}
-                    className="text-[10px] text-ice-muted hover:text-red-400 transition-colors"
+                    className="text-[10px] text-ice-subtext hover:text-red-500 transition-colors"
                   >
                     Xóa lịch sử
                   </button>
@@ -578,9 +578,9 @@ export const IceDropView: React.FC<IceDropViewProps> = ({ activeProfile }) => {
 
               {receivedItems.length === 0 ? (
                 <div className="py-8 text-center space-y-2">
-                  <KeyRound className="w-8 h-8 text-ice-muted/30 mx-auto" />
-                  <p className="text-xs text-ice-muted">Chưa nhận nội dung nào qua mã PIN.</p>
-                  <p className="text-[11px] text-ice-muted/70">
+                  <KeyRound className="w-8 h-8 text-ice-subtext/30 mx-auto" />
+                  <p className="text-xs text-ice-subtext">Chưa nhận nội dung nào qua mã PIN.</p>
+                  <p className="text-[11px] text-ice-subtext/70">
                     Nhập mã PIN 4 số ở khung bên trái để xem nội dung do người khác chia sẻ cho bạn.
                   </p>
                 </div>
@@ -597,23 +597,23 @@ export const IceDropView: React.FC<IceDropViewProps> = ({ activeProfile }) => {
                       >
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-2">
-                            <span className="w-7 h-7 rounded-lg bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 flex items-center justify-center text-xs font-black">
+                            <span className="w-7 h-7 rounded-lg bg-emerald-500/20 text-emerald-600 dark:text-emerald-300 border border-emerald-500/30 flex items-center justify-center text-xs font-black">
                               {item.type === 'link' ? <LinkIcon className="w-3.5 h-3.5" /> : <FileText className="w-3.5 h-3.5" />}
                             </span>
                             <div>
-                              <span className="text-xs font-bold text-white">Từ: {item.senderName}</span>
-                              <span className="text-[10px] text-ice-muted block">Mã PIN: {item.pinCode}</span>
+                              <span className="text-xs font-bold text-ice-text">Từ: {item.senderName}</span>
+                              <span className="text-[10px] text-ice-subtext block">Mã PIN: {item.pinCode}</span>
                             </div>
                           </div>
                         </div>
 
                         {/* Content text (Clickable if link) */}
-                        <div className="p-3 rounded-xl bg-black/40 border border-white/5 text-xs text-ice-text break-all select-text font-mono">
+                        <div className="p-3 rounded-xl bg-ice-bg border border-ice-border/60 text-xs text-ice-text break-all select-text font-mono">
                           {isUrl ? (
                             <button
                               type="button"
                               onClick={() => handleOpenUrl(item.content)}
-                              className="text-blue-400 hover:text-blue-300 underline font-bold flex items-center gap-1 text-left inline-flex"
+                              className="text-blue-500 hover:text-blue-400 underline font-bold flex items-center gap-1 text-left inline-flex"
                             >
                               <span>{item.content}</span>
                               <ExternalLink className="w-3 h-3 shrink-0" />
@@ -629,7 +629,7 @@ export const IceDropView: React.FC<IceDropViewProps> = ({ activeProfile }) => {
                             <button
                               type="button"
                               onClick={() => handleOpenUrl(item.content)}
-                              className="px-3 py-1 rounded-lg bg-blue-500 text-black text-xs font-black flex items-center gap-1.5 transition-colors shadow"
+                              className="px-3 py-1 rounded-lg bg-blue-500 text-white text-xs font-black flex items-center gap-1.5 transition-colors shadow"
                             >
                               <ExternalLink className="w-3 h-3" />
                               <span>Mở Link Trực Tiếp</span>
@@ -639,7 +639,7 @@ export const IceDropView: React.FC<IceDropViewProps> = ({ activeProfile }) => {
                           <button
                             type="button"
                             onClick={() => handleCopy('rec_' + item.id, item.content)}
-                            className="px-3 py-1 rounded-lg bg-white/10 hover:bg-white/20 text-xs text-white font-bold flex items-center gap-1.5 transition-colors"
+                            className="px-3 py-1 rounded-lg bg-ice-hover hover:bg-ice-hover/80 text-xs text-ice-text font-bold flex items-center gap-1.5 transition-colors border border-ice-border"
                           >
                             <Copy className="w-3 h-3" />
                             <span>{isCopied ? 'Đã chép!' : 'Sao chép'}</span>
@@ -660,9 +660,9 @@ export const IceDropView: React.FC<IceDropViewProps> = ({ activeProfile }) => {
         <div className="max-w-4xl mx-auto space-y-6">
           {isDesktop ? (
             /* PC View: Display QR code and direct message box */
-            <div className="grid grid-cols-1 md:grid-cols-12 gap-6 p-6 rounded-3xl bg-black/40 border border-white/10 shadow-2xl">
+            <div className="grid grid-cols-1 md:grid-cols-12 gap-6 p-6 rounded-3xl bg-ice-card border border-ice-border shadow-2xl">
               {/* QR Code Container (5 cols) */}
-              <div className="md:col-span-5 flex flex-col items-center justify-center p-6 bg-white/[0.02] border border-white/10 rounded-2xl text-center space-y-4">
+              <div className="md:col-span-5 flex flex-col items-center justify-center p-6 bg-ice-bg border border-ice-border rounded-2xl text-center space-y-4">
                 <span className="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-blue-500 text-white shadow">
                   Mã QR Chia Sẻ Trực Tiếp
                 </span>
@@ -678,8 +678,8 @@ export const IceDropView: React.FC<IceDropViewProps> = ({ activeProfile }) => {
                 </div>
 
                 <div className="space-y-1">
-                  <h4 className="text-sm font-bold text-white">Quét bằng camera điện thoại</h4>
-                  <p className="text-[11px] text-ice-muted max-w-xs">
+                  <h4 className="text-sm font-bold text-ice-text">Quét bằng camera điện thoại</h4>
+                  <p className="text-[11px] text-ice-subtext max-w-xs">
                     Không cần có kết nối Internet. Điện thoại quét QR xong là 2 máy truyền dữ liệu trực tiếp 2 chiều.
                   </p>
                 </div>
@@ -688,24 +688,24 @@ export const IceDropView: React.FC<IceDropViewProps> = ({ activeProfile }) => {
               {/* Chat & File Send Area (7 cols) */}
               <div className="md:col-span-7 flex flex-col justify-between space-y-4">
                 <div className="space-y-3">
-                  <div className="flex items-center justify-between border-b border-white/10 pb-2">
-                    <span className="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-1.5">
-                      <Smartphone className="w-4 h-4 text-blue-400" />
+                  <div className="flex items-center justify-between border-b border-ice-border pb-2">
+                    <span className="text-xs font-bold text-ice-text uppercase tracking-wider flex items-center gap-1.5">
+                      <Smartphone className="w-4 h-4 text-blue-500" />
                       <span>{directStatus}</span>
                     </span>
                   </div>
 
                   {/* Received Stream */}
-                  <div className="h-48 overflow-y-auto custom-scrollbar p-3 rounded-2xl bg-black/50 border border-white/10 space-y-2">
+                  <div className="h-48 overflow-y-auto custom-scrollbar p-3 rounded-2xl bg-ice-bg border border-ice-border space-y-2">
                     {receivedDirectItems.length === 0 ? (
-                      <div className="h-full flex items-center justify-center text-xs text-ice-muted italic">
+                      <div className="h-full flex items-center justify-center text-xs text-ice-subtext italic">
                         Chưa có dữ liệu nào được truyền.
                       </div>
                     ) : (
                       receivedDirectItems.map((item) => (
-                        <div key={item.id} className="p-2.5 rounded-xl bg-white/5 border border-white/10 text-xs text-white flex items-center justify-between">
+                        <div key={item.id} className="p-2.5 rounded-xl bg-ice-card border border-ice-border text-xs text-ice-text flex items-center justify-between">
                           <span className="break-all font-mono">{item.content}</span>
-                          <span className="text-[10px] text-ice-muted ml-2 shrink-0">{item.time}</span>
+                          <span className="text-[10px] text-ice-subtext ml-2 shrink-0">{item.time}</span>
                         </div>
                       ))
                     )}
@@ -719,7 +719,7 @@ export const IceDropView: React.FC<IceDropViewProps> = ({ activeProfile }) => {
                     value={directText}
                     onChange={(e) => setDirectText(e.target.value)}
                     placeholder="Nhập text hoặc link gửi sang điện thoại..."
-                    className="flex-1 px-3.5 py-2.5 rounded-xl bg-black/60 border border-white/15 text-xs text-white focus:border-blue-400 focus:outline-none"
+                    className="flex-1 px-3.5 py-2.5 rounded-xl bg-ice-bg border border-ice-border text-xs text-ice-text focus:border-blue-400 focus:outline-none"
                   />
                   <button
                     type="button"
@@ -734,21 +734,21 @@ export const IceDropView: React.FC<IceDropViewProps> = ({ activeProfile }) => {
             </div>
           ) : (
             /* Mobile View: Button to open QR Scanner */
-            <div className="p-8 rounded-3xl bg-black/40 border border-white/10 shadow-2xl text-center space-y-5">
-              <div className="w-16 h-16 rounded-3xl bg-blue-500/20 text-blue-400 border border-blue-500/30 mx-auto flex items-center justify-center shadow-lg">
+            <div className="p-8 rounded-3xl bg-ice-card border border-ice-border shadow-2xl text-center space-y-5">
+              <div className="w-16 h-16 rounded-3xl bg-blue-500/20 text-blue-500 border border-blue-500/30 mx-auto flex items-center justify-center shadow-lg">
                 <Camera className="w-8 h-8" />
               </div>
 
               <div>
-                <h3 className="text-lg font-black text-white">Quét Mã QR Máy Tính</h3>
-                <p className="text-xs text-ice-muted mt-1 max-w-sm mx-auto">
+                <h3 className="text-lg font-black text-ice-text">Quét Mã QR Máy Tính</h3>
+                <p className="text-xs text-ice-subtext mt-1 max-w-sm mx-auto">
                   Hướng camera về mã QR trên máy tính để thiết lập đường truyền nội bộ trực tiếp hai chiều.
                 </p>
               </div>
 
-              <div className="p-4 rounded-2xl bg-white/[0.02] border border-white/10 text-xs text-left space-y-2">
-                <span className="font-bold text-white block">Trạng thái hiện tại:</span>
-                <span className="text-amber-300 font-mono block">{directStatus}</span>
+              <div className="p-4 rounded-2xl bg-ice-bg border border-ice-border text-xs text-left space-y-2">
+                <span className="font-bold text-ice-text block">Trạng thái hiện tại:</span>
+                <span className="text-amber-500 dark:text-amber-300 font-mono block">{directStatus}</span>
               </div>
 
               <button
@@ -762,14 +762,14 @@ export const IceDropView: React.FC<IceDropViewProps> = ({ activeProfile }) => {
 
               {/* Direct chat/file send if connected */}
               {directConnectedHost && (
-                <div className="pt-4 border-t border-white/10 space-y-3">
+                <div className="pt-4 border-t border-ice-border space-y-3">
                   <div className="flex gap-2">
                     <input
                       type="text"
                       value={directText}
                       onChange={(e) => setDirectText(e.target.value)}
                       placeholder="Nhập tin nhắn gửi thẳng tới PC..."
-                      className="flex-1 px-3 py-2 rounded-xl bg-black/60 border border-white/20 text-xs text-white"
+                      className="flex-1 px-3 py-2 rounded-xl bg-ice-bg border border-ice-border text-xs text-ice-text"
                     />
                     <button
                       type="button"

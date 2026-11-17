@@ -45,6 +45,7 @@ import type {
   CloudSyncSettings
 } from '../../types';
 import { ActionButtonModal } from '../admin/ActionButtonModal';
+import { ThemeToggleSwitch } from './ThemeToggleSwitch';
 import { sfx } from '../../utils/sfx';
 
 type SettingsTab = 'appearance' | 'integrations' | 'storage' | 'cloud' | 'admin' | 'updates';
@@ -715,6 +716,22 @@ CREATE POLICY "Public Update Assets" ON storage.objects FOR UPDATE TO anon WITH 
       {/* ========================================================= */}
       {activeTab === 'appearance' && (
         <div className="space-y-6">
+          {/* Solar / Lunar Theme System Switcher Card */}
+          <section className="bg-ice-card rounded-2xl border border-ice-border p-6 shadow-md flex items-center justify-between">
+            <div className="space-y-1 pr-4">
+              <div className="flex items-center gap-2.5">
+                <Palette className="w-5 h-5 text-ice-accent" />
+                <h3 className="text-sm font-bold text-ice-text">Chế Độ Giao Diện Hệ Thống (Solar & Lunar)</h3>
+              </div>
+              <p className="text-xs text-ice-subtext leading-relaxed">
+                Chuyển đổi giao diện toàn ứng dụng giữa chế độ Ban ngày tươi sáng (Solar Mode) và chế độ Ban đêm dịu mắt (Lunar Mode). Trạng thái được lưu tự động trên máy này.
+              </p>
+            </div>
+            <div className="shrink-0 pl-4 border-l border-ice-border/60">
+              <ThemeToggleSwitch size="lg" showLabel={true} />
+            </div>
+          </section>
+
           {/* Low-Spec Mode Performance Toggle Banner */}
           <section className="bg-gradient-to-r from-cyan-950/40 via-blue-950/30 to-ice-card border border-cyan-500/30 rounded-2xl p-5 shadow-lg flex items-center justify-between">
             <div className="space-y-1 pr-4">

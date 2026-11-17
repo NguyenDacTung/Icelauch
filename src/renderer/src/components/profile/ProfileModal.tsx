@@ -193,15 +193,15 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fade-in select-none">
-      <div className="bg-[#12141A] border border-ice-border rounded-2xl w-full max-w-xl overflow-hidden shadow-2xl flex flex-col max-h-[92vh]">
+      <div className="bg-ice-card border border-ice-border rounded-2xl w-full max-w-xl overflow-hidden shadow-2xl flex flex-col max-h-[92vh]">
         {/* Header */}
-        <div className="px-6 py-4 border-b border-ice-border/60 flex items-center justify-between bg-[#161922]">
+        <div className="px-6 py-4 border-b border-ice-border/60 flex items-center justify-between bg-ice-card/90">
           <div className="flex items-center gap-2.5">
             <div className="w-8 h-8 rounded-lg bg-ice-accent/20 border border-ice-accent/40 flex items-center justify-center text-ice-accent">
               <User className="w-4 h-4" />
             </div>
             <div>
-              <h3 className="text-base font-bold text-white tracking-wide">
+              <h3 className="text-base font-bold text-ice-text tracking-wide">
                 {isEditing ? 'Chỉnh Sửa Hồ Sơ' : 'Tạo Hồ Sơ Người Dùng Mới'}
               </h3>
               <p className="text-xs text-ice-subtext">
@@ -480,7 +480,7 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
         </form>
 
         {/* Footer */}
-        <div className="px-6 py-4 border-t border-ice-border/60 flex items-center justify-between bg-[#161922]">
+        <div className="px-6 py-4 border-t border-ice-border/60 flex items-center justify-between bg-ice-card/90">
           {isEditing && onDelete ? (
             <button
               type="button"
