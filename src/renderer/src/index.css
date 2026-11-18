@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@custom-variant dark (&:where(.dark, .dark *));
 
 /* ============================================================================
    CELISTIAL DESIGN SYSTEM — 9 THEME TOKENS & ADAPTIVE GEOMETRY (Cross-Platform)
@@ -42,18 +43,18 @@
   --theme-line-height: 1.5;
 }
 
-/* 2. SOLAR (Standard Warm Day - WCAG AAA/AA Contrast & Tinted Glass) */
+/* 2. SOLAR (Standard Warm Day - WCAG AAA/AA Contrast & Distinct Surface Elevation) */
 [data-theme="solar"] {
-  --theme-bg: #F8F6F1;
-  --theme-card: #FFFFFF;
-  --theme-card-elevated: #F5F3ED;
-  --theme-hover: #EFECE5;
-  --theme-border: #E5E1D8;
+  --theme-bg: #EAE2D2; /* Warm Golden Sand canvas - clearly distinct from white */
+  --theme-card: #FFFFFF; /* Pure elevated crisp white card surface */
+  --theme-card-elevated: #F8F4EC;
+  --theme-hover: #DFD3BE;
+  --theme-border: #D0C3AC; /* Solid warm stone border */
   --theme-border-light: rgba(0, 0, 0, 0.08);
   --theme-accent: #D97706; /* Amber 600 - WCAG AA 4.6:1 */
   --theme-accentHover: #B45309; /* Amber 700 */
   --theme-accent-warm: #D97706;
-  --theme-success: #16A34A;
+  --theme-success: #15803D; /* Green 700 */
   --theme-warning: #D97706;
   --theme-error: #DC2626;
   --theme-text: #181512; /* WCAG AAA 15.2:1 */
@@ -61,53 +62,53 @@
 
   /* Glassmorphism & Adaptive Geometry */
   --theme-radius: 16px;
-  --glass-bg: rgba(255, 255, 255, 0.94);
-  --glass-header-bg: rgba(255, 255, 255, 0.96);
-  --glass-border: rgba(217, 119, 6, 0.22); /* Tinted Amber rim */
-  --glass-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 10px 25px -3px rgba(180, 120, 40, 0.12), 0 20px 35px -5px rgba(0, 0, 0, 0.08);
-  --glass-inner-glow: inset 0 1px 0 rgba(255, 255, 255, 0.98);
+  --glass-bg: rgba(255, 255, 255, 0.98);
+  --glass-header-bg: rgba(220, 206, 182, 0.98); /* Rich Champagne Sand toolbar - distinct from page & cards */
+  --glass-border: rgba(146, 64, 14, 0.35); /* Warm Amber rim */
+  --glass-shadow: 0 4px 14px -1px rgba(120, 80, 30, 0.16), 0 2px 6px rgba(0, 0, 0, 0.06);
+  --glass-inner-glow: inset 0 1px 0 rgba(255, 255, 255, 0.95);
 
   /* Scrollbar & Selection */
-  --scrollbar-track: #F8F6F1;
-  --scrollbar-thumb: #D8D2C6;
-  --scrollbar-thumb-hover: #D97706;
-  --selection-bg: rgba(217, 119, 6, 0.25);
+  --scrollbar-track: #EAE2D2;
+  --scrollbar-thumb: #C8BAA2;
+  --scrollbar-thumb-hover: #B45309;
+  --selection-bg: rgba(180, 83, 9, 0.25);
 
   /* Ambient Cinema Backdrop Tint */
-  --ambient-overlay: rgba(248, 246, 241, 0.85);
+  --ambient-overlay: rgba(234, 226, 210, 0.90);
   --theme-line-height: 1.5;
 }
 
-/* 3. AQUA (Dark Ocean - Xanh Biển Sâu Đậm Đà, Liquid Pill 24px) */
+/* 3. AQUA (Thủy — Fluid Liquid Architecture, Light Fresh Ocean, Liquid Pill 24px) */
 [data-theme="aqua"] {
-  --theme-bg: #061524;
-  --theme-card: #0B2238;
-  --theme-card-elevated: #102D4A;
-  --theme-hover: #13385C;
-  --theme-border: #133959;
-  --theme-border-light: rgba(56, 189, 248, 0.25);
-  --theme-accent: #38BDF8; /* Ocean Sky 400 - WCAG AA 7.2:1 on dark ocean */
-  --theme-accentHover: #0284C7;
+  --theme-bg: #E0F7FA;
+  --theme-card: #FFFFFF;
+  --theme-card-elevated: #F0F9FF;
+  --theme-hover: #E0F2FE;
+  --theme-border: #BAE6FD;
+  --theme-border-light: rgba(56, 189, 248, 0.35);
+  --theme-accent: #0284C7; /* Ocean Sky 600 - WCAG AA 4.8:1 on fresh water */
+  --theme-accentHover: #0369A1; /* Sky 700 */
   --theme-accent-warm: #0EA5E9;
-  --theme-success: #10B981;
-  --theme-warning: #F59E0B;
-  --theme-error: #EF4444;
-  --theme-text: #F0F9FF; /* WCAG AAA 16.5:1 */
-  --theme-subtext: #94A3B8; /* WCAG AA 6.8:1 */
+  --theme-success: #059669;
+  --theme-warning: #D97706;
+  --theme-error: #DC2626;
+  --theme-text: #082F49; /* Sky 950 - WCAG AAA 12.8:1 on light cyan */
+  --theme-subtext: #334155; /* Slate 700 - WCAG AA 6.5:1 on light cyan */
 
   /* Glassmorphism & Liquid Pill Geometry */
   --theme-radius: 24px;
-  --glass-bg: rgba(11, 34, 56, 0.94);
-  --glass-header-bg: rgba(7, 24, 43, 0.96);
-  --glass-border: rgba(56, 189, 248, 0.35);
-  --glass-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 10px 25px -3px rgba(56, 189, 248, 0.15), 0 20px 35px -5px rgba(0, 0, 0, 0.5);
-  --glass-inner-glow: inset 0 1px 0 rgba(56, 189, 248, 0.35);
+  --glass-bg: rgba(255, 255, 255, 0.82);
+  --glass-header-bg: rgba(255, 255, 255, 0.90);
+  --glass-border: rgba(56, 189, 248, 0.45);
+  --glass-shadow: 0 8px 30px -4px rgba(2, 132, 199, 0.16), 0 2px 8px rgba(0, 0, 0, 0.04);
+  --glass-inner-glow: inset 0 1px 0 rgba(255, 255, 255, 0.95);
 
-  --scrollbar-track: #061524;
-  --scrollbar-thumb: #133959;
-  --scrollbar-thumb-hover: #38BDF8;
+  --scrollbar-track: #E0F7FA;
+  --scrollbar-thumb: #BAE6FD;
+  --scrollbar-thumb-hover: #0284C7;
   --selection-bg: rgba(56, 189, 248, 0.35);
-  --ambient-overlay: rgba(6, 21, 36, 0.88);
+  --ambient-overlay: rgba(224, 247, 250, 0.90);
   --theme-line-height: 1.5;
 }
 
@@ -481,21 +482,71 @@
   100% { background-position: 200% 0; }
 }
 .aqua-wave-bar {
-  background: linear-gradient(90deg, transparent 0%, rgba(56, 189, 248, 0.25) 25%, rgba(14, 165, 233, 0.5) 50%, rgba(56, 189, 248, 0.25) 75%, transparent 100%);
+  background: linear-gradient(90deg, transparent 0%, rgba(56, 189, 248, 0.3) 25%, rgba(14, 165, 233, 0.55) 50%, rgba(56, 189, 248, 0.3) 75%, transparent 100%);
   background-size: 200% 100%;
   animation: aqua-wave-motion 3.5s linear infinite;
+}
+
+/* Continuous Ambient Wave Backdrop Keyframes */
+@keyframes aqua-wave-drift-slow {
+  0% { transform: translate3d(0, 0, 0); }
+  50% { transform: translate3d(-18%, 10px, 0); }
+  100% { transform: translate3d(0, 0, 0); }
+}
+
+@keyframes aqua-wave-drift-fast {
+  0% { transform: translate3d(0, 0, 0); }
+  50% { transform: translate3d(-24%, -8px, 0); }
+  100% { transform: translate3d(0, 0, 0); }
+}
+
+/* Aqua Mode Top-Attached Drop Header (Gắn mép trên màn hình, thắt eo giọt nước) */
+[data-theme="aqua"] header.aqua-header-wrapper {
+  padding-top: 0 !important;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+}
+
+[data-theme="aqua"] .aqua-top-drop-header {
+  border-top-left-radius: 0 !important;
+  border-top-right-radius: 0 !important;
+  border-bottom-left-radius: 28px !important;
+  border-bottom-right-radius: 28px !important;
+  border-top: none !important;
+  border-left: 1px solid rgba(186, 230, 253, 0.6) !important;
+  border-right: 1px solid rgba(186, 230, 253, 0.6) !important;
+  border-bottom: 2px solid rgba(56, 189, 248, 0.6) !important;
+  box-shadow: 0 14px 34px -4px rgba(2, 132, 199, 0.2), 0 2px 8px rgba(0, 0, 0, 0.04) !important;
+  background-color: rgba(255, 255, 255, 0.88) !important;
+  backdrop-filter: blur(24px) !important;
+}
+
+/* Aqua Sliding 3D Liquid Droplet Indicator */
+.aqua-droplet-bubble {
+  position: absolute;
+  top: 50%;
+  border-radius: 9999px;
+  background: radial-gradient(circle at 35% 25%, rgba(255, 255, 255, 0.95) 0%, rgba(186, 230, 253, 0.8) 45%, rgba(56, 189, 248, 0.4) 80%, rgba(2, 132, 199, 0.3) 100%);
+  border: 1.5px solid rgba(56, 189, 248, 0.75);
+  box-shadow: 
+    0 4px 14px rgba(2, 132, 199, 0.25), 
+    inset 0 1.5px 3px rgba(255, 255, 255, 0.95),
+    inset 0 -1.5px 3px rgba(2, 132, 199, 0.3);
+  pointer-events: none;
+  transition: transform 0.38s cubic-bezier(0.34, 1.56, 0.64, 1), width 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.2s ease;
+  z-index: 0;
 }
 
 /* Liquid Water Droplet Capsule Pill on Navbar */
 .liquid-water-pill {
   position: relative;
-  background: radial-gradient(circle at 50% 20%, rgba(56, 189, 248, 0.35) 0%, rgba(2, 132, 199, 0.2) 70%, rgba(3, 105, 161, 0.35) 100%);
-  border: 1.5px solid rgba(56, 189, 248, 0.65);
+  background: radial-gradient(circle at 50% 20%, rgba(186, 230, 253, 0.6) 0%, rgba(56, 189, 248, 0.35) 70%, rgba(2, 132, 199, 0.25) 100%);
+  border: 1.5px solid rgba(56, 189, 248, 0.75);
   box-shadow: 
-    0 0 16px rgba(56, 189, 248, 0.4), 
-    inset 0 1px 3px rgba(255, 255, 255, 0.6), 
-    inset 0 -2px 4px rgba(2, 132, 199, 0.5);
-  backdrop-filter: blur(8px);
+    0 4px 16px rgba(56, 189, 248, 0.35), 
+    inset 0 1px 3px rgba(255, 255, 255, 0.8), 
+    inset 0 -2px 4px rgba(2, 132, 199, 0.3);
+  backdrop-filter: blur(12px);
 }
 .liquid-water-pill::after {
   content: '';
@@ -504,32 +555,19 @@
   left: 20%;
   right: 20%;
   height: 2px;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.8), transparent);
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.9), transparent);
   border-radius: 9999px;
   pointer-events: none;
 }
 
-/* Enhanced Realistic Water Ripple (Multi-ring concentric droplet waves) */
+/* Subtle Single-Ring Water Ripple (Chỉ giữ 1 vòng gợn nước nhỏ tinh tế, không lan rộng) */
 @keyframes water-ripple-inner {
   0% {
-    transform: translate(-50%, -50%) scale(0.1);
-    opacity: 0.9;
+    transform: translate(-50%, -50%) scale(0.2);
+    opacity: 0.85;
   }
   100% {
-    transform: translate(-50%, -50%) scale(5.5);
-    opacity: 0;
-  }
-}
-@keyframes water-ripple-outer {
-  0% {
-    transform: translate(-50%, -50%) scale(0);
-    opacity: 0.6;
-  }
-  40% {
-    opacity: 0.4;
-  }
-  100% {
-    transform: translate(-50%, -50%) scale(7.5);
+    transform: translate(-50%, -50%) scale(2.8);
     opacity: 0;
   }
 }
@@ -538,20 +576,12 @@
   border-radius: 9999px;
   pointer-events: none;
   z-index: 99999;
-  width: 44px;
-  height: 44px;
-  border: 2px solid rgba(56, 189, 248, 0.85);
-  background: radial-gradient(circle, rgba(56, 189, 248, 0.35) 0%, rgba(2, 132, 199, 0.1) 60%, transparent 80%);
-  box-shadow: 0 0 14px rgba(56, 189, 248, 0.6), inset 0 0 8px rgba(255, 255, 255, 0.7);
-  animation: water-ripple-inner 0.75s cubic-bezier(0.12, 0.8, 0.32, 1) forwards;
-}
-.water-ripple-circle::after {
-  content: '';
-  position: absolute;
-  inset: -6px;
-  border-radius: 9999px;
-  border: 1px dashed rgba(186, 230, 253, 0.65);
-  animation: water-ripple-outer 0.9s cubic-bezier(0.12, 0.8, 0.32, 1) forwards;
+  width: 32px;
+  height: 32px;
+  border: 1.5px solid rgba(2, 132, 199, 0.75);
+  background: radial-gradient(circle, rgba(56, 189, 248, 0.3) 0%, rgba(2, 132, 199, 0.08) 50%, transparent 80%);
+  box-shadow: 0 0 10px rgba(56, 189, 248, 0.5), inset 0 0 5px rgba(255, 255, 255, 0.8);
+  animation: water-ripple-inner 0.65s cubic-bezier(0.12, 0.8, 0.32, 1) forwards;
 }
 
 /* 2. Eclipse: Golden Corona Glow on bottom edge of toolbars and cards */
@@ -705,4 +735,159 @@
 .release-notes-content hr {
   border-color: rgba(255, 255, 255, 0.1);
   margin: 0.6rem 0;
+}
+
+/* ========================================================= */
+/* SOLAR MODE CONTRAST SHIELD & ELEVATION OVERHAUL (V6.4.2) */
+/* ========================================================= */
+
+/* Distinct Toolbar Elevation in Solar */
+[data-theme="solar"] .glass-header,
+[data-theme="solar"] .glass-header-elevated,
+[data-theme="solar"] .glass-pill-elevated {
+  background-color: var(--glass-header-bg) !important;
+  border-color: rgba(180, 83, 9, 0.28) !important;
+  box-shadow: 0 6px 20px -3px rgba(120, 80, 30, 0.14), 0 2px 6px rgba(0, 0, 0, 0.06) !important;
+}
+
+/* Distinct Card Elevation in Solar Mode */
+[data-theme="solar"] .bg-ice-card {
+  box-shadow: 0 4px 16px -2px rgba(130, 95, 45, 0.08), 0 2px 6px rgba(0, 0, 0, 0.04);
+}
+
+/* Eliminate Poster Bottom White Fog in Solar */
+[data-theme="solar"] .game-card-poster-fog {
+  display: none !important;
+}
+
+/* Universal Text Contrast Shields in Solar Mode: Prevent White-on-White Text */
+[data-theme="solar"] h1.text-white,
+[data-theme="solar"] h2.text-white,
+[data-theme="solar"] h3.text-white,
+[data-theme="solar"] h4.text-white,
+[data-theme="solar"] p.text-white,
+[data-theme="solar"] span.text-white:not(.btn-keep-white *):not(.btn-keep-white),
+[data-theme="solar"] .glass-panel .text-white\/90,
+[data-theme="solar"] .glass-panel .text-white,
+[data-theme="solar"] .bg-ice-card .text-white:not(button:not(.btn-subtle) *):not(button:not(.btn-subtle)),
+[data-theme="solar"] .bg-ice-card .text-white\/90,
+[data-theme="solar"] .bg-ice-card .text-white\/80 {
+  color: var(--theme-text) !important;
+}
+
+/* Deep Amber Text Shield: Ban Faint Yellow on Light Surfaces */
+[data-theme="solar"] .text-amber-300,
+[data-theme="solar"] .text-amber-400,
+[data-theme="solar"] .text-amber-500,
+[data-theme="solar"] .text-amber-600,
+[data-theme="solar"] .text-amber-700,
+[data-theme="solar"] .text-amber-400\/90,
+[data-theme="solar"] .text-cyan-300,
+[data-theme="solar"] .text-cyan-400 {
+  color: #78350F !important; /* Amber 900 - Dark Amber Brown, WCAG AAA compliant */
+}
+
+/* Hover States Shield: Ban Hovering into Pale Yellow */
+[data-theme="solar"] .hover\:text-amber-300:hover,
+[data-theme="solar"] .hover\:text-amber-400:hover,
+[data-theme="solar"] .group:hover .group-hover\:text-amber-300,
+[data-theme="solar"] .group:hover .group-hover\:text-amber-400 {
+  color: #78350F !important; /* Deep Amber 900 */
+}
+
+/* Guarantee no dark backgrounds or gradients leak into Solar mode */
+[data-theme="solar"] .bg-ice-card {
+  background-color: #FFFFFF !important;
+  background-image: none !important;
+  color: var(--theme-text) !important;
+}
+
+[data-theme="solar"] .bg-ice-hover\/50,
+[data-theme="solar"] .bg-ice-hover\/40 {
+  background-color: #F0E8DC !important;
+  color: var(--theme-text) !important;
+}
+
+/* Ghost Buttons on Light Card */
+[data-theme="solar"] button.bg-white\/10,
+[data-theme="solar"] button.bg-white\/15 {
+  background-color: var(--theme-hover) !important;
+  color: var(--theme-text) !important;
+  border: 1px solid var(--theme-border) !important;
+}
+
+/* Solar Accent Text Enhancement: High contrast amber 800 */
+[data-theme="solar"] .text-ice-accent {
+  color: #92400E !important;
+}
+
+/* Solar Mode: Prevent white SVG fill on cards */
+[data-theme="solar"] .bg-ice-card button:not(.bg-gradient-to-r):not(.bg-ice-accent):not(.bg-emerald-600):not(.bg-emerald-500) svg.fill-white {
+  fill: var(--theme-text) !important;
+}
+
+/* Sub-card & Action Badges in Solar Mode */
+[data-theme="solar"] .solar-card-elevated {
+  background-color: #FFFFFF !important;
+  border-color: #D0C3AC !important;
+  color: var(--theme-text) !important;
+  box-shadow: 0 4px 16px -2px rgba(130, 95, 45, 0.08), 0 2px 6px rgba(0, 0, 0, 0.04) !important;
+}
+
+/* ========================================================= */
+/* AQUA MODE CONTRAST SHIELD & FLUID ARCHITECTURE */
+/* ========================================================= */
+
+/* Organic Card Membrane Adhesion & Elevation */
+[data-theme="aqua"] .bg-ice-card {
+  background-color: rgba(255, 255, 255, 0.88) !important;
+  background-image: none !important;
+  border-color: rgba(186, 230, 253, 0.85) !important;
+  box-shadow: 0 8px 26px -4px rgba(2, 132, 199, 0.12), 0 2px 6px rgba(0, 0, 0, 0.03) !important;
+  color: var(--theme-text) !important;
+}
+
+[data-theme="aqua"] .glass-panel {
+  background-color: rgba(255, 255, 255, 0.92) !important;
+  border-color: rgba(186, 230, 253, 0.85) !important;
+  backdrop-filter: blur(24px) !important;
+  color: var(--theme-text) !important;
+}
+
+[data-theme="aqua"] .bg-ice-hover\/50,
+[data-theme="aqua"] .bg-ice-hover\/40 {
+  background-color: rgba(224, 242, 254, 0.70) !important;
+  color: var(--theme-text) !important;
+}
+
+/* Universal Text Contrast Shields in Aqua Mode */
+[data-theme="aqua"] h1.text-white,
+[data-theme="aqua"] h2.text-white,
+[data-theme="aqua"] h3.text-white,
+[data-theme="aqua"] h4.text-white,
+[data-theme="aqua"] p.text-white,
+[data-theme="aqua"] span.text-white:not(.btn-keep-white *):not(.btn-keep-white),
+[data-theme="aqua"] .glass-panel .text-white,
+[data-theme="aqua"] .bg-ice-card .text-white:not(button:not(.btn-subtle) *):not(button:not(.btn-subtle)),
+[data-theme="aqua"] .bg-ice-card .text-white\/90,
+[data-theme="aqua"] .bg-ice-card .text-white\/80 {
+  color: var(--theme-text) !important;
+}
+
+/* Ghost Buttons on Light Ocean Card */
+[data-theme="aqua"] button.bg-white\/10,
+[data-theme="aqua"] button.bg-white\/15 {
+  background-color: var(--theme-hover) !important;
+  color: var(--theme-text) !important;
+  border: 1px solid var(--theme-border) !important;
+}
+
+/* Vibrant Ocean Accent on Buttons & Icons */
+[data-theme="aqua"] .text-ice-accent {
+  color: #0284C7 !important;
+}
+
+[data-theme="aqua"] .bg-ice-accent {
+  background-color: #0284C7 !important;
+  color: #FFFFFF !important;
 }

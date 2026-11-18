@@ -117,7 +117,7 @@ export const ExtrasView: React.FC<ExtrasViewProps> = ({ activeProfile, isAdmin }
                   </div>
 
                   <div>
-                    <h3 className="text-lg font-black text-ice-text group-hover:text-amber-500 dark:group-hover:text-amber-300 transition-colors flex items-center gap-2">
+                    <h3 className="text-lg font-black text-ice-text group-hover:text-amber-700 dark:group-hover:text-amber-300 transition-colors flex items-center gap-2">
                       <span>Trạm Điều Khiển Tay Cầm</span>
                       <ChevronRight className="w-4 h-4 opacity-50 group-hover:translate-x-1 transition-transform" />
                     </h3>
@@ -127,9 +127,9 @@ export const ExtrasView: React.FC<ExtrasViewProps> = ({ activeProfile, isAdmin }
                   </div>
                 </div>
 
-                <div className="pt-5 mt-5 border-t border-ice-border flex items-center justify-between text-xs font-bold text-amber-500 dark:text-amber-400">
+                <div className="pt-5 mt-5 border-t border-ice-border flex items-center justify-between text-xs font-bold text-amber-700 dark:text-amber-400">
                   <span className="flex items-center gap-1.5 text-ice-subtext text-[11px]">
-                    <QrCode className="w-3.5 h-3.5 text-amber-500 dark:text-amber-400" />
+                    <QrCode className="w-3.5 h-3.5 text-amber-700 dark:text-amber-400" />
                     <span>Ghép nối 1 lần qua mã QR</span>
                   </span>
                   <span className="group-hover:underline">Cấu hình & Thử phím &rarr;</span>

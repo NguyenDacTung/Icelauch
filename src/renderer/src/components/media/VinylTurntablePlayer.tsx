@@ -279,8 +279,8 @@ export const VinylTurntablePlayer: React.FC<VinylTurntablePlayerProps> = ({
 
           {/* Track Info */}
           <div className="mt-6 text-center space-y-1 max-w-lg">
-            <h2 className="text-xl font-bold text-white tracking-wide truncate">{media.title}</h2>
-            <p className="text-xs text-amber-400/90 font-medium">
+            <h2 className="text-xl font-bold text-ice-text tracking-wide truncate">{media.title}</h2>
+            <p className="text-xs text-amber-700 dark:text-amber-400 font-medium">
               {media.artist || currentPlaylist?.name || media.category || 'Âm Nhạc Icelauch'}
             </p>
           </div>
@@ -330,10 +330,10 @@ export const VinylTurntablePlayer: React.FC<VinylTurntablePlayerProps> = ({
               <div className="flex items-center gap-4">
                 <button
                   onClick={handlePrev}
-                  className="p-2.5 rounded-full bg-ice-card hover:bg-ice-hover text-white transition-all active:scale-95"
+                  className="p-2.5 rounded-full bg-ice-card hover:bg-ice-hover text-ice-text border border-ice-border shadow-md transition-all active:scale-95"
                   title="Bài trước"
                 >
-                  <SkipBack className="w-5 h-5 fill-white" />
+                  <SkipBack className="w-5 h-5 fill-current" />
                 </button>
 
                 <button
@@ -346,10 +346,10 @@ export const VinylTurntablePlayer: React.FC<VinylTurntablePlayerProps> = ({
 
                 <button
                   onClick={handleNext}
-                  className="p-2.5 rounded-full bg-ice-card hover:bg-ice-hover text-white transition-all active:scale-95"
+                  className="p-2.5 rounded-full bg-ice-card hover:bg-ice-hover text-ice-text border border-ice-border shadow-md transition-all active:scale-95"
                   title="Bài tiếp theo"
                 >
-                  <SkipForward className="w-5 h-5 fill-white" />
+                  <SkipForward className="w-5 h-5 fill-current" />
                 </button>
               </div>
 
@@ -383,10 +383,10 @@ export const VinylTurntablePlayer: React.FC<VinylTurntablePlayerProps> = ({
 
         {/* RIGHT: Playlist / Queue Drawer */}
         {showPlaylistDrawer && (
-          <div className="w-80 border-l border-ice-border/60 bg-ice-card/60 flex flex-col shrink-0 animate-in slide-in-from-right duration-200">
+          <div className="w-80 border-l border-ice-border/60 bg-ice-card flex flex-col shrink-0 animate-in slide-in-from-right duration-200 shadow-xl">
             <div className="p-4 border-b border-ice-border/60 flex items-center justify-between">
-              <div className="flex items-center gap-2 text-white font-bold text-xs">
-                <ListMusic className="w-4 h-4 text-amber-400" />
+              <div className="flex items-center gap-2 text-ice-text font-bold text-xs">
+                <ListMusic className="w-4 h-4 text-amber-500 dark:text-amber-400" />
                 <span>{currentPlaylist ? currentPlaylist.name : 'Danh Sách Đang Phát'}</span>
               </div>
               <span className="text-[11px] text-ice-muted">{playlistTracks.length} bài</span>
@@ -404,15 +404,15 @@ export const VinylTurntablePlayer: React.FC<VinylTurntablePlayerProps> = ({
                     }}
                     className={`flex items-center gap-2.5 p-2 rounded-xl cursor-pointer transition-all ${
                       isCurrent
-                        ? 'bg-amber-500/20 border border-amber-500/40 text-white'
+                        ? 'bg-amber-500/15 border border-amber-500/40 text-ice-text shadow-sm'
                         : 'hover:bg-ice-hover text-ice-text border border-transparent'
                     }`}
                   >
                     <span className="w-5 text-center text-[11px] font-bold text-ice-muted">
-                      {isCurrent ? <Disc className="w-3.5 h-3.5 text-amber-400 animate-spin" /> : idx + 1}
+                      {isCurrent ? <Disc className="w-3.5 h-3.5 text-amber-500 dark:text-amber-400 animate-spin" /> : idx + 1}
                     </span>
                     <div className="flex-1 truncate">
-                      <p className={`text-xs font-semibold truncate ${isCurrent ? 'text-amber-300' : 'text-white'}`}>
+                      <p className={`text-xs font-semibold truncate ${isCurrent ? 'text-amber-700 dark:text-amber-300 font-bold' : 'text-ice-text'}`}>
                         {item.title}
                       </p>
                       <p className="text-[10px] text-ice-muted truncate">

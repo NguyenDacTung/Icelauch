@@ -4,14 +4,14 @@
       "id": "game-bombanana",
       "name": "BOMBANANA!",
       "coverPath": "https://wqmmagfrwwctvipopazx.supabase.co/storage/v1/object/public/icelauch-assets/covers/68cca7fc75_wallpaper10997.jpg",
-      "bannerPath": "C:\\Users\\dactu\\Downloads\\wallpaper10997.jpg",
+      "bannerPath": "https://wqmmagfrwwctvipopazx.supabase.co/storage/v1/object/public/icelauch-assets/banners/68cca7fc75_wallpaper10997.jpg",
       "downloadLinks": [
         "https://drive.google.com/file/d/1VuBePGR8UHDVaANxWMEQ1tjy7gwHmSNy/view?usp=sharing"
       ],
       "expectedSize": 322122547.2,
       "archivePassword": "linkneverdie.com",
       "genre": "Coop, Hài hước, Mô phỏng",
-      "description": "BOMBANANA! là game hành động co-op vui nhộn do Lefto Studio phát triển và phát hành trên Steam. Trong trò chơi, ba người sẽ vào vai một đội gỡ bom gồm ba chú khỉ đặc biệt: một con mù, một con điếc và một con câm. Bên trong chiếc xe minivan được cải tạo thành xưởng gỡ bom di động, cả đội phải phối hợp để vô hiệu hóa những quả bom nguy hiểm trong điều kiện giao tiếp vô cùng hạn chế.",
+      "description": "BOMBANANA! là game hành động co-op vui nhộn do Lefto Studio phát triển và phát hành trên Steam. Trong trò chơi, ba người sẽ vào vai một đội gỡ bom gồm ba chú khỉ đặc biệt: một con mù, một con điếc và một con câm. Bên trong chiếc xe minivan được cải tạo thành xưởng gỡ bom di động, cả đội phải phối hợp để vô hiệu hóa những quả bom nguy hi���m trong điều kiện giao tiếp vô cùng hạn chế.",
       "runAsAdmin": false,
       "deleteArchiveAfterInstall": true,
       "status": "ready",
@@ -95,7 +95,7 @@
       "expectedSize": 2147483648,
       "archivePassword": "linkneverdie.com",
       "genre": "Hài hước",
-      "description": "Totally Accurate Battle  Simulator (TABS) là một  trò chơi chiến thuật dựa trên cơ chế vật lý hài hước đến từ Landfall - nhà phát hành của nhiều  game hành động đặc sắc như Stick Fight: The Game và Totally Accurate Battlegrounds.Chơi game mô phỏng",
+      "description": "Totally Accurate Battle  Simulator (TABS) là một  trò chơi chiến thu��������������t dựa trên cơ chế vật lý hài hước đến từ Landfall - nhà phát hành của nhiều  game hành động đặc sắc như Stick Fight: The Game và Totally Accurate Battlegrounds.Chơi game mô phỏng",
       "installPath": "C:\\Icelauch\\Games\\Totally Accurate Battle Simulator",
       "exeCandidates": [
         "TABS/TotallyAccurateBattleSimulator.exe",
@@ -115,6 +115,104 @@
       "tags": [
         "Hài hước"
       ]
+    },
+    {
+      "id": "2651f777-2445-41e1-a220-e05ac5309d15",
+      "name": "Human Fall Flat",
+      "coverPath": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQStdhXWvab7tfiYkj40S_ZTrNZ-uZ9ictEj6IpeoxwCepCvlXZNqFgF4v2avamYR1jgQOlhQvcne2uJn_hzoKNsC4ZKCAh2BcImjoiS7s&s=10",
+      "bannerPath": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSiBYuapgzPdq3vlY_2PYitZR6heXrE51wLNucHbtpI3Q&s=10",
+      "trailerUrl": "https://youtu.be/-Edk59BqSEU?si=hWjyKDJeBhy8oc0F",
+      "description": "Human: Fall Flat là một tựa game giải đố đi cảnh (puzzle-platformer) dựa trên cơ chế vật lý hài hước được phát triển bởi No Brakes Games và phát hành bởi Curve Games. Trong game, bạn sẽ điều khiển một nhân vật màu trắng có hình dáng như một khối bột dẻo tên là Bob, vượt qua các hòn đảo n��i kỳ lạ trong giấc mơ bằng cách leo trèo, đu dây và tương tác với môi trường.",
+      "genre": "Coop, Hài hước, Giải đố",
+      "tags": [
+        "Coop",
+        "Hài hước",
+        "Giải đố"
+      ],
+      "actionButtonIds": [
+        "btn-steam-default",
+        "btn-discord-default"
+      ],
+      "downloadLinks": [
+        "https://drive.google.com/file/d/1_lvt86DH7keG5SPqxjfQ9gxu9gfekuDP/view?usp=sharing"
+      ],
+      "backupLinks": [],
+      "extensions": [],
+      "expectedSize": 1073741824,
+      "featured": true,
+      "hidden": false,
+      "runAsAdmin": false,
+      "deleteArchiveAfterInstall": true,
+      "status": "uninstalled",
+      "inLibrary": false,
+      "addedAt": "2026-11-17T17:12:07.244+00:00",
+      "screenshots": []
+    },
+    {
+      "id": "b6f2648f-a2eb-404f-8161-21faa74126cc",
+      "name": "Overcooked 2",
+      "coverPath": "https://alisaltrojantribune.com/wp-content/uploads/2023/10/Overcooked2-900x1200.jpg",
+      "bannerPath": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRB--195zjox9aLaRSwlPRo0BbHrPMWaCPf0rRDW9-Uqhv9LrEPRMc_g1F8&s=10",
+      "trailerUrl": "https://youtu.be/0JG5Y7ZWvWU?si=oaRXfwAyGUUmq9rF",
+      "description": "Overcooked! 2 là một tựa game mô phỏng nấu ăn co-op (chơi cộng tác) cực kỳ nổi tiếng và vui nhộn, được phát triển bởi Ghost Town Games và phát hành bởi Team17. Trò chơi này thường được mệnh danh là \"game chia rẽ tình bạn\" hoặc \"vua phá hoại tình cảm\" vì nhịp độ chơi vô cùng hỗn loạn, đòi hỏi sự phối hợp tuyệt đối giữa các ngư��i chơi.",
+      "genre": "Coop, Indie, Giải đố, Hài hước, Mô phỏng",
+      "tags": [
+        "Coop",
+        "Indie",
+        "Giải đố",
+        "Hài hước",
+        "Mô phỏng"
+      ],
+      "actionButtonIds": [
+        "btn-steam-default"
+      ],
+      "downloadLinks": [
+        "https://drive.google.com/file/d/1BeyIcbJTEZdKL2Z78xEZaODDAEhD-erT/view?usp=sharing"
+      ],
+      "backupLinks": [],
+      "extensions": [],
+      "expectedSize": 7516192768,
+      "featured": true,
+      "hidden": false,
+      "runAsAdmin": false,
+      "deleteArchiveAfterInstall": true,
+      "status": "uninstalled",
+      "inLibrary": false,
+      "addedAt": "2026-11-17T17:12:09.224+00:00",
+      "screenshots": []
+    },
+    {
+      "id": "5a8eda8a-0818-49cb-8134-e8293157e8a7",
+      "name": "Clair Obscur: Expedition 33",
+      "coverPath": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQAv3vFnCmcV9hehqdib4XFnXnAYfiMBCHzjCxdJolqtg&s=10",
+      "bannerPath": "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/1903340/eccd7fa054e32bed3213fb92f6089bebd9978215/capsule_616x353.jpg?t=1793903997",
+      "trailerUrl": "https://youtu.be/ltK_AhiXGDU?si=q6xvshQ4LbgHCJwB",
+      "description": "Cốt truyện độc đáo và đầy bi kịch\nBối cảnh game diễn ra tại một thế giới siêu thực lấy cảm hứng từ thời kỳ Belle Époque (Thời kỳ Tươi đẹp) của nước Pháp. Mỗi năm một lần, một thực thể bí ẩn gọi là Nữ Họa Sĩ (The Paintress) sẽ thức giấc và vẽ một con số lên bức tượng đài Monolith. Bất kỳ ai ở độ tuổi đó hoặc lớn hơn sẽ lập tức tan biến thành khói bụi.\nKhi con số tiếp theo bị vẽ là 33, nhân vật chính Gustave cùng các thành viên của Đội thám hiểm số 33 (chỉ còn đúng 1 năm để sống) đã quyết định lên đường thực hiện một hành trình vô vọng nhằm tiêu diệt Nữ Họa Sĩ và phá vỡ vòng lặp chết chóc này.",
+      "genre": "Nhập vai (RPG), Chiến thuật, Mô phỏng, Phiêu lưu, Giải đố",
+      "tags": [
+        "Nhập vai (RPG)",
+        "Chiến thuật",
+        "Mô phỏng",
+        "Phiêu lưu",
+        "Giải đố"
+      ],
+      "actionButtonIds": [
+        "btn-steam-default"
+      ],
+      "downloadLinks": [
+        "https://drive.google.com/file/d/1Uqgm-kBqDp_enIcW3Z_vUBx9pi3HfZbz/view?usp=sharing"
+      ],
+      "backupLinks": [],
+      "extensions": [],
+      "expectedSize": 53687091200,
+      "featured": true,
+      "hidden": false,
+      "runAsAdmin": false,
+      "deleteArchiveAfterInstall": true,
+      "status": "uninstalled",
+      "inLibrary": false,
+      "addedAt": "2026-11-17T17:12:09.126+00:00",
+      "screenshots": []
     }
   ],
   "media": [
@@ -126,14 +224,14 @@
       "watched": false,
       "addedAt": "2026-11-09T01:13:09.862Z",
       "id": "09b1d589-0bb5-4630-9068-93404e08c62e",
-      "coverPath": "C:\\Users\\dactu\\Downloads\\images (15).png",
+      "coverPath": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRLqxzKZyan36uaic_hyewxVkxXlNhyc1niKnV97ITl7w&s=10",
       "coverPosition": "46% 43%",
       "bannerPosition": "50% 18%",
       "coverZoom": 1,
       "bannerZoom": 1,
       "bannerBlur": 0,
       "bannerDarkness": 0,
-      "description": "Trong bộ phim \"Thám Tử Lừng Danh Conan: 15 Phút Tĩnh Lặng\", Conan Edogawa - tên được coi là mối đe dọa của chính phủ Nhật Bản, tiếp tục chứng minh tài năng siêu phàm của mình khi phải ngăn chặn một vụ tai họa đe dọa đến cư dân trong đường hầm xe điện ngầm. Câu chuyện bắt đầu khi Conan phát hiện có một mối liên hệ bí ẩn giữa một ngôi làng bị dời đi để làm chỗ cho một dự án xây dựng đập nước. Để ngăn chặn tên tội phạm và tiếp tục bảo vệ công lý, Conan phải nhanh chóng tìm ra bằng chứng và chạy đua với thời gian trước khi một vụ án mạng kinh hoàng xảy ra. Đạo diễn bộ phim \"Thám Tử Lừng Danh Conan: 15 Phút Tĩnh Lặng\" là sự kết hợp của Yasuichiro Yamamoto và Kobun Shizuno, hứa hẹn mang đến cho khán giả những cảnh quay tinh tế và kịch tính. Dàn diễn viên góp mặt trong phim cũng không kém phần ấn tượng với sự tham gia của Minami Takayama, Kappei Yamaguchi, Wakana Yamazaki, Rikiya Koyama, Megumi Hayashibara, Yukiko Iwai, Wataru Takagi, Ikue Otani, Kenichi Ogata, Naoko Matsui, Yuko Kato, Kōji Nakata, Chafurin, Kazuhiko Inoue và Atsuko Yuya. \"Thám Tử Lừng Danh Conan: 15 Phút Tĩnh Lặng\" thuộc thể loại phim Bí Ẩn, Hành Động và Hình Sự, mang đến cho khán giả những phút giây căng thẳng không ngừng, những bí ẩn cần giải mã và những màn truy đuổi nghẹt thở. Với nội dung hấp dẫn, kịch tính và dàn diễn viên tài năng, bộ phim hứa hẹn sẽ là lựa chọn không thể bỏ lỡ đối với những ai yêu thích thể loại phim trinh thám.",
+      "description": "Trong bộ phim \"Thám Tử Lừng Danh Conan: 15 Phút Tĩnh Lặng\", Conan Edogawa - tên được coi là mối đe dọa của chính phủ Nhật Bản, tiếp tục chứng minh tài năng siêu phàm của mình khi phải ngăn chặn một vụ tai họa đe dọa đến cư dân trong đường hầm xe điện ngầm. Câu chuyện bắt đầu khi Conan phát hiện có một mối liên hệ bí ẩn giữa một ngôi làng bị dời đi để làm chỗ cho một dự án xây dựng đập nước. Để ngăn chặn tên tội phạm và tiếp tục bảo vệ công lý, Conan phải nhanh chóng tìm ra bằng chứng và chạy đua với thời gian trước khi một vụ án mạng kinh hoàng xảy ra. Đ���o diễn b�� phim \"Thám T��� L��ng Danh Conan: 15 Phút Tĩnh Lặng\" là sự kết hợp của Yasuichiro Yamamoto và Kobun Shizuno, hứa hẹn mang đến cho khán giả những cảnh quay tinh tế và kịch tính. Dàn diễn viên góp mặt trong phim cũng không kém phần ấn tượng với sự tham gia của Minami Takayama, Kappei Yamaguchi, Wakana Yamazaki, Rikiya Koyama, Megumi Hayashibara, Yukiko Iwai, Wataru Takagi, Ikue Otani, Kenichi Ogata, Naoko Matsui, Yuko Kato, Kōji Nakata, Chafurin, Kazuhiko Inoue và Atsuko Yuya. \"Thám Tử Lừng Danh Conan: 15 Phút Tĩnh Lặng\" thuộc thể loại phim Bí Ẩn, Hành Đ���ng và Hình Sự, mang đến cho khán giả những phút giây căng thẳng không ngừng, những bí ẩn cần giải mã và những màn truy đuổi nghẹt thở. Với nội dung hấp dẫn, kịch tính và dàn diễn viên tài năng, bộ phim hứa hẹn sẽ là lựa chọn không thể bỏ lỡ đối với những ai yêu thích thể loại phim trinh thám.",
       "tags": [
         "Hoạt hình",
         "Phim Chiếu Rạp",
@@ -142,24 +240,25 @@
         "Trinh Thám"
       ],
       "hidden": false,
-      "category": "Hoạt hình, Phim Chiếu Rạp, Hành động, Lồng Tiếng, Trinh Thám"
+      "category": "Hoạt hình, Phim Chiếu Rạp, Hành động, Lồng Tiếng, Trinh Thám",
+      "bannerPath": "https://media.themoviedb.org/t/p/w780/eIDU9RFFapzrfV0fjYtr5lzf04J.jpg"
     },
     {
       "title": "Thám Tử Lừng Danh Conan 21: Bản Tình Ca Màu Đỏ Thẫm",
       "type": "video",
-      "link": "https://drive.google.com/file/d/1dk5E4DGVkWSc31lnaV9f1yzYteoJyZTq/view?usp=sharing",
+      "link": "https://drive.google.com/file/d/1w3clo6e7AvfguEg_OmjwYJ6xNGmjvXqr/view?usp=sharing",
       "lastPosition": 0,
       "watched": false,
       "addedAt": "2026-11-09T01:15:33.324Z",
       "id": "85a29a0c-2a2f-44bb-b05d-43c68607ce73",
-      "coverPath": "C:\\Users\\dactu\\Downloads\\conan-movie-21.jpg",
+      "coverPath": "https://conanmovie.com/wp-content/uploads/2026/10/21-724x1024.jpeg",
       "coverPosition": "50% 50%",
       "bannerPosition": "50% 50%",
       "coverZoom": 1,
       "bannerZoom": 1,
       "bannerBlur": 0,
       "bannerDarkness": 0,
-      "description": "Nội dung phim: Thám Tử Lừng Danh Conan 21: Bản Tình Ca Màu Đỏ Thẫm (Case Closed: The Crimson Love Letter)\nTrên màn hình đài truyền hình náo loạn, những cảnh phim phong phú hấp dẫn khán giả bắt đầu với một cảnh tượng đầy kịch tính: một trạm truyền hình tại Osaka bất ngờ bị phát nổ. Trước cảnh khẩn cấp, Conan và nhóm thám tử nhí không kịp phản ứng. Họ đồng loạt đặt ra câu hỏi: ai là kẻ phát định này và mục đích thật sự đằng sau vụ việc? Trong khi tất cả đều hốt hoảng, một nhân vật mới xuất hiện, Ooka Momiji. Với vẻ ngoài đáng yêu và cá tính mạnh mẽ, Momiji tự nhận mình là hôn thê của Heiji Hattori, người bạn thân thiết của Conan, và là nhà vô địch giải đấu Karuta - một trò chơi truyền thống đầy ý nghĩa tại Nhật Bản. Sự xuất hiện bất ngờ của Momiji khiến không khí trở nên hồi hộp và lôi cuốn hơn bao giờ hết. Song song với sự xuất hiện của Momiji, một vấn đề khác nổi lên. Quán quân giải đấu Karuta tại Kyoto liên tiếp bị ám sát trong 2 năm liền. Sự trùng hợp này khiến cho cả Conan và nhóm phải suy đoán và tìm hiểu mọi chi tiết kỹ lưỡng. Trong khi đài truyền hình trực tiếp phát sóng hình ảnh vị quán quân mới Momiji, một vụ án mạng khác lặng lẽ diễn ra, đẩy câu chuyện lên đến cao trào. \"Thám Tử Lừng Danh Conan 21: Bản Tình Ca Màu Đỏ Thẫm\" (tên gốc: Case Closed: The Crimson Love Letter) mang đến cho khán giả một màn trình diễn ấn tượng với sự tham gia đạo diễn của Kobun Shizuno và dàn diễn viên đầy tài năng như Minami Takayama, Kappei Yamaguchi, Wakana Yamazaki, Rikiya Koyama, và nhiều gương mặt khác. Với thể loại Bí ẩn, Hành động, Hình sự và Phiêu lưu, \"Thám Tử Lừng Danh Conan 21: Bản Tình Ca Màu Đỏ Thẫm\" không chỉ là một bộ phim giải trí mà còn là một thước phim đáng để xem. Dòng phim này đưa khán giả vào những trải nghiệm đầy kịch tính, li kỳ và hấp dẫn, thể hiện sự tinh tế trong cách xây dựng những câu chuyện, những tình tiết bí ẩn và những pha hành động nghẹt thở.",
+      "description": "Nội dung phim: Thám Tử Lừng Danh Conan 21: Bản Tình Ca Màu Đỏ Thẫm (Case Closed: The Crimson Love Letter)\nTrên màn hình đài truyền hình náo loạn, những cảnh phim phong phú hấp dẫn khán giả bắt đầu với một cảnh tượng đầy kịch tính: một trạm truyền hình tại Osaka bất ngờ bị phát nổ. Trước cảnh khẩn c���p, Conan và nhóm thám tử nhí không kịp phản ứng. Họ đồng loạt đặt ra câu hỏi: ai là kẻ phát định này và mục đích th���t s��� �����ng sau v�� vi��c? Trong khi tất cả đều hốt ho����ng, một nhân vật mới xuất hiện, Ooka Momiji. Với vẻ ngoài đáng yêu và cá tính mạnh mẽ, Momiji tự nhận mình là hôn thê của Heiji Hattori, người bạn thân thiết của Conan, và là nhà vô địch giải đấu Karuta - một trò chơi truyền thống đầy ý nghĩa tại Nhật Bản. Sự xuất hiện bất ngờ của Momiji khiến không khí trở nên hồi hộp và lôi cuốn hơn bao giờ hết. Song song với sự xuất hiện của Momiji, một vấn đề khác nổi lên. Quán quân giải đấu Karuta tại Kyoto liên tiếp bị ám sát trong 2 năm liền. Sự trùng hợp này khiến cho cả Conan và nhóm phải suy đoán và tìm hiểu mọi chi tiết kỹ lưỡng. Trong khi đài truyền hình trực tiếp phát sóng hình ảnh vị quán quân mới Momiji, một vụ án mạng khác lặng lẽ diễn ra, đẩy câu chuyện lên đến cao trào. \"Thám Tử Lừng Danh Conan 21: Bản Tình Ca Màu Đỏ Thẫm\" (tên gốc: Case Closed: The Crimson Love Letter) mang đến cho khán giả một màn trình diễn ấn tượng với sự tham gia đạo diễn của Kobun Shizuno và dàn diễn viên đầy tài năng như Minami Takayama, Kappei Yamaguchi, Wakana Yamazaki, Rikiya Koyama, và nhi��u gương mặt khác. V��i thể loại Bí ẩn, Hành ����ng, Hình sự và Phiêu lưu, \"Thám Tử Lừng Danh Conan 21: Bản Tình Ca Màu Đỏ Thẫm\" không chỉ là một bộ phim giải trí mà còn là một thước phim đáng để xem. Dòng phim này đưa khán giả vào những trải nghiệm đầy kịch tính, li kỳ và hấp dẫn, thể hiện sự tinh tế trong cách xây dựng những câu chuyện, những tình tiết bí ẩn và những pha hành động nghẹt thở.",
       "tags": [
         "Hoạt hình",
         "Phim Chiếu Rạp",
@@ -168,7 +267,8 @@
         "Trinh Thám"
       ],
       "hidden": false,
-      "category": "Hoạt hình, Phim Chiếu Rạp, Hành động, Lồng Tiếng, Trinh Thám"
+      "category": "Hoạt hình, Phim Chiếu Rạp, Hành động, Lồng Tiếng, Trinh Thám",
+      "bannerPath": "https://kilala.vn/data/upload/article/3326/21314718_1816801215277219_8942782677233306911_n-CJ%20.jpg"
     },
     {
       "title": "Thám Tử Lừng Danh Conan 4: Thủ Phạm Trong Đôi Mắt",
@@ -180,14 +280,14 @@
       "id": "1707b104-2d68-448d-8b5c-067fcbb3fa49",
       "subType": "movie",
       "aspectRatioMode": "16:9",
-      "coverPath": "C:\\Users\\dactu\\Downloads\\mv4bn.jpg",
+      "coverPath": "https://image.tmdb.org/t/p/original/nAC3yulTnqloGvoIGtFEGzX1aKp.jpg",
       "coverPosition": "41% 46%",
       "bannerPosition": "100% 22%",
       "coverZoom": 1,
       "bannerZoom": 1.9,
       "bannerBlur": 0,
       "bannerDarkness": 0,
-      "description": "Trong bộ phim \"Thám Tử Lừng Danh Conan 4: Thủ Phạm Trong Đôi Mắt\", Conan đứng trước một vụ ám sát đầy bí ẩn, khi cảnh sát Narasawa Osamu bị giết trong khi điều tra một vụ án từ 1 năm trước. Conan nhanh chóng nhận biết ra một điểm quan trọng: hung thủ cầm ô tay tay phải, nhưng lại thuận tay trái. Sự suy luận của Conan dẫn đến những câu hỏi lớn: Liệu vụ án của Narasawa và vụ án mới đều có liên quan đến nhau hay không? Vì sao cả hai nạn nhân đều bị sử dụng cùng một khẩu súng? Cùng với sự giúp đỡ từ những người bạn thân thiết, Conan bắt đầu mở rộng cuộc điều tra về vụ án, đặt ra những câu hỏi tinh tế và căn chỉnh mọi manh mối nhỏ nhặt. Trên hành trình phá giải bí ẩn này, khán giả sẽ được dẫn dắt qua những khúc mắc đầy kịch tính, những đoạn phim hồi hộp và những thông điệp sâu sắc về sự công bằng và lòng tự trọng. Đạo diễn Kenji Kodama đã tạo nên một bức tranh tinh tế với các diễn viên xuất sắc như Minami Takayama, Kappei Yamaguchi, Wakana Yamazaki, Akira Kamiya... Họ đã đồng lòng mang đến cho khán giả những cảm xúc sâu sắc, từ những phút giây hồi hộp đến những khoảnh khắc lắng đọng.",
+      "description": "Trong bộ phim \"Thám Tử Lừng Danh Conan 4: Thủ Ph���m Trong Đôi Mắt\", Conan đứng trước một vụ ám sát đầy bí ẩn, khi cảnh sát Narasawa Osamu bị giết trong khi điều tra một vụ án từ 1 năm trước. Conan nhanh chóng nhận biết ra một điểm quan trọng: hung thủ cầm ô tay tay phải, nhưng lại thuận tay trái. Sự suy luận của Conan dẫn đến những câu hỏi lớn: Liệu vụ án của Narasawa và vụ án mới đều có liên quan đến nhau hay không? Vì sao cả hai nạn nhân đều bị sử dụng cùng một khẩu súng? Cùng với sự giúp đỡ từ những người bạn thân thiết, Conan bắt đầu mở rộng cuộc điều tra về vụ án, đặt ra những câu hỏi tinh tế và căn chỉnh mọi manh mối nhỏ nhặt. Trên hành trình phá giải bí ẩn này, khán giả sẽ được dẫn dắt qua những khúc mắc đầy kịch tính, những đoạn phim hồi hộp và những thông điệp sâu sắc về sự công bằng và lòng tự trọng. Đạo diễn Kenji Kodama đã tạo nên một bức tranh tinh tế với các diễn viên xuất sắc như Minami Takayama, Kappei Yamaguchi, Wakana Yamazaki, Akira Kamiya... Họ đã đồng lòng mang đến cho khán giả những cảm xúc sâu sắc, từ những phút giây hồi hộp đến những khoảnh kh�����������������������c l�����������ng đọng.",
       "tags": [
         "Hoạt hình",
         "Phim Chiếu Rạp",
@@ -212,19 +312,19 @@
       "id": "750a1d02-53ee-47f0-9002-37c94db6cbd4",
       "subType": "movie",
       "aspectRatioMode": "16:9",
-      "coverPath": "C:\\Users\\dactu\\Downloads\\bong-ma-pho-baker-conan.jpg",
+      "coverPath": "https://cdn2.tuoitre.vn/zoom/1200_675/471584752817336320/2026/9/5/photo-17886037085282001971286-0-0-1005-1920-crop-17886039576531782553242.jpeg",
       "coverPosition": "50% 50%",
       "bannerPosition": "50% 62%",
       "coverZoom": 1,
       "bannerZoom": 1,
       "bannerBlur": 0,
       "bannerDarkness": 0,
-      "description": "Trong bộ phim \"Thám Tử Lừng Danh Conan 6: Bóng Ma Đường Baker\", Conan và Đội Thám Tử Nhí lớp 1B bắt đầu cuộc phiêu lưu mới và đầy kịch tính khi họ được mời tham gia vào một trò chơi máy tính ảo độc đáo. Với tính cách thông minh và trí tuệ sắc bén, Conan sớm nhận ra rằng trò chơi này không đơn giản như vẻ bề ngoài. Đạo diễn こだま兼嗣 đã tạo ra một câu chuyện đầy hấp dẫn và gây cấn, nơi mà nguy hiểm và bí ẩn luôn rình rập từng góc khuất. Dàn diễn viên góp mặt trong phim với sự xuất sắc, với các cá nhân như 高山みなみ, 山口勝平, 山崎和佳奈, 神谷明, 田中秀幸, 林原めぐみ, 岩居由希子, 大谷育江, 高木渉, và chịu trách nhiệm làm nổi bật hơn nữa cho tác phẩm. \"Thám Tử Lừng Danh Conan 6: Bóng Ma Đường Baker\" không chỉ là một bộ phim hoạt hình thú vị với những tình tiết lôi cuốn, mà còn là một câu chuyện về sự thông minh, tinh tế và lòng dũng cảm của Conan trong việc đối mặt với thử thách đầy nguy hiểm. Khán giả sẽ được đắm chìm trong không khí căng thẳng, mơ hồ và hồi hộp từ đầu đến cuối bộ phim.",
+      "description": "Trong bộ phim \"Thám Tử Lừng Danh Conan 6: Bóng Ma Đường Baker\", Conan v�� ��ội Th��m Tử Nhí l���p 1B bắt đ����u cuộc phi��u lưu m���i và ����y k���ch tính khi họ được m����i tham gia vào một trò chơi máy tính ảo độc đáo. Với tính cách thông minh và trí tu��� sắc bén, Conan sớm nhận ra rằng trò chơi này không đơn giản như vẻ bề ngoài. Đạo diễn こだま兼嗣 đã tạo ra một câu chuyện đầy hấp dẫn và gây cấn, nơi mà nguy hiểm và bí ẩn luôn rình rập từng góc khuất. Dàn diễn viên góp mặt trong phim với sự xuất sắc, với các cá nhân như 高山みなみ, 山口勝平, 山崎和佳奈, 神谷明, 田中秀幸, 林原めぐみ, 岩居由希子, 大谷育江, 高木渉, và chịu trách nhiệm làm nổi bật hơn nữa cho tác phẩm. \"Thám Tử Lừng Danh Conan 6: Bóng Ma Đường Baker\" không chỉ là một bộ phim hoạt hình thú vị với những tình tiết lôi cuốn, mà còn là một câu chuyện về sự thông minh, tinh tế và lòng dũng cảm của Conan trong việc đối mặt với thử thách đầy nguy hiểm. Khán giả sẽ được đắm chìm trong không khí căng thẳng, mơ hồ và hồi hộp từ đầu đến cuối bộ phim.",
       "tags": [
         "Hoạt hình",
-        "Phim Chiếu Rạp",
         "Lồng Tiếng",
         "Trinh Thám",
+        "Phim Chiếu Rạp",
         "Hành động"
       ],
       "hidden": false,
@@ -240,21 +340,21 @@
       "id": "8315d3fe-7398-45f0-b7bf-4d984aee13d3",
       "subType": "movie",
       "aspectRatioMode": "16:9",
-      "coverPath": "C:\\Users\\dactu\\Downloads\\30.png",
-      "bannerPath": "C:\\Users\\dactu\\Downloads\\banner30.jpg",
+      "coverPath": "https://wqmmagfrwwctvipopazx.supabase.co/storage/v1/object/public/icelauch-assets/covers/6f1391a8e4_30.png",
+      "bannerPath": "https://wqmmagfrwwctvipopazx.supabase.co/storage/v1/object/public/icelauch-assets/banners/3eb2ed5732_banner30.jpg",
       "coverPosition": "50% 50%",
       "bannerPosition": "49% 57%",
       "coverZoom": 1,
       "bannerZoom": 1,
       "bannerBlur": 0,
       "bannerDarkness": 0,
-      "description": "\"Thám Tử Lừng Danh Conan: Vụ án tiền giả Ultra 30\". Phim mở đầu bằng việc xuất hiện đột ngột của những tờ tiền giả tràn lan trên thị trường, biến một cuộc điều tra tội phạm bình thường thành mối đe dọa đến an ninh quốc gia. Chính vì vậy, Conan Edogawa cùng nhóm thám tử đã quyết định theo dấu nguồn gốc của dòng tiền không rõ nguồn. Hành trình điều tra dẫn dắt họ từ Cục In Tiền Quốc Gia tại Nagano đến Osaka, nơi mà nghi vấn về việc sản xuất tiền giả trở nên rõ ràng hơn bao giờ hết. Với sự hợp tác giữa Conan và thám tử trung học Heiji Hattori, những manh mối và dấu vết dần dần hé lộ, đưa họ đến gần hơn với sự thật đen tối đằng sau vụ án. Đạo diễn Nobuharu Kamanaka đã tạo nên một bức tranh hấp dẫn và gây cấn, khiến khán giả không thể rời mắt khỏi màn hình. Diễn viên góp mặt trong phim, gồm Minami Takayama, Akemi Okamura, Kappei Yamaguchi, Rikiya Koyama, Elaiza Ikeda, Kenichi Ogata, Megumi Hayashibara, hoàn thiện từng nhân vật với đầy đủ sắc thái và tâm trạng. \"Thám Tử Lừng Danh Conan: Vụ án tiền giả Ultra 30\" là một sáng tác mang đến cho khán giả không chỉ là những giây phút giải trí tuyệt vời mà còn là cơ hội trải nghiệm cảm xúc mạnh mẽ từ những khám phá, rắc rối và sự căng thẳng.",
+      "description": "\"Thám Tử Lừng Danh Conan: Vụ án tiền giả Ultra 30\". Phim mở đầu bằng việc xu��t hi��n đ��t ngột của những tờ tiền giả tràn lan trên thị trường, bi��n một cu���c điều tra tội phạm bình thường thành mối đe dọa đến an ninh quốc gia. Chính vì vậy, Conan Edogawa cùng nhóm thám t�� đã quyết định theo dấu nguồn gốc của dòng ti��n kh��ng rõ ngu��n. Hành trình điều tra dẫn dắt họ từ Cục In Tiền Quốc Gia tại Nagano đến Osaka, nơi mà nghi vấn về việc sản xuất tiền giả trở nên rõ ràng hơn bao giờ hết. Với sự hợp tác giữa Conan và thám tử trung học Heiji Hattori, những manh mối và dấu vết dần d��n hé lộ, đưa họ đến gần hơn với sự thật đen tối đằng sau vụ án. ��ạo diễn Nobuharu Kamanaka đã tạo nên một bức tranh hấp dẫn và gây cấn, khiến khán giả không thể rời mắt khỏi màn hình. Diễn viên góp mặt trong phim, gồm Minami Takayama, Akemi Okamura, Kappei Yamaguchi, Rikiya Koyama, Elaiza Ikeda, Kenichi Ogata, Megumi Hayashibara, hoàn thiện từng nhân vật với đầy đủ sắc thái và tâm trạng. \"Thám Tử Lừng Danh Conan: Vụ án tiền giả Ultra 30\" là một sáng t��c mang đến cho khán giả không chỉ là những giây phút giải trí tuyệt vời mà còn là cơ hội trải nghi���m cảm xúc mạnh mẽ từ những khám phá, rắc rối và sự căng thẳng.",
       "tags": [
-        "Hoạt hình",
         "Vietsub",
         "Trinh Thám",
-        "Hành động",
-        "Phim Lẻ"
+        "Phim Lẻ",
+        "Hoạt hình",
+        "Hành động"
       ],
       "hidden": false,
       "category": "Hoạt hình, Vietsub, Trinh Thám, Hành động, Phim Lẻ"
@@ -269,15 +369,15 @@
       "id": "411b16d7-f9f5-431d-9053-b69afbb2f695",
       "subType": "movie",
       "aspectRatioMode": "16:9",
-      "coverPath": "C:\\Users\\dactu\\Downloads\\zootopiaBia.png",
-      "bannerPath": "C:\\Users\\dactu\\Downloads\\zootopiaBanner.png",
+      "coverPath": "https://wqmmagfrwwctvipopazx.supabase.co/storage/v1/object/public/icelauch-assets/covers/1fb4ef6df2_zootopiaBia.png",
+      "bannerPath": "https://wqmmagfrwwctvipopazx.supabase.co/storage/v1/object/public/icelauch-assets/banners/214d20390e_zootopiaBanner.png",
       "coverPosition": "50% 50%",
       "bannerPosition": "7% 49%",
       "coverZoom": 1,
       "bannerZoom": 1.1,
       "bannerBlur": 0,
       "bannerDarkness": 0,
-      "description": "\"Phi Vụ Động Trời 2\" (Zootopia 2) - một bộ phim hấp dẫn không thể bỏ lỡ. Được đạo diễn bởi Jared Bush và Byron Howard, bộ phim tái ngộ với hai nhân vật chính là cặp đôi cảnh sát tân binh Judy Hopps và Nick Wilde, người vừa giải quyết một vụ án lớn nhất trong lịch sử Zootopia. Sau thành công vang dội đó, Judy và Nick nhận ra rằng mối đồng đội của họ không mạnh mẽ như họ từng nghĩ khi Trưởng Bogo ra lệnh họ tham gia chương trình tư vấn Đối tác trong Tình Trạng Khẩn Cấp. Tuy nhiên, không lâu sau, đối đầu với một thử thách lớn hơn, họ phải đối mặt với một bí ẩn kỳ lạ liên quan đến sự xuất hiện của một con rắn độc trong thủ đô động vật. \"Phi Vụ Động Trời 2\" không chỉ là một bộ phim hài hước mà còn kết hợp cả yếu tố hình sự, phiêu lưu, gia đình và bí ẩn. Với sự tham gia của các diễn viên tài năng như Ginnifer Goodwin, Jason Bateman, Ke Huy Quan, Fortune Feimster, Andy Samberg, Idris Elba, Nate Torrence, Maurice LaMarche, Shakira và Quinta Brunson, bộ phim hứa hẹn sẽ mang đến những phút giây giải trí đầy thú vị. Năm sản xuất: \"Phi Vụ Động Trời 2\" hứa hẹn sẽ là một trong những bộ phim hot nhất của năm, với những tình tiết hấp dẫn, những thông điệp ý nghĩa và một màn trình diễn hoạt hình đỉnh cao.",
+      "description": "\"Phi Vụ Động Trời 2\" (Zootopia 2) - một bộ phim hấp dẫn không thể bỏ lỡ. Đư���c đạo diễn bởi Jared Bush và Byron Howard, bộ phim tái ngộ với hai nhân vật chính là cặp đôi cảnh sát tân binh Judy Hopps và Nick Wilde, người vừa giải quyết một vụ án lớn nhất trong lịch sử Zootopia. Sau thành công vang dội đó, Judy và Nick nhận ra rằng mối đồng đội của họ không mạnh mẽ như họ từng nghĩ khi Trưởng Bogo ra lệnh họ tham gia chương trình tư vấn Đối tác trong Tình Trạng Khẩn Cấp. Tuy nhiên, không lâu sau, đối đầu với một thử thách lớn hơn, họ phải đối mặt với một bí ẩn kỳ lạ liên quan đến sự xuất hiện của một con rắn độc trong thủ đô động vật. \"Phi Vụ Động Trời 2\" không ch��� là một bộ phim hài hước m�� còn k��t hợp cả yếu tố hình s��, phiêu lưu, gia đình và b�� ẩn. V��i sự tham gia của các diễn viên tài năng như Ginnifer Goodwin, Jason Bateman, Ke Huy Quan, Fortune Feimster, Andy Samberg, Idris Elba, Nate Torrence, Maurice LaMarche, Shakira và Quinta Brunson, bộ phim hứa hẹn sẽ mang đến những phút giây giải trí đầy thú vị. Năm sản xuất: \"Phi Vụ Động Trời 2\" hứa hẹn sẽ là m��t trong những bộ phim hot nhất của năm, với những tình tiết hấp dẫn, những thông điệp ý nghĩa và một màn trình diễn hoạt hình đỉnh cao.",
       "tags": [
         "Hoạt hình",
         "Phim Chiếu Rạp",
@@ -285,6 +385,554 @@
       ],
       "hidden": false,
       "category": "Hoạt hình, Phim Chiếu Rạp, Lồng Tiếng"
+    },
+    {
+      "id": "c1b10489-e2c9-4d63-8704-3960944d2754",
+      "title": "Die With A Smile",
+      "type": "audio",
+      "subType": "music",
+      "link": "https://drive.google.com/file/d/1xlJ_g-5V6IM4Es8WOe666PYcUimwInXo/view?usp=sharing",
+      "backupLinks": [],
+      "coverPath": "https://image-cdn.nct.vn/song/2024/08/16/f/b/9/5/1723784458729_300.jpg",
+      "description": "",
+      "category": "Pop, USUK",
+      "tags": [
+        "Pop",
+        "USUK"
+      ],
+      "duration": 0,
+      "isBannerPinned": false,
+      "hidden": false,
+      "lastPosition": 0,
+      "watched": false,
+      "addedAt": "2026-11-17T17:12:09.529+00:00"
+    },
+    {
+      "id": "d59d314d-1247-4621-a8ef-ed6724e506ee",
+      "title": "We Don't Talk Anymore",
+      "type": "audio",
+      "subType": "music",
+      "link": "https://drive.google.com/file/d/1GS7P90lvaSBLdvKztjmANaw9y6NgToL4/view?usp=sharing",
+      "backupLinks": [],
+      "coverPath": "https://image-cdn.nct.vn/song/2017/09/27/a/9/e/f/1506480482657_300.jpg",
+      "description": "",
+      "category": "USUK",
+      "tags": [
+        "USUK"
+      ],
+      "duration": 0,
+      "isBannerPinned": false,
+      "hidden": false,
+      "lastPosition": 0,
+      "watched": false,
+      "addedAt": "2026-11-17T17:12:09.626+00:00"
+    },
+    {
+      "id": "056d2049-1f45-4bd7-b5df-98bd9315e646",
+      "title": "Ngày Còn Đôi Mươi",
+      "type": "audio",
+      "subType": "music",
+      "link": "https://drive.google.com/file/d/1Kj1Uimd98ci_CZRjclsomb2B1HM5cMIh/view?usp=sharing",
+      "backupLinks": [],
+      "coverPath": "https://image-cdn.nct.vn/song/2026/09/24/5/0/b/1/1790236226565_300.jpg",
+      "description": "",
+      "category": "Nhạc Việt",
+      "tags": [
+        "Nhạc Việt"
+      ],
+      "duration": 0,
+      "isBannerPinned": false,
+      "hidden": false,
+      "lastPosition": 0,
+      "watched": false,
+      "addedAt": "2026-11-17T17:12:09.859+00:00"
+    },
+    {
+      "id": "065691f9-8f92-4a6f-9030-f08379a3044b",
+      "title": "Thám Tử Lừng Danh Conan - Tập 1084: Phía bên kia rèm cửa",
+      "type": "video",
+      "link": "https://youtu.be/di4w4Ah-dLA?si=HllrKH5HUUVGpvlS",
+      "backupLinks": [],
+      "coverPath": "https://img.youtube.com/vi/di4w4Ah-dLA/hqdefault.jpg",
+      "description": "Thám Tử Lừng Danh Conan xoay quanh Kudo Shinichi, một thám tử trung học nổi tiếng với khả năng suy luận sắc bén. Trong một lần điều tra, Shinichi bị Tổ chức Áo Đen ép uống một loại thuốc độc khiến cơ thể bị teo nhỏ.\n\nĐể che giấu thân phận và tiếp tục điều tra tung tích của Tổ chức Áo Đen, Shinichi lấy tên mới là Conan Edogawa và chuyển đến sống cùng người bạn thuở nhỏ Ran Mori và bố cô, thám tử Kogoro Mori. Tại đây, Conan âm thầm sử dụng văn phòng thám tử của Kogoro để phá giải những vụ án hóc búa, đồng thời từng bước lần theo những manh mối liên quan đến Tổ chức Áo Đen",
+      "category": "Hoạt hình, Phim Bộ, Trinh Thám, Anime, Hành động, Lồng Tiếng, Hoạt Hình",
+      "tags": [
+        "Hoạt hình",
+        "Phim Bộ",
+        "Trinh Thám",
+        "Anime",
+        "Hành động",
+        "Lồng Tiếng",
+        "Hoạt Hình"
+      ],
+      "duration": 0,
+      "isBannerPinned": false,
+      "hidden": false,
+      "lastPosition": 0,
+      "watched": false,
+      "addedAt": "2026-11-17T17:12:09.959+00:00"
+    },
+    {
+      "id": "4a86b160-5d7c-4ce3-9605-353c94a56003",
+      "title": "3 Phải 6 Đừng",
+      "type": "audio",
+      "subType": "music",
+      "link": "https://drive.google.com/file/d/1dwium-ZElg_-5D5FIkd09uojBlKKaiqe/view?usp=sharing",
+      "backupLinks": [],
+      "coverPath": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ62z_g05iQIaltSW4kBk9U9GtAKli9COWJbpuB3OEkCW-UJ4bCfHCBE24&s=10",
+      "description": "",
+      "category": "Nhạc Việt",
+      "tags": [
+        "Nhạc Việt"
+      ],
+      "duration": 0,
+      "isBannerPinned": false,
+      "hidden": false,
+      "lastPosition": 0,
+      "watched": false,
+      "addedAt": "2026-11-17T17:12:10.063+00:00"
+    },
+    {
+      "id": "510482af-526b-428d-80d4-823a9c0a386b",
+      "title": "Như một người rưng",
+      "type": "audio",
+      "subType": "music",
+      "link": "https://drive.google.com/file/d/1y93isaREJ00AOYc9bZD1VL2m6awWPPzj/view?usp=sharing",
+      "backupLinks": [],
+      "coverPath": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSJsb82K-OdGrKBHAMqzBZw1R7V9qJ8-yxHD-mgieFTA-CnGERHhRQ7R42B&s=10",
+      "description": "",
+      "category": "Nhạc Chill",
+      "tags": [
+        "Nhạc Chill"
+      ],
+      "duration": 0,
+      "isBannerPinned": true,
+      "hidden": false,
+      "lastPosition": 0,
+      "watched": false,
+      "addedAt": "2026-11-17T17:12:10.154+00:00"
+    },
+    {
+      "id": "076b6df3-77be-4130-bdcd-50a4f6b7120e",
+      "title": "Nhẹ Buông",
+      "type": "audio",
+      "subType": "music",
+      "link": "https://drive.google.com/file/d/1-by33zPvT4WfkUJURtcfzUkly5jECp9m/view?usp=sharing",
+      "backupLinks": [],
+      "coverPath": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQLkqjQV4VxNn9y27qAaD-gb-oZ47bGwyS1EGVZcTYV3t_9LPkSQTaAhfkH&s=10",
+      "description": "",
+      "category": "Nhạc Việt",
+      "tags": [
+        "Nhạc Việt"
+      ],
+      "duration": 0,
+      "isBannerPinned": false,
+      "hidden": false,
+      "lastPosition": 0,
+      "watched": false,
+      "addedAt": "2026-11-17T17:12:10.369+00:00"
+    },
+    {
+      "id": "c487cdfa-6db4-4528-bcda-18895f54e892",
+      "title": "Thám Tử Lừng Danh Conan - Tập 1085: Bản balad của cô gái yêu bánh",
+      "type": "video",
+      "link": "https://youtu.be/SRhPvf_nuks?si=CUzeFsg1altTN44V",
+      "backupLinks": [],
+      "coverPath": "https://img.youtube.com/vi/SRhPvf_nuks/hqdefault.jpg",
+      "description": "Thám Tử Lừng Danh Conan xoay quanh Kudo Shinichi, một thám tử trung học nổi tiếng với khả năng suy luận sắc bén. Trong một lần điều tra, Shinichi bị Tổ chức Áo Đen ép uống một loại thuốc độc khiến cơ thể bị teo nhỏ.\n\nĐể che giấu thân phận và tiếp tục điều tra tung tích của Tổ chức Áo Đen, Shinichi lấy tên mới là Conan Edogawa và chuyển đến sống cùng người bạn thuở nhỏ Ran Mori và bố cô, thám tử Kogoro Mori. Tại đây, Conan âm thầm sử dụng văn phòng thám tử của Kogoro để phá giải những vụ án hóc búa, đồng thời từng bước lần theo những manh mối liên quan đến Tổ chức Áo Đen",
+      "category": "Hoạt hình, Phim Bộ, Anime, Trinh Thám, Hành động, Lồng Tiếng",
+      "tags": [
+        "Hoạt hình",
+        "Phim Bộ",
+        "Anime",
+        "Trinh Thám",
+        "Hành động",
+        "Lồng Tiếng"
+      ],
+      "duration": 0,
+      "isBannerPinned": false,
+      "hidden": false,
+      "lastPosition": 0,
+      "watched": false,
+      "addedAt": "2026-11-17T17:12:10.467+00:00"
+    },
+    {
+      "id": "89dd477d-b952-4486-8a08-fa24d6d09c5d",
+      "title": "Bạn Đời",
+      "type": "audio",
+      "subType": "music",
+      "link": "https://drive.google.com/file/d/1aNAJiyk-i_PAXvqmsKFSdUKJ8s1iyYyo/view?usp=sharing",
+      "backupLinks": [],
+      "coverPath": "https://image-cdn.nct.vn/song/2023/10/03/f/e/7/2/1696311595243_300.jpg",
+      "description": "",
+      "category": "Nhạc Việt",
+      "tags": [
+        "Nhạc Việt"
+      ],
+      "duration": 0,
+      "isBannerPinned": false,
+      "hidden": false,
+      "lastPosition": 0,
+      "watched": false,
+      "addedAt": "2026-11-17T17:12:10.562+00:00"
+    },
+    {
+      "id": "973acd61-6eb0-4d5c-8f45-bb59dda83f0e",
+      "title": "Tìm em",
+      "type": "audio",
+      "subType": "music",
+      "link": "https://drive.google.com/file/d/1KExpaGDA5mEzkF7dmPf89H5E2kUs6kT6/view?usp=sharing",
+      "backupLinks": [],
+      "coverPath": "https://image-cdn.nct.vn/song/2026/06/17/y/y/x/r/1781672442646_300.jpg",
+      "description": "",
+      "category": "Nhạc Việt",
+      "tags": [
+        "Nhạc Việt"
+      ],
+      "duration": 0,
+      "isBannerPinned": false,
+      "hidden": false,
+      "lastPosition": 0,
+      "watched": false,
+      "addedAt": "2026-11-17T17:12:10.847+00:00"
+    },
+    {
+      "id": "56c0e9a0-9eb3-46c4-b3e4-94298fcc1ba4",
+      "title": "Thám Tử Lừng Danh Conan - Tập 1101: Món súp thịt heo ám chỉ cái chết",
+      "type": "video",
+      "link": "https://youtu.be/-wh53y2ockA?si=mJuUzlAygPkeeim1",
+      "backupLinks": [],
+      "coverPath": "https://img.youtube.com/vi/-wh53y2ockA/hqdefault.jpg",
+      "description": "Thám Tử Lừng Danh Conan xoay quanh Kudo Shinichi, một thám tử trung học nổi tiếng với khả năng suy luận sắc bén. Trong một lần điều tra, Shinichi bị Tổ chức Áo Đen ép uống một loại thuốc độc khiến cơ thể bị teo nhỏ.\n\nĐể che giấu thân phận và tiếp tục điều tra tung tích của Tổ chức Áo Đen, Shinichi lấy tên mới là Conan Edogawa và chuyển đến sống cùng người bạn thuở nhỏ Ran Mori và bố cô, thám tử Kogoro Mori. Tại đây, Conan âm thầm sử dụng văn phòng thám tử của Kogoro để phá giải những vụ án hóc búa, đồng thời từng bước lần theo những manh mối liên quan đến Tổ chức Áo Đen",
+      "category": "Hoạt hình, Lồng Tiếng, Hành động, Phim Bộ, Anime, Trinh Thám, Hoạt Hình",
+      "tags": [
+        "Hoạt hình",
+        "Lồng Tiếng",
+        "Hành động",
+        "Phim Bộ",
+        "Anime",
+        "Trinh Thám",
+        "Hoạt Hình"
+      ],
+      "duration": 0,
+      "isBannerPinned": false,
+      "hidden": false,
+      "lastPosition": 0,
+      "watched": false,
+      "addedAt": "2026-11-17T17:12:10.938+00:00"
+    },
+    {
+      "id": "2b1b21f3-e4ed-4478-b307-db25743470a6",
+      "title": "Em Có Biết (Lofi)",
+      "type": "audio",
+      "subType": "music",
+      "link": "https://drive.google.com/file/d/1iO97EG6EeWOS36bwg7pFmWyaNm5rNFYO/view?usp=sharing",
+      "backupLinks": [],
+      "coverPath": "https://image-cdn.nct.vn/song/2026/04/10/Y/3/b/Z/1775830344374_300.jpg",
+      "description": "",
+      "category": "Nhạc Việt",
+      "tags": [
+        "Nhạc Việt"
+      ],
+      "duration": 0,
+      "isBannerPinned": false,
+      "hidden": false,
+      "lastPosition": 0,
+      "watched": false,
+      "addedAt": "2026-11-17T17:12:11.029+00:00"
+    },
+    {
+      "id": "f58014eb-40a4-47ca-9aea-d5781f4b5ce3",
+      "title": "Thám Tử Lừng Danh Conan - Tập 1082: Thư khiêu chiến của Ooka Momiji (P2)",
+      "type": "video",
+      "link": "https://youtu.be/3wUwuQU4fSs?si=QjLVB0q5g6LV6lfm",
+      "backupLinks": [],
+      "coverPath": "https://img.youtube.com/vi/3wUwuQU4fSs/hqdefault.jpg",
+      "description": "Thám Tử Lừng Danh Conan xoay quanh Kudo Shinichi, một thám tử trung học nổi tiếng với khả năng suy luận sắc bén. Trong một lần điều tra, Shinichi bị Tổ chức Áo Đen ép uống một loại thuốc độc khiến cơ thể bị teo nhỏ.\n\nĐể che giấu thân phận và tiếp tục điều tra tung tích của Tổ chức Áo Đen, Shinichi lấy tên mới là Conan Edogawa và chuyển đến sống cùng người bạn thuở nhỏ Ran Mori và bố cô, thám tử Kogoro Mori. Tại đây, Conan âm thầm sử dụng văn phòng thám tử của Kogoro để phá giải những vụ án hóc búa, đồng thời từng bước lần theo những manh mối liên quan đến Tổ chức Áo Đen.",
+      "category": "Hoạt hình, Hành động, Lồng Tiếng, Phim Bộ, Trinh Thám",
+      "tags": [
+        "Hoạt hình",
+        "Hành động",
+        "Lồng Tiếng",
+        "Phim Bộ",
+        "Trinh Thám"
+      ],
+      "duration": 0,
+      "isBannerPinned": false,
+      "hidden": false,
+      "lastPosition": 0,
+      "watched": false,
+      "addedAt": "2026-11-17T17:12:11.123+00:00"
+    },
+    {
+      "id": "b193b24e-2ca3-498c-b612-03a374f89487",
+      "title": "Lỡ Thương Nhau",
+      "type": "audio",
+      "subType": "music",
+      "link": "https://drive.google.com/file/d/1SrQD0Qp5YmZo8bdL8ZdPuOhdi3BhB19V/view?usp=sharing",
+      "backupLinks": [],
+      "coverPath": "https://image-cdn.nct.vn/song/2026/10/07/H/N/p/W/1791338985265_300.jpg",
+      "description": "",
+      "category": "Nhạc Việt",
+      "tags": [
+        "Nhạc Việt"
+      ],
+      "duration": 0,
+      "isBannerPinned": false,
+      "hidden": false,
+      "lastPosition": 0,
+      "watched": false,
+      "addedAt": "2026-11-17T17:12:11.214+00:00"
+    },
+    {
+      "id": "6cb8c38d-a1af-47b1-8fbe-4e8ae90577c5",
+      "title": "Buông Bỏ Sự Phụ Thuộc Nơi Anh",
+      "type": "audio",
+      "subType": "music",
+      "link": "https://drive.google.com/file/d/1jhQhiKjBteqS_gz5kwrHiymPhYt0KpKz/view?usp=sharing",
+      "backupLinks": [],
+      "coverPath": "https://image-cdn.nct.vn/song/2025/08/14/v/f/b/R/1755161348840_300.jpg",
+      "description": "",
+      "category": "Nhạc Trung",
+      "tags": [
+        "Nhạc Trung"
+      ],
+      "duration": 0,
+      "isBannerPinned": false,
+      "hidden": false,
+      "lastPosition": 0,
+      "watched": false,
+      "addedAt": "2026-11-17T17:12:11.839+00:00"
+    },
+    {
+      "id": "7e7ad171-95a7-4816-9f50-0418883dba25",
+      "title": "Dạo Bước Hongkong 1999",
+      "type": "audio",
+      "subType": "music",
+      "link": "https://drive.google.com/file/d/17QqqfL5tt1MGf1h5AUZpPbcZQ9j7QinS/view?usp=sharing",
+      "backupLinks": [],
+      "coverPath": "https://image-cdn.nct.vn/song/2024/05/13/6/e/d/3/1715572874734_300.jpg",
+      "description": "",
+      "category": "Nhạc Trung",
+      "tags": [
+        "Nhạc Trung"
+      ],
+      "duration": 0,
+      "isBannerPinned": false,
+      "hidden": false,
+      "lastPosition": 0,
+      "watched": false,
+      "addedAt": "2026-11-17T17:12:11.931+00:00"
+    },
+    {
+      "id": "ebee8f26-6d2e-482a-a12d-d41e19cb1c4f",
+      "title": "Không Môn Đăng Hộ Đối",
+      "type": "audio",
+      "subType": "music",
+      "link": "https://drive.google.com/file/d/1oG3owkB8aplzaKaaFT2gFi3dLYsLlbhw/view?usp=sharing",
+      "backupLinks": [],
+      "coverPath": "https://image-cdn.nct.vn/song/2026/10/08/0/a/b/2/1791434042422_300.jpg",
+      "description": "",
+      "category": "Nhạc Việt",
+      "tags": [
+        "Nhạc Việt"
+      ],
+      "duration": 0,
+      "isBannerPinned": false,
+      "hidden": false,
+      "lastPosition": 0,
+      "watched": false,
+      "addedAt": "2026-11-17T17:12:12.023+00:00"
+    },
+    {
+      "id": "18021c53-45ed-4d73-abe5-28fbecb60033",
+      "title": "Thám Tử Lừng Danh Conan Tập 1086: Phần Học Viện Cảnh Sát: Wild Police Story. Vụ án: Matsuda Jinpei",
+      "type": "video",
+      "link": "https://youtu.be/DUq08FNaamc?si=f4qTkcl91NUHAWue",
+      "backupLinks": [],
+      "coverPath": "https://img.youtube.com/vi/DUq08FNaamc/hqdefault.jpg",
+      "description": "Thám Tử Lừng Danh Conan xoay quanh Kudo Shinichi, một thám tử trung học nổi tiếng với khả năng suy luận sắc bén. Trong một lần điều tra, Shinichi bị Tổ chức Áo Đen ép uống một loại thuốc độc khiến cơ thể bị teo nhỏ.\n\nĐể che giấu thân phận và tiếp tục điều tra tung tích của Tổ chức Áo Đen, Shinichi lấy tên mới là Conan Edogawa và chuyển đến sống cùng người bạn thuở nhỏ Ran Mori và bố cô, thám tử Kogoro Mori. Tại đây, Conan âm thầm sử dụng văn phòng thám tử của Kogoro để phá giải những vụ án hóc búa, đồng thời từng bước lần theo những manh mối liên quan đến Tổ chức Áo Đen",
+      "category": "Hoạt hình, Lồng Tiếng, Hành động, Hoạt Hình, Phim Bộ, Anime, Trinh Thám",
+      "tags": [
+        "Hoạt hình",
+        "Lồng Tiếng",
+        "Hành động",
+        "Hoạt Hình",
+        "Phim Bộ",
+        "Anime",
+        "Trinh Thám"
+      ],
+      "duration": 0,
+      "isBannerPinned": false,
+      "hidden": false,
+      "lastPosition": 0,
+      "watched": false,
+      "addedAt": "2026-11-17T17:12:11.75+00:00"
+    },
+    {
+      "id": "8a30b255-4fc4-4eb5-8560-20a4501822c6",
+      "title": "Trò Chơi Tháp Rơi Tự Do",
+      "type": "audio",
+      "subType": "music",
+      "link": "https://drive.google.com/file/d/1Ev8W36XwfsKpmHJ3WtU1J6wL3iyjhWjq/view?usp=sharing",
+      "backupLinks": [],
+      "coverPath": "https://image-cdn.nct.vn/song/2025/01/15/l/S/n/w/1736929945372_300.jpg",
+      "description": "",
+      "category": "Nhạc Trung",
+      "tags": [
+        "Nhạc Trung"
+      ],
+      "duration": 0,
+      "isBannerPinned": false,
+      "hidden": false,
+      "lastPosition": 0,
+      "watched": false,
+      "addedAt": "2026-11-17T17:12:12.788+00:00"
+    },
+    {
+      "id": "52185683-8e17-4a17-b7f1-f650af69ee9d",
+      "title": "Gió Thổi Tuyết Rơi",
+      "type": "audio",
+      "subType": "music",
+      "link": "https://drive.google.com/file/d/1X7vJsZOUHNeG96yUReASKm9wZCZVc3dD/view?usp=sharing",
+      "backupLinks": [],
+      "coverPath": "https://image-cdn.nct.vn/song/2026/01/13/N/6/J/R/1768281593538_300.jpg",
+      "description": "",
+      "category": "Nhạc Trung",
+      "tags": [
+        "Nhạc Trung"
+      ],
+      "duration": 0,
+      "isBannerPinned": false,
+      "hidden": false,
+      "lastPosition": 0,
+      "watched": false,
+      "addedAt": "2026-11-17T17:12:12.884+00:00"
+    },
+    {
+      "id": "d96b2e65-8ecc-42a6-a629-ab723c2f7afa",
+      "title": "Thám Tử Lừng Danh Conan - Tập 1081: Thư khiêu chiến của Ooka Momiji (P1)",
+      "type": "video",
+      "link": "https://youtu.be/RvcayvxgziI?si=ylNuXsdogcqrVqIj",
+      "backupLinks": [],
+      "coverPath": "https://img.youtube.com/vi/RvcayvxgziI/hqdefault.jpg",
+      "description": "Thám Tử Lừng Danh Conan xoay quanh Kudo Shinichi, một thám tử trung học nổi tiếng với khả năng suy luận sắc bén. Trong một lần điều tra, Shinichi bị Tổ chức Áo Đen ép uống một loại thuốc độc khiến cơ thể bị teo nhỏ.\n\nĐể che giấu thân phận và tiếp tục điều tra tung tích của Tổ chức Áo Đen, Shinichi lấy tên mới là Conan Edogawa và chuyển đến sống cùng người bạn thuở nhỏ Ran Mori và bố cô, thám tử Kogoro Mori. Tại đây, Conan âm thầm sử dụng văn phòng thám tử của Kogoro để phá giải những vụ án hóc búa, đồng thời từng bước lần theo những manh mối liên quan đến Tổ chức Áo Đen.",
+      "category": "Hoạt hình, Hành động, Phim Bộ",
+      "tags": [
+        "Hoạt hình",
+        "Hành động",
+        "Phim Bộ"
+      ],
+      "duration": 0,
+      "isBannerPinned": false,
+      "hidden": false,
+      "lastPosition": 0,
+      "watched": false,
+      "addedAt": "2026-11-17T17:12:12.982+00:00"
+    },
+    {
+      "id": "575106e5-4ce2-4dbd-a860-bc5abdab4320",
+      "title": "Sa Vào Nguy Hiểm",
+      "type": "audio",
+      "subType": "music",
+      "link": "https://drive.google.com/file/d/11JAMRJLc3yopHSGhdtHZ2vQwQfkjhqKO/view?usp=sharing",
+      "backupLinks": [],
+      "coverPath": "https://image-cdn.nct.vn/song/2023/09/22/3/3/9/7/1695354472970_300.jpg",
+      "description": "",
+      "category": "Nhạc Trung",
+      "tags": [
+        "Nhạc Trung"
+      ],
+      "duration": 0,
+      "isBannerPinned": false,
+      "hidden": false,
+      "lastPosition": 0,
+      "watched": false,
+      "addedAt": "2026-11-17T17:12:13.382+00:00"
+    },
+    {
+      "id": "94f91ce5-8d24-41e5-af82-461f4144d17c",
+      "title": "Váy Cưới Của Em Giống Như Bông Tuyết",
+      "type": "audio",
+      "subType": "music",
+      "link": "https://drive.google.com/file/d/1Po7YO5q2kXGuyZNrxL0Yh-fknOrn5r-5/view?usp=sharing",
+      "backupLinks": [],
+      "coverPath": "https://image-cdn.nct.vn/song/2024/01/05/0/7/d/5/1704429838693_300.jpg",
+      "description": "",
+      "category": "Nhạc Trung",
+      "tags": [
+        "Nhạc Trung"
+      ],
+      "duration": 0,
+      "isBannerPinned": false,
+      "hidden": false,
+      "lastPosition": 0,
+      "watched": false,
+      "addedAt": "2026-11-17T17:12:13.475+00:00"
+    },
+    {
+      "id": "380ec7be-62be-4d6c-be51-1b8ff87267ac",
+      "title": "Không Thoát Khỏi Luân Hồi",
+      "type": "audio",
+      "subType": "music",
+      "link": "https://drive.google.com/file/d/1rURxAfzsm6Xt_-PTzL9TkUvzexlSLGtH/view?usp=sharing",
+      "backupLinks": [],
+      "coverPath": "https://image-cdn.nct.vn/song/2023/04/25/b/2/1/2/1682434164893_300.jpg",
+      "description": "",
+      "category": "Nhạc Trung",
+      "tags": [
+        "Nhạc Trung"
+      ],
+      "duration": 0,
+      "isBannerPinned": false,
+      "hidden": false,
+      "lastPosition": 0,
+      "watched": false,
+      "addedAt": "2026-11-17T17:12:13.846+00:00"
+    },
+    {
+      "id": "6d2d1772-d65b-4b37-8d30-7ee64b330e93",
+      "title": "Thám Tử Lừng Danh Conan - Tập 1083: Nhân chứng không thể nói",
+      "type": "video",
+      "link": "https://youtu.be/GjqvKRuXDCI?si=TXJGXdfyVmld7Pqo",
+      "backupLinks": [],
+      "coverPath": "https://img.youtube.com/vi/GjqvKRuXDCI/hqdefault.jpg",
+      "description": "Thám Tử Lừng Danh Conan xoay quanh Kudo Shinichi, một thám tử trung học nổi tiếng với khả năng suy luận sắc bén. Trong một lần điều tra, Shinichi bị Tổ chức Áo Đen ép uống một loại thuốc độc khiến cơ thể bị teo nhỏ.\n\nĐể che giấu thân phận và tiếp tục điều tra tung tích của Tổ chức Áo Đen, Shinichi lấy tên mới là Conan Edogawa và chuyển đến sống cùng người bạn thuở nhỏ Ran Mori và bố cô, thám tử Kogoro Mori. Tại đây, Conan âm thầm sử dụng văn phòng thám tử của Kogoro để phá giải những vụ án hóc búa, đồng thời từng bước lần theo những manh mối liên quan đến Tổ chức Áo Đen.",
+      "category": "Hoạt hình, Hành động, Phim Bộ",
+      "tags": [
+        "Hoạt hình",
+        "Hành động",
+        "Phim Bộ"
+      ],
+      "duration": 0,
+      "isBannerPinned": false,
+      "hidden": false,
+      "lastPosition": 0,
+      "watched": false,
+      "addedAt": "2026-11-17T17:12:14.034+00:00"
+    },
+    {
+      "id": "171f34bb-5678-40b9-b9b0-94ddf1a3819d",
+      "title": "Thám tử lừng danh Conan 28: Dư ảnh của độc nhãn",
+      "type": "video",
+      "link": "https://drive.google.com/file/d/1MtPJ69pGcMurXz9cjp-NaNlyuIxY59Sq/view?usp=sharing",
+      "backupLinks": [],
+      "coverPath": "https://cdn2.fptshop.com.vn/unsafe/800x0/conan_movie_28_lich_chieu_1_2fab7c4c57.jpg",
+      "bannerPath": "https://www.elleman.vn/app/uploads/2025/07/28/250354/conan-movie-28_elleman-1.jpg",
+      "description": "Câu chuyện lấy bối cảnh tại tỉnh Nagano. Conan cùng thám tử ng�� gật Kogoro Mori tham gia phá gi���i một vụ án mạng đầy kịch tính có liên kết chặt chẽ tới vụ tai nạn lở tuyết từ 8 năm trước của thanh tra độc nhãn Yamato Kansuke.",
+      "category": "Hoạt hình, Phim Chiếu Rạp, Trinh Thám, Hành động",
+      "tags": [
+        "Hoạt hình",
+        "Phim Chiếu Rạp",
+        "Trinh Thám",
+        "Hành động"
+      ],
+      "duration": 0,
+      "isBannerPinned": true,
+      "hidden": false,
+      "lastPosition": 0,
+      "watched": false,
+      "addedAt": "2026-11-17T17:12:14.134+00:00"
     }
   ],
   "settings": {
@@ -370,8 +1018,237 @@
     "userGamerTitle": "Tân Binh Băng Giá",
     "tvAutoPlayTrailer": false
   },
-  "playlists": [],
-  "profiles": [],
+  "playlists": [
+    {
+      "id": "2e399c63-6eb7-435d-b5b5-1d0adc6a4a8c",
+      "name": "Conan Movie",
+      "type": "video",
+      "coverAspectRatio": "16:9",
+      "description": "Danh sách Phim chiếu rạp Thám tử lừng danh Conan",
+      "coverPath": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQKIPuD0Qr6cnunbg7VgOyjpB_8SruKO42lWVMzsfhkY5smd_Ptk0SaLw4O&s=10",
+      "itemIds": [
+        "1707b104-2d68-448d-8b5c-067fcbb3fa49",
+        "750a1d02-53ee-47f0-9002-37c94db6cbd4",
+        "09b1d589-0bb5-4630-9068-93404e08c62e",
+        "85a29a0c-2a2f-44bb-b05d-43c68607ce73",
+        "171f34bb-5678-40b9-b9b0-94ddf1a3819d"
+      ],
+      "createdAt": "2026-11-18T11:23:11.228+00:00"
+    },
+    {
+      "id": "__system_catalog_settings__",
+      "name": "__system_catalog_settings__",
+      "type": "video",
+      "coverAspectRatio": "16:9",
+      "description": "{\"gameTags\":[\"Coop\",\"Hành động\",\"Nhập vai (RPG)\",\"Chiến thuật\",\"Kinh dị\",\"Mô phỏng\",\"Thế giới mở\",\"Bắn súng (FPS)\",\"Phiêu lưu\",\"Indie\",\"Giải đố\"],\"globalActionButtons\":[{\"id\":\"btn-steam-default\",\"label\":\"Mở ứng dụng Steam\",\"description\":\"Khởi chạy ứng dụng Steam trên máy trước khi vào game\",\"icon\":\"steam\",\"type\":\"app\",\"target\":\"steam://open/main\",\"isDefault\":true,\"runAsAdmin\":false},{\"id\":\"btn-discord-default\",\"label\":\"Vào Discord Voice Chat\",\"description\":\"Kết nối phòng thoại Discord cùng bạn bè\",\"icon\":\"discord\",\"type\":\"link\",\"target\":\"https://discord.com/app\",\"isDefault\":false,\"runAsAdmin\":false}]}",
+      "itemIds": [],
+      "createdAt": "2026-11-18T11:23:11.575+00:00"
+    },
+    {
+      "id": "e32f4549-75fa-4199-92e4-becb99b35871",
+      "name": "Thám tử lừng danh Conan",
+      "type": "video",
+      "coverAspectRatio": "16:9",
+      "description": "Thám Tử Lừng Danh Conan xoay quanh Kudo Shinichi, một thám tử trung học nổi tiếng với khả năng suy luận sắc bén. Trong một lần điều tra, Shinichi bị Tổ chức Áo Đen ép uống một loại thuốc độc khiến cơ thể bị teo nhỏ.\n\nĐể che giấu thân phận và tiếp tục điều tra tung tích của Tổ chức Áo Đen, Shinichi lấy tên mới là Conan Edogawa và chuyển đến sống cùng người bạn thuở nhỏ Ran Mori và bố cô, thám tử Kogoro Mori. Tại đây, Conan âm thầm sử dụng văn phòng thám tử của Kogoro để phá giải những vụ án hóc búa, đồng thời từng bước lần theo những manh mối liên quan đến Tổ chức Áo Đen.",
+      "coverPath": "https://vcdn1-giaitri.vnecdn.net/2024/07/08/conan-5-9805-1720426192.jpg?w=1020&h=0&q=100&dpr=2&fit=crop&s=TL5dr0ycuC1NSFsZpho9ew",
+      "itemIds": [
+        "d96b2e65-8ecc-42a6-a629-ab723c2f7afa",
+        "f58014eb-40a4-47ca-9aea-d5781f4b5ce3",
+        "6d2d1772-d65b-4b37-8d30-7ee64b330e93"
+      ],
+      "createdAt": "2026-11-18T11:23:11.682+00:00"
+    }
+  ],
+  "profiles": [
+    {
+      "id": "user-1794284333335",
+      "username": "iceenser",
+      "nickname": "iceenser",
+      "avatar": "avatar_ghost_phantom",
+      "role": "admin",
+      "pinHash": "b789345a4de73e837ef46798d14fd1be9e2f12567cbb039fc1836359eb9176fa",
+      "createdDate": "2026-11-17T05:01:58.282149+00:00",
+      "lastActiveDate": "2026-11-13T02:08:29.957+00:00",
+      "library": [],
+      "favoriteMedia": [],
+      "favoritePlaylists": [],
+      "customPlaylists": [],
+      "watchProgress": {},
+      "gameStats": {
+        "favoritePlaylists": []
+      }
+    },
+    {
+      "id": "user-1794664238428",
+      "username": "ad",
+      "nickname": "Ad",
+      "avatar": "avatar_cyber_ninja",
+      "role": "user",
+      "pinHash": "",
+      "createdDate": "2026-11-14T13:51:53.8626+00:00",
+      "lastActiveDate": "2026-11-17T05:02:35.418+00:00",
+      "library": [],
+      "favoriteMedia": [],
+      "favoritePlaylists": [],
+      "customPlaylists": [],
+      "watchProgress": {},
+      "gameStats": {
+        "favoritePlaylists": []
+      }
+    },
+    {
+      "id": "user-1794827120197",
+      "username": "iceenser",
+      "nickname": "iceenser",
+      "avatar": "avatar_pixel_knight",
+      "role": "user",
+      "pinHash": "",
+      "passwordHash": "39506f8d7ceb98ab988c673f82b6c452bce5e04778b29ffe9287def021c8bd20",
+      "passwordSalt": "49190cb3ff69bc2a1afee6a98433d5b4",
+      "requiresPasswordReset": false,
+      "createdDate": "2026-11-16T11:05:20.457477+00:00",
+      "lastActiveDate": "2026-11-16T14:20:29.64+00:00",
+      "library": [],
+      "favoriteMedia": [],
+      "favoritePlaylists": [],
+      "customPlaylists": [],
+      "watchProgress": {
+        "056d2049-1f45-4bd7-b5df-98bd9315e646": {
+          "duration": 0,
+          "completed": false,
+          "currentTime": 51.5,
+          "lastWatchedAt": 1794829517896
+        },
+        "2b1b21f3-e4ed-4478-b307-db25743470a6": {
+          "duration": 0,
+          "completed": false,
+          "currentTime": 207.437439,
+          "lastWatchedAt": 1794842958636
+        },
+        "510482af-526b-428d-80d4-823a9c0a386b": {
+          "duration": 0,
+          "completed": false,
+          "currentTime": 31.800061,
+          "lastWatchedAt": 1794839672672
+        },
+        "52185683-8e17-4a17-b7f1-f650af69ee9d": {
+          "duration": 0,
+          "completed": false,
+          "currentTime": 203.993217,
+          "lastWatchedAt": 1794837041044
+        },
+        "7e7ad171-95a7-4816-9f50-0418883dba25": {
+          "duration": 0,
+          "completed": false,
+          "currentTime": 219.999361,
+          "lastWatchedAt": 1794836625569
+        },
+        "8a30b255-4fc4-4eb5-8560-20a4501822c6": {
+          "duration": 0,
+          "completed": false,
+          "currentTime": 200.73613,
+          "lastWatchedAt": 1794836831776
+        },
+        "973acd61-6eb0-4d5c-8f45-bb59dda83f0e": {
+          "duration": 0,
+          "completed": false,
+          "currentTime": 273.984936,
+          "lastWatchedAt": 1794836400006
+        },
+        "b193b24e-2ca3-498c-b612-03a374f89487": {
+          "duration": 0,
+          "completed": false,
+          "currentTime": 229.145405,
+          "lastWatchedAt": 1794838501229
+        },
+        "ebee8f26-6d2e-482a-a12d-d41e19cb1c4f": {
+          "duration": 0,
+          "completed": false,
+          "currentTime": 286.861229,
+          "lastWatchedAt": 1794837570415
+        }
+      },
+      "gameStats": {
+        "role": "user",
+        "username": "iceenser",
+        "passwordHash": "39506f8d7ceb98ab988c673f82b6c452bce5e04778b29ffe9287def021c8bd20",
+        "passwordSalt": "49190cb3ff69bc2a1afee6a98433d5b4",
+        "customPlaylists": [],
+        "favoritePlaylists": [],
+        "requiresPasswordReset": false
+      }
+    },
+    {
+      "id": "user-1794845779916",
+      "username": "iceenser01",
+      "nickname": "iceenser01",
+      "avatar": "avatar_pixel_knight",
+      "role": "user",
+      "pinHash": "",
+      "passwordHash": "b3709d9df36889b3d91ba931e3e3f8578e156f1c00348c194ea5627490a3ab1a",
+      "passwordSalt": "199516082876ad1a035fe9e729a33079",
+      "requiresPasswordReset": false,
+      "createdDate": "2026-11-16T16:16:20.045273+00:00",
+      "lastActiveDate": "2026-11-18T10:28:07.355+00:00",
+      "library": [],
+      "favoriteMedia": [],
+      "favoritePlaylists": [],
+      "customPlaylists": [],
+      "watchProgress": {
+        "076b6df3-77be-4130-bdcd-50a4f6b7120e": {
+          "duration": 0,
+          "completed": false,
+          "currentTime": 3.072209,
+          "lastWatchedAt": 1794998722508
+        },
+        "2b1b21f3-e4ed-4478-b307-db25743470a6": {
+          "duration": 0,
+          "completed": false,
+          "currentTime": 6.397093,
+          "lastWatchedAt": 1794965750360
+        },
+        "380ec7be-62be-4d6c-be51-1b8ff87267ac": {
+          "duration": 0,
+          "completed": false,
+          "currentTime": 130.625923,
+          "lastWatchedAt": 1794998730133
+        },
+        "510482af-526b-428d-80d4-823a9c0a386b": {
+          "duration": 0,
+          "completed": false,
+          "currentTime": 124.347741,
+          "lastWatchedAt": 1795001177774
+        },
+        "89dd477d-b952-4486-8a08-fa24d6d09c5d": {
+          "duration": 0,
+          "completed": false,
+          "currentTime": 3.003197,
+          "lastWatchedAt": 1794845877975
+        },
+        "973acd61-6eb0-4d5c-8f45-bb59dda83f0e": {
+          "duration": 0,
+          "completed": false,
+          "currentTime": 19.06744,
+          "lastWatchedAt": 1794971583773
+        },
+        "b193b24e-2ca3-498c-b612-03a374f89487": {
+          "duration": 0,
+          "completed": false,
+          "currentTime": 165.83401,
+          "lastWatchedAt": 1794963862217
+        }
+      },
+      "gameStats": {
+        "role": "user",
+        "username": "iceenser01",
+        "passwordHash": "b3709d9df36889b3d91ba931e3e3f8578e156f1c00348c194ea5627490a3ab1a",
+        "passwordSalt": "199516082876ad1a035fe9e729a33079",
+        "customPlaylists": [],
+        "favoritePlaylists": [],
+        "requiresPasswordReset": false
+      }
+    }
+  ],
   "activeProfileId": null,
   "rememberedProfileId": null,
   "cloudSync": {
@@ -380,8 +1257,8 @@
     "supabaseAnonKey": "sb_publishable_l1vNbLKXXhLNnfi1pI5UnQ_0EaqbXuJ",
     "autoSyncIntervalMinutes": 5,
     "lastSyncStatus": "success",
-    "lastSyncedAt": "2026-11-09T12:48:14.116Z",
-    "lastSyncMessage": "Đồng bộ thành công 0 hồ sơ với Supabase Cloud"
+    "lastSyncedAt": "2026-11-18T11:26:19.872Z",
+    "lastSyncMessage": "Đồng bộ thành công danh mục dùng chung (6 game, 32 phim/media, 3 playlists, 4 tài khoản)!"
   },
   "iceDropShares": [],
   "approvedDevices": []

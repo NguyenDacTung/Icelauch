@@ -169,7 +169,7 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
             className={`flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all ${
               activeTab === 'game'
                 ? 'bg-amber-400 text-black shadow-md'
-                : 'text-ice-subtext hover:text-white hover:bg-white/5'
+                : 'text-ice-subtext hover:text-ice-text hover:bg-ice-hover'
             }`}
           >
             <Gamepad2 className="w-3.5 h-3.5" />
@@ -184,7 +184,7 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
             className={`flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all ${
               activeTab === 'movie'
                 ? 'bg-amber-400 text-black shadow-md'
-                : 'text-ice-subtext hover:text-white hover:bg-white/5'
+                : 'text-ice-subtext hover:text-ice-text hover:bg-ice-hover'
             }`}
           >
             <Film className="w-3.5 h-3.5" />
@@ -199,7 +199,7 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
             className={`flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all ${
               activeTab === 'music'
                 ? 'bg-amber-400 text-black shadow-md'
-                : 'text-ice-subtext hover:text-white hover:bg-white/5'
+                : 'text-ice-subtext hover:text-ice-text hover:bg-ice-hover'
             }`}
           >
             <Music className="w-3.5 h-3.5" />
@@ -214,7 +214,7 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
             className={`flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all ${
               activeTab === 'podcast'
                 ? 'bg-amber-400 text-black shadow-md'
-                : 'text-ice-subtext hover:text-white hover:bg-white/5'
+                : 'text-ice-subtext hover:text-ice-text hover:bg-ice-hover'
             }`}
           >
             <Mic className="w-3.5 h-3.5" />
@@ -237,7 +237,7 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Tìm game..."
-              className="w-full h-7 pl-8 pr-2 rounded bg-ice-bg border border-ice-border text-xs text-white placeholder-ice-subtext focus:outline-none focus:border-ice-accent"
+              className="w-full h-7 pl-8 pr-2 rounded bg-ice-card border border-ice-border text-xs text-ice-text placeholder-ice-subtext focus:outline-none focus:border-ice-accent"
             />
           </div>
 
@@ -245,7 +245,7 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
             <button
               onClick={() => setFilter('all')}
               className={`px-2 py-0.5 rounded transition-colors whitespace-nowrap ${
-                filter === 'all' ? 'bg-ice-accent text-white font-semibold' : 'text-ice-subtext hover:text-white'
+                filter === 'all' ? 'bg-ice-accent text-white font-semibold' : 'text-ice-subtext hover:text-ice-text'
               }`}
             >
               Tất cả ({libraryGames.length})
@@ -253,7 +253,7 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
             <button
               onClick={() => setFilter('installed')}
               className={`px-2 py-0.5 rounded transition-colors whitespace-nowrap ${
-                filter === 'installed' ? 'bg-ice-accent text-white font-semibold' : 'text-ice-subtext hover:text-white'
+                filter === 'installed' ? 'bg-ice-accent text-white font-semibold' : 'text-ice-subtext hover:text-ice-text'
               }`}
             >
               Đã cài
@@ -261,7 +261,7 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
             <button
               onClick={() => setFilter('downloading')}
               className={`px-2 py-0.5 rounded transition-colors whitespace-nowrap ${
-                filter === 'downloading' ? 'bg-ice-accent text-white font-semibold' : 'text-ice-subtext hover:text-white'
+                filter === 'downloading' ? 'bg-ice-accent text-white font-semibold' : 'text-ice-subtext hover:text-ice-text'
               }`}
             >
               Đang tải
@@ -296,7 +296,7 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
                   onClick={() => onSelectGame(game)}
                   className={`flex items-center gap-2.5 px-3 py-2.5 cursor-pointer transition-colors ${
                     isSelected
-                      ? 'bg-ice-accent/15 border-l-2 border-ice-accent text-white font-semibold'
+                      ? 'bg-ice-accent/15 border-l-2 border-ice-accent text-ice-text font-semibold'
                       : 'hover:bg-ice-hover text-ice-text/90'
                   }`}
                 >
@@ -460,10 +460,10 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
                     <button
                       type="button"
                       onClick={() => onOpenInstallSettings(selectedGame)}
-                      className="w-11 h-11 rounded-md bg-white/10 hover:bg-white/20 border border-white/20 text-white flex items-center justify-center transition-all shadow-md active:scale-95 shrink-0"
+                      className="w-11 h-11 rounded-md bg-ice-hover hover:bg-ice-border/40 border border-ice-border text-ice-text flex items-center justify-center transition-all shadow-md active:scale-95 shrink-0"
                       title="Cài đặt game & bố cục điều khiển điện thoại"
                     >
-                      <Settings2 className="w-5 h-5 text-amber-400" />
+                      <Settings2 className="w-5 h-5 text-amber-500 dark:text-amber-400" />
                     </button>
                   )}
                 </div>
@@ -491,10 +491,10 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
                     <button
                       type="button"
                       onClick={() => onOpenInstallSettings(selectedGame)}
-                      className="w-11 h-11 rounded-md bg-white/10 hover:bg-white/20 border border-white/20 text-white flex items-center justify-center transition-all shadow-md active:scale-95 shrink-0"
+                      className="w-11 h-11 rounded-md bg-ice-hover hover:bg-ice-border/40 border border-ice-border text-ice-text flex items-center justify-center transition-all shadow-md active:scale-95 shrink-0"
                       title="Cài đặt nơi lưu file game & xem dung lượng ổ đĩa"
                     >
-                      <Settings2 className="w-5 h-5 text-amber-400" />
+                      <Settings2 className="w-5 h-5 text-amber-500 dark:text-amber-400" />
                     </button>
                   )}
                 </div>
@@ -534,10 +534,10 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
               {onOpenDetail && (
                 <button
                   onClick={() => onOpenDetail(selectedGame)}
-                  className="h-11 px-4 rounded-md bg-ice-bg hover:bg-ice-hover border border-ice-border text-amber-300 hover:text-white text-xs font-bold flex items-center gap-2 transition-colors"
+                  className="h-11 px-4 rounded-md bg-ice-bg hover:bg-ice-hover border border-ice-border text-amber-700 dark:text-amber-300 hover:text-ice-accent text-xs font-bold flex items-center gap-2 transition-colors"
                   title="Xem trang giới thiệu & Trailer"
                 >
-                  <Sparkles className="w-4 h-4 text-amber-400" />
+                  <Sparkles className="w-4 h-4 text-amber-500 dark:text-amber-400" />
                   <span>Trang Chi Tiết Game</span>
                 </button>
               )}
@@ -545,7 +545,7 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
               {/* Game Settings Button (Gear icon) */}
               <button
                 onClick={() => setIsSettingsOpen(true)}
-                className="h-11 px-4 rounded-md bg-ice-bg hover:bg-ice-hover border border-ice-border text-ice-text hover:text-white text-xs font-semibold flex items-center gap-2 transition-colors"
+                className="h-11 px-4 rounded-md bg-ice-bg hover:bg-ice-hover border border-ice-border text-ice-text hover:text-ice-accent text-xs font-semibold flex items-center gap-2 transition-colors"
                 title="Cài đặt game"
               >
                 <Settings className="w-4 h-4 text-ice-subtext" />
@@ -556,10 +556,10 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
               {selectedGame.status === 'ready' && (
                 <button
                   onClick={() => onOpenFolder(selectedGame.id)}
-                  className="h-11 px-4 rounded-md bg-ice-bg hover:bg-ice-hover border border-ice-border text-ice-text hover:text-white text-xs font-semibold flex items-center gap-2 transition-colors"
+                  className="h-11 px-4 rounded-md bg-ice-bg hover:bg-ice-hover border border-ice-border text-ice-text hover:text-ice-accent text-xs font-semibold flex items-center gap-2 transition-colors"
                   title="Mở thư mục game"
                 >
-                  <FolderOpen className="w-4 h-4 text-amber-400" />
+                  <FolderOpen className="w-4 h-4 text-amber-500 dark:text-amber-400" />
                   <span>Mở thư mục</span>
                 </button>
               )}
@@ -567,7 +567,7 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
 
             <button
               onClick={() => onToggleLibrary(selectedGame.id)}
-              className="text-xs text-ice-subtext hover:text-white transition-colors flex items-center gap-1.5"
+              className="text-xs text-ice-subtext hover:text-ice-text transition-colors flex items-center gap-1.5"
             >
               <BookmarkCheck className="w-4 h-4 text-ice-accent" />
               <span>Đang lưu trong Thư viện</span>
@@ -577,7 +577,7 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
           {/* Progress Banner (when downloading/installing) */}
           {(selectedGame.status === 'downloading' || selectedGame.status === 'installing') && (
             <div className="mx-8 my-4 p-4 rounded-lg bg-ice-card border border-ice-accent/30 space-y-2">
-              <div className="flex justify-between items-center text-xs font-semibold text-white">
+              <div className="flex justify-between items-center text-xs font-semibold text-ice-text">
                 <span>
                   {selectedGame.status === 'installing' ? 'Đang cài đặt game' : 'Đang tải file game...'}
                 </span>
@@ -620,7 +620,7 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
                 <FileCode className="w-4 h-4" />
                 <span>
                   Tìm thấy {selectedGame.exeCandidates.length} file chạy, đã tự động chọn:{' '}
-                  <strong className="text-white">{selectedGame.mainExe || selectedGame.exeCandidates[0]}</strong>
+                  <strong className="text-ice-text font-bold">{selectedGame.mainExe || selectedGame.exeCandidates[0]}</strong>
                 </span>
               </div>
               <button
@@ -643,7 +643,7 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
             )}
 
             <div className="space-y-2">
-              <h3 className="text-sm font-bold text-white uppercase tracking-wider">
+              <h3 className="text-sm font-bold text-ice-text uppercase tracking-wider">
                 Giới thiệu & Ghi chú
               </h3>
               <p className="text-xs text-ice-text/80 leading-relaxed max-w-3xl">
@@ -653,24 +653,24 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
 
             {/* Installation Details info table */}
             <div className="space-y-3">
-              <h3 className="text-sm font-bold text-white uppercase tracking-wider">
+              <h3 className="text-sm font-bold text-ice-text uppercase tracking-wider">
                 Thông tin cài đặt
               </h3>
-              <div className="grid grid-cols-2 max-w-xl gap-2 text-xs bg-ice-card p-4 rounded-lg border border-ice-border">
+              <div className="grid grid-cols-2 max-w-xl gap-2 text-xs bg-ice-card p-4 rounded-lg border border-ice-border shadow-sm">
                 <div className="text-ice-subtext">Thư mục cài đặt:</div>
-                <div className="text-white font-mono text-[11px] truncate" title={selectedGame.installPath}>
+                <div className="text-ice-text font-mono text-[11px] truncate" title={selectedGame.installPath}>
                   {selectedGame.installPath || `Games/${selectedGame.name}`}
                 </div>
                 <div className="text-ice-subtext">File chạy chính:</div>
-                <div className="text-white font-mono text-[11px] truncate">
+                <div className="text-ice-text font-mono text-[11px] truncate">
                   {selectedGame.mainExe || '(Chưa cấu hình)'}
                 </div>
                 <div className="text-ice-subtext">Quyền Quản trị (Admin UAC):</div>
-                <div className="text-white">
+                <div className="text-ice-text">
                   {selectedGame.runAsAdmin ? 'Có (bật)' : 'Không'}
                 </div>
                 <div className="text-ice-subtext">Ngày thêm vào danh mục:</div>
-                <div className="text-white">
+                <div className="text-ice-text">
                   {new Date(selectedGame.addedAt).toLocaleDateString('vi-VN')}
                 </div>
               </div>
@@ -692,7 +692,7 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
       ) : (
         <div className="flex-1 flex flex-col items-center justify-center text-center p-8 text-ice-subtext">
           <Gamepad2 className="w-12 h-12 opacity-40 mb-3" />
-          <h3 className="text-sm font-semibold text-white">Chưa chọn game nào</h3>
+          <h3 className="text-sm font-semibold text-ice-text">Chưa chọn game nào</h3>
           <p className="text-xs max-w-sm mt-1">
             Chọn một game trong danh sách bên trái hoặc chuyển sang tab Trang chủ để khám phá.
           </p>
@@ -711,12 +711,12 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
             value={mediaSearch}
             onChange={(e) => setMediaSearch(e.target.value)}
             placeholder={`Tìm kiếm trong ${activeTab === 'movie' ? 'phim' : activeTab === 'music' ? 'nhạc' : 'podcast'}...`}
-            className="w-full bg-ice-card border border-ice-border rounded-xl pl-9.5 pr-4 py-2 text-xs text-white placeholder-ice-muted focus:outline-none focus:border-amber-400 shadow-inner"
+            className="w-full bg-ice-card border border-ice-border rounded-xl pl-9.5 pr-4 py-2 text-xs text-ice-text placeholder-ice-muted focus:outline-none focus:border-ice-accent shadow-inner"
           />
           {mediaSearch && (
             <button
               onClick={() => setMediaSearch('')}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-ice-muted hover:text-white"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-ice-muted hover:text-ice-text"
             >
               <X className="w-3.5 h-3.5" />
             </button>
@@ -730,7 +730,7 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
               setEditingUserPlaylist(null);
               setIsUserPlaylistModalOpen(true);
             }}
-            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-amber-400 hover:bg-amber-300 text-black font-bold text-xs transition-all shadow-md active:scale-95"
+            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs transition-all shadow-md active:scale-95"
           >
             <Plus className="w-4 h-4 stroke-[3]" />
             <span>Tạo Playlist Mới</span>
@@ -741,8 +741,8 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
       {/* Section 1: User Custom Playlists */}
       <section className="space-y-4">
         <div className="flex items-center justify-between">
-          <h3 className="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
-            <ListMusic className="w-4 h-4 text-amber-400" />
+          <h3 className="text-sm font-bold text-ice-text uppercase tracking-wider flex items-center gap-2">
+            <ListMusic className="w-4 h-4 text-amber-500 dark:text-amber-400" />
             <span>Danh Sách Phát Của Bạn</span>
             <span className="text-xs text-ice-muted font-mono font-normal">({tabUserPlaylists.length})</span>
           </h3>
@@ -773,7 +773,7 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
                     </div>
 
                     <div className="min-w-0 flex-1">
-                      <h4 className="text-xs font-bold text-white truncate group-hover:text-amber-300 transition-colors">
+                      <h4 className="text-xs font-bold text-ice-text truncate group-hover:text-ice-accent transition-colors">
                         {pl.name}
                       </h4>
                       <p className="text-[11px] text-ice-muted mt-0.5">
@@ -852,7 +852,7 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
       {/* Section 2: Favorited Items */}
       <section className="space-y-4">
         <div className="flex items-center justify-between">
-          <h3 className="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
+          <h3 className="text-sm font-bold text-ice-text uppercase tracking-wider flex items-center gap-2">
             <Heart className="w-4 h-4 text-rose-500 fill-current" />
             <span>Nội Dung Đã Lưu & Yêu Thích</span>
             <span className="text-xs text-ice-muted font-mono font-normal">({favoriteTabMedia.length})</span>
@@ -924,7 +924,7 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
                 </div>
 
                 <div className="p-3">
-                  <h4 className="text-xs font-bold text-white truncate group-hover:text-amber-300 transition-colors">
+                  <h4 className="text-xs font-bold text-ice-text truncate group-hover:text-ice-accent transition-colors">
                     {item.title}
                   </h4>
                   <p className="text-[10px] text-ice-muted truncate mt-0.5">

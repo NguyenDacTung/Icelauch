@@ -435,10 +435,10 @@ export const GameDetailView: React.FC<GameDetailViewProps> = ({
                           <button
                             type="button"
                             onClick={() => onOpenInstallSettings(game)}
-                            className="w-12 h-12 rounded-xl bg-white/10 hover:bg-white/20 border border-white/20 text-white flex items-center justify-center transition-all shadow-md active:scale-95 shrink-0"
+                            className="w-12 h-12 rounded-xl bg-ice-hover hover:bg-ice-border/40 border border-ice-border text-ice-text flex items-center justify-center transition-all shadow-md active:scale-95 shrink-0"
                             title="Cài đặt game & bố cục điều khiển điện thoại"
                           >
-                            <Settings2 className="w-5 h-5 text-amber-400" />
+                            <Settings2 className="w-5 h-5 text-amber-500 dark:text-amber-400" />
                           </button>
                         )}
                       </div>
@@ -482,10 +482,10 @@ export const GameDetailView: React.FC<GameDetailViewProps> = ({
                         <button
                           type="button"
                           onClick={() => onOpenInstallSettings(game)}
-                          className="w-12 h-12 rounded-xl bg-white/10 hover:bg-white/20 border border-white/20 text-white flex items-center justify-center transition-all shadow-md active:scale-95 shrink-0"
+                          className="w-12 h-12 rounded-xl bg-ice-hover hover:bg-ice-border/40 border border-ice-border text-ice-text flex items-center justify-center transition-all shadow-md active:scale-95 shrink-0"
                           title="Cài đặt nơi lưu file game & xem dung lượng ổ đĩa"
                         >
-                          <Settings2 className="w-5 h-5 text-amber-400" />
+                          <Settings2 className="w-5 h-5 text-amber-500 dark:text-amber-400" />
                         </button>
                       )}
                     </div>
@@ -508,9 +508,9 @@ export const GameDetailView: React.FC<GameDetailViewProps> = ({
               <button
                 type="button"
                 onClick={() => setIsExtensionsModalOpen(true)}
-                className="w-full h-10 rounded-xl bg-purple-500/15 hover:bg-purple-500/25 border border-purple-500/40 text-purple-300 text-xs font-bold flex items-center justify-center gap-2 transition-all active:scale-98 shadow-md"
+                className="w-full h-10 rounded-xl bg-purple-500/15 hover:bg-purple-500/25 border border-purple-500/40 text-purple-700 dark:text-purple-300 text-xs font-bold flex items-center justify-center gap-2 transition-all active:scale-98 shadow-md"
               >
-                <Puzzle className="w-4 h-4 text-purple-400" />
+                <Puzzle className="w-4 h-4 text-purple-600 dark:text-purple-400" />
                 <span>🧩 Gói Mở Rộng & Việt Hóa ({game.extensions?.length || 0})</span>
               </button>
 

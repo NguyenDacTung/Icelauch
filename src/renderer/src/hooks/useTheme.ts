@@ -70,14 +70,14 @@ export const THEME_REGISTRY: ThemeMeta[] = [
     subtitle: 'Aqua',
     symbol: '💧',
     category: 'specialized',
-    description: 'Xanh biển sâu đậm đà, sóng nước chạy trên thanh nhạc, giọt nước trượt Navbar và gợn sóng khi chạm.',
-    isLight: false,
+    description: 'Xanh nước nhạt tươi mát, sóng biển trôi êm ả, giọt nước trượt Navbar và màng nước hữu cơ.',
+    isLight: true,
     radius: '24px',
     previewColors: {
-      bg: '#061524',
-      card: '#0B2238',
-      accent: '#38BDF8',
-      border: '#133959',
+      bg: '#E0F7FA',
+      card: '#FFFFFF',
+      accent: '#0284C7',
+      border: '#BAE6FD',
     },
   },
   {
@@ -194,7 +194,7 @@ const STORAGE_KEY = 'icelauch_theme_mode';
 const DEFAULT_THEME: ThemeMode = 'lunar';
 
 export function isLightMode(theme: ThemeMode): boolean {
-  return theme === 'solar' || theme === 'aer';
+  return theme === 'solar' || theme === 'aer' || theme === 'aqua';
 }
 
 export function getStoredTheme(): ThemeMode {

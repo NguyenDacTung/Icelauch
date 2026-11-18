@@ -208,15 +208,15 @@ export const VideoTheaterView: React.FC<VideoTheaterViewProps> = ({
               sfx.playClick();
               onBack();
             }}
-            className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-ice-card hover:bg-ice-hover text-white text-xs font-semibold border border-ice-border transition-colors shadow-sm"
+            className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-ice-card hover:bg-ice-hover text-ice-text text-xs font-semibold border border-ice-border transition-colors shadow-sm"
           >
-            <ArrowLeft className="w-4 h-4 text-amber-400" />
+            <ArrowLeft className="w-4 h-4 text-amber-500 dark:text-amber-400" />
             <span>Quay lại</span>
           </button>
           <div className="hidden sm:flex items-center gap-2 text-xs text-ice-subtext">
             <span>Rạp Giải Trí</span>
             <span>/</span>
-            <span className="text-white font-medium truncate max-w-sm">{media.title}</span>
+            <span className="text-ice-text font-medium truncate max-w-sm">{media.title}</span>
           </div>
         </div>
 
@@ -583,13 +583,13 @@ export const VideoTheaterView: React.FC<VideoTheaterViewProps> = ({
                     </span>
                   )}
                   {currentPlaylist && (
-                    <span className="px-2.5 py-0.5 rounded-md bg-amber-500/20 border border-amber-500/40 text-[11px] font-bold text-amber-300">
+                    <span className="px-2.5 py-0.5 rounded-md bg-amber-500/20 border border-amber-500/40 text-[11px] font-bold text-amber-700 dark:text-amber-300">
                       {currentPlaylist.name}
                     </span>
                   )}
                 </div>
 
-                <h1 className="text-2xl font-extrabold text-white tracking-tight leading-snug">
+                <h1 className="text-2xl font-extrabold text-ice-text tracking-tight leading-snug">
                   {media.title}
                 </h1>
               </div>
@@ -678,11 +678,11 @@ export const VideoTheaterView: React.FC<VideoTheaterViewProps> = ({
                               : 'hover:bg-ice-hover border border-transparent'
                           }`}
                         >
-                          <span className={`w-5 text-center text-xs font-bold ${isCurrent ? 'text-amber-400' : 'text-ice-muted'}`}>
+                          <span className={`w-5 text-center text-xs font-bold ${isCurrent ? 'text-amber-500 dark:text-amber-400' : 'text-ice-muted'}`}>
                             {idx + 1}
                           </span>
                           <div className="flex-1 truncate">
-                            <h4 className={`text-xs font-semibold truncate ${isCurrent ? 'text-amber-300' : 'text-white'}`}>
+                            <h4 className={`text-xs font-semibold truncate ${isCurrent ? 'text-amber-700 dark:text-amber-300' : 'text-ice-text'}`}>
                               {item.title}
                             </h4>
                             <p className="text-[10px] text-ice-muted">{item.tags?.[0] || 'Tập phim'}</p>
@@ -698,7 +698,7 @@ export const VideoTheaterView: React.FC<VideoTheaterViewProps> = ({
               {sidebarTab === 'related' && (
                 <div className="space-y-2">
                   <div className="pb-2 border-b border-ice-border/40">
-                    <span className="text-xs font-bold text-white flex items-center gap-1.5">
+                    <span className="text-xs font-bold text-ice-text flex items-center gap-1.5">
                       <Sparkles className="w-4 h-4 text-ice-accent" />
                       <span>Video Cùng Thể Loại ({relatedVideos.length})</span>
                     </span>

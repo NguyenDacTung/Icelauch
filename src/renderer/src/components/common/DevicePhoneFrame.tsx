@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Film, Gamepad2, Bookmark, Sliders, X, Sparkles } from 'lucide-react';
+import { useTheme } from '../../hooks/useTheme';
 import type { NavigationTab, UserProfile } from '../../types';
 
 interface DevicePhoneFrameProps {
@@ -29,6 +30,11 @@ export const DevicePhoneFrame: React.FC<DevicePhoneFrameProps> = ({
   isSimulated = false,
   miniPlayer,
 }) => {
+  const { theme } = useTheme();
+  const isAqua = theme === 'aqua';
+  const navRef = useRef<HTMLElement | null>(null);
+  const [dropletStyle, setDropletStyle] = useState<{ left: number; width: number; opacity: number }>({ left: 0, width: 0, opacity: 0 });
+
   // 5 Primary Mobile Navigation Tabs
   const mobileNavItems: { id: NavigationTab; label: string; icon: any }[] = [
     { id: 'media', label: 'Giải Trí', icon: Film },
@@ -37,6 +43,18 @@ export const DevicePhoneFrame: React.FC<DevicePhoneFrameProps> = ({
     { id: 'extras', label: 'Tiện Ích', icon: Sparkles },
     { id: 'settings', label: 'Cài Đặt', icon: Sliders },
   ];
+
+  useEffect(() => {
+    if (!isAqua || !navRef.current) return;
+    const activeBtn = navRef.current.querySelector(`[data-tab-id="${currentTab}"]`) as HTMLElement | null;
+    if (activeBtn) {
+      setDropletStyle({
+        left: activeBtn.offsetLeft,
+        width: activeBtn.offsetWidth,
+        opacity: 1,
+      });
+    }
+  }, [currentTab, isAqua]);
 
   const handleTabClick = (tabId: NavigationTab) => {
     if (currentTab === tabId) {
@@ -48,27 +66,61 @@ export const DevicePhoneFrame: React.FC<DevicePhoneFrameProps> = ({
 
   const renderBottomNav = () => (
     <div className="w-full px-4 pb-2 pt-1 shrink-0 z-40 select-none bg-transparent">
-      <nav className="h-15 w-full max-w-md mx-auto rounded-full glass-pill-elevated flex items-center justify-around px-2 py-1 transition-all duration-300">
+      <nav 
+        ref={navRef}
+        className={`relative h-15 w-full max-w-md mx-auto rounded-full flex items-center justify-around px-2 py-1 transition-all duration-300 ${
+          isAqua
+            ? 'bg-white/80 border border-sky-300/60 shadow-[0_8px_32px_rgba(2,132,199,0.2)] backdrop-blur-2xl'
+            : 'glass-pill-elevated'
+        }`}
+      >
+        {/* Aqua Liquid Droplet Sliding Indicator */}
+        {isAqua && dropletStyle.opacity > 0 && (
+          <div
+            className="aqua-droplet-bubble"
+            style={{
+              transform: `translate3d(${dropletStyle.left}px, -50%, 0)`,
+              width: `${dropletStyle.width}px`,
+              height: '46px',
+            }}
+          />
+        )}
+
         {mobileNavItems.map((item) => {
           const isActive = currentTab === item.id;
           const Icon = item.icon;
           return (
             <button
               key={item.id}
+              data-tab-id={item.id}
               type="button"
               onClick={() => handleTabClick(item.id)}
-              className={`flex-1 flex flex-col items-center justify-center py-1.5 px-1 rounded-full transition-all duration-200 active:scale-95 ${
+              className={`relative z-10 flex-1 flex flex-col items-center justify-center py-1.5 px-1 rounded-full transition-all duration-200 active:scale-95 ${
                 isActive
-                  ? 'bg-ice-accent/15 text-ice-accent font-bold shadow-sm'
-                  : 'text-ice-subtext hover:text-ice-text font-medium'
+                  ? isAqua
+                    ? 'text-sky-950 font-black'
+                    : 'bg-ice-accent/15 text-ice-accent font-bold shadow-sm'
+                  : isAqua
+                    ? 'text-slate-600 hover:text-sky-950 font-medium'
+                    : 'text-ice-subtext hover:text-ice-text font-medium'
               }`}
             >
               <Icon
                 className={`w-5 h-5 transition-transform duration-200 ${
-                  isActive ? 'scale-110 drop-shadow-[0_0_6px_rgba(245,158,11,0.5)]' : ''
+                  isActive 
+                    ? isAqua 
+                      ? 'scale-110 drop-shadow-[0_0_8px_rgba(2,132,199,0.5)] text-sky-600'
+                      : 'scale-110 drop-shadow-[0_0_6px_rgba(245,158,11,0.5)]' 
+                    : ''
                 }`}
               />
-              <span className={`text-[10px] mt-0.5 tracking-tight ${isActive ? 'text-ice-accent font-bold' : ''}`}>
+              <span className={`text-[10px] mt-0.5 tracking-tight ${
+                isActive 
+                  ? isAqua 
+                    ? 'text-sky-950 font-black' 
+                    : 'text-ice-accent font-bold' 
+                  : ''
+              }`}>
                 {item.label}
               </span>
             </button>

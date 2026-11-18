@@ -80,7 +80,7 @@ export const GenreShelfScroller: React.FC<GenreShelfScrollerProps> = ({
               onClick={() => handleScroll('left')}
               className={`p-1 rounded-md transition-all ${
                 canScrollLeft
-                  ? 'text-ice-text hover:bg-ice-hover hover:text-amber-400 active:scale-95 cursor-pointer'
+                  ? 'text-ice-text hover:bg-ice-hover hover:text-ice-accent active:scale-95 cursor-pointer'
                   : 'text-ice-subtext/30 cursor-not-allowed'
               }`}
               title="Cuộn sang trái"
@@ -94,7 +94,7 @@ export const GenreShelfScroller: React.FC<GenreShelfScrollerProps> = ({
               onClick={() => handleScroll('right')}
               className={`p-1 rounded-md transition-all ${
                 canScrollRight
-                  ? 'text-ice-text hover:bg-ice-hover hover:text-amber-400 active:scale-95 cursor-pointer'
+                  ? 'text-ice-text hover:bg-ice-hover hover:text-ice-accent active:scale-95 cursor-pointer'
                   : 'text-ice-subtext/30 cursor-not-allowed'
               }`}
               title="Cuộn sang phải"
@@ -110,7 +110,7 @@ export const GenreShelfScroller: React.FC<GenreShelfScrollerProps> = ({
                 sfx.playClick();
                 onViewAll();
               }}
-              className="text-xs text-amber-400 hover:text-amber-300 font-semibold transition-colors flex items-center gap-1 active:scale-95 cursor-pointer"
+              className="text-xs text-ice-accent hover:opacity-80 font-semibold transition-colors flex items-center gap-1 active:scale-95 cursor-pointer"
             >
               <span>Xem tất cả</span>
               <span>&rarr;</span>

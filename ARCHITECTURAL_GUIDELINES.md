@@ -172,6 +172,23 @@ When implementing celestial and elemental modes:
 - **Thanh công cụ (Toolbars):** Không bao giờ được cùng mã màu hex hoặc độ mờ với `--theme-bg`. Bắt buộc có viền bắt sáng riêng và độ chênh lệch sắc độ bề mặt tối thiểu để luôn nổi bật trên màn hình.
 - **Thẻ nội dung (Cards):** Bắt buộc có viền bao quanh (`--theme-card-border` / `border-ice-border/70`) ở mọi mode để phân tách rõ rệt khối nội dung khỏi nền launcher.
 
+### 7.12 Specialized Mode Visual Hierarchy & Base Switch Dimming
+- Khi kích hoạt bất kỳ chế độ chuyên biệt nào (Aqua, Ignis, Aer, Terra, Eclipse, Aurora, Nebula), nút gạt hai trạng thái `Solar/Lunar` trên thanh công cụ phải tự động mờ và mất màu (`opacity: 0.4; filter: grayscale(100%); cursor: pointer;`).
+- Bấm vào nút gạt này trong chế độ chuyên biệt sẽ kích hoạt lệnh thoát chế độ chuyên biệt, đưa ứng dụng quay về chế độ cơ sở tương ứng (`isLight ? 'solar' : 'lunar'`).
+
+### 7.13 Aqua Fluid Architecture & High-Contrast Light Ocean Standard
+- **Bảng màu:**
+  - Nền chính: Gradient xanh nước nhạt `#E0F7FA` → `#BAE6FD`.
+  - Thẻ & Bề mặt kính: Trắng ánh xanh xuyên thấu `rgba(255, 255, 255, 0.78)` kèm `backdrop-blur(18px)`.
+  - Chữ chính: Xanh đại dương rất đậm `#082F49` (đạt chuẩn WCAG AAA 12.8:1).
+  - Chữ phụ: Xanh xám đậm `#334155` (đạt chuẩn WCAG AA 6.5:1).
+  - Màu nhấn: Xanh biển rực rỡ `#0284C7` và ánh phản chiếu `#38BDF8`.
+- **Top-Attached Header:** Cạnh trên của Header PC gắn sát viền trên cửa sổ ứng dụng, bo thắt eo hai bên mô phỏng giọt nước đọng. Vùng kéo cửa sổ (`-webkit-app-region: drag`) và các nút tương tác (`no-drag`) phải được bảo toàn 100%.
+
+### 7.14 Compositor-Only Ambient Wave & Water Ripple Guardrail
+- Các lớp sóng nền di chuyển bằng GPU-accelerated CSS `transform: translate3d(x, 0, 0)` hoặc SVG clip-path nhẹ, CPU tiêu thụ < 1%.
+- Hiệu ứng chạm gợn nước chỉ gồm 1 vòng nhỏ bán kính < 48px, thời gian tồn tại < 800ms, có nút bật/tắt lưu tại `localStorage.getItem('icelauch_aqua_ripple_enabled')`.
+
 ---
 
 ## 8. Quick Reference — Key Files

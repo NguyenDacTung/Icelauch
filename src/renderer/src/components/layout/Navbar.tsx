@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import appLogo from '../../assets/icon.png';
 import { 
   Gamepad2, 
@@ -13,7 +13,8 @@ import {
   Square,
   Copy,
   Users,
-  Shield
+  Shield,
+  Droplet
 } from 'lucide-react';
 import { UserMenuWidget } from '../profile/UserMenuWidget';
 import { ThemeToggleSwitch } from '../common/ThemeToggleSwitch';
@@ -90,6 +91,39 @@ export const Navbar: React.FC<NavbarProps> = ({
     return `${m}:${s < 10 ? '0' : ''}${s}`;
   };
 
+  const isAqua = theme === 'aqua';
+  const navContainerRef = useRef<HTMLDivElement | null>(null);
+  const [dropletStyle, setDropletStyle] = useState<{ left: number; width: number; opacity: number }>({ left: 0, width: 0, opacity: 0 });
+
+  const [isRippleEnabled, setIsRippleEnabled] = useState<boolean>(() => {
+    try {
+      return localStorage.getItem('icelauch_aqua_ripple_enabled') !== 'false';
+    } catch {
+      return true;
+    }
+  });
+
+  const toggleAquaRipple = () => {
+    const next = !isRippleEnabled;
+    setIsRippleEnabled(next);
+    try {
+      localStorage.setItem('icelauch_aqua_ripple_enabled', String(next));
+    } catch {}
+    window.dispatchEvent(new CustomEvent('icelauch:aqua-ripple-toggle', { detail: { enabled: next } }));
+  };
+
+  useEffect(() => {
+    if (!isAqua || !navContainerRef.current) return;
+    const activeBtn = navContainerRef.current.querySelector(`[data-tab-id="${currentTab}"]`) as HTMLElement | null;
+    if (activeBtn) {
+      setDropletStyle({
+        left: activeBtn.offsetLeft,
+        width: activeBtn.offsetWidth,
+        opacity: 1,
+      });
+    }
+  }, [currentTab, isAqua]);
+
   const navItems: { id: NavigationTab; label: string }[] = [
     { id: 'home', label: 'TRANG CHỦ' },
     { id: 'library', label: 'THƯ VIỆN' },
@@ -99,7 +133,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   ];
 
   return (
-    <header className="relative flex-shrink-0 z-30 select-none px-4 pt-2.5 pb-1">
+    <header className={`relative flex-shrink-0 z-30 select-none ${isAqua ? 'aqua-header-wrapper px-0 pt-0 pb-1' : 'px-4 pt-2.5 pb-1'}`}>
       {/* Top Admin banner if active */}
       {isAdmin && (
         <div className="mb-2 h-7 bg-amber-500/15 border border-amber-500/30 rounded-xl px-3.5 flex items-center justify-between text-xs text-amber-300 shadow-sm backdrop-blur-md">
@@ -129,7 +163,9 @@ export const Navbar: React.FC<NavbarProps> = ({
 
       {/* Main Full-Width Floating Island Navigation Bar with window drag support */}
       <div 
-        className="h-15 glass-header-elevated px-4 flex items-center justify-between transition-all duration-300"
+        className={`h-15 flex items-center justify-between transition-all duration-300 ${
+          isAqua ? 'aqua-top-drop-header px-6' : 'glass-header-elevated px-4'
+        }`}
         style={{ WebkitAppRegion: 'drag' } as React.CSSProperties}
         onDoubleClick={handleMaximize}
       >
@@ -167,55 +203,115 @@ export const Navbar: React.FC<NavbarProps> = ({
           </div>
 
           {/* Navigation Links with Spacious Floating Pills */}
-          <nav className="flex items-center gap-1.5 bg-ice-bg/40 p-1 rounded-xl border border-ice-border/40">
+          <nav 
+            ref={navContainerRef}
+            className={`relative flex items-center gap-1.5 p-1 transition-all ${
+              isAqua
+                ? 'bg-sky-100/60 border border-sky-200/80 shadow-inner rounded-2xl'
+                : 'bg-ice-bg/40 border border-ice-border/40 rounded-xl'
+            }`}
+          >
+            {/* Aqua Sliding 3D Liquid Droplet Indicator */}
+            {isAqua && dropletStyle.opacity > 0 && (
+              <div
+                className="aqua-droplet-bubble"
+                style={{
+                  transform: `translate3d(${dropletStyle.left}px, -50%, 0)`,
+                  width: `${dropletStyle.width}px`,
+                  height: '32px',
+                }}
+              />
+            )}
+
             {navItems.map((item) => {
               const isActive = currentTab === item.id;
-              const isAqua = theme === 'aqua';
 
               return (
                 <button
                   key={item.id}
+                  data-tab-id={item.id}
                   onClick={() => onTabChange(item.id)}
-                  className={`relative px-3.5 py-1.5 text-xs font-bold tracking-wide rounded-lg transition-all duration-300 cursor-pointer ${
+                  className={`relative z-10 px-3.5 py-1.5 text-xs font-bold tracking-wide rounded-xl transition-all duration-300 cursor-pointer ${
                     isActive 
                       ? isAqua
-                        ? 'liquid-water-pill text-white shadow-[0_0_15px_rgba(56,189,248,0.55)] scale-[1.02]'
+                        ? 'text-sky-950 font-black scale-[1.03]'
                         : 'bg-ice-accent text-white shadow-sm' 
-                      : 'text-ice-subtext hover:text-ice-text hover:bg-ice-hover/60'
+                      : isAqua
+                        ? 'text-slate-600 hover:text-sky-950 hover:bg-white/40'
+                        : 'text-ice-subtext hover:text-ice-text hover:bg-ice-hover/60'
                   }`}
                 >
                   {item.label}
-                  {/* Subtle water droplet bead on Aqua mode */}
-                  {isActive && isAqua && (
-                    <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-cyan-300 shadow-[0_0_6px_#38bdf8] animate-pulse" />
-                  )}
                 </button>
               );
             })}
           </nav>
         </div>
 
+        {/* Center Extended Search Bar on Aqua Mode */}
+        {isAqua && (
+          <div className="flex-1 max-w-xs md:max-w-sm lg:max-w-md mx-4" style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}>
+            <div className="relative w-full">
+              <Search className="w-3.5 h-3.5 text-sky-700 absolute left-3.5 top-1/2 -translate-y-1/2" />
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => onSearchChange(e.target.value)}
+                placeholder="Tìm kiếm trò chơi, video, bài hát..."
+                className="w-full h-9 pl-9 pr-8 rounded-full bg-white/70 hover:bg-white/90 focus:bg-white border border-sky-300/80 text-xs text-sky-950 placeholder-sky-900/60 focus:outline-none focus:ring-2 focus:ring-sky-400/50 shadow-inner transition-all font-medium"
+              />
+              {searchQuery && (
+                <button
+                  onClick={() => onSearchChange('')}
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-sky-600 hover:text-sky-900"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              )}
+            </div>
+          </div>
+        )}
+
         {/* Right Section: Search, Theme Toggle, Downloads, Admin, Window Controls */}
         <div className="flex items-center gap-2" style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}>
-          {/* Search Bar - Concentric Pill Shape */}
-          <div className="relative w-52 lg:w-60">
-            <Search className="w-3.5 h-3.5 text-ice-subtext absolute left-3 top-1/2 -translate-y-1/2" />
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => onSearchChange(e.target.value)}
-              placeholder="Tìm kiếm..."
-              className="w-full h-8 pl-8 pr-7 rounded-full bg-ice-bg/70 border border-ice-border text-xs text-ice-text placeholder-ice-subtext focus:outline-none focus:border-ice-accent focus:bg-ice-bg transition-colors shadow-inner"
-            />
-            {searchQuery && (
-              <button
-                onClick={() => onSearchChange('')}
-                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-ice-subtext hover:text-ice-text"
-              >
-                <X className="w-3.5 h-3.5" />
-              </button>
-            )}
-          </div>
+          {/* Search Bar - Concentric Pill Shape (Only in non-Aqua modes) */}
+          {!isAqua && (
+            <div className="relative w-52 lg:w-60">
+              <Search className="w-3.5 h-3.5 text-ice-subtext absolute left-3 top-1/2 -translate-y-1/2" />
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => onSearchChange(e.target.value)}
+                placeholder="Tìm kiếm..."
+                className="w-full h-8 pl-8 pr-7 rounded-full bg-ice-bg/70 border border-ice-border text-xs text-ice-text placeholder-ice-subtext focus:outline-none focus:border-ice-accent focus:bg-ice-bg transition-colors shadow-inner"
+              />
+              {searchQuery && (
+                <button
+                  onClick={() => onSearchChange('')}
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-ice-subtext hover:text-ice-text"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              )}
+            </div>
+          )}
+
+          {/* Aqua Mode: Quick Water Touch Ripple Toggle Button */}
+          {isAqua && (
+            <button
+              type="button"
+              onClick={toggleAquaRipple}
+              className={`h-8 px-2.5 rounded-xl border text-xs font-semibold flex items-center gap-1.5 transition-all active:scale-95 cursor-pointer ${
+                isRippleEnabled
+                  ? 'bg-sky-500/20 text-sky-700 border-sky-400/60 shadow-xs'
+                  : 'bg-ice-hover text-ice-muted border-ice-border opacity-50'
+              }`}
+              title={isRippleEnabled ? 'Hiệu ứng chạm gợn nước đang BẬT. Nhấp để TẮT' : 'Hiệu ứng chạm gợn nước đang TẮT. Nhấp để BẬT'}
+            >
+              <Droplet className={`w-3.5 h-3.5 ${isRippleEnabled ? 'text-sky-600 fill-sky-500' : 'text-ice-muted'}`} />
+              <span className="hidden xl:inline text-[11px]">{isRippleEnabled ? 'Gợn nước: Bật' : 'Gợn nước: Tắt'}</span>
+            </button>
+          )}
 
           {/* Solar / Lunar Morphing Theme Switch */}
           <ThemeToggleSwitch size="sm" />

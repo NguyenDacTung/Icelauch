@@ -1,8 +1,8 @@
 # Icelauch - Trình Quản Lý Game & Rạp Giải Trí Đa Nền Tảng (Windows, Mobile & Android TV)
 
 **Phiên bản phát hành:** 
-- 🖥️ **Windows PC:** `v1.2.5`
-- 📱 **Android Điện Thoại:** `v1.2.5` (Mã phiên bản build: `versionCode 21`)
+- 🖥️ **Windows PC:** `v1.2.6`
+- 📱 **Android Điện Thoại:** `v1.2.6` (Mã phiên bản build: `versionCode 22`)
 - 📺 **Android TV Edition:** `v1.0.0` (Bản chuyên biệt điều khiển 100% bằng Remote)
 
 **Hệ điều hành hỗ trợ:** 
@@ -28,19 +28,34 @@ Tại trang Releases, bạn sẽ có các file cài đặt tương ứng với t
 
 ---
 
-## 2. Các Nâng Cấp Nổi Bật Trong Phiên Bản v1.2.5 (Bộ Nhận Diện Thương Hiệu Mới & Đại Tu Hệ Thống 9 Chế Độ Thời Không)
+## 2. Các Nâng Cấp Nổi Bật Trong Phiên Bản v1.2.6 (Bộ Nhận Diện Thương Hiệu Mới & Đại Tu Toàn Diện Aqua & Solar Mode)
 
-Bản cập nhật v1.2.5 mang đến cuộc cách mạng diện mạo cho **Icelauch**:
+Bản cập nhật v1.2.6 mang đến bước đột phá mạnh mẽ về thị giác và công thái học cho **Icelauch**:
 
-### 2.1 Bộ Nhận Diện Thương Hiệu & Biểu Tượng App Độc Bản (New Brand Identity)
-- 💎 **Icon ứng dụng cao cấp:** Biểu tượng đóa hoa lục giác phát sáng đa tầng sinh động (Cyber Cyan - Ocean Blue - Neon Magenta) ôm trọn lõi kính mờ Frost Glass Hexagon trung tâm.
-- 🎨 **Tối ưu hiển thị đa nền tảng:** Nền trong suốt tự nhiên không viền hộp, hiển thị sắc nét từ kích thước nhỏ (16px favicon, 32px taskbar, 48px thanh điều hướng) đến kích thước lớn (192px Android launcher, 512px desktop icon, 640px Android TV banner).
+### 2.1 Bộ Nhận Diện Thương Hiệu & Biểu Tượng App Độc Bản Mới (New Brand Icon 2026)
+- 💎 **Icon ứng dụng cao cấp:** Biểu tượng đóa hoa sóng lỏng đa tầng sinh động (Cyan Blue, Sky Azure & Neon Magenta) bao quanh lõi lục giác kính mờ Frost Glass trung tâm.
+- 🎨 **Tối ưu hiển thị đa nền tảng:** Định dạng Master PNG chuẩn 512x512 và trọn bộ Adaptive Mipmap Icons cho Android (mdpi, hdpi, xhdpi, xxhdpi, xxxhdpi), sắc nét trên Desktop PC, Taskbar, Android Launcher, và Header UI trong app.
 
-### 2.2 Hệ Thống 9 Chế Độ Thời Không Toàn Diện (9 Celestial Themes)
+### 2.2 Đại Tu Chuyên Biệt Aqua Mode (Thủy — Fluid Liquid Architecture)
+- 💧 **Bảng màu nước biển nông tươi mát:** Nền chuyển sắc xanh băng dịu mắt (`#E0F7FA` → `#BAE6FD`), mặt kính mờ trong suốt phản chiếu ánh nước (`rgba(255, 255, 255, 0.88)` kèm `backdrop-blur(24px)`), chữ chính xanh đại dương đậm đà (`#082F49`, WCAG AAA 12.8:1) và màu nhấn xanh nước biển rực rỡ (`#0284C7`).
+- 🌊 **Kiến trúc Header PC "Giọt Nước Đọng Từ Mép Trên":** Cạnh trên Header dính liền mép cửa sổ (`pt-0`), hai bên thắt eo mềm mại như giọt nước lớn đang chảy xuống.
+- 🔍 **Thanh Tìm Kiếm Trung Tâm Kéo Dài (Extended Center Search Bar):** Cân đối ở chính giữa thanh công cụ trên PC, tạo điểm nhấn thoáng đãng và tiện dụng.
+- 💦 **Giọt Nước Trượt Điều Hướng (Liquid Droplet Tab Indicator):** Giọt nước 3D lỏng nổi trên tab hiện tại, chuyển động kéo giãn và chảy trôi mượt mà (`cubic-bezier(0.34, 1.56, 0.64, 1)`) khi chuyển tab.
+- 🌊 **Nền Sóng Chuyển Động Liên Tục (Continuous Flowing Wave Backdrop):** Đồ họa sóng nước đa tầng chuyển động êm ả thư giãn, tăng tốc GPU CSS, tự động tối ưu hóa theo chế độ máy yếu Low-Spec Mode.
+- 🫧 **Gợn Sóng Nước Khi Chạm & Nút Bật/Tắt:** Tinh giản thành vòng tròn nước mỏng nhẹ thanh lịch, kèm nút công tắc hình giọt nước ngay trên Header PC và trang Cài Đặt (lưu trạng thái `localStorage`).
+- ☀️🌙 **Cơ chế nút gạt Solar/Lunar trong Aqua Mode:** Tự động mờ và mất màu (`opacity: 0.4`, `grayscale(100%)`) để báo hiệu chế độ độc lập, bấm vào nút gạt này sẽ lập tức thoát Aqua để quay về Solar/Lunar.
+
+### 2.3 Đại Tu Độ Tương Phản & Nổi Khối Solar Mode (V6.4.2)
+- 🛡️ **Text Contrast Shield WCAG AAA:** Khắc phục triệt để chữ vàng nhạt trên nền trắng, chuyển hoàn toàn sang sắc Amber 900 `#78350F` (tỷ lệ tương phản 12.5:1).
+- 🧱 **Phân tách dứt khoát 3 lớp bề mặt:** Nền canvas cát vàng ấm (`#EAE2D2`), thanh công cụ vàng champagne cát (`#DCCEBA`), và bề mặt thẻ trắng sứ nguyên chất (`#FFFFFF`) có đổ bóng ấm.
+- 🖼️ **Xóa bỏ sương mờ trắng chân poster:** Hiển thị trọn vẹn 100% hình ảnh nghệ thuật của thẻ game ở trang chủ.
+- ⚙️ **Đồng bộ hóa toàn bộ trang Cài Đặt:** Loại bỏ hoàn toàn các khung nền đen/tối sót lại trên các tab Lưu trữ, Đám mây và Cập nhật trong Solar Mode.
+
+### 2.4 Hệ Thống 9 Chế Độ Thời Không Toàn Diện (9 Celestial Themes)
 Bảng màu 9 chế độ độc bản được chuẩn hóa công thái học và hiển thị đồng bộ 100% trên cả PC và Mobile:
-1. ☀️ **Solar:** Chế độ ngày rạng rỡ, đạt chuẩn tương phản cao WCAG AAA (`#181512` trên nền `#FAF8F5`), nghiêm cấm chữ vàng nhạt trên nền sáng.
+1. ☀️ **Solar:** Chế độ ngày rạng rỡ, đạt chuẩn tương phản cao WCAG AAA (`#181512` trên nền cát ấm `#EAE2D2`), nghiêm cấm chữ vàng nhạt trên nền sáng.
 2. 🌙 **Lunar:** Không gian màn đêm điện ảnh tĩnh lặng Obsidian (`#0B0F19`), màu nhấn chàm thanh lịch.
-3. 🌊 **Aqua:** Đại dương sâu thẳm Dark Ocean (`#061524`), sóng nước dập dềnh liên tục trên thanh phát nhạc (`aqua-wave-motion`), nút tab viên nang nước lỏng (`liquid-water-pill`) phản chiếu ánh sáng và hiệu ứng bấm gợn nước đa vòng chân thực.
+3. 💧 **Aqua:** Ngôn ngữ chất lỏng tươi mát (Fluid Liquid Architecture), sóng biển trôi dạt liên tục, giọt nước trượt tab và màng nước hữu cơ.
 4. 🔥 **Ignis:** Nham thạch & Lửa thiêng, viền dạ quang cam đỏ rực rỡ và hiệu ứng tro tàn bay bổng.
 5. 💨 **Aer:** Kính khí động học tối giản siêu nhẹ, khung lưới kỹ thuật và tắt hiệu ứng nặng giúp tiết kiệm pin tối đa.
 6. 🌿 **Terra:** Rừng già RPG & Đất phong rêu (`#121613` + `#84CC16`), góc vát hình học 8 cạnh mang phong cách dã chiến.

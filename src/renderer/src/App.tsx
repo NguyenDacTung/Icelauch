@@ -18,6 +18,7 @@ import { setActiveProxyPort, getActiveProxyPort } from './utils/mediaUrl';
 import { SeasonalParticleEngine } from './components/common/SeasonalParticleEngine';
 import { AppWallpaper } from './components/common/AppWallpaper';
 import { WaterRippleEffect } from './components/common/WaterRippleEffect';
+import { AquaWaveBackdrop } from './components/common/AquaWaveBackdrop';
 import { updateNebulaDominantColor } from './utils/dominantColor';
 import { UpdateToast } from './components/common/UpdateToast';
 import { ProfilePickerView } from './components/profile/ProfilePickerView';
@@ -448,7 +449,7 @@ export default function App() {
         }
 
         // Version update check: require re-login on new app version update; keep auto-login on same version
-        const CURRENT_APP_VERSION = '1.2.5';
+        const CURRENT_APP_VERSION = '1.2.6';
         const isNewVersion = shouldRequireReLoginForNewVersion(CURRENT_APP_VERSION);
         if (isNewVersion) {
           console.log(`[Version Upgrade] New version ${CURRENT_APP_VERSION}: Requiring re-login.`);
@@ -2090,6 +2091,9 @@ export default function App() {
 
       {/* Global Interactive Water Ripple Effect (Aqua Theme) */}
       <WaterRippleEffect />
+
+      {/* Global Continuous Flowing Waves (Aqua Theme) */}
+      <AquaWaveBackdrop lowSpecMode={appData.settings.lowSpecMode} />
 
       {/* Nebula Full-Screen Dynamic Ambient Banner Glow */}
       {theme === 'nebula' && (

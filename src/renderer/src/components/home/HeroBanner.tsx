@@ -117,7 +117,7 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({
 
           <h3 
             onClick={() => onSelectGame(currentGame)}
-            className="text-lg font-black text-white leading-tight line-clamp-1 cursor-pointer"
+            className="text-lg font-black text-ice-text leading-tight line-clamp-1 cursor-pointer"
           >
             {currentGame.name}
           </h3>
@@ -125,14 +125,14 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({
           <div className="flex items-center gap-2 pt-1">
             <button
               onClick={() => onIncompatibleClick ? onIncompatibleClick(currentGame) : onSelectGame(currentGame)}
-              className="flex-1 h-9 rounded-xl bg-amber-500/20 border border-amber-500/40 text-amber-300 text-[11px] font-bold flex items-center justify-center gap-1.5 shadow-md"
+              className="flex-1 h-9 rounded-xl bg-amber-500/20 border border-amber-500/40 text-amber-600 dark:text-amber-300 text-[11px] font-bold flex items-center justify-center gap-1.5 shadow-md"
             >
               <Monitor className="w-3.5 h-3.5" />
               <span>🚫 Chỉ hỗ trợ PC</span>
             </button>
             <button
               onClick={() => onSelectGame(currentGame)}
-              className="h-9 px-3.5 rounded-xl bg-white/15 text-white text-[11px] font-bold backdrop-blur-md"
+              className="h-9 px-3.5 rounded-xl bg-ice-hover hover:bg-ice-border/40 text-ice-text border border-ice-border text-[11px] font-bold backdrop-blur-md transition-colors"
             >
               Chi tiết
             </button>
@@ -233,7 +233,7 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({
             {tagsList.slice(0, 4).map((tag) => (
               <span
                 key={tag}
-                className="px-2.5 py-0.5 rounded-md text-[10px] font-semibold bg-white/10 text-white/90 border border-white/10"
+                className="px-2.5 py-0.5 rounded-md text-[10px] font-semibold bg-ice-hover text-ice-text border border-ice-border"
               >
                 {tag}
               </span>
@@ -243,7 +243,7 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({
           {/* Title */}
           <h2
             onClick={() => onSelectGame(currentGame)}
-            className="text-xl lg:text-2xl font-black text-white tracking-tight leading-snug line-clamp-2 cursor-pointer hover:text-ice-accent transition-colors"
+            className="text-xl lg:text-2xl font-black text-ice-text tracking-tight leading-snug line-clamp-2 cursor-pointer hover:text-ice-accent transition-colors"
           >
             {currentGame.name}
           </h2>
@@ -318,7 +318,7 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({
 
             <button
               onClick={() => onSelectGame(currentGame)}
-              className="h-11 px-4 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-bold flex items-center gap-1.5 transition-colors shrink-0"
+              className="h-11 px-4 rounded-xl bg-ice-hover hover:bg-ice-border/50 text-ice-text border border-ice-border text-xs font-bold flex items-center gap-1.5 transition-colors shrink-0"
               title="Xem trang chi tiết game"
             >
               <Info className="w-3.5 h-3.5" />
@@ -330,7 +330,7 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({
               className={`h-11 px-3.5 rounded-xl border text-xs font-semibold flex items-center justify-center transition-all shrink-0 ${
                 currentGame.inLibrary
                   ? 'bg-ice-accent/20 border-ice-accent text-ice-accent'
-                  : 'bg-white/5 border-white/10 text-ice-subtext hover:text-white hover:bg-white/10'
+                  : 'bg-ice-card border-ice-border text-ice-subtext hover:text-ice-text hover:bg-ice-hover'
               }`}
               title={currentGame.inLibrary ? 'Đã lưu trong thư viện' : 'Lưu vào thư viện'}
             >
@@ -342,7 +342,7 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({
           {displayGames.length > 1 && (
             <div className="flex items-center justify-between text-xs text-ice-subtext pt-1">
               <span className="text-[11px] font-mono">
-                Mục <strong className="text-white">{currentIndex + 1}</strong> / {displayGames.length}
+                Mục <strong className="text-ice-text font-bold">{currentIndex + 1}</strong> / {displayGames.length}
               </span>
 
               <div className="flex items-center gap-1.5">
@@ -352,7 +352,7 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({
                     setCurrentIndex((prev) => (prev - 1 + displayGames.length) % displayGames.length);
                     setHoveredScreenshot(null);
                   }}
-                  className="p-1.5 rounded-lg bg-white/10 hover:bg-ice-accent hover:text-white text-white/80 transition-colors"
+                  className="p-1.5 rounded-lg bg-ice-hover hover:bg-ice-accent hover:text-white text-ice-text border border-ice-border transition-colors cursor-pointer"
                   title="Game trước"
                 >
                   <ChevronLeft className="w-3.5 h-3.5" />
@@ -363,7 +363,7 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({
                     setCurrentIndex((prev) => (prev + 1) % displayGames.length);
                     setHoveredScreenshot(null);
                   }}
-                  className="p-1.5 rounded-lg bg-white/10 hover:bg-ice-accent hover:text-white text-white/80 transition-colors"
+                  className="p-1.5 rounded-lg bg-ice-hover hover:bg-ice-accent hover:text-white text-ice-text border border-ice-border transition-colors cursor-pointer"
                   title="Game tiếp theo"
                 >
                   <ChevronRight className="w-3.5 h-3.5" />

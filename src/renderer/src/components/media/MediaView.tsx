@@ -386,7 +386,7 @@ export const MediaView: React.FC<MediaViewProps> = ({
 
         <div className="p-2.5 flex flex-col flex-1 justify-between gap-1">
           <div>
-            <h4 className="text-xs font-bold text-white truncate group-hover:text-amber-300">
+            <h4 className="text-xs font-bold text-ice-text truncate group-hover:text-ice-accent">
               {item.title}
             </h4>
             <p className="text-[10px] text-ice-muted truncate mt-0.5">
@@ -558,7 +558,7 @@ export const MediaView: React.FC<MediaViewProps> = ({
               </span>
             </div>
 
-            <h1 className="text-2xl font-black text-white tracking-wide truncate">
+            <h1 className="text-2xl font-black text-ice-text tracking-wide truncate">
               {viewingPlaylist.name}
             </h1>
 
@@ -657,7 +657,7 @@ export const MediaView: React.FC<MediaViewProps> = ({
         {/* Toolbar: Sort Direction + Mini Search */}
         <div className="flex flex-wrap items-center justify-between gap-3 p-3 rounded-xl bg-ice-card border border-ice-border">
           <div className="flex items-center gap-2">
-            <span className="text-xs font-bold text-white uppercase tracking-wider">Danh Sách Video / Bài Hát</span>
+            <span className="text-xs font-bold text-ice-text uppercase tracking-wider">Danh Sách Video / Bài Hát</span>
             <span className="text-xs text-ice-muted font-mono">({processedItems.length})</span>
           </div>
 
@@ -668,10 +668,10 @@ export const MediaView: React.FC<MediaViewProps> = ({
                 sfx.playClick();
                 setPlaylistSortAsc(!playlistSortAsc);
               }}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-semibold text-ice-text hover:text-white transition-all"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-ice-hover hover:bg-ice-border/40 border border-ice-border text-xs font-semibold text-ice-text transition-all"
               title="Đổi thứ tự hiển thị"
             >
-              <ArrowUpDown className="w-3.5 h-3.5 text-amber-400" />
+              <ArrowUpDown className="w-3.5 h-3.5 text-amber-500 dark:text-amber-400" />
               <span>{playlistSortAsc ? 'Thứ tự: Từ trên xuống (1 → N)' : 'Thứ tự: Từ dưới lên (N → 1)'}</span>
             </button>
 
@@ -679,17 +679,17 @@ export const MediaView: React.FC<MediaViewProps> = ({
             <div className="relative flex items-center">
               {isPlaylistSearchOpen ? (
                 <div className="flex items-center gap-1 bg-ice-card border border-amber-400/50 rounded-lg px-2.5 py-1 animate-fade-in shadow-md">
-                  <Search className="w-3.5 h-3.5 text-amber-400" />
+                  <Search className="w-3.5 h-3.5 text-amber-500 dark:text-amber-400" />
                   <input
                     type="text"
                     value={playlistSearch}
                     onChange={(e) => setPlaylistSearch(e.target.value)}
                     placeholder="Tìm trong danh sách này..."
                     autoFocus
-                    className="w-44 bg-transparent text-xs text-white placeholder-ice-muted focus:outline-none"
+                    className="w-44 bg-transparent text-xs text-ice-text placeholder-ice-muted focus:outline-none"
                   />
                   {playlistSearch && (
-                    <button onClick={() => setPlaylistSearch('')} className="text-ice-muted hover:text-white">
+                    <button onClick={() => setPlaylistSearch('')} className="text-ice-muted hover:text-ice-text">
                       <X className="w-3.5 h-3.5" />
                     </button>
                   )}
@@ -963,7 +963,7 @@ export const MediaView: React.FC<MediaViewProps> = ({
                 </div>
 
                 <div className="flex-1 min-w-0">
-                  <h4 className="text-xs font-bold text-white truncate group-hover:text-amber-300 transition-colors">
+                  <h4 className="text-xs font-bold text-ice-text truncate group-hover:text-ice-accent transition-colors">
                     {item.title}
                   </h4>
                   <p className="text-[10px] text-ice-muted truncate mt-0.5">Đã xem {percent}%</p>

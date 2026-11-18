@@ -86,8 +86,8 @@ export const GameCard: React.FC<GameCardProps> = ({
           className="w-full h-full object-cover transition-transform duration-300"
         />
 
-        {/* Gradient Overlay */}
-        <div className="absolute inset-0 bg-gradient-to-t from-ice-card via-transparent to-transparent opacity-80" />
+        {/* Gradient Overlay - Hidden in Solar to eliminate poster washout */}
+        <div className="game-card-poster-fog absolute inset-0 bg-gradient-to-t from-ice-card via-transparent to-transparent opacity-80" />
 
         {/* Top Badges: InLibrary & 3-Dot Menu */}
         <div className="absolute top-2.5 left-2.5 right-2.5 flex items-center justify-between">
@@ -272,7 +272,7 @@ export const GameCard: React.FC<GameCardProps> = ({
       <div className="p-3 flex flex-col justify-between flex-1 gap-2">
         <h3
           onClick={() => onSelectGame(game)}
-          className="text-sm font-semibold text-white truncate cursor-pointer hover:text-ice-accent transition-colors"
+          className="text-sm font-semibold text-ice-text truncate cursor-pointer hover:text-ice-accent transition-colors"
           title={game.name}
         >
           {game.name}

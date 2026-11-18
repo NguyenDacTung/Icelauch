@@ -180,7 +180,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <span className="text-xs font-bold text-white tracking-wide">
+              <span className="text-xs font-bold text-ice-text tracking-wide">
                 {settings?.userGamerTitle || 'Tân Binh Băng Giá'}
               </span>
               <span className="px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-ice-accent/20 text-ice-accent border border-ice-accent/40">
@@ -203,10 +203,10 @@ export const HomeView: React.FC<HomeViewProps> = ({
                 sfx.playClick();
                 onOpenTagManager('game');
               }}
-              className="flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-white/10 hover:bg-white/15 border border-white/15 text-white text-xs font-bold transition-all shadow-sm active:scale-95"
+              className="flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-ice-hover hover:bg-ice-border/40 border border-ice-border text-ice-text text-xs font-bold transition-all shadow-sm active:scale-95"
               title="Quản lý thể loại / tag game"
             >
-              <Tag className="w-3.5 h-3.5 text-amber-400" />
+              <Tag className="w-3.5 h-3.5 text-amber-500 dark:text-amber-400" />
               <span>Quản Lý Thể Loại</span>
             </button>
           )}
@@ -259,7 +259,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
       {recentGames.length > 0 && !searchQuery && (
         <section className="space-y-3">
           <div className="flex items-center justify-between">
-            <h2 className="text-sm font-bold text-white tracking-wider uppercase flex items-center gap-2">
+            <h2 className="text-sm font-bold text-ice-text tracking-wider uppercase flex items-center gap-2">
               <span className="w-2.5 h-2.5 rounded-full bg-ice-success animate-pulse" />
               <span>Vừa Chơi Gần Đây (Quick Resume)</span>
             </h2>
@@ -395,11 +395,11 @@ export const HomeView: React.FC<HomeViewProps> = ({
                   }}
                   className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all border ${
                     isActive
-                      ? 'bg-amber-500/20 text-amber-300 border-amber-500/50 shadow-sm'
-                      : 'bg-ice-card text-ice-text border-ice-border hover:bg-ice-hover hover:text-white'
+                      ? 'bg-amber-500/20 text-amber-900 dark:text-amber-300 border-amber-500/50 shadow-sm font-bold'
+                      : 'bg-ice-card text-ice-text border-ice-border hover:bg-ice-hover hover:text-ice-text'
                   }`}
                 >
-                  <Tag className={`w-3 h-3 ${isActive ? 'text-amber-400' : 'text-ice-muted'}`} />
+                  <Tag className={`w-3 h-3 ${isActive ? 'text-amber-600 dark:text-amber-400' : 'text-ice-muted'}`} />
                   <span>{g}</span>
                 </button>
               );
@@ -521,7 +521,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
                   className="bg-transparent text-xs text-ice-text focus:outline-none cursor-pointer"
                 >
                   {genres.map((g) => (
-                    <option key={g} value={g} className="bg-ice-card text-white">
+                    <option key={g} value={g} className="bg-ice-card text-ice-text">
                       {g}
                     </option>
                   ))}
@@ -540,8 +540,8 @@ export const HomeView: React.FC<HomeViewProps> = ({
                 }}
                 className="bg-transparent text-xs text-ice-text focus:outline-none cursor-pointer"
               >
-                <option value="newest" className="bg-ice-card text-white">Mới nhất</option>
-                <option value="name" className="bg-ice-card text-white">Tên A-Z</option>
+                <option value="newest" className="bg-ice-card text-ice-text">Mới nhất</option>
+                <option value="name" className="bg-ice-card text-ice-text">Tên A-Z</option>
               </select>
             </div>
 
@@ -554,10 +554,10 @@ export const HomeView: React.FC<HomeViewProps> = ({
                       sfx.playClick();
                       onOpenTagManager('game');
                     }}
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/10 hover:bg-white/15 border border-white/15 text-white text-xs font-bold transition-all shadow-sm active:scale-95"
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-ice-hover hover:bg-ice-border/40 border border-ice-border text-ice-text text-xs font-bold transition-all shadow-sm active:scale-95"
                     title="Quản lý thể loại / tag game"
                   >
-                    <Tag className="w-3.5 h-3.5 text-amber-400" />
+                    <Tag className="w-3.5 h-3.5 text-amber-500 dark:text-amber-400" />
                     <span>Quản Lý Thể Loại</span>
                   </button>
                 )}
@@ -616,9 +616,9 @@ export const HomeView: React.FC<HomeViewProps> = ({
                     sfx.playClick();
                     setVisibleCount((prev) => prev + 24);
                   }}
-                  className="px-8 py-3 rounded-2xl bg-white/10 hover:bg-white/20 border border-white/20 text-white font-bold text-xs tracking-wider uppercase transition-all shadow-lg active:scale-95 flex items-center gap-2 hover:border-amber-400"
+                  className="px-8 py-3 rounded-2xl bg-ice-hover hover:bg-ice-border/40 border border-ice-border text-ice-text font-bold text-xs tracking-wider uppercase transition-all shadow-lg active:scale-95 flex items-center gap-2 hover:border-amber-500"
                 >
-                  <Plus className="w-4 h-4 text-amber-400" />
+                  <Plus className="w-4 h-4 text-amber-500 dark:text-amber-400" />
                   <span>Xem Thêm Trò Chơi (+24 Game • Còn lại {filteredGames.length - visibleCount})</span>
                 </button>
               </div>
@@ -627,7 +627,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
         ) : (
           <div className="py-16 flex flex-col items-center justify-center text-center space-y-3 rounded-2xl border border-dashed border-ice-border bg-ice-card/40">
             <Gamepad2 className="w-10 h-10 text-ice-subtext opacity-50" />
-            <h3 className="text-sm font-semibold text-white">Không tìm thấy trò chơi nào</h3>
+            <h3 className="text-sm font-semibold text-ice-text">Không tìm thấy trò chơi nào</h3>
             <p className="text-xs text-ice-subtext max-w-sm">
               {searchQuery
                 ? 'Không có kết quả nào khớp với tìm kiếm.'

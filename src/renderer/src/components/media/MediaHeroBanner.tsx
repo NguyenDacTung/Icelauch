@@ -191,7 +191,7 @@ export const MediaHeroBanner: React.FC<MediaHeroBannerProps> = ({
             {tags.slice(0, 3).map((tag) => (
               <span
                 key={tag}
-                className="px-2 py-0.5 rounded-md text-[10px] font-semibold bg-white/10 text-white/90 border border-white/10"
+                className="px-2 py-0.5 rounded-md text-[10px] font-semibold bg-ice-hover text-ice-text border border-ice-border"
               >
                 {tag}
               </span>
@@ -201,14 +201,14 @@ export const MediaHeroBanner: React.FC<MediaHeroBannerProps> = ({
           {/* Title */}
           <h2
             onClick={() => onPlayMedia(currentItem)}
-            className="text-xl lg:text-2xl font-black text-white tracking-tight leading-snug line-clamp-2 cursor-pointer hover:text-amber-400 transition-colors"
+            className="text-xl lg:text-2xl font-black text-ice-text tracking-tight leading-snug line-clamp-2 cursor-pointer hover:text-ice-accent transition-colors"
           >
             {currentItem.title}
           </h2>
 
           {/* Artist if Audio */}
           {currentItem.artist && (
-            <p className="text-xs font-semibold text-amber-300">
+            <p className="text-xs font-semibold text-amber-700 dark:text-amber-300">
               Nghệ sĩ: {currentItem.artist}
             </p>
           )}
@@ -237,14 +237,14 @@ export const MediaHeroBanner: React.FC<MediaHeroBannerProps> = ({
           {displayItems.length > 1 && (
             <div className="flex items-center justify-between text-xs text-ice-subtext pt-1">
               <span className="text-[11px] font-mono">
-                Mục <strong className="text-white">{currentIndex + 1}</strong> / {displayItems.length}
+                Mục <strong className="text-ice-text">{currentIndex + 1}</strong> / {displayItems.length}
               </span>
 
               <div className="flex items-center gap-1.5">
                 <button
                   type="button"
                   onClick={() => setCurrentIndex((prev) => (prev - 1 + displayItems.length) % displayItems.length)}
-                  className="p-1.5 rounded-lg bg-white/10 hover:bg-amber-400 hover:text-black text-white/80 transition-colors"
+                  className="p-1.5 rounded-lg bg-ice-hover hover:bg-ice-border/50 text-ice-text border border-ice-border transition-colors"
                   title="Mục trước"
                 >
                   <ChevronLeft className="w-3.5 h-3.5" />
@@ -252,7 +252,7 @@ export const MediaHeroBanner: React.FC<MediaHeroBannerProps> = ({
                 <button
                   type="button"
                   onClick={() => setCurrentIndex((prev) => (prev + 1) % displayItems.length)}
-                  className="p-1.5 rounded-lg bg-white/10 hover:bg-amber-400 hover:text-black text-white/80 transition-colors"
+                  className="p-1.5 rounded-lg bg-ice-hover hover:bg-ice-border/50 text-ice-text border border-ice-border transition-colors"
                   title="Mục tiếp theo"
                 >
                   <ChevronRight className="w-3.5 h-3.5" />

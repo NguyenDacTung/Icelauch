@@ -718,20 +718,20 @@ try {
 }
 
 try {
-  // TC-SEC-09: Version Upgrade Re-Login Enforcement (1.2.5)
+  // TC-SEC-09: Version Upgrade Re-Login Enforcement (1.2.6)
   const appSrc = fs.readFileSync(path.join(ROOT_DIR, 'src/renderer/src/App.tsx'), 'utf8');
   const pkgSrc = fs.readFileSync(path.join(ROOT_DIR, 'package.json'), 'utf8');
   const gradleSrc = fs.readFileSync(path.join(ROOT_DIR, 'android/app/build.gradle'), 'utf8');
 
-  const appHasVersion = appSrc.includes("CURRENT_APP_VERSION = '1.2.5'");
-  const pkgHasVersion = pkgSrc.includes('"version": "1.2.5"');
-  const gradleHasVersion = gradleSrc.includes('versionName "1.2.5"') && gradleSrc.includes('versionCode 21');
+  const appHasVersion = appSrc.includes("CURRENT_APP_VERSION = '1.2.6'");
+  const pkgHasVersion = pkgSrc.includes('"version": "1.2.6"');
+  const gradleHasVersion = gradleSrc.includes('versionName "1.2.6"') && gradleSrc.includes('versionCode 22');
   const hasReLoginLogic = appSrc.includes('shouldRequireReLoginForNewVersion');
 
-  assert.ok(appHasVersion && pkgHasVersion && gradleHasVersion && hasReLoginLogic, 'Version 1.2.5 must be synchronized and re-login enforced');
-  recordTest('TC-SEC-09', 'Version Upgrade Re-Login Enforcement (v1.2.5 / Code 21)', 'Module 8: Device Whitelist & Security', 'Cross-Platform', true, 'Upgraded to v1.2.5 (versionCode 21); sessions maintained across restarts but purged on version upgrade');
+  assert.ok(appHasVersion && pkgHasVersion && gradleHasVersion && hasReLoginLogic, 'Version 1.2.6 must be synchronized and re-login enforced');
+  recordTest('TC-SEC-09', 'Version Upgrade Re-Login Enforcement (v1.2.6 / Code 22)', 'Module 8: Device Whitelist & Security', 'Cross-Platform', true, 'Upgraded to v1.2.6 (versionCode 22); sessions maintained across restarts but purged on version upgrade');
 } catch (e) {
-  recordTest('TC-SEC-09', 'Version Upgrade Re-Login Enforcement (v1.2.5 / Code 21)', 'Module 8: Device Whitelist & Security', 'Cross-Platform', false, e.message);
+  recordTest('TC-SEC-09', 'Version Upgrade Re-Login Enforcement (v1.2.6 / Code 22)', 'Module 8: Device Whitelist & Security', 'Cross-Platform', false, e.message);
 }
 
 try {

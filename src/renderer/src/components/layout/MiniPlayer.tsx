@@ -302,13 +302,17 @@ export const MiniPlayer: React.FC<MiniPlayerProps> = ({
       {/* Floating Pill MiniPlayer (Centered at bottom 16px, auto slide-up animation) */}
       {currentTrack && !isTurntableActive && !hideVisualBar && (
         <div className="fixed bottom-4 left-1/2 -translate-x-1/2 w-[94%] max-w-3xl z-40 select-none pointer-events-auto transition-all duration-300 animate-in fade-in slide-in-from-bottom-6">
-          <div className={`glass-pill-elevated backdrop-blur-2xl px-4 py-2 flex items-center justify-between gap-3 relative overflow-hidden ${
+          <div className={`backdrop-blur-2xl px-5 py-2.5 flex items-center justify-between gap-3 relative overflow-hidden transition-all duration-300 ${
             theme === 'aqua' 
-              ? 'aqua-wave-bar border-sky-400/40 shadow-[0_4px_24px_rgba(56,189,248,0.25)]' 
+              ? 'rounded-full bg-white/85 border border-sky-300/60 shadow-[0_12px_36px_rgba(2,132,199,0.22)]' 
               : theme === 'aurora' 
-              ? 'aurora-drift-bar border-emerald-400/30' 
-              : ''
+              ? 'glass-pill-elevated aurora-drift-bar border-emerald-400/30' 
+              : 'glass-pill-elevated'
           }`}>
+            {/* Ambient Wave Motion Bar for Aqua Theme */}
+            {theme === 'aqua' && (
+              <div className="absolute inset-x-0 bottom-0 h-1.5 aqua-wave-bar pointer-events-none" />
+            )}
             {/* Left: Track Info & Artwork */}
             <div
               onClick={onNavigateToTrack}
