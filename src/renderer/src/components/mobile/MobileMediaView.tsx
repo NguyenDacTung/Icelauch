@@ -220,7 +220,7 @@ export const MobileMediaView: React.FC<MobileMediaViewProps> = ({
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
                 mediaTab === 'video'
                   ? 'bg-cyan-500 text-black shadow-md'
-                  : 'text-slate-400 hover:text-white'
+                  : 'text-ice-subtext hover:text-ice-text'
               }`}
             >
               <Film className="w-3.5 h-3.5" />
@@ -237,7 +237,7 @@ export const MobileMediaView: React.FC<MobileMediaViewProps> = ({
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
                 mediaTab === 'music'
                   ? 'bg-cyan-500 text-black shadow-md'
-                  : 'text-slate-400 hover:text-white'
+                  : 'text-ice-subtext hover:text-ice-text'
               }`}
             >
               <Music className="w-3.5 h-3.5" />
@@ -254,7 +254,7 @@ export const MobileMediaView: React.FC<MobileMediaViewProps> = ({
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
                 mediaTab === 'podcast'
                   ? 'bg-cyan-500 text-black shadow-md'
-                  : 'text-slate-400 hover:text-white'
+                  : 'text-ice-subtext hover:text-ice-text'
               }`}
             >
               <Radio className="w-3.5 h-3.5" />
@@ -391,7 +391,7 @@ export const MobileMediaView: React.FC<MobileMediaViewProps> = ({
             className={`px-3 py-1.5 rounded-xl text-xs font-bold shrink-0 transition-all ${
               selectedCategory === 'all'
                 ? 'bg-cyan-500 text-black shadow-sm'
-                : 'bg-white/5 text-slate-400 hover:text-white border border-white/5'
+                : 'bg-ice-hover/40 text-ice-subtext hover:text-ice-text border border-ice-border/60'
             }`}
           >
             Tất cả
@@ -407,7 +407,7 @@ export const MobileMediaView: React.FC<MobileMediaViewProps> = ({
               className={`px-3 py-1.5 rounded-xl text-xs font-semibold shrink-0 transition-all ${
                 selectedCategory === cat
                   ? 'bg-cyan-500 text-black shadow-sm'
-                  : 'bg-white/5 text-slate-400 hover:text-white border border-white/5'
+                  : 'bg-ice-hover/40 text-ice-subtext hover:text-ice-text border border-ice-border/60'
               }`}
             >
               {cat}
@@ -420,11 +420,11 @@ export const MobileMediaView: React.FC<MobileMediaViewProps> = ({
       {mediaTab === 'video' && !effectiveSearch && continueWatching.length > 0 && (
         <div className="space-y-2 shrink-0">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-black text-white flex items-center gap-1.5 uppercase tracking-wide">
+            <span className="text-xs font-black text-ice-text flex items-center gap-1.5 uppercase tracking-wide">
               <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
               <span>Tiếp Tục Xem</span>
             </span>
-            <span className="text-[10px] text-slate-400 font-semibold">
+            <span className="text-[10px] text-ice-subtext font-semibold">
               {continueWatching.length} video
             </span>
           </div>
@@ -528,7 +528,7 @@ export const MobileMediaView: React.FC<MobileMediaViewProps> = ({
       {/* 6. TOÀN BỘ KHO PHIM / NHẠC (LƯỚI 2 CỘT CHUẨN DI ĐỘNG) */}
       <div className="space-y-2 pb-6">
         <div className="flex items-center justify-between">
-          <span className="text-xs font-black text-white flex items-center gap-1.5 uppercase tracking-wide">
+          <span className="text-xs font-black text-ice-text flex items-center gap-1.5 uppercase tracking-wide">
             <Film className="w-3.5 h-3.5 text-cyan-400" />
             <span>
               {effectiveSearch
@@ -538,7 +538,7 @@ export const MobileMediaView: React.FC<MobileMediaViewProps> = ({
                 : `Toàn Bộ Kho ${mediaTab === 'video' ? 'Phim' : mediaTab === 'music' ? 'Bài Hát' : 'Audio'}`}
             </span>
           </span>
-          <span className="text-[10px] text-slate-400 font-semibold">Lưới 2 cột</span>
+          <span className="text-[10px] text-ice-subtext font-semibold">Lưới 2 cột</span>
         </div>
 
         {filteredList.length > 0 ? (
@@ -554,10 +554,10 @@ export const MobileMediaView: React.FC<MobileMediaViewProps> = ({
                       if (item.type === 'video') handleSetActiveMedia(item);
                       else onPlayAudio?.(item);
                     }}
-                    className="rounded-2xl overflow-hidden bg-ice-card border border-ice-border cursor-pointer group hover:border-ice-accent/60 transition-all shadow-md flex flex-col active:scale-98"
+                    className="rounded-2xl overflow-hidden bg-ice-card border border-ice-border cursor-pointer group hover:border-ice-accent/60 transition-all shadow-md flex flex-col active:scale-98 hover-depth-lift"
                   >
                     {/* 4:6 (2:3) List Card Poster */}
-                    <div className="relative aspect-[2/3] w-full bg-black overflow-hidden">
+                    <div className="relative aspect-[2/3] w-full bg-ice-hover/50 overflow-hidden">
                       <SafeImage
                         src={item.coverPath || item.bannerPath}
                         alt={item.title}
@@ -617,14 +617,14 @@ export const MobileMediaView: React.FC<MobileMediaViewProps> = ({
                     {/* Info */}
                     <div className="p-2.5 flex-1 flex flex-col justify-between space-y-1">
                       <div>
-                        <h4 className="text-xs font-bold text-white line-clamp-1 group-hover:text-cyan-400 transition-colors">
+                        <h4 className="text-xs font-bold text-ice-text line-clamp-1 group-hover:text-cyan-400 transition-colors">
                           {item.title}
                         </h4>
-                        <span className="text-[10px] text-slate-400 line-clamp-1">
+                        <span className="text-[10px] text-ice-subtext line-clamp-1">
                           {item.category || (item.type === 'video' ? 'Phim' : 'Nhạc')}
                         </span>
                       </div>
-                      <div className="pt-1 flex items-center justify-between text-[10px] text-cyan-400 font-semibold">
+                      <div className="pt-1 flex items-center justify-between text-[10px] text-cyan-500 font-semibold">
                         <span>{item.type === 'video' ? 'Xem ngay' : 'Phát nhạc'}</span>
                         <Play className="w-3 h-3 fill-current" />
                       </div>
@@ -640,9 +640,9 @@ export const MobileMediaView: React.FC<MobileMediaViewProps> = ({
                 <button
                   type="button"
                   onClick={() => setVisibleCount((prev) => prev + 10)}
-                  className="w-full py-2.5 rounded-xl bg-white/10 hover:bg-white/15 border border-white/10 text-white font-bold text-xs tracking-wide transition-all shadow-sm active:scale-98 flex items-center justify-center gap-1.5"
+                  className="w-full py-2.5 rounded-xl bg-ice-hover/60 hover:bg-ice-hover border border-ice-border text-ice-text font-bold text-xs tracking-wide transition-all shadow-sm active:scale-98 flex items-center justify-center gap-1.5"
                 >
-                  <Plus className="w-4 h-4 text-cyan-400" />
+                  <Plus className="w-4 h-4 text-cyan-500" />
                   <span>Xem Thêm (+10 Mục • Còn lại {filteredList.length - visibleCount})</span>
                 </button>
               </div>
@@ -650,8 +650,8 @@ export const MobileMediaView: React.FC<MobileMediaViewProps> = ({
           </>
         ) : (
           <div className="py-12 flex flex-col items-center justify-center text-center space-y-2">
-            <span className="text-sm font-bold text-white">Không tìm thấy nội dung phù hợp</span>
-            <p className="text-xs text-slate-400 max-w-[240px]">
+            <span className="text-sm font-bold text-ice-text">Không tìm thấy nội dung phù hợp</span>
+            <p className="text-xs text-ice-subtext max-w-[240px]">
               Vui lòng thử từ khóa khác hoặc chọn &quot;Tất cả&quot; thể loại.
             </p>
           </div>

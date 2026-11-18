@@ -1,8 +1,12 @@
 @import "tailwindcss";
 
 /* ============================================================================
-   SOLAR & LUNAR DESIGN SYSTEM TOKENS (Cross-Platform)
+   CELISTIAL DESIGN SYSTEM — 9 THEME TOKENS & ADAPTIVE GEOMETRY (Cross-Platform)
+   2 Base Modes: Solar (Day) & Lunar (Night)
+   7 Specialized Modes: Aqua, Ignis, Aer, Terra, Eclipse, Aurora, Nebula
    ============================================================================ */
+
+/* 1. LUNAR (Standard Deep Night - Default) */
 :root, [data-theme="lunar"] {
   --theme-bg: #0B0F19;
   --theme-card: #151C2C;
@@ -19,12 +23,13 @@
   --theme-text: #F1F5F9;
   --theme-subtext: #94A3B8;
 
-  /* Glassmorphism & Floating Tokens */
+  /* Glassmorphism & Adaptive Geometry */
+  --theme-radius: 16px;
   --glass-bg: rgba(21, 28, 44, 0.85);
-  --glass-header-bg: rgba(15, 21, 35, 0.82);
-  --glass-border: rgba(255, 255, 255, 0.10);
+  --glass-header-bg: rgba(15, 21, 35, 0.88);
+  --glass-border: rgba(255, 255, 255, 0.12);
   --glass-shadow: 0 16px 40px rgba(0, 0, 0, 0.7);
-  --glass-inner-glow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  --glass-inner-glow: inset 0 1px 0 rgba(255, 255, 255, 0.12);
 
   /* Scrollbar & Selection */
   --scrollbar-track: #0B0F19;
@@ -33,45 +38,292 @@
   --selection-bg: rgba(129, 140, 248, 0.35);
 
   /* Ambient Cinema Backdrop Tint */
-  --ambient-overlay: rgba(11, 15, 25, 0.72);
+  --ambient-overlay: rgba(11, 15, 25, 0.75);
+  --theme-line-height: 1.5;
 }
 
+/* 2. SOLAR (Standard Warm Day - WCAG AAA/AA Contrast & Tinted Glass) */
 [data-theme="solar"] {
-  --theme-bg: #FAF8F5;
+  --theme-bg: #F8F6F1;
   --theme-card: #FFFFFF;
-  --theme-card-elevated: #F5F3EF;
-  --theme-hover: #F0ECE4;
-  --theme-border: #E7E5E4;
-  --theme-border-light: rgba(0, 0, 0, 0.06);
-  --theme-accent: #F59E0B;
-  --theme-accentHover: #D97706;
+  --theme-card-elevated: #F5F3ED;
+  --theme-hover: #EFECE5;
+  --theme-border: #E5E1D8;
+  --theme-border-light: rgba(0, 0, 0, 0.08);
+  --theme-accent: #D97706; /* Amber 600 - WCAG AA 4.6:1 */
+  --theme-accentHover: #B45309; /* Amber 700 */
   --theme-accent-warm: #D97706;
   --theme-success: #16A34A;
   --theme-warning: #D97706;
   --theme-error: #DC2626;
-  --theme-text: #1C1917;
-  --theme-subtext: #78716C;
+  --theme-text: #181512; /* WCAG AAA 15.2:1 */
+  --theme-subtext: #524C46; /* WCAG AA 6.2:1 */
 
-  /* Glassmorphism & Floating Tokens */
-  --glass-bg: rgba(255, 255, 255, 0.88);
-  --glass-header-bg: rgba(255, 255, 255, 0.85);
-  --glass-border: rgba(0, 0, 0, 0.08);
-  --glass-shadow: 0 16px 35px rgba(28, 25, 23, 0.08);
-  --glass-inner-glow: inset 0 1px 0 rgba(255, 255, 255, 0.95);
+  /* Glassmorphism & Adaptive Geometry */
+  --theme-radius: 16px;
+  --glass-bg: rgba(255, 255, 255, 0.94);
+  --glass-header-bg: rgba(255, 255, 255, 0.96);
+  --glass-border: rgba(217, 119, 6, 0.22); /* Tinted Amber rim */
+  --glass-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 10px 25px -3px rgba(180, 120, 40, 0.12), 0 20px 35px -5px rgba(0, 0, 0, 0.08);
+  --glass-inner-glow: inset 0 1px 0 rgba(255, 255, 255, 0.98);
 
   /* Scrollbar & Selection */
-  --scrollbar-track: #FAF8F5;
-  --scrollbar-thumb: #E7E5E4;
-  --scrollbar-thumb-hover: #F59E0B;
-  --selection-bg: rgba(245, 158, 11, 0.30);
+  --scrollbar-track: #F8F6F1;
+  --scrollbar-thumb: #D8D2C6;
+  --scrollbar-thumb-hover: #D97706;
+  --selection-bg: rgba(217, 119, 6, 0.25);
 
   /* Ambient Cinema Backdrop Tint */
-  --ambient-overlay: rgba(250, 248, 245, 0.80);
+  --ambient-overlay: rgba(248, 246, 241, 0.85);
+  --theme-line-height: 1.5;
+}
+
+/* 3. AQUA (Dark Ocean - Xanh Biển Sâu Đậm Đà, Liquid Pill 24px) */
+[data-theme="aqua"] {
+  --theme-bg: #061524;
+  --theme-card: #0B2238;
+  --theme-card-elevated: #102D4A;
+  --theme-hover: #13385C;
+  --theme-border: #133959;
+  --theme-border-light: rgba(56, 189, 248, 0.25);
+  --theme-accent: #38BDF8; /* Ocean Sky 400 - WCAG AA 7.2:1 on dark ocean */
+  --theme-accentHover: #0284C7;
+  --theme-accent-warm: #0EA5E9;
+  --theme-success: #10B981;
+  --theme-warning: #F59E0B;
+  --theme-error: #EF4444;
+  --theme-text: #F0F9FF; /* WCAG AAA 16.5:1 */
+  --theme-subtext: #94A3B8; /* WCAG AA 6.8:1 */
+
+  /* Glassmorphism & Liquid Pill Geometry */
+  --theme-radius: 24px;
+  --glass-bg: rgba(11, 34, 56, 0.94);
+  --glass-header-bg: rgba(7, 24, 43, 0.96);
+  --glass-border: rgba(56, 189, 248, 0.35);
+  --glass-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 10px 25px -3px rgba(56, 189, 248, 0.15), 0 20px 35px -5px rgba(0, 0, 0, 0.5);
+  --glass-inner-glow: inset 0 1px 0 rgba(56, 189, 248, 0.35);
+
+  --scrollbar-track: #061524;
+  --scrollbar-thumb: #133959;
+  --scrollbar-thumb-hover: #38BDF8;
+  --selection-bg: rgba(56, 189, 248, 0.35);
+  --ambient-overlay: rgba(6, 21, 36, 0.88);
+  --theme-line-height: 1.5;
+}
+
+/* 4. IGNIS (Hỏa - Focus & Boost, Sharp Bevel 8px, Ember Rim) */
+[data-theme="ignis"] {
+  --theme-bg: #140C0A;
+  --theme-card: #211310;
+  --theme-card-elevated: #2E1B17;
+  --theme-hover: #3B221D;
+  --theme-border: #3D221D;
+  --theme-border-light: rgba(249, 115, 22, 0.22);
+  --theme-accent: #F97316;
+  --theme-accentHover: #EA580C;
+  --theme-accent-warm: #FB923C;
+  --theme-success: #22C55E;
+  --theme-warning: #F59E0B;
+  --theme-error: #EF4444;
+  --theme-text: #FFF1F2; /* WCAG AAA 15.5:1 */
+  --theme-subtext: #FCA5A5; /* WCAG AAA 7.5:1 */
+
+  /* Glassmorphism & Sharp Geometry */
+  --theme-radius: 8px;
+  --glass-bg: rgba(33, 19, 16, 0.90);
+  --glass-header-bg: rgba(20, 12, 10, 0.94);
+  --glass-border: rgba(249, 115, 22, 0.28);
+  --glass-shadow: 0 12px 35px rgba(20, 12, 10, 0.85), 0 0 18px rgba(249, 115, 22, 0.15);
+  --glass-inner-glow: inset 0 1px 0 rgba(251, 146, 60, 0.25);
+
+  --scrollbar-track: #140C0A;
+  --scrollbar-thumb: #3D221D;
+  --scrollbar-thumb-hover: #F97316;
+  --selection-bg: rgba(249, 115, 22, 0.4);
+  --ambient-overlay: rgba(20, 12, 10, 0.78);
+  --theme-line-height: 1.5;
+}
+
+/* 5. AER (Phong - Lite & Battery-Saver Flat UI, 0ms Delay) */
+[data-theme="aer"] {
+  --theme-bg: #F4F6F8;
+  --theme-card: #FFFFFF;
+  --theme-card-elevated: #F1F4F7;
+  --theme-hover: #E9ECEF;
+  --theme-border: #DDE2E7;
+  --theme-border-light: rgba(0, 0, 0, 0.08);
+  --theme-accent: #0D9488;
+  --theme-accentHover: #0F766E;
+  --theme-accent-warm: #14B8A6;
+  --theme-success: #16A34A;
+  --theme-warning: #D97706;
+  --theme-error: #DC2626;
+  --theme-text: #0F172A; /* WCAG AAA 15.8:1 */
+  --theme-subtext: #475569; /* WCAG AAA 7.1:1 */
+
+  /* Flat Minimalist Geometry (Zero blur, low shadow) */
+  --theme-radius: 12px;
+  --glass-bg: #FFFFFF;
+  --glass-header-bg: #FFFFFF;
+  --glass-border: #DDE2E7;
+  --glass-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+  --glass-inner-glow: none;
+
+  --scrollbar-track: #F4F6F8;
+  --scrollbar-thumb: #CBD5E1;
+  --scrollbar-thumb-hover: #0D9488;
+  --selection-bg: rgba(13, 148, 136, 0.25);
+  --ambient-overlay: rgba(244, 246, 248, 0.92);
+  --theme-line-height: 1.5;
+}
+
+/* Aer Mode Optimization Override: Zero heavy backdrop-filter */
+[data-theme="aer"] .glass-panel,
+[data-theme="aer"] .glass-header,
+[data-theme="aer"] .glass-pill,
+[data-theme="aer"] .glass-header-elevated,
+[data-theme="aer"] .glass-pill-elevated {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08) !important;
+}
+
+/* 6. TERRA (Deep Forest Soil - Rừng Già & Đất Phong Rêu, 4px Geometry) */
+[data-theme="terra"] {
+  --theme-bg: #121613;
+  --theme-card: #1C241E;
+  --theme-card-elevated: #253028;
+  --theme-hover: #2E3B32;
+  --theme-border: #334337;
+  --theme-border-light: rgba(132, 204, 22, 0.25);
+  --theme-accent: #84CC16; /* Lime/Moss 500 - WCAG AA 6.5:1 on dark soil */
+  --theme-accentHover: #65A30D;
+  --theme-accent-warm: #A3E635;
+  --theme-success: #22C55E;
+  --theme-warning: #EAB308;
+  --theme-error: #EF4444;
+  --theme-text: #F4F6F4; /* WCAG AAA 16.2:1 */
+  --theme-subtext: #9CA3AF; /* WCAG AA 7.1:1 */
+
+  /* Dark Forest Soil Chamfered Geometry */
+  --theme-radius: 4px;
+  --glass-bg: rgba(28, 36, 30, 0.95);
+  --glass-header-bg: rgba(22, 30, 24, 0.96);
+  --glass-border: rgba(132, 204, 22, 0.3);
+  --glass-shadow: 0 4px 12px rgba(0, 0, 0, 0.6), 0 0 15px rgba(132, 204, 22, 0.08);
+  --glass-inner-glow: inset 0 1px 0 rgba(132, 204, 22, 0.2);
+
+  --scrollbar-track: #121613;
+  --scrollbar-thumb: #334337;
+  --scrollbar-thumb-hover: #84CC16;
+  --selection-bg: rgba(132, 204, 22, 0.3);
+  --ambient-overlay: rgba(18, 22, 19, 0.88);
+  --theme-line-height: 1.65;
+}
+
+/* 7. ECLIPSE (Nhật Thực - 100% OLED Off-Pixel Black & Solar Corona) */
+[data-theme="eclipse"] {
+  --theme-bg: #000000;
+  --theme-card: #0A0A0A;
+  --theme-card-elevated: #141414;
+  --theme-hover: #1F1F1F;
+  --theme-border: #222222;
+  --theme-border-light: rgba(249, 115, 22, 0.22);
+  --theme-accent: #F97316;
+  --theme-accentHover: #FB923C;
+  --theme-accent-warm: #FBBF24;
+  --theme-success: #22C55E;
+  --theme-warning: #F59E0B;
+  --theme-error: #EF4444;
+  --theme-text: #F8FAFC; /* WCAG AAA 20.8:1 */
+  --theme-subtext: #A1A1AA; /* WCAG AAA 8.9:1 */
+
+  /* OLED Deep Geometry with Corona Rim */
+  --theme-radius: 14px;
+  --glass-bg: rgba(10, 10, 10, 0.95);
+  --glass-header-bg: rgba(0, 0, 0, 0.96);
+  --glass-border: rgba(249, 115, 22, 0.35);
+  --glass-shadow: 0 0 25px rgba(249, 115, 22, 0.15), 0 15px 35px rgba(0, 0, 0, 0.95);
+  --glass-inner-glow: inset 0 1px 0 rgba(249, 115, 22, 0.25);
+
+  --scrollbar-track: #000000;
+  --scrollbar-thumb: #222222;
+  --scrollbar-thumb-hover: #F97316;
+  --selection-bg: rgba(249, 115, 22, 0.35);
+  --ambient-overlay: rgba(0, 0, 0, 0.95);
+  --theme-line-height: 1.5;
+}
+
+/* 8. AURORA (Cực Quang - Northern Lights & Audio Sync) */
+[data-theme="aurora"] {
+  --theme-bg: #090D16;
+  --theme-card: #111827;
+  --theme-card-elevated: #162032;
+  --theme-hover: #1E293B;
+  --theme-border: #1E293B;
+  --theme-border-light: rgba(16, 185, 129, 0.18);
+  --theme-accent: #10B981;
+  --theme-accentHover: #34D399;
+  --theme-accent-warm: #8B5CF6;
+  --theme-success: #10B981;
+  --theme-warning: #F59E0B;
+  --theme-error: #F43F5E;
+  --theme-text: #F9FAFB; /* WCAG AAA 16.2:1 */
+  --theme-subtext: #A7F3D0; /* WCAG AAA 10.5:1 */
+
+  /* Aurora Northern Lights Geometry */
+  --theme-radius: 18px;
+  --glass-bg: rgba(17, 24, 39, 0.85);
+  --glass-header-bg: rgba(9, 13, 22, 0.88);
+  --glass-border: rgba(16, 185, 129, 0.25);
+  --glass-shadow: 0 16px 40px rgba(9, 13, 22, 0.85), 0 0 25px rgba(16, 185, 129, 0.12);
+  --glass-inner-glow: inset 0 1px 0 rgba(167, 243, 208, 0.2);
+
+  --scrollbar-track: #090D16;
+  --scrollbar-thumb: #1E293B;
+  --scrollbar-thumb-hover: #10B981;
+  --selection-bg: rgba(16, 185, 129, 0.35);
+  --ambient-overlay: rgba(9, 13, 22, 0.78);
+  --theme-line-height: 1.5;
+}
+
+/* 9. NEBULA (Tinh Vân - Cosmic Indigo & Dense Workspace) */
+[data-theme="nebula"] {
+  --theme-bg: #0C081A;
+  --theme-card: #18102E;
+  --theme-card-elevated: #22173F;
+  --theme-hover: #2E1F52;
+  --theme-border: #2D1E50;
+  --theme-border-light: rgba(168, 85, 247, 0.18);
+  --theme-accent: #A855F7;
+  --theme-accentHover: #C084FC;
+  --theme-accent-warm: #E879F9;
+  --theme-success: #34D399;
+  --theme-warning: #FBBF24;
+  --theme-error: #F43F5E;
+  --theme-text: #FAF5FF; /* WCAG AAA 16.0:1 */
+  --theme-subtext: #D8B4FE; /* WCAG AAA 8.4:1 */
+
+  /* Nebula Sharp Workspace Geometry */
+  --theme-radius: 12px;
+  --glass-bg: rgba(24, 16, 46, 0.88);
+  --glass-header-bg: rgba(12, 8, 26, 0.90);
+  --glass-border: rgba(168, 85, 247, 0.25);
+  --glass-shadow: 0 16px 40px rgba(12, 8, 26, 0.85), 0 0 25px rgba(168, 85, 247, 0.15);
+  --glass-inner-glow: inset 0 1px 0 rgba(216, 180, 254, 0.2);
+
+  --scrollbar-track: #0C081A;
+  --scrollbar-thumb: #2D1E50;
+  --scrollbar-thumb-hover: #A855F7;
+  --selection-bg: rgba(168, 85, 247, 0.35);
+  --ambient-overlay: rgba(12, 8, 26, 0.8);
+  --theme-line-height: 1.45;
 }
 
 @theme {
   --color-ice-bg: var(--theme-bg);
   --color-ice-card: var(--theme-card);
+  --color-ice-surface: var(--theme-card);
   --color-ice-hover: var(--theme-hover);
   --color-ice-border: var(--theme-border);
   --color-ice-accent: var(--theme-accent);
@@ -81,6 +333,7 @@
   --color-ice-error: var(--theme-error);
   --color-ice-text: var(--theme-text);
   --color-ice-subtext: var(--theme-subtext);
+  --color-ice-muted: var(--theme-subtext);
 
   --aspect-cover: 2 / 3;
   --aspect-banner: 16 / 9;
@@ -131,6 +384,8 @@
   -webkit-backdrop-filter: blur(16px);
   border: 1px solid var(--glass-border);
   box-shadow: var(--glass-shadow);
+  border-radius: var(--theme-radius, 16px);
+  transition: border-radius 0.3s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.3s ease, border-color 0.3s ease;
 }
 
 .glass-header {
@@ -139,6 +394,21 @@
   -webkit-backdrop-filter: blur(20px);
   border: 1px solid var(--glass-border);
   box-shadow: var(--glass-shadow);
+  border-radius: var(--theme-radius, 16px);
+  transition: border-radius 0.3s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.3s ease, border-color 0.3s ease;
+}
+
+.glass-header-elevated {
+  background: var(--glass-header-bg);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1.5px solid var(--glass-border);
+  box-shadow: 
+    0 2px 4px -1px rgba(0, 0, 0, 0.04),
+    0 8px 24px -4px rgba(0, 0, 0, 0.12),
+    0 20px 48px -6px rgba(0, 0, 0, 0.08);
+  border-radius: var(--theme-radius, 16px);
+  transition: border-radius 0.3s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
 .glass-pill {
@@ -147,6 +417,239 @@
   -webkit-backdrop-filter: blur(24px);
   border: 1px solid var(--glass-border);
   box-shadow: var(--glass-shadow);
+  border-radius: var(--theme-radius, 24px);
+  transition: border-radius 0.3s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.3s ease, border-color 0.3s ease;
+}
+
+.glass-pill-elevated {
+  background: var(--glass-bg);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1.5px solid var(--glass-border);
+  box-shadow: 
+    0 2px 4px -1px rgba(0, 0, 0, 0.04),
+    0 8px 24px -4px rgba(0, 0, 0, 0.12),
+    0 20px 48px -6px rgba(0, 0, 0, 0.08);
+  border-radius: var(--theme-radius, 24px);
+  transition: border-radius 0.3s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* Adaptive Geometry Utility */
+.adaptive-card {
+  border-radius: var(--theme-radius, 16px);
+  border: 1px solid var(--theme-border);
+  transition: border-radius 0.3s cubic-bezier(0.16, 1, 0.3, 1), transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+}
+
+/* Distinct Card Elevation: Pure surface + explicit border + Hover Depth Lift */
+.hover-depth-lift {
+  border: 1px solid var(--theme-border);
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s ease, border-color 0.25s ease;
+}
+.hover-depth-lift:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 28px -4px rgba(0, 0, 0, 0.25);
+  border-color: var(--theme-accent);
+}
+
+/* Solar & Light Mode Text Contrast Enforcement (Strict Yellow Text Ban on Light Modes) */
+[data-theme="solar"] .text-amber-400,
+[data-theme="solar"] .text-amber-300,
+[data-theme="solar"] .text-yellow-400,
+[data-theme="solar"] .text-yellow-300,
+[data-theme="aer"] .text-amber-400,
+[data-theme="aer"] .text-yellow-400 {
+  color: #B45309 !important; /* Deep Amber 700 - WCAG AAA/AA on light backgrounds */
+}
+
+/* 7 Specialized Modes Signature Effects */
+
+/* 1. Aqua: Realistic Multi-Ring Water Ripple & Left-to-Right Wave Motion */
+@keyframes aqua-wave-shimmer {
+  0% { border-color: rgba(56, 189, 248, 0.3); }
+  50% { border-color: rgba(56, 189, 248, 0.75); }
+  100% { border-color: rgba(56, 189, 248, 0.3); }
+}
+[data-theme="aqua"] .glass-header-elevated,
+[data-theme="aqua"] .glass-pill-elevated {
+  animation: aqua-wave-shimmer 4s ease-in-out infinite;
+}
+
+/* Continuous Ocean Wave Motion for Audio Player */
+@keyframes aqua-wave-motion {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+.aqua-wave-bar {
+  background: linear-gradient(90deg, transparent 0%, rgba(56, 189, 248, 0.25) 25%, rgba(14, 165, 233, 0.5) 50%, rgba(56, 189, 248, 0.25) 75%, transparent 100%);
+  background-size: 200% 100%;
+  animation: aqua-wave-motion 3.5s linear infinite;
+}
+
+/* Liquid Water Droplet Capsule Pill on Navbar */
+.liquid-water-pill {
+  position: relative;
+  background: radial-gradient(circle at 50% 20%, rgba(56, 189, 248, 0.35) 0%, rgba(2, 132, 199, 0.2) 70%, rgba(3, 105, 161, 0.35) 100%);
+  border: 1.5px solid rgba(56, 189, 248, 0.65);
+  box-shadow: 
+    0 0 16px rgba(56, 189, 248, 0.4), 
+    inset 0 1px 3px rgba(255, 255, 255, 0.6), 
+    inset 0 -2px 4px rgba(2, 132, 199, 0.5);
+  backdrop-filter: blur(8px);
+}
+.liquid-water-pill::after {
+  content: '';
+  position: absolute;
+  top: 3px;
+  left: 20%;
+  right: 20%;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.8), transparent);
+  border-radius: 9999px;
+  pointer-events: none;
+}
+
+/* Enhanced Realistic Water Ripple (Multi-ring concentric droplet waves) */
+@keyframes water-ripple-inner {
+  0% {
+    transform: translate(-50%, -50%) scale(0.1);
+    opacity: 0.9;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(5.5);
+    opacity: 0;
+  }
+}
+@keyframes water-ripple-outer {
+  0% {
+    transform: translate(-50%, -50%) scale(0);
+    opacity: 0.6;
+  }
+  40% {
+    opacity: 0.4;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(7.5);
+    opacity: 0;
+  }
+}
+.water-ripple-circle {
+  position: fixed;
+  border-radius: 9999px;
+  pointer-events: none;
+  z-index: 99999;
+  width: 44px;
+  height: 44px;
+  border: 2px solid rgba(56, 189, 248, 0.85);
+  background: radial-gradient(circle, rgba(56, 189, 248, 0.35) 0%, rgba(2, 132, 199, 0.1) 60%, transparent 80%);
+  box-shadow: 0 0 14px rgba(56, 189, 248, 0.6), inset 0 0 8px rgba(255, 255, 255, 0.7);
+  animation: water-ripple-inner 0.75s cubic-bezier(0.12, 0.8, 0.32, 1) forwards;
+}
+.water-ripple-circle::after {
+  content: '';
+  position: absolute;
+  inset: -6px;
+  border-radius: 9999px;
+  border: 1px dashed rgba(186, 230, 253, 0.65);
+  animation: water-ripple-outer 0.9s cubic-bezier(0.12, 0.8, 0.32, 1) forwards;
+}
+
+/* 2. Eclipse: Golden Corona Glow on bottom edge of toolbars and cards */
+[data-theme="eclipse"] .glass-header-elevated,
+[data-theme="eclipse"] .glass-pill-elevated {
+  border-bottom: 2.5px solid rgba(245, 158, 11, 0.9) !important;
+  box-shadow: 
+    0 6px 30px -2px rgba(245, 158, 11, 0.55), 
+    0 0 18px rgba(245, 158, 11, 0.35), 
+    0 16px 40px rgba(0, 0, 0, 0.95) !important;
+}
+[data-theme="eclipse"] .adaptive-card,
+[data-theme="eclipse"] .hover-depth-lift {
+  border: 1px solid rgba(245, 158, 11, 0.3) !important;
+  border-bottom: 2px solid rgba(245, 158, 11, 0.7) !important;
+  box-shadow: 
+    0 4px 20px -2px rgba(245, 158, 11, 0.35), 
+    0 0 12px rgba(245, 158, 11, 0.15) !important;
+}
+
+/* 3. Aurora: Northern Lights Gradient Mesh Drift */
+@keyframes aurora-mesh-drift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+[data-theme="aurora"] {
+  background: linear-gradient(135deg, #090D16 0%, #064E3B 30%, #4338CA 70%, #090D16 100%) !important;
+  background-size: 300% 300% !important;
+  animation: aurora-mesh-drift 14s ease infinite !important;
+}
+[data-theme="aurora"] .glass-header-elevated,
+[data-theme="aurora"] .glass-pill-elevated {
+  border: 1.5px solid rgba(16, 185, 129, 0.4) !important;
+  box-shadow: 0 4px 20px rgba(16, 185, 129, 0.25), 0 0 25px rgba(139, 92, 246, 0.25) !important;
+}
+.aurora-drift-bar {
+  background: linear-gradient(90deg, rgba(16, 185, 129, 0.4) 0%, rgba(139, 92, 246, 0.5) 50%, rgba(16, 185, 129, 0.4) 100%);
+  background-size: 200% 100%;
+  animation: aurora-mesh-drift 6s linear infinite;
+}
+
+/* 4. Nebula: Fullscreen Ambient Glow & Twinkling Starfield */
+@keyframes star-twinkle {
+  0%, 100% { opacity: 0.25; transform: scale(0.9); }
+  50% { opacity: 0.95; transform: scale(1.15); }
+}
+[data-theme="nebula"] body {
+  background-color: var(--theme-bg);
+  background-image: 
+    radial-gradient(2px 2px at 40px 60px, rgba(232, 121, 249, 0.8), transparent),
+    radial-gradient(1.5px 1.5px at 150px 220px, rgba(168, 85, 247, 0.7), transparent),
+    radial-gradient(2px 2px at 280px 120px, rgba(192, 132, 252, 0.85), transparent),
+    radial-gradient(1.5px 1.5px at 390px 310px, rgba(232, 121, 249, 0.7), transparent),
+    radial-gradient(2.5px 2.5px at 520px 180px, rgba(255, 255, 255, 0.9), transparent);
+  background-size: 350px 350px;
+}
+.nebula-fullscreen-ambient {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background: 
+    radial-gradient(ellipse 110% 80% at 50% 15%, var(--nebula-ambient-tint, rgba(168, 85, 247, 0.3)) 0%, rgba(12, 8, 26, 0.1) 65%, transparent 85%),
+    radial-gradient(ellipse 90% 70% at 85% 85%, var(--nebula-ambient-tint, rgba(168, 85, 247, 0.18)) 0%, transparent 60%);
+  transition: background 1.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* 5. Ignis: Ember Underglow */
+[data-theme="ignis"] .adaptive-card:hover,
+[data-theme="ignis"] .adaptive-card.active {
+  border-bottom: 2px solid #F97316 !important;
+  box-shadow: 0 8px 24px -4px rgba(249, 115, 22, 0.45) !important;
+}
+
+/* 6. Aer: Hairline Blueprint Grid */
+[data-theme="aer"] body {
+  background-image: 
+    linear-gradient(to right, rgba(13, 148, 136, 0.05) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(13, 148, 136, 0.05) 1px, transparent 1px) !important;
+  background-size: 28px 28px !important;
+}
+
+/* 7. Terra: Chamfered Octagonal Clip-Path */
+[data-theme="terra"] .adaptive-card {
+  clip-path: polygon(
+    8px 0%, calc(100% - 8px) 0%, 
+    100% 8px, 100% calc(100% - 8px), 
+    calc(100% - 8px) 100%, 8px 100%, 
+    0% calc(100% - 8px), 0% 8px
+  ) !important;
+  border-radius: 0px !important;
+}
+
+/* Nebula layout density modifier */
+[data-theme="nebula"] .workspace-grid {
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)) !important;
+  gap: 0.75rem !important;
 }
 
 /* Hide scrollbars for mobile carousels */

@@ -116,7 +116,65 @@ When adding a new field to `Game`, `MediaItem`, or `MediaPlaylist`:
 
 ---
 
-## 7. Quick Reference — Key Files
+## 7. UI Theme Contrast, Elevation & Celestial Design System (v1.2.5 / v6.3)
+
+### 7.1 Color Contrast Standards (WCAG AAA / AA)
+- **Primary Body & Heading Text:** Must strictly achieve a minimum contrast ratio of **7:1 (WCAG AAA)** against its container/background.
+  - In Solar mode: Background `#F8F6F1` requires primary text `#181512` (15.2:1 ratio).
+- **Secondary Text, Subtitles & Metadata:** Must achieve a minimum contrast ratio of **4.5:1 (WCAG AA)**.
+  - In Solar mode: Subtext must be `#524C46` or darker (6.2:1 ratio). Never use low-contrast grey (`#9CA3AF`, `#78716C`) on light backgrounds.
+- **Interactive Accents:** Interactive elements must have a minimum contrast ratio of **4.5:1** on light backgrounds (e.g. Amber 600 `#D97706`).
+
+### 7.2 Toolbar Elevation & Silhouette Rule
+To prevent floating toolbars (Navbar Island, Mobile Tab Bar, MiniPlayer) from visually merging/drowning into light or white backgrounds:
+- **RULE (Tinted Glass):** Never use plain transparent white glass. Use tinted glass with minimum 90% opacity (`rgba(255, 255, 255, 0.92)`).
+- **RULE (Double-edge Rim Border):** Always pair an outer colored rim (`border: 1px solid rgba(217, 119, 6, 0.22)`) with an inner specular highlight (`box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.95)`).
+- **RULE (Layered Ambient Shadow):** Combine contact shadow (2px-4px) with diffused ambient shadow (16px-36px) to physically elevate the toolbar above scrolling content.
+
+### 7.3 Full Adaptive Geometry Architecture
+When implementing celestial and elemental modes:
+- **RULE:** Themes must not only swap color palettes, but also alter component geometry (`--theme-radius`), glass opacity (`--glass-blur`), and surface textures via CSS variables.
+- **RULE:** The `Aer` (Lite) theme MUST disable all GPU-heavy filters (`backdrop-filter: none !important`, `box-shadow: none !important`, `0ms delay`) for maximum battery and FPS efficiency.
+- **RULE:** The `Eclipse` theme MUST use pure `#000000` on canvas and backgrounds to fully switch off OLED pixels.
+
+### 7.4 Solar Text Contrast & Color Ban Rules
+- NEVER use light amber or yellow (`#FBBF24`, `#F59E0B`, `text-amber-400`, `text-yellow-400`) as text color on light backgrounds.
+- All body text in light modes must be `#1C1917` (AAA 15:1), secondary text `#44403C` (AA 6:1), and active text `#B45309` (AA 5:1).
+- Yellow/amber is strictly restricted to button backgrounds, bold icons, and glowing rims.
+
+### 7.5 Hardcoded Dark Container Ban
+- Hardcoded dark backgrounds (`bg-black`, `bg-slate-900`, `bg-[#0B0F19]`) inside text boxes, inputs, cards, and modals are strictly prohibited.
+- All containers must bind to dynamic theme tokens (`bg-ice-card`, `bg-ice-hover/50`, `bg-ice-bg/80`).
+
+### 7.6 Dual Distinct Elevation Architecture
+- Floating Toolbars (Header, Tab Bar, MiniPlayer): Tinted glass (0.96) + 1.5px rim border + 3-stage layered anti-gravity shadow.
+- Content Cards (Cards, Panels): Pure card surface + 1px border + hover depth lift (`translateY(-3px)`) with subtle ambient shadow.
+
+### 7.7 Specialized Mode Muted Switch Paradigm
+- When in 1 of 7 specialized modes, the quick Sun/Moon toggle switch must display `opacity: 0.4; filter: grayscale(100%)`.
+- Clicking the muted switch immediately exits the specialized mode back to standard Solar or Lunar.
+
+### 7.8 Stacking Context & Modal Portaling Invariant
+- **Bắt buộc dùng React Portal cho Modal/Floating Hub:** Mọi component dạng lớp phủ toàn màn hình (`fixed inset-0`) như `CelestialThemeHub`, `GameInstallModal`, `ProfileModal` BẮT BUỘC phải được render qua `createPortal(jsx, document.body)`.
+- **Tuyệt đối không mount trực tiếp bên trong component có `backdrop-filter` hoặc `transform`:** Điều này ngăn chặn triệt để lỗi phần tử `fixed` bị bẫy trong containing block của Navbar/Header.
+
+### 7.9 Toggle Switch Visual Polarity Standard
+- **Quy ước vị trí con trượt:**
+  - Vị trí Trái (Left): Trạng thái Ban Đêm / Tối (`Lunar 🌙`). Con trượt ở bên trái, biểu tượng Mặt Trăng, bầu trời sao.
+  - Vị trí Phải (Right): Trạng thái Ban Ngày / Sáng (`Solar ☀️`). Con trượt ở bên phải, biểu tượng Mặt Trời, bầu trời mây ấm.
+- **Phản ánh trạng thái hiện hành:** Nút gạt luôn thể hiện chế độ đang được kích hoạt, tuyệt đối không hiển thị chế độ mục tiêu sẽ chuyển đến.
+
+### 7.10 Dynamic Theme Accent on Buttons & Media Controls
+- **Không hardcoded màu vàng hổ phách:** Cấm sử dụng trực tiếp các class `bg-amber-500`, `text-amber-400`, `bg-yellow-400` cho các nút bấm hành động chung và thanh phát nhạc.
+- **Sử dụng Theme Accent Token:** Toàn bộ nút chính và thanh điều khiển nhạc phải gắn với `var(--theme-accent)` (`bg-ice-accent`, `text-ice-accent`), tự động biến chuyển theo từng Mode (Xanh biển Aqua, Cam lửa Ignis, Ngọc bích Aurora, Đất rêu Terra...).
+
+### 7.11 Surface Contrast Separation (Zero-Merge Invariant)
+- **Thanh công cụ (Toolbars):** Không bao giờ được cùng mã màu hex hoặc độ mờ với `--theme-bg`. Bắt buộc có viền bắt sáng riêng và độ chênh lệch sắc độ bề mặt tối thiểu để luôn nổi bật trên màn hình.
+- **Thẻ nội dung (Cards):** Bắt buộc có viền bao quanh (`--theme-card-border` / `border-ice-border/70`) ở mọi mode để phân tách rõ rệt khối nội dung khỏi nền launcher.
+
+---
+
+## 8. Quick Reference — Key Files
 
 | Concern | File(s) |
 |---------|---------|
@@ -128,8 +186,9 @@ When adding a new field to `Game`, `MediaItem`, or `MediaPlaylist`:
 | Hidden filter — Media | `src/renderer/src/components/media/MediaView.tsx` (baseMedia) |
 | Electron window focus | `src/main/index.ts` |
 | Android IME / keyboard | `android/app/src/main/AndroidManifest.xml`, `capacitor.config.json` |
+| Theme engine & tokens | `src/renderer/src/index.css`, `src/renderer/src/hooks/useTheme.ts` |
 | Verification suite | `scripts/run-all-verifications.cjs` |
 
 ---
 
-*Last updated: 2026-11-17 | Icelauch v1.2.2 System Overhaul*
+*Last updated: 2026-11-18 | Icelauch v1.2.5 / v6.4 UI Deep Refinement & Polish*

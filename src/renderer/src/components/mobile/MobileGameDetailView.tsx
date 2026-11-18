@@ -67,23 +67,23 @@ export const MobileGameDetailView: React.FC<MobileGameDetailViewProps> = ({
         <button
           type="button"
           onClick={onBack}
-          className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-white font-medium text-xs border border-white/10 active:scale-95 transition-all shrink-0"
+          className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-ice-card hover:bg-ice-hover text-ice-text font-medium text-xs border border-ice-border/70 active:scale-95 transition-all shrink-0"
           title="Quay lại danh sách"
         >
-          <ArrowLeft className="w-4 h-4 text-cyan-400" />
+          <ArrowLeft className="w-4 h-4 text-ice-accent" />
           <span>Quay lại</span>
         </button>
 
         <div className="flex-1 min-w-0 mx-2 text-center">
-          <p className="text-xs font-bold text-white truncate">{game.name}</p>
-          <p className="text-[10px] text-slate-400 truncate">{game.genre || 'Game PC'}</p>
+          <p className="text-xs font-bold text-ice-text truncate">{game.name}</p>
+          <p className="text-[10px] text-ice-subtext truncate">{game.genre || 'Game PC'}</p>
         </div>
 
         {youtubeVideoId ? (
           <button
             type="button"
             onClick={() => window.open(game.trailerUrl, '_blank')}
-            className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-400 font-semibold text-xs border border-red-500/20 active:scale-95 transition-all shrink-0"
+            className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-500 font-semibold text-xs border border-red-500/30 active:scale-95 transition-all shrink-0"
             title="Mở xem trên YouTube"
           >
             <ExternalLink className="w-3.5 h-3.5" />
@@ -133,7 +133,7 @@ export const MobileGameDetailView: React.FC<MobileGameDetailViewProps> = ({
               )}
             </div>
 
-            <h1 className="text-lg font-black text-white leading-tight">
+            <h1 className="text-lg font-black text-ice-text leading-tight">
               {game.name}
             </h1>
           </div>
@@ -143,9 +143,9 @@ export const MobileGameDetailView: React.FC<MobileGameDetailViewProps> = ({
             <button
               type="button"
               onClick={() => onIncompatibleClick(game)}
-              className="flex-1 h-11 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/40 text-amber-300 text-xs font-bold tracking-wider uppercase flex items-center justify-center gap-2 shadow-lg transition-all active:scale-98"
+              className="flex-1 h-11 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/40 text-amber-500 text-xs font-bold tracking-wider uppercase flex items-center justify-center gap-2 shadow-lg transition-all active:scale-98"
             >
-              <Monitor className="w-4 h-4 text-amber-400" />
+              <Monitor className="w-4 h-4 text-amber-500" />
               <span>🚫 Chỉ hỗ trợ PC</span>
             </button>
 
@@ -153,7 +153,7 @@ export const MobileGameDetailView: React.FC<MobileGameDetailViewProps> = ({
             <button
               type="button"
               onClick={() => setIsExtensionsModalOpen(true)}
-              className="h-11 px-3 rounded-xl bg-purple-500/20 hover:bg-purple-500/30 border border-purple-500/40 text-purple-300 text-xs font-bold flex items-center justify-center gap-1.5 shadow-lg transition-all active:scale-95 shrink-0"
+              className="h-11 px-3 rounded-xl bg-purple-500/20 hover:bg-purple-500/30 border border-purple-500/40 text-purple-400 text-xs font-bold flex items-center justify-center gap-1.5 shadow-lg transition-all active:scale-95 shrink-0"
               title="Xem các gói Việt Hóa, DLC và Update"
             >
               <Puzzle className="w-4 h-4 text-purple-400" />
@@ -166,7 +166,7 @@ export const MobileGameDetailView: React.FC<MobileGameDetailViewProps> = ({
               className={`w-11 h-11 rounded-xl border flex items-center justify-center transition-all shrink-0 active:scale-95 ${
                 game.inLibrary
                   ? 'bg-ice-accent/25 border-ice-accent text-ice-accent shadow-md shadow-blue-500/20'
-                  : 'bg-white/5 border-white/10 text-white/80 hover:text-white hover:bg-white/10'
+                  : 'bg-ice-card border-ice-border text-ice-text hover:bg-ice-hover'
               }`}
               title={game.inLibrary ? 'Đã lưu trong thư viện' : 'Lưu vào thư viện'}
             >
@@ -216,22 +216,22 @@ export const MobileGameDetailView: React.FC<MobileGameDetailViewProps> = ({
               <HardDrive className="w-3.5 h-3.5 text-ice-accent" />
               <span>Dung lượng cài đặt:</span>
             </span>
-            <span className="text-white font-bold">{formatBytes(game.expectedSize)}</span>
+            <span className="text-ice-text font-bold">{formatBytes(game.expectedSize)}</span>
           </div>
 
           <div className="flex items-center justify-between">
             <span className="flex items-center gap-1.5">
-              <Clock className="w-3.5 h-3.5 text-amber-400" />
+              <Clock className="w-3.5 h-3.5 text-ice-accent" />
               <span>Chơi lần cuối:</span>
             </span>
-            <span className="text-white font-medium">{game.lastPlayed || 'Chưa mở'}</span>
+            <span className="text-ice-text font-medium">{game.lastPlayed || 'Chưa mở'}</span>
           </div>
 
           {game.status === 'ready' && onOpenFolder && (
             <button
               type="button"
               onClick={() => onOpenFolder(game.id)}
-              className="w-full mt-1 h-8 rounded-lg bg-white/5 hover:bg-white/10 text-white text-xs font-semibold flex items-center justify-center gap-1.5 border border-white/10"
+              className="w-full mt-1 h-8 rounded-lg bg-ice-hover/50 hover:bg-ice-hover text-ice-text text-xs font-semibold flex items-center justify-center gap-1.5 border border-ice-border/70"
             >
               <FolderOpen className="w-3.5 h-3.5" />
               <span>Mở thư mục cài đặt</span>
@@ -243,7 +243,7 @@ export const MobileGameDetailView: React.FC<MobileGameDetailViewProps> = ({
       {/* Screenshots Filmstrip Carousel */}
         {screenshots.length > 0 && (
           <div className="space-y-2 pt-1">
-            <span className="text-[11px] font-bold text-white uppercase tracking-wider flex items-center gap-1.5">
+            <span className="text-[11px] font-bold text-ice-text uppercase tracking-wider flex items-center gap-1.5">
               <ImageIcon className="w-3.5 h-3.5 text-ice-accent" />
               <span>Ảnh chụp màn hình</span>
             </span>

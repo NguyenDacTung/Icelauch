@@ -246,7 +246,7 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
                     placeholder="VD: gamerpro, dactung..."
                     maxLength={25}
                     required
-                    className="w-full h-9 px-3 rounded-lg bg-black/40 border border-ice-border text-xs text-cyan-300 font-mono placeholder-ice-subtext/60 focus:outline-none focus:border-ice-accent transition-colors"
+                    className="w-full h-9 px-3 rounded-lg bg-ice-hover/60 border border-ice-border text-xs text-ice-accent font-mono placeholder-ice-subtext/60 focus:outline-none focus:border-ice-accent transition-colors"
                   />
                 </div>
 
@@ -261,7 +261,7 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
                     placeholder="VD: Gamer Pro, Đắc Tùng, Ba Mẹ..."
                     maxLength={20}
                     required
-                    className="w-full h-9 px-3 rounded-lg bg-black/40 border border-ice-border text-xs text-white placeholder-ice-subtext/60 focus:outline-none focus:border-ice-accent transition-colors font-medium"
+                    className="w-full h-9 px-3 rounded-lg bg-ice-hover/60 border border-ice-border text-xs text-ice-text placeholder-ice-subtext/60 focus:outline-none focus:border-ice-accent transition-colors font-medium"
                   />
                 </div>
               </div>
@@ -287,14 +287,14 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
               <span className="text-xs font-semibold text-ice-subtext uppercase tracking-wider">
                 Chọn Ảnh Đại Diện (Avatar)
               </span>
-              <div className="flex items-center gap-1 p-0.5 rounded-lg bg-black/40 border border-ice-border">
+              <div className="flex items-center gap-1 p-0.5 rounded-lg bg-ice-hover/50 border border-ice-border">
                 <button
                   type="button"
                   onClick={() => setAvatarTab('presets')}
                   className={`px-3 py-1 rounded text-xs font-bold transition-all ${
                     avatarTab === 'presets'
                       ? 'bg-ice-accent text-white shadow'
-                      : 'text-ice-subtext hover:text-white'
+                      : 'text-ice-subtext hover:text-ice-text'
                   }`}
                 >
                   Kho 20 Mẫu Có Sẵn
@@ -305,7 +305,7 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
                   className={`px-3 py-1 rounded text-xs font-bold transition-all ${
                     avatarTab === 'custom'
                       ? 'bg-ice-accent text-white shadow'
-                      : 'text-ice-subtext hover:text-white'
+                      : 'text-ice-subtext hover:text-ice-text'
                   }`}
                 >
                   Ảnh Tùy Chỉnh
@@ -314,7 +314,7 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
             </div>
 
             {avatarTab === 'presets' ? (
-              <div className="grid grid-cols-5 sm:grid-cols-10 gap-2 p-3 rounded-xl bg-black/30 border border-ice-border max-h-44 overflow-y-auto scrollbar-thin">
+              <div className="grid grid-cols-5 sm:grid-cols-10 gap-2 p-3 rounded-xl bg-ice-hover/40 border border-ice-border max-h-44 overflow-y-auto scrollbar-thin">
                 {AVATAR_PRESETS.map((preset) => {
                   const isSelected = selectedAvatar === preset.id;
                   return (
@@ -324,14 +324,14 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
                       onClick={() => setSelectedAvatar(preset.id)}
                       className={`relative aspect-square rounded-xl flex items-center justify-center p-1 border-2 transition-all group ${
                         isSelected
-                          ? 'border-amber-400 scale-110 shadow-lg shadow-amber-500/20 z-10'
-                          : 'border-transparent hover:border-white/30'
+                          ? 'border-ice-accent scale-110 shadow-lg shadow-ice-accent/20 z-10'
+                          : 'border-transparent hover:border-ice-border/60'
                       }`}
                       title={preset.name}
                     >
                       <AvatarBadge avatar={preset.id} size="sm" showBorder={false} />
                       {isSelected && (
-                        <div className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-amber-400 text-black flex items-center justify-center">
+                        <div className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-ice-accent text-white flex items-center justify-center">
                           <Check className="w-2.5 h-2.5 stroke-[3]" />
                         </div>
                       )}
@@ -340,7 +340,7 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
                 })}
               </div>
             ) : (
-              <div className="space-y-3 p-4 rounded-xl bg-black/30 border border-ice-border">
+              <div className="space-y-3 p-4 rounded-xl bg-ice-hover/40 border border-ice-border">
                 <div className="flex items-center gap-2">
                   <div className="relative flex-1">
                     <LinkIcon className="w-3.5 h-3.5 text-ice-subtext absolute left-3 top-1/2 -translate-y-1/2" />
@@ -352,13 +352,13 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
                         setSelectedAvatar(e.target.value);
                       }}
                       placeholder="Dán đường dẫn ảnh URL (https://...)"
-                      className="w-full h-9 pl-9 pr-3 rounded-lg bg-black/50 border border-ice-border text-xs text-white placeholder-ice-subtext focus:outline-none focus:border-ice-accent"
+                      className="w-full h-9 pl-9 pr-3 rounded-lg bg-ice-hover/60 border border-ice-border text-xs text-ice-text placeholder-ice-subtext/60 focus:outline-none focus:border-ice-accent"
                     />
                   </div>
                   <button
                     type="button"
                     onClick={handleBrowseCustomAvatar}
-                    className="h-9 px-3.5 rounded-lg bg-white/10 hover:bg-white/20 text-white text-xs font-semibold flex items-center gap-1.5 transition-colors border border-white/10"
+                    className="h-9 px-3.5 rounded-lg bg-ice-card hover:bg-ice-hover text-ice-text text-xs font-semibold flex items-center gap-1.5 transition-colors border border-ice-border"
                   >
                     <Upload className="w-3.5 h-3.5" />
                     <span>Duyệt Ảnh Máy Tính</span>
@@ -388,12 +388,12 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
                       onChange={(e) => setPassword(e.target.value)}
                       placeholder="Tối thiểu 4 ký tự"
                       required={!isEditing}
-                      className="w-full h-10 pl-3 pr-9 rounded-lg bg-black/50 border border-ice-border text-xs text-white focus:outline-none focus:border-ice-accent transition-colors font-medium"
+                      className="w-full h-10 pl-3 pr-9 rounded-lg bg-ice-hover/60 border border-ice-border text-xs text-ice-text focus:outline-none focus:border-ice-accent transition-colors font-medium"
                     />
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-2.5 top-1/2 -translate-y-1/2 text-ice-subtext hover:text-white p-1"
+                      className="absolute right-2.5 top-1/2 -translate-y-1/2 text-ice-subtext hover:text-ice-text p-1"
                     >
                       {showPassword ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
                     </button>
@@ -410,7 +410,7 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
                     onChange={(e) => setConfirmPassword(e.target.value)}
                     placeholder="Nhập lại mật khẩu"
                     required={!isEditing || password.length > 0}
-                    className="w-full h-10 px-3 rounded-lg bg-black/50 border border-ice-border text-xs text-white focus:outline-none focus:border-ice-accent transition-colors font-medium"
+                    className="w-full h-10 px-3 rounded-lg bg-ice-hover/60 border border-ice-border text-xs text-ice-text focus:outline-none focus:border-ice-accent transition-colors font-medium"
                   />
                 </div>
               </div>
@@ -420,9 +420,9 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
               </p>
             </div>
           ) : (
-            <div className="space-y-3 p-4 rounded-xl bg-amber-500/5 border border-amber-500/20">
-              <div className="flex items-center gap-2 text-amber-300 text-xs font-bold uppercase tracking-wider">
-                <KeyRound className="w-4 h-4 text-amber-400" />
+            <div className="space-y-3 p-4 rounded-xl bg-amber-500/10 border border-amber-500/20">
+              <div className="flex items-center gap-2 text-amber-600 dark:text-amber-300 text-xs font-bold uppercase tracking-wider">
+                <KeyRound className="w-4 h-4 text-amber-500" />
                 <span>{isEditing ? 'Mã PIN Admin (Để trống nếu không đổi)' : 'Cài Đặt Mã PIN Admin (4 - 10 Chữ Số) *'}</span>
               </div>
 
@@ -438,7 +438,7 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
                     onChange={(e) => setPin(e.target.value.replace(/\D/g, '').slice(0, 10))}
                     placeholder="Từ 4 đến 10 số"
                     required={!isEditing}
-                    className="w-full h-10 px-3 rounded-lg bg-black/50 border border-ice-border text-sm text-white tracking-widest focus:outline-none focus:border-amber-400 font-mono transition-colors"
+                    className="w-full h-10 px-3 rounded-lg bg-ice-hover/60 border border-ice-border text-sm text-ice-text tracking-widest focus:outline-none focus:border-amber-500 font-mono transition-colors"
                   />
                 </div>
 
@@ -453,7 +453,7 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
                     onChange={(e) => setConfirmPin(e.target.value.replace(/\D/g, '').slice(0, 10))}
                     placeholder="Nhập lại mã PIN"
                     required={!isEditing || pin.length > 0}
-                    className="w-full h-10 px-3 rounded-lg bg-black/50 border border-ice-border text-sm text-white tracking-widest focus:outline-none focus:border-amber-400 font-mono transition-colors"
+                    className="w-full h-10 px-3 rounded-lg bg-ice-hover/60 border border-ice-border text-sm text-ice-text tracking-widest focus:outline-none focus:border-amber-500 font-mono transition-colors"
                   />
                 </div>
               </div>

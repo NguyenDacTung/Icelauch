@@ -20,6 +20,7 @@ import {
   updateMediaSessionPositionState, 
   clearMediaSession 
 } from '../../utils/mediaSession';
+import { useTheme } from '../../hooks/useTheme';
 
 interface MiniPlayerProps {
   currentTrack: MediaItem | null;
@@ -66,6 +67,7 @@ export const MiniPlayer: React.FC<MiniPlayerProps> = ({
   onToggleMute,
 }) => {
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const { theme } = useTheme();
   const lastReportedTimeRef = useRef<number>(0);
   const [currentTime, setCurrentTime] = useState<number>(0);
   const [duration, setDuration] = useState<number>(0);
@@ -300,7 +302,13 @@ export const MiniPlayer: React.FC<MiniPlayerProps> = ({
       {/* Floating Pill MiniPlayer (Centered at bottom 16px, auto slide-up animation) */}
       {currentTrack && !isTurntableActive && !hideVisualBar && (
         <div className="fixed bottom-4 left-1/2 -translate-x-1/2 w-[94%] max-w-3xl z-40 select-none pointer-events-auto transition-all duration-300 animate-in fade-in slide-in-from-bottom-6">
-          <div className="glass-pill rounded-2xl px-4 py-2 flex items-center justify-between gap-3 border border-ice-border/70 shadow-[0_16px_40px_rgba(0,0,0,0.35)] backdrop-blur-2xl">
+          <div className={`glass-pill-elevated backdrop-blur-2xl px-4 py-2 flex items-center justify-between gap-3 relative overflow-hidden ${
+            theme === 'aqua' 
+              ? 'aqua-wave-bar border-sky-400/40 shadow-[0_4px_24px_rgba(56,189,248,0.25)]' 
+              : theme === 'aurora' 
+              ? 'aurora-drift-bar border-emerald-400/30' 
+              : ''
+          }`}>
             {/* Left: Track Info & Artwork */}
             <div
               onClick={onNavigateToTrack}
@@ -314,30 +322,30 @@ export const MiniPlayer: React.FC<MiniPlayerProps> = ({
                   <img
                     src={coverUrl}
                     alt={currentTrack.title}
-                    className="w-10 h-10 object-cover rounded-xl shadow-md border border-ice-border/70 group-hover:border-amber-400/80 transition-all group-hover:scale-105"
+                    className="w-10 h-10 object-cover rounded-xl shadow-md border border-ice-border/70 group-hover:border-ice-accent transition-all group-hover:scale-105"
                   />
                 ) : (
-                  <div className="w-10 h-10 rounded-xl bg-ice-hover/60 border border-ice-border/70 flex items-center justify-center text-amber-400 group-hover:border-amber-400/80 transition-all">
+                  <div className="w-10 h-10 rounded-xl bg-ice-hover/60 border border-ice-border/70 flex items-center justify-center text-ice-accent group-hover:border-ice-accent transition-all">
                     <Music className="w-5 h-5" />
                   </div>
                 )}
                 {isPlaying && (
-                  <span className="absolute -bottom-1 -right-1 w-3 h-3 rounded-full bg-amber-400 border-2 border-ice-card flex items-center justify-center animate-ping" />
+                  <span className="absolute -bottom-1 -right-1 w-3 h-3 rounded-full bg-ice-accent border-2 border-ice-card flex items-center justify-center animate-ping" />
                 )}
               </div>
 
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-1.5">
-                  <p className="text-xs font-bold text-ice-text truncate group-hover:text-amber-400 transition-colors">
+                  <p className="text-xs font-bold text-ice-text truncate group-hover:text-ice-accent transition-colors">
                     {currentTrack.title}
                   </p>
                   {/* Dancing Equalizer next to title */}
                   {isPlaying && (
                     <div className="flex items-end gap-0.5 h-3 shrink-0" title="Đang phát">
-                      <span className="w-0.5 bg-amber-400 rounded-full animate-pulse" style={{ height: '50%', animationDuration: '400ms' }} />
-                      <span className="w-0.5 bg-amber-400 rounded-full animate-pulse" style={{ height: '100%', animationDuration: '600ms' }} />
-                      <span className="w-0.5 bg-amber-400 rounded-full animate-pulse" style={{ height: '30%', animationDuration: '500ms' }} />
-                      <span className="w-0.5 bg-amber-400 rounded-full animate-pulse" style={{ height: '80%', animationDuration: '450ms' }} />
+                      <span className="w-0.5 bg-ice-accent rounded-full animate-pulse" style={{ height: '50%', animationDuration: '400ms' }} />
+                      <span className="w-0.5 bg-ice-accent rounded-full animate-pulse" style={{ height: '100%', animationDuration: '600ms' }} />
+                      <span className="w-0.5 bg-ice-accent rounded-full animate-pulse" style={{ height: '30%', animationDuration: '500ms' }} />
+                      <span className="w-0.5 bg-ice-accent rounded-full animate-pulse" style={{ height: '80%', animationDuration: '450ms' }} />
                     </div>
                   )}
                 </div>
@@ -359,7 +367,7 @@ export const MiniPlayer: React.FC<MiniPlayerProps> = ({
                     e.stopPropagation();
                     onNavigateToTrack();
                   }}
-                  className="p-1.5 rounded-lg text-ice-subtext hover:text-amber-400 hover:bg-ice-hover/60 active:scale-95 transition-all ml-0.5 shrink-0"
+                  className="p-1.5 rounded-lg text-ice-subtext hover:text-ice-accent hover:bg-ice-hover/60 active:scale-95 transition-all ml-0.5 shrink-0"
                   title="Mở toàn màn hình Máy Hát Đĩa Than"
                 >
                   <Disc className={`w-4 h-4 ${isPlaying ? 'animate-spin' : ''}`} style={{ animationDuration: '5s' }} />
@@ -374,7 +382,7 @@ export const MiniPlayer: React.FC<MiniPlayerProps> = ({
                   type="button"
                   onClick={() => setIsShuffle(!isShuffle)}
                   className={`p-1.5 rounded-full transition-colors ${
-                    isShuffle ? 'text-amber-400 bg-amber-400/10' : 'text-ice-subtext hover:text-ice-text hover:bg-ice-hover/50'
+                    isShuffle ? 'text-ice-accent bg-ice-accent/15' : 'text-ice-subtext hover:text-ice-text hover:bg-ice-hover/50'
                   }`}
                   title={isShuffle ? 'Tắt phát ngẫu nhiên' : 'Bật phát ngẫu nhiên'}
                 >
@@ -390,17 +398,17 @@ export const MiniPlayer: React.FC<MiniPlayerProps> = ({
                   <SkipBack className="w-4 h-4" />
                 </button>
 
-                {/* Glowing Amber Play/Pause button */}
+                {/* Glowing Play/Pause button styled with active theme accent */}
                 <button
                   type="button"
                   onClick={onPlayPause}
-                  className="w-9 h-9 rounded-full bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-black flex items-center justify-center shadow-[0_0_16px_rgba(251,191,36,0.35)] transition-all hover:scale-105 active:scale-95"
+                  className="w-9 h-9 rounded-full bg-ice-accent hover:opacity-90 text-white flex items-center justify-center shadow-lg shadow-ice-accent/30 transition-all hover:scale-105 active:scale-95 cursor-pointer"
                   title={isPlaying ? 'Tạm dừng' : 'Phát'}
                 >
                   {isPlaying ? (
-                    <Pause className="w-4 h-4 fill-black text-black" />
+                    <Pause className="w-4 h-4 fill-white text-white" />
                   ) : (
-                    <Play className="w-4 h-4 fill-black text-black ml-0.5" />
+                    <Play className="w-4 h-4 fill-white text-white ml-0.5" />
                   )}
                 </button>
 
@@ -417,7 +425,7 @@ export const MiniPlayer: React.FC<MiniPlayerProps> = ({
                   type="button"
                   onClick={() => setIsRepeat(!isRepeat)}
                   className={`p-1.5 rounded-full transition-colors ${
-                    isRepeat ? 'text-amber-400 bg-amber-400/10' : 'text-ice-subtext hover:text-ice-text hover:bg-ice-hover/50'
+                    isRepeat ? 'text-ice-accent bg-ice-accent/15' : 'text-ice-subtext hover:text-ice-text hover:bg-ice-hover/50'
                   }`}
                   title={isRepeat ? 'Tắt lặp lại' : 'Lặp lại bài này'}
                 >
@@ -436,7 +444,7 @@ export const MiniPlayer: React.FC<MiniPlayerProps> = ({
                     step={0.5}
                     value={currentTime}
                     onChange={handleSeek}
-                    className="w-full h-1 bg-ice-border/60 rounded-lg appearance-none cursor-pointer accent-amber-400 hover:h-1.5 transition-all"
+                    className="w-full h-1 bg-ice-border/60 rounded-lg appearance-none cursor-pointer accent-ice-accent hover:h-1.5 transition-all"
                   />
                 </div>
                 <span className="w-8 text-left tabular-nums">{formatTime(duration)}</span>
@@ -464,7 +472,7 @@ export const MiniPlayer: React.FC<MiniPlayerProps> = ({
                 step={0.05}
                 value={effectiveIsMuted ? 0 : effectiveVolume}
                 onChange={handleVolumeChange}
-                className="w-16 h-1 bg-ice-border/60 rounded-lg appearance-none cursor-pointer accent-amber-400 hover:h-1.5 transition-all"
+                className="w-16 h-1 bg-ice-border/60 rounded-lg appearance-none cursor-pointer accent-ice-accent hover:h-1.5 transition-all"
                 title={`Âm lượng: ${Math.round((effectiveIsMuted ? 0 : effectiveVolume) * 100)}%`}
               />
 

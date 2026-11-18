@@ -1,5 +1,6 @@
 import React from 'react';
 import { Play, Pause, X, Music } from 'lucide-react';
+import { useTheme } from '../../hooks/useTheme';
 import type { MediaItem } from '../../types';
 
 export interface MobileMiniPlayerProps {
@@ -21,6 +22,7 @@ export const MobileMiniPlayer: React.FC<MobileMiniPlayerProps> = ({
   onOpenFullPlayer,
   onClose,
 }) => {
+  const { theme } = useTheme();
   if (!currentTrack) return null;
 
   const progressPercent = duration > 0 ? Math.min(100, Math.max(0, (currentTime / duration) * 100)) : 0;
@@ -33,11 +35,13 @@ export const MobileMiniPlayer: React.FC<MobileMiniPlayerProps> = ({
     : '';
 
   return (
-    <div className="w-full max-w-full overflow-hidden glass-panel border-t border-ice-border/60 shadow-[0_-4px_20px_rgba(0,0,0,0.15)] z-30 select-none shrink-0 flex flex-col transition-all duration-300">
+    <div className={`w-full max-w-full overflow-hidden glass-header-elevated border-t border-ice-border/60 z-30 select-none shrink-0 flex flex-col transition-all duration-300 rounded-none relative ${
+      theme === 'aqua' ? 'aqua-wave-bar border-sky-400/30' : theme === 'aurora' ? 'aurora-drift-bar border-emerald-400/30' : ''
+    }`}>
       {/* 2px Progress Bar at Top */}
       <div className="w-full h-[2px] bg-ice-border/40 relative overflow-hidden">
         <div
-          className="h-full bg-gradient-to-r from-ice-accent to-amber-400 transition-all duration-200"
+          className="h-full bg-ice-accent transition-all duration-200"
           style={{ width: `${progressPercent}%` }}
         />
       </div>

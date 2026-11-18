@@ -17,6 +17,8 @@ import { FirstRunModal } from './components/common/FirstRunModal';
 import { setActiveProxyPort, getActiveProxyPort } from './utils/mediaUrl';
 import { SeasonalParticleEngine } from './components/common/SeasonalParticleEngine';
 import { AppWallpaper } from './components/common/AppWallpaper';
+import { WaterRippleEffect } from './components/common/WaterRippleEffect';
+import { updateNebulaDominantColor } from './utils/dominantColor';
 import { UpdateToast } from './components/common/UpdateToast';
 import { ProfilePickerView } from './components/profile/ProfilePickerView';
 import { ProfileModal } from './components/profile/ProfileModal';
@@ -136,6 +138,13 @@ export default function App() {
   const isTurntableActive = isTurntableOpen && currentTab === 'media';
   const [ambientArtworkUrl, setAmbientArtworkUrl] = useState<string>('');
   const { theme } = useTheme();
+
+  // Dynamic Banner Color Sync for Nebula Theme
+  useEffect(() => {
+    if (theme === 'nebula') {
+      updateNebulaDominantColor(ambientArtworkUrl);
+    }
+  }, [theme, ambientArtworkUrl]);
 
   // Multi-User Profile State
   const [profiles, setProfiles] = useState<UserProfile[]>([]);
@@ -439,7 +448,7 @@ export default function App() {
         }
 
         // Version update check: require re-login on new app version update; keep auto-login on same version
-        const CURRENT_APP_VERSION = '1.2.4';
+        const CURRENT_APP_VERSION = '1.2.5';
         const isNewVersion = shouldRequireReLoginForNewVersion(CURRENT_APP_VERSION);
         if (isNewVersion) {
           console.log(`[Version Upgrade] New version ${CURRENT_APP_VERSION}: Requiring re-login.`);
@@ -2078,6 +2087,14 @@ export default function App() {
         config={appData.settings.wallpaperConfig}
         lowSpecMode={appData.settings.lowSpecMode}
       />
+
+      {/* Global Interactive Water Ripple Effect (Aqua Theme) */}
+      <WaterRippleEffect />
+
+      {/* Nebula Full-Screen Dynamic Ambient Banner Glow */}
+      {theme === 'nebula' && (
+        <div className="nebula-fullscreen-ambient pointer-events-none" aria-hidden="true" />
+      )}
 
       {/* 1. Top Navbar (56px) - Desktop Windows PC only or Simulator */}
       {!isMobileOrTvNative && (

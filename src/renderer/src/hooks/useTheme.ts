@@ -1,14 +1,206 @@
 import { useState, useEffect, useCallback } from 'react';
 
-export type ThemeMode = 'solar' | 'lunar';
+export type ThemeMode =
+  | 'lunar'
+  | 'solar'
+  | 'aqua'
+  | 'ignis'
+  | 'aer'
+  | 'terra'
+  | 'eclipse'
+  | 'aurora'
+  | 'nebula';
+
+export interface ThemeMeta {
+  id: ThemeMode;
+  name: string;
+  subtitle: string;
+  symbol: string;
+  category: 'base' | 'specialized';
+  description: string;
+  isLight: boolean;
+  radius: string;
+  previewColors: {
+    bg: string;
+    card: string;
+    accent: string;
+    border: string;
+  };
+}
+
+export const THEME_REGISTRY: ThemeMeta[] = [
+  // --- 2 Base Modes ---
+  {
+    id: 'lunar',
+    name: 'Lunar',
+    subtitle: 'Lunar',
+    symbol: '🌙',
+    category: 'base',
+    description: 'Chế độ ban đêm kính mờ sang trọng, dịu mắt chuẩn công thái học.',
+    isLight: false,
+    radius: '16px',
+    previewColors: {
+      bg: '#0B0F19',
+      card: '#151C2C',
+      accent: '#818CF8',
+      border: '#1E293B',
+    },
+  },
+  {
+    id: 'solar',
+    name: 'Solar',
+    subtitle: 'Solar',
+    symbol: '☀️',
+    category: 'base',
+    description: 'Chế độ ban ngày rực rỡ, sắc ngà ấm, tương phản siêu cao WCAG AAA/AA.',
+    isLight: true,
+    radius: '16px',
+    previewColors: {
+      bg: '#F8F6F1',
+      card: '#FFFFFF',
+      accent: '#D97706',
+      border: '#E5E1D8',
+    },
+  },
+
+  // --- 7 Specialized Modes ---
+  {
+    id: 'aqua',
+    name: 'Aqua',
+    subtitle: 'Aqua',
+    symbol: '💧',
+    category: 'specialized',
+    description: 'Xanh biển sâu đậm đà, sóng nước chạy trên thanh nhạc, giọt nước trượt Navbar và gợn sóng khi chạm.',
+    isLight: false,
+    radius: '24px',
+    previewColors: {
+      bg: '#061524',
+      card: '#0B2238',
+      accent: '#38BDF8',
+      border: '#133959',
+    },
+  },
+  {
+    id: 'ignis',
+    name: 'Ignis',
+    subtitle: 'Ignis',
+    symbol: '🔥',
+    category: 'specialized',
+    description: 'Góc vát sắc cạnh 8px, viền ánh lửa than hồng, kích thích phản xạ tập trung.',
+    isLight: false,
+    radius: '8px',
+    previewColors: {
+      bg: '#140C0A',
+      card: '#211310',
+      accent: '#F97316',
+      border: '#3D221D',
+    },
+  },
+  {
+    id: 'aer',
+    name: 'Aer',
+    subtitle: 'Aer',
+    symbol: '🍃',
+    category: 'specialized',
+    description: 'Thiết kế phẳng tối giản, lưới kiến trúc hairline, tắt 100% blur, 0ms delay tiết kiệm pin.',
+    isLight: true,
+    radius: '12px',
+    previewColors: {
+      bg: '#F4F6F8',
+      card: '#FFFFFF',
+      accent: '#0D9488',
+      border: '#DDE2E7',
+    },
+  },
+  {
+    id: 'terra',
+    name: 'Terra',
+    subtitle: 'Terra',
+    symbol: '📜',
+    category: 'specialized',
+    description: 'Rừng già và đất phong rêu trầm ấm, góc vát phiến đá 4px, điểm nhấn rêu tươi tự nhiên.',
+    isLight: false,
+    radius: '4px',
+    previewColors: {
+      bg: '#121613',
+      card: '#1C241E',
+      accent: '#84CC16',
+      border: '#334337',
+    },
+  },
+  {
+    id: 'eclipse',
+    name: 'Eclipse',
+    subtitle: 'Eclipse',
+    symbol: '🌑',
+    category: 'specialized',
+    description: 'Đen tuyệt đối #000000 tắt hoàn toàn điểm ảnh OLED, vành hào quang vàng tỏa nhẹ.',
+    isLight: false,
+    radius: '14px',
+    previewColors: {
+      bg: '#000000',
+      card: '#0A0A0A',
+      accent: '#F97316',
+      border: '#222222',
+    },
+  },
+  {
+    id: 'aurora',
+    name: 'Aurora',
+    subtitle: 'Aurora',
+    symbol: '✨',
+    category: 'specialized',
+    description: 'Dải ánh sáng Bắc Cực huyền ảo ngọc bích và tím uốn lượn liên tục trên toolbar, player, nền.',
+    isLight: false,
+    radius: '18px',
+    previewColors: {
+      bg: '#090D16',
+      card: '#111827',
+      accent: '#10B981',
+      border: '#1E293B',
+    },
+  },
+  {
+    id: 'nebula',
+    name: 'Nebula',
+    subtitle: 'Nebula',
+    symbol: '🌌',
+    category: 'specialized',
+    description: 'Trích xuất màu banner lan tỏa toàn màn hình, không gian vũ trụ sâu thẳm cùng bầu trời sao li ti lấp lánh.',
+    isLight: false,
+    radius: '12px',
+    previewColors: {
+      bg: '#0C081A',
+      card: '#18102E',
+      accent: '#A855F7',
+      border: '#2D1E50',
+    },
+  },
+];
+
+const VALID_THEMES: Set<ThemeMode> = new Set([
+  'lunar',
+  'solar',
+  'aqua',
+  'ignis',
+  'aer',
+  'terra',
+  'eclipse',
+  'aurora',
+  'nebula',
+]);
 
 const STORAGE_KEY = 'icelauch_theme_mode';
 const DEFAULT_THEME: ThemeMode = 'lunar';
 
+export function isLightMode(theme: ThemeMode): boolean {
+  return theme === 'solar' || theme === 'aer';
+}
+
 export function getStoredTheme(): ThemeMode {
   try {
-    const saved = localStorage.getItem(STORAGE_KEY);
-    if (saved === 'solar' || saved === 'lunar') {
+    const saved = localStorage.getItem(STORAGE_KEY) as ThemeMode | null;
+    if (saved && VALID_THEMES.has(saved)) {
       return saved;
     }
   } catch (e) {
@@ -17,17 +209,31 @@ export function getStoredTheme(): ThemeMode {
   return DEFAULT_THEME;
 }
 
+const ALL_THEME_CLASSES = [
+  'theme-lunar',
+  'theme-solar',
+  'theme-aqua',
+  'theme-ignis',
+  'theme-aer',
+  'theme-terra',
+  'theme-eclipse',
+  'theme-aurora',
+  'theme-nebula',
+];
+
 export function applyThemeToDOM(theme: ThemeMode): void {
   try {
     const root = document.documentElement;
     root.setAttribute('data-theme', theme);
-    if (theme === 'solar') {
-      root.classList.add('theme-solar');
-      root.classList.remove('theme-lunar');
+
+    // Clean up older theme classes and add active one
+    ALL_THEME_CLASSES.forEach((cls) => root.classList.remove(cls));
+    root.classList.add(`theme-${theme}`);
+
+    // Manage standard Tailwind `.dark` flag
+    if (isLightMode(theme)) {
       root.classList.remove('dark');
     } else {
-      root.classList.add('theme-lunar');
-      root.classList.remove('theme-solar');
       root.classList.add('dark');
     }
   } catch (e) {
@@ -55,7 +261,20 @@ export function useTheme() {
 
   const toggleTheme = useCallback(() => {
     setThemeState((prev) => {
-      const next: ThemeMode = prev === 'solar' ? 'lunar' : 'solar';
+      let next: ThemeMode;
+      // If currently Solar, switch to Lunar
+      if (prev === 'solar') {
+        next = 'lunar';
+      }
+      // If currently Lunar, switch to Solar
+      else if (prev === 'lunar') {
+        next = 'solar';
+      }
+      // If in specialized mode, exit cleanly to base Solar or Lunar depending on lightness
+      else {
+        next = isLightMode(prev) ? 'lunar' : 'solar';
+      }
+
       try {
         localStorage.setItem(STORAGE_KEY, next);
       } catch (e) {
@@ -70,7 +289,7 @@ export function useTheme() {
   useEffect(() => {
     // Listen for theme changes across windows or components
     const handleThemeChange = (e: any) => {
-      if (e.detail?.theme && e.detail.theme !== theme) {
+      if (e.detail?.theme && e.detail.theme !== theme && VALID_THEMES.has(e.detail.theme)) {
         setThemeState(e.detail.theme);
       }
     };
@@ -78,5 +297,19 @@ export function useTheme() {
     return () => window.removeEventListener('icelauch:theme-change', handleThemeChange);
   }, [theme]);
 
-  return { theme, isSolar: theme === 'solar', isLunar: theme === 'lunar', setTheme, toggleTheme };
+  const currentThemeMeta = THEME_REGISTRY.find((t) => t.id === theme) || THEME_REGISTRY[0];
+  const isLight = isLightMode(theme);
+  const isDark = !isLight;
+
+  return {
+    theme,
+    isSolar: theme === 'solar',
+    isLunar: theme === 'lunar',
+    isLight,
+    isDark,
+    currentThemeMeta,
+    themes: THEME_REGISTRY,
+    setTheme,
+    toggleTheme,
+  };
 }

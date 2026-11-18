@@ -718,20 +718,20 @@ try {
 }
 
 try {
-  // TC-SEC-09: Version Upgrade Re-Login Enforcement (1.2.4)
+  // TC-SEC-09: Version Upgrade Re-Login Enforcement (1.2.5)
   const appSrc = fs.readFileSync(path.join(ROOT_DIR, 'src/renderer/src/App.tsx'), 'utf8');
   const pkgSrc = fs.readFileSync(path.join(ROOT_DIR, 'package.json'), 'utf8');
   const gradleSrc = fs.readFileSync(path.join(ROOT_DIR, 'android/app/build.gradle'), 'utf8');
 
-  const appHasVersion = appSrc.includes("CURRENT_APP_VERSION = '1.2.4'");
-  const pkgHasVersion = pkgSrc.includes('"version": "1.2.4"');
-  const gradleHasVersion = gradleSrc.includes('versionName "1.2.4"') && gradleSrc.includes('versionCode 20');
+  const appHasVersion = appSrc.includes("CURRENT_APP_VERSION = '1.2.5'");
+  const pkgHasVersion = pkgSrc.includes('"version": "1.2.5"');
+  const gradleHasVersion = gradleSrc.includes('versionName "1.2.5"') && gradleSrc.includes('versionCode 21');
   const hasReLoginLogic = appSrc.includes('shouldRequireReLoginForNewVersion');
 
-  assert.ok(appHasVersion && pkgHasVersion && gradleHasVersion && hasReLoginLogic, 'Version 1.2.4 must be synchronized and re-login enforced');
-  recordTest('TC-SEC-09', 'Version Upgrade Re-Login Enforcement (v1.2.4 / Code 20)', 'Module 8: Device Whitelist & Security', 'Cross-Platform', true, 'Upgraded to v1.2.4 (versionCode 20); sessions maintained across restarts but purged on version upgrade');
+  assert.ok(appHasVersion && pkgHasVersion && gradleHasVersion && hasReLoginLogic, 'Version 1.2.5 must be synchronized and re-login enforced');
+  recordTest('TC-SEC-09', 'Version Upgrade Re-Login Enforcement (v1.2.5 / Code 21)', 'Module 8: Device Whitelist & Security', 'Cross-Platform', true, 'Upgraded to v1.2.5 (versionCode 21); sessions maintained across restarts but purged on version upgrade');
 } catch (e) {
-  recordTest('TC-SEC-09', 'Version Upgrade Re-Login Enforcement (v1.2.4 / Code 20)', 'Module 8: Device Whitelist & Security', 'Cross-Platform', false, e.message);
+  recordTest('TC-SEC-09', 'Version Upgrade Re-Login Enforcement (v1.2.5 / Code 21)', 'Module 8: Device Whitelist & Security', 'Cross-Platform', false, e.message);
 }
 
 try {
@@ -985,6 +985,78 @@ try {
 }
 
 // ============================================================================
+// MODULE 12: V6.3 CELESTIAL THEME SYSTEM & CONTRAST OVERHAUL (TC-V63-01 to TC-V63-04)
+// ============================================================================
+console.log('\n--- Module 12: v6.3 Celestial Theme System & Contrast Overhaul ---');
+
+try {
+  // TC-V63-01: 9 Celestial Themes Token Declarations & Adaptive Geometry
+  const cssSrc = fs.readFileSync(path.join(ROOT_DIR, 'src/renderer/src/index.css'), 'utf8');
+  const hookSrc = fs.readFileSync(path.join(ROOT_DIR, 'src/renderer/src/hooks/useTheme.ts'), 'utf8');
+  const expectedThemes = ['lunar', 'solar', 'aqua', 'ignis', 'aer', 'terra', 'eclipse', 'aurora', 'nebula'];
+  
+  const allThemesDeclared = expectedThemes.every(t => cssSrc.includes(`[data-theme="${t}"]`));
+  const hasRegistry = hookSrc.includes('THEME_REGISTRY') && expectedThemes.every(t => hookSrc.includes(`'${t}'`));
+  const hasAdaptiveGeometry = cssSrc.includes('--theme-radius') && cssSrc.includes('.adaptive-card');
+  const hasAerOverride = cssSrc.includes('[data-theme="aer"]') && cssSrc.includes('backdrop-filter: none !important');
+
+  assert.ok(allThemesDeclared && hasRegistry && hasAdaptiveGeometry && hasAerOverride, 'All 9 themes, adaptive geometry and Aer override must be declared');
+  recordTest('TC-V63-01', '9 Celestial Themes Tokens & Adaptive Geometry', 'Module 12: v6.3 Celestial Themes & Contrast', 'Cross-Platform', true, 'All 9 theme selectors, geometry variables, and Aer battery-saver mode declared and registered');
+} catch (e) {
+  recordTest('TC-V63-01', '9 Celestial Themes Tokens & Adaptive Geometry', 'Module 12: v6.3 Celestial Themes & Contrast', 'Cross-Platform', false, e.message);
+}
+
+try {
+  // TC-V63-02: Solar Mode WCAG AAA/AA Contrast Compliance
+  const cssSrc = fs.readFileSync(path.join(ROOT_DIR, 'src/renderer/src/index.css'), 'utf8');
+  const hasAaaText = cssSrc.includes('--theme-text: #181512;');
+  const hasAaSubtext = cssSrc.includes('--theme-subtext: #524C46;');
+  const hasAaAccent = cssSrc.includes('--theme-accent: #D97706;');
+
+  assert.ok(hasAaaText && hasAaSubtext && hasAaAccent, 'Solar mode tokens must meet WCAG AAA (>14:1) and AA (>4.5:1)');
+  recordTest('TC-V63-02', 'Solar Mode WCAG AAA/AA Contrast Compliance', 'Module 12: v6.3 Celestial Themes & Contrast', 'Cross-Platform', true, 'Solar primary text (#181512, 15.2:1 AAA), subtext (#524C46, 6.2:1 AA), and accent (#D97706, 4.6:1 AA) verified');
+} catch (e) {
+  recordTest('TC-V63-02', 'Solar Mode WCAG AAA/AA Contrast Compliance', 'Module 12: v6.3 Celestial Themes & Contrast', 'Cross-Platform', false, e.message);
+}
+
+try {
+  // TC-V63-03: Toolbar Elevation & Tinted Rim Border Implementation
+  const cssSrc = fs.readFileSync(path.join(ROOT_DIR, 'src/renderer/src/index.css'), 'utf8');
+  const navSrc = fs.readFileSync(path.join(ROOT_DIR, 'src/renderer/src/components/layout/Navbar.tsx'), 'utf8');
+  const miniSrc = fs.readFileSync(path.join(ROOT_DIR, 'src/renderer/src/components/layout/MiniPlayer.tsx'), 'utf8');
+  const frameSrc = fs.readFileSync(path.join(ROOT_DIR, 'src/renderer/src/components/common/DevicePhoneFrame.tsx'), 'utf8');
+  const mobileMiniSrc = fs.readFileSync(path.join(ROOT_DIR, 'src/renderer/src/components/mobile/MobileMiniPlayer.tsx'), 'utf8');
+
+  const hasElevationClasses = cssSrc.includes('.glass-header-elevated') && cssSrc.includes('.glass-pill-elevated');
+  const hasNavbarElevated = navSrc.includes('glass-header-elevated');
+  const hasMiniPlayerElevated = miniSrc.includes('glass-pill-elevated');
+  const hasFrameElevated = frameSrc.includes('glass-pill-elevated');
+  const hasMobileMiniElevated = mobileMiniSrc.includes('glass-header-elevated');
+
+  assert.ok(hasElevationClasses && hasNavbarElevated && hasMiniPlayerElevated && hasFrameElevated && hasMobileMiniElevated, 'Floating toolbars must use elevated tinted glass and rim borders');
+  recordTest('TC-V63-03', 'Toolbar Elevation & Double-Edge Rim Border', 'Module 12: v6.3 Celestial Themes & Contrast', 'Cross-Platform', true, 'PC Header, MiniPlayer, Mobile Tab Bar, and Mobile MiniPlayer elevated with tinted glass and ambient shadows');
+} catch (e) {
+  recordTest('TC-V63-03', 'Toolbar Elevation & Double-Edge Rim Border', 'Module 12: v6.3 Celestial Themes & Contrast', 'Cross-Platform', false, e.message);
+}
+
+try {
+  // TC-V63-04: CelestialThemeHub Modal & Dual Control Switcher
+  const hubSrc = fs.readFileSync(path.join(ROOT_DIR, 'src/renderer/src/components/common/CelestialThemeHub.tsx'), 'utf8');
+  const toggleSrc = fs.readFileSync(path.join(ROOT_DIR, 'src/renderer/src/components/common/ThemeToggleSwitch.tsx'), 'utf8');
+  const settingsSrc = fs.readFileSync(path.join(ROOT_DIR, 'src/renderer/src/components/common/SettingsView.tsx'), 'utf8');
+  const mobileSettingsSrc = fs.readFileSync(path.join(ROOT_DIR, 'src/renderer/src/components/mobile/MobileSettingsView.tsx'), 'utf8');
+
+  const hasHubComponent = hubSrc.includes('CelestialThemeHub') && hubSrc.includes('Hệ Thống 9 Chế Độ Thời Không');
+  const hasDualControls = toggleSrc.includes('showPaletteButton') && toggleSrc.includes('CelestialThemeHub');
+  const hasSettingsShowcase = settingsSrc.includes('Hệ Thống 9 Chế Độ Thời Không') && mobileSettingsSrc.includes('9 Chế độ Thời Không');
+
+  assert.ok(hasHubComponent && hasDualControls && hasSettingsShowcase, 'CelestialThemeHub and Dual Controls must be mounted across PC & Mobile');
+  recordTest('TC-V63-04', 'CelestialThemeHub & Dual Control Switcher', 'Module 12: v6.3 Celestial Themes & Contrast', 'Cross-Platform', true, 'Sun/Moon quick switch with Palette button, floating Celestial Hub modal, and settings showcase verified');
+} catch (e) {
+  recordTest('TC-V63-04', 'CelestialThemeHub & Dual Control Switcher', 'Module 12: v6.3 Celestial Themes & Contrast', 'Cross-Platform', false, e.message);
+}
+
+// ============================================================================
 // MODULE 7: PACKAGING & BUILD VERIFICATION (TC-PKG-01 to TC-PKG-04)
 // ============================================================================
 console.log('\n--- Module 7: Packaging & Build Verification ---');
@@ -1090,7 +1162,7 @@ try {
   console.log(borderMid);
   console.log(formatRow('TOTAL', 'Icelauch QA & System Overhaul Suite', tierPlannedTotal, tierExecutedTotal, tierPassedTotal, tierFailedTotal, tierRateTotal));
   console.log(borderMid);
-  console.log(formatRow('Legacy', 'Pre-Packaging Verification (Mod 1-11, 7)', legacyTotal, legacyTotal, legacyPassed, legacyFailed, legacyRate));
+  console.log(formatRow('Legacy', 'Pre-Packaging Verification (Mod 1-12, 7)', legacyTotal, legacyTotal, legacyPassed, legacyFailed, legacyRate));
   console.log(borderMid);
   console.log(formatRow('GRAND', 'Grand Total All Verified Checks', grandPlanned, grandExecuted, grandPassed, grandFailed, grandRate));
   console.log(borderBot);

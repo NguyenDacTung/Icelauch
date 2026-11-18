@@ -24,6 +24,7 @@ import {
 import type { AppSettings, CloudSyncSettings, SeasonTheme, UserProfile } from '../../types';
 import { AvatarBadge } from '../common/AvatarBadge';
 import { ThemeToggleSwitch } from '../common/ThemeToggleSwitch';
+import { useTheme } from '../../hooks/useTheme';
 import { sfx } from '../../utils/sfx';
 import {
   checkMobileUpdate,
@@ -62,6 +63,7 @@ export const MobileSettingsView: React.FC<MobileSettingsViewProps> = ({
   onSaveCloudSync,
 }) => {
   // Theme & SFX states
+  const { theme: currentTheme, setTheme: setMobileTheme, themes: allThemes } = useTheme();
   const [particleTheme, setParticleTheme] = useState<SeasonTheme>(
     settings.particleConfig?.theme || (settings.ambientSnowEnabled === false ? 'none' : 'winter')
   );
@@ -225,21 +227,21 @@ export const MobileSettingsView: React.FC<MobileSettingsViewProps> = ({
   const currentInterval = cloudSync?.autoSyncIntervalMinutes ?? 5;
 
   return (
-    <div className="flex-1 w-full h-full flex flex-col bg-[#07090E] select-none overflow-y-auto no-scrollbar p-3.5 space-y-4">
+    <div className="flex-1 w-full h-full flex flex-col bg-ice-bg select-none overflow-y-auto no-scrollbar p-3.5 space-y-4">
       {/* 1. TOP HEADER & TOAST */}
       <div className="flex items-center justify-between shrink-0 pt-1">
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-xl bg-amber-500/15 border border-amber-500/30 flex items-center justify-center text-amber-400">
+          <div className="w-8 h-8 rounded-xl bg-ice-accent/15 border border-ice-accent/30 flex items-center justify-center text-ice-accent">
             <Sliders className="w-4 h-4" />
           </div>
           <div>
-            <h1 className="text-base font-black text-white uppercase tracking-wider">Cài Đặt</h1>
+            <h1 className="text-base font-black text-ice-text uppercase tracking-wider">Cài Đặt</h1>
             <p className="text-[10px] text-ice-subtext">Tối ưu cho thao tác chạm di động</p>
           </div>
         </div>
 
         {isSavedToast && (
-          <span className="text-[11px] font-bold text-emerald-400 flex items-center gap-1 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-full animate-fade-in">
+          <span className="text-[11px] font-bold text-emerald-500 flex items-center gap-1 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-full animate-fade-in">
             <Check className="w-3.5 h-3.5" />
             <span>Đã lưu!</span>
           </span>
@@ -247,7 +249,7 @@ export const MobileSettingsView: React.FC<MobileSettingsViewProps> = ({
       </div>
 
       {/* 2. PROFILE HERO CARD */}
-      <div className="p-3.5 rounded-2xl bg-gradient-to-r from-[#141824] via-[#11141D] to-[#161B29] border border-white/10 shadow-lg flex items-center justify-between gap-3">
+      <div className="p-3.5 rounded-2xl bg-ice-card border border-ice-border/70 shadow-lg flex items-center justify-between gap-3 hover-depth-lift">
         <div className="flex items-center gap-3 min-w-0">
           <AvatarBadge
             avatar={activeProfile?.avatar || 'avatar_1'}
@@ -256,11 +258,11 @@ export const MobileSettingsView: React.FC<MobileSettingsViewProps> = ({
           />
           <div className="min-w-0">
             <div className="flex items-center gap-1.5">
-              <h2 className="text-sm font-bold text-white truncate">
+              <h2 className="text-sm font-bold text-ice-text truncate">
                 {activeProfile?.nickname || 'Người Dùng'}
               </h2>
               {isAdmin && (
-                <span className="text-[9px] font-black px-1.5 py-0.2 rounded bg-amber-500/20 text-amber-300 border border-amber-500/40 uppercase">
+                <span className="text-[9px] font-black px-1.5 py-0.2 rounded bg-amber-500/20 text-amber-500 border border-amber-500/40 uppercase">
                   Admin
                 </span>
               )}
@@ -279,10 +281,10 @@ export const MobileSettingsView: React.FC<MobileSettingsViewProps> = ({
                 sfx.playClick();
                 onEditProfile();
               }}
-              className="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-ice-subtext hover:text-white border border-white/5 transition-colors"
+              className="p-2 rounded-xl bg-ice-hover/60 hover:bg-ice-hover text-ice-subtext hover:text-ice-text border border-ice-border/60 transition-colors"
               title="Đổi tên & avatar"
             >
-              <User className="w-4 h-4 text-amber-400" />
+              <User className="w-4 h-4 text-ice-accent" />
             </button>
           )}
 
@@ -293,7 +295,7 @@ export const MobileSettingsView: React.FC<MobileSettingsViewProps> = ({
                 sfx.playClick();
                 onSwitchProfile();
               }}
-              className="px-2.5 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-ice-subtext hover:text-white text-xs font-semibold border border-white/5 flex items-center gap-1 transition-colors"
+              className="px-2.5 py-1.5 rounded-xl bg-ice-hover/60 hover:bg-ice-hover text-ice-subtext hover:text-ice-text text-xs font-semibold border border-ice-border/60 flex items-center gap-1 transition-colors"
               title="Đổi hồ sơ khác"
             >
               <LogOut className="w-3.5 h-3.5" />
@@ -304,7 +306,7 @@ export const MobileSettingsView: React.FC<MobileSettingsViewProps> = ({
       </div>
 
       {/* 3. CLOUD SYNC CARD (MOBILE FIRST) */}
-      <div className="p-4 rounded-2xl bg-ice-card border border-indigo-500/30 shadow-md space-y-3.5">
+      <div className="p-4 rounded-2xl bg-ice-card border border-indigo-500/30 shadow-md space-y-3.5 hover-depth-lift">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-xl bg-indigo-500/20 text-indigo-400 flex items-center justify-center">
@@ -318,27 +320,26 @@ export const MobileSettingsView: React.FC<MobileSettingsViewProps> = ({
             </div>
           </div>
 
-          <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
-            cloudSync?.enabled
-              ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
-              : 'bg-white/10 text-ice-muted'
-          }`}>
+          <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${cloudSync?.enabled
+            ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
+            : 'bg-white/10 text-ice-muted'
+            }`}>
             {cloudSync?.enabled ? '🟢 ĐÃ BẬT' : '⚪ CHƯA BẬT'}
           </span>
         </div>
 
         {/* Sync Info Banner */}
-        <div className="p-2.5 rounded-xl bg-black/40 border border-white/5 text-[11px] space-y-1">
+        <div className="p-2.5 rounded-xl bg-ice-hover/50 border border-ice-border/60 text-[11px] space-y-1">
           <div className="flex items-center justify-between text-ice-subtext">
             <span>Lần cuối đồng bộ:</span>
-            <span className="text-white font-mono">
+            <span className="text-ice-text font-mono font-bold">
               {cloudSync?.lastSyncedAt
                 ? new Date(cloudSync.lastSyncedAt).toLocaleTimeString('vi-VN', {
-                    hour: '2-digit',
-                    minute: '2-digit',
-                    day: '2-digit',
-                    month: '2-digit',
-                  })
+                  hour: '2-digit',
+                  minute: '2-digit',
+                  day: '2-digit',
+                  month: '2-digit',
+                })
                 : 'Chưa đồng bộ'}
             </span>
           </div>
@@ -351,11 +352,10 @@ export const MobileSettingsView: React.FC<MobileSettingsViewProps> = ({
 
         {/* Sync Feedback Message */}
         {syncFeedback && (
-          <div className={`p-2.5 rounded-xl text-xs flex items-center gap-2 border animate-fade-in ${
-            syncFeedback.type === 'success'
-              ? 'bg-emerald-500/15 border-emerald-500/30 text-emerald-300'
-              : 'bg-rose-500/15 border-rose-500/30 text-rose-300'
-          }`}>
+          <div className={`p-2.5 rounded-xl text-xs flex items-center gap-2 border animate-fade-in ${syncFeedback.type === 'success'
+            ? 'bg-emerald-500/15 border-emerald-500/30 text-emerald-300'
+            : 'bg-rose-500/15 border-rose-500/30 text-rose-300'
+            }`}>
             {syncFeedback.type === 'success' ? (
               <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-400" />
             ) : (
@@ -393,11 +393,10 @@ export const MobileSettingsView: React.FC<MobileSettingsViewProps> = ({
                 key={opt.val}
                 type="button"
                 onClick={() => handleIntervalChange(opt.val)}
-                className={`h-8 rounded-lg text-[11px] font-bold transition-all border ${
-                  currentInterval === opt.val
-                    ? 'bg-indigo-600 text-white border-indigo-400 shadow-md'
-                    : 'bg-black/30 text-ice-subtext border-white/5 hover:text-white'
-                }`}
+                className={`h-8 rounded-lg text-[11px] font-bold transition-all border ${currentInterval === opt.val
+                  ? 'bg-indigo-600 text-white border-indigo-400 shadow-md'
+                  : 'bg-ice-hover/40 text-ice-subtext border-ice-border/60 hover:text-ice-text'
+                  }`}
               >
                 {opt.label}
               </button>
@@ -428,10 +427,52 @@ export const MobileSettingsView: React.FC<MobileSettingsViewProps> = ({
             <Palette className="w-4 h-4 text-ice-accent" />
             <div>
               <span className="text-xs font-bold text-ice-text block">Chế độ giao diện (Solar / Lunar)</span>
-              <span className="text-[10px] text-ice-subtext">Gạt để đổi giữa Ban ngày và Ban đêm</span>
+              <span className="text-[10px] text-ice-subtext">Gạt để đổi nhanh hoặc chọn 9 theme</span>
             </div>
           </div>
           <ThemeToggleSwitch size="sm" />
+        </div>
+
+        {/* 9 Celestial Themes Horizontal Scroll Bar */}
+        <div className="space-y-1.5">
+          <div className="flex items-center justify-between px-1">
+            <span className="text-[11px] font-bold text-ice-subtext uppercase tracking-wider">
+              9 Chế độ Thời Không (Celestial)
+            </span>
+            <span className="text-[10px] text-ice-subtext">Chạm để đổi</span>
+          </div>
+          <div className="flex items-center gap-2 overflow-x-auto pb-1 no-scrollbar -mx-1 px-1">
+            {allThemes.map((t) => {
+              const isSelected = currentTheme === t.id;
+              return (
+                <button
+                  key={t.id}
+                  type="button"
+                  onClick={() => {
+                    try {
+                      sfx.playClick();
+                    } catch { }
+                    setMobileTheme(t.id);
+                  }}
+                  className={`shrink-0 flex items-center gap-2 px-3 py-2 border transition-all duration-200 cursor-pointer ${isSelected
+                    ? 'ring-2 ring-ice-accent border-ice-accent bg-ice-hover text-ice-text shadow-sm'
+                    : 'border-ice-border/60 bg-ice-card/80 text-ice-subtext hover:text-ice-text'
+                    }`}
+                  style={{ borderRadius: t.radius }}
+                >
+                  <span className="text-base select-none">{t.symbol}</span>
+                  <div className="text-left">
+                    <span className="text-xs font-bold block leading-tight text-ice-text">
+                      {t.name}
+                    </span>
+                    <span className="text-[9px] text-ice-subtext block">
+                      {t.isLight ? 'Sáng' : 'Tối'}
+                    </span>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
         </div>
 
         {/* SFX Toggle Row */}
@@ -447,14 +488,12 @@ export const MobileSettingsView: React.FC<MobileSettingsViewProps> = ({
           <button
             type="button"
             onClick={() => handleToggleSfx(!sfxEnabled)}
-            className={`w-12 h-6 rounded-full transition-colors relative flex items-center px-1 ${
-              sfxEnabled ? 'bg-amber-500' : 'bg-white/20'
-            }`}
+            className={`w-12 h-6 rounded-full transition-colors relative flex items-center px-1 ${sfxEnabled ? 'bg-amber-500' : 'bg-white/20'
+              }`}
           >
             <div
-              className={`w-4 h-4 rounded-full bg-white shadow transform transition-transform ${
-                sfxEnabled ? 'translate-x-6' : 'translate-x-0'
-              }`}
+              className={`w-4 h-4 rounded-full bg-white shadow transform transition-transform ${sfxEnabled ? 'translate-x-6' : 'translate-x-0'
+                }`}
             />
           </button>
         </div>
@@ -479,11 +518,10 @@ export const MobileSettingsView: React.FC<MobileSettingsViewProps> = ({
                   key={theme.id}
                   type="button"
                   onClick={() => handleSelectTheme(theme.id)}
-                  className={`p-2.5 rounded-xl border flex flex-col items-center justify-center gap-1 text-center transition-all ${
-                    isSelected
-                      ? 'bg-amber-500/20 border-amber-500 text-amber-300 shadow-md'
-                      : 'bg-black/30 border-white/5 text-ice-subtext hover:text-white'
-                  }`}
+                  className={`p-2.5 rounded-xl border flex flex-col items-center justify-center gap-1 text-center transition-all ${isSelected
+                    ? 'bg-amber-500/20 border-amber-500 text-amber-500 shadow-md'
+                    : 'bg-ice-hover/40 border-ice-border/60 text-ice-subtext hover:text-ice-text'
+                    }`}
                 >
                   <span className="text-base">{theme.icon}</span>
                   <span className="text-[11px] font-bold">{theme.label}</span>
@@ -509,11 +547,10 @@ export const MobileSettingsView: React.FC<MobileSettingsViewProps> = ({
             </div>
           </div>
 
-          <span className={`text-[10px] font-black px-2 py-0.5 rounded-full ${
-            isAdmin
-              ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40'
-              : 'bg-white/10 text-ice-muted'
-          }`}>
+          <span className={`text-[10px] font-black px-2 py-0.5 rounded-full ${isAdmin
+            ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40'
+            : 'bg-white/10 text-ice-muted'
+            }`}>
             {isAdmin ? 'ĐANG BẬT' : 'ĐÃ KHÓA'}
           </span>
         </div>
@@ -545,9 +582,9 @@ export const MobileSettingsView: React.FC<MobileSettingsViewProps> = ({
                   sfx.playClick();
                   onChangePin();
                 }}
-                className="h-10 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-white text-xs font-bold flex items-center justify-center gap-1.5 transition-colors"
+                className="h-10 rounded-xl bg-ice-hover/60 hover:bg-ice-hover border border-ice-border text-ice-text text-xs font-bold flex items-center justify-center gap-1.5 transition-colors"
               >
-                <KeyRound className="w-3.5 h-3.5 text-amber-400" />
+                <KeyRound className="w-3.5 h-3.5 text-ice-accent" />
                 <span>Đổi Mã PIN</span>
               </button>
 
@@ -598,13 +635,12 @@ export const MobileSettingsView: React.FC<MobileSettingsViewProps> = ({
         </div>
 
         {updateResult.status !== 'idle' && (
-          <div className={`p-2.5 rounded-xl border text-xs flex items-start gap-2 animate-fade-in ${
-            updateResult.status === 'available'
-              ? 'bg-amber-500/15 border-amber-500/40 text-amber-300'
-              : updateResult.status === 'error'
+          <div className={`p-2.5 rounded-xl border text-xs flex items-start gap-2 animate-fade-in ${updateResult.status === 'available'
+            ? 'bg-amber-500/15 border-amber-500/40 text-amber-300'
+            : updateResult.status === 'error'
               ? 'bg-rose-500/15 border-rose-500/40 text-rose-300'
               : 'bg-emerald-500/15 border-emerald-500/40 text-emerald-300'
-          }`}>
+            }`}>
             <Sparkles className="w-4 h-4 shrink-0 mt-0.5" />
             <span className="flex-1 font-medium">{updateResult.msg}</span>
           </div>
@@ -623,12 +659,12 @@ export const MobileSettingsView: React.FC<MobileSettingsViewProps> = ({
         )}
 
         {isDownloadingApk && (
-          <div className="space-y-1.5 p-3 rounded-xl bg-black/40 border border-cyan-500/30">
+          <div className="space-y-1.5 p-3 rounded-xl bg-ice-hover/50 border border-cyan-500/30">
             <div className="flex items-center justify-between text-xs">
-              <span className="text-slate-300 font-semibold">Đang tải file APK vào máy...</span>
-              <span className="text-cyan-400 font-mono font-bold">{downloadProgress}%</span>
+              <span className="text-ice-subtext font-semibold">Đang tải file APK vào máy...</span>
+              <span className="text-cyan-500 font-mono font-bold">{downloadProgress}%</span>
             </div>
-            <div className="w-full h-2 rounded-full bg-white/10 overflow-hidden">
+            <div className="w-full h-2 rounded-full bg-ice-hover overflow-hidden">
               <div
                 className="h-full bg-gradient-to-r from-cyan-500 to-blue-500 rounded-full transition-all duration-200"
                 style={{ width: `${downloadProgress}%` }}
@@ -641,7 +677,7 @@ export const MobileSettingsView: React.FC<MobileSettingsViewProps> = ({
           type="button"
           onClick={handleCheckUpdate}
           disabled={isCheckingUpdate}
-          className="w-full h-10 rounded-xl bg-white/10 hover:bg-white/15 text-white text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 border border-white/10 transition-all active:scale-98 disabled:opacity-50"
+          className="w-full h-10 rounded-xl bg-ice-hover/60 hover:bg-ice-hover text-ice-text text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 border border-ice-border/70 transition-all active:scale-98 disabled:opacity-50"
         >
           <RefreshCw className={`w-3.5 h-3.5 text-cyan-400 ${isCheckingUpdate ? 'animate-spin' : ''}`} />
           <span>{isCheckingUpdate ? 'Đang Kiểm Tra Bản Mới...' : 'Kiểm Tra Phiên Bản Mới (OTA)'}</span>

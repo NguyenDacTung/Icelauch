@@ -101,19 +101,19 @@ export const AdminUserManagementModal: React.FC<AdminUserManagementModalProps> =
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fade-in">
       <div className="relative w-full max-w-4xl max-h-[90vh] bg-ice-surface/95 border border-ice-border rounded-2xl flex flex-col shadow-2xl overflow-hidden">
         {/* Header */}
-        <div className="p-5 border-b border-white/10 flex items-center justify-between bg-black/30">
+        <div className="p-5 border-b border-ice-border/60 flex items-center justify-between bg-ice-hover/40">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-amber-500/20 text-amber-400 border border-amber-500/30 flex items-center justify-center">
+            <div className="w-10 h-10 rounded-xl bg-amber-500/20 text-amber-500 border border-amber-500/30 flex items-center justify-center">
               <Users className="w-5 h-5" />
             </div>
             <div>
-              <h2 className="text-lg font-black text-white flex items-center gap-2">
+              <h2 className="text-lg font-black text-ice-text flex items-center gap-2">
                 Quản Trị Người Dùng & Tài Khoản
-                <span className="px-2 py-0.5 rounded text-[11px] font-bold bg-amber-400/20 text-amber-300 border border-amber-400/30">
+                <span className="px-2 py-0.5 rounded text-[11px] font-bold bg-amber-400/20 text-amber-500 border border-amber-400/30">
                   {profiles.length} Tài khoản
                 </span>
               </h2>
-              <p className="text-xs text-ice-muted">
+              <p className="text-xs text-ice-subtext">
                 Tìm kiếm, phân quyền, sửa thông tin, đặt lại mật khẩu và cấm tài khoản vi phạm.
               </p>
             </div>
@@ -121,31 +121,31 @@ export const AdminUserManagementModal: React.FC<AdminUserManagementModalProps> =
           <button
             type="button"
             onClick={onClose}
-            className="p-2 rounded-xl text-ice-muted hover:text-white hover:bg-white/10 transition-colors"
+            className="p-2 rounded-xl text-ice-subtext hover:text-ice-text hover:bg-ice-hover transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Toolbar: Search & Filter */}
-        <div className="p-4 border-b border-white/5 bg-black/20 flex flex-wrap items-center justify-between gap-3">
+        <div className="p-4 border-b border-ice-border/40 bg-ice-hover/20 flex flex-wrap items-center justify-between gap-3">
           <div className="relative flex-1 min-w-[240px]">
-            <Search className="w-4 h-4 text-ice-muted absolute left-3 top-1/2 -translate-y-1/2" />
+            <Search className="w-4 h-4 text-ice-subtext absolute left-3 top-1/2 -translate-y-1/2" />
             <input
               type="text"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               placeholder="Tìm theo tên hiển thị, username hoặc mã bạn bè..."
-              className="w-full h-9 pl-9 pr-3 rounded-xl bg-black/40 border border-ice-border text-xs text-white placeholder-ice-muted focus:outline-none focus:border-amber-400 transition-colors"
+              className="w-full h-9 pl-9 pr-3 rounded-xl bg-ice-hover/60 border border-ice-border text-xs text-ice-text placeholder-ice-subtext focus:outline-none focus:border-ice-accent transition-colors"
             />
           </div>
 
-          <div className="flex items-center gap-1.5 p-1 rounded-xl bg-black/40 border border-ice-border">
+          <div className="flex items-center gap-1.5 p-1 rounded-xl bg-ice-hover/50 border border-ice-border">
             <button
               type="button"
               onClick={() => setFilterMode('all')}
               className={`px-3 py-1 rounded-lg text-xs font-bold transition-all ${
-                filterMode === 'all' ? 'bg-amber-400 text-black shadow' : 'text-ice-muted hover:text-white'
+                filterMode === 'all' ? 'bg-amber-400 text-black shadow' : 'text-ice-subtext hover:text-ice-text'
               }`}
             >
               Tất Cả ({profiles.length})
@@ -154,7 +154,7 @@ export const AdminUserManagementModal: React.FC<AdminUserManagementModalProps> =
               type="button"
               onClick={() => setFilterMode('active')}
               className={`px-3 py-1 rounded-lg text-xs font-bold transition-all ${
-                filterMode === 'active' ? 'bg-amber-400 text-black shadow' : 'text-ice-muted hover:text-white'
+                filterMode === 'active' ? 'bg-amber-400 text-black shadow' : 'text-ice-subtext hover:text-ice-text'
               }`}
             >
               Đang Hoạt Động
@@ -163,7 +163,7 @@ export const AdminUserManagementModal: React.FC<AdminUserManagementModalProps> =
               type="button"
               onClick={() => setFilterMode('banned')}
               className={`px-3 py-1 rounded-lg text-xs font-bold transition-all ${
-                filterMode === 'banned' ? 'bg-red-500 text-white shadow' : 'text-ice-muted hover:text-white'
+                filterMode === 'banned' ? 'bg-red-500 text-white shadow' : 'text-ice-subtext hover:text-ice-text'
               }`}
             >
               Bị Cấm
@@ -189,16 +189,16 @@ export const AdminUserManagementModal: React.FC<AdminUserManagementModalProps> =
                     isBanned
                       ? 'bg-red-950/20 border-red-500/30'
                       : isMasterAdmin
-                      ? 'bg-amber-500/5 border-amber-500/30'
-                      : 'bg-black/30 border-ice-border hover:border-white/20'
+                      ? 'bg-amber-500/10 border-amber-500/30'
+                      : 'bg-ice-card border-ice-border hover:border-ice-accent/40 hover-depth-lift'
                   }`}
                 >
                   {/* Left: Avatar & Info */}
                   <div className="flex items-center gap-3">
-                    <AvatarBadge avatar={p.avatar} size="md" className="border border-white/20" />
+                    <AvatarBadge avatar={p.avatar} size="md" className="border border-ice-border" />
                     <div>
                       <div className="flex items-center gap-2">
-                        <span className="font-bold text-sm text-white">{p.nickname}</span>
+                        <span className="font-bold text-sm text-ice-text">{p.nickname}</span>
                         {isMasterAdmin ? (
                           <span className="px-2 py-0.5 rounded text-[10px] font-black bg-amber-400 text-black shadow">
                             🛡️ MASTER ADMIN
@@ -288,12 +288,12 @@ export const AdminUserManagementModal: React.FC<AdminUserManagementModalProps> =
         </div>
 
         {/* Footer */}
-        <div className="p-4 border-t border-white/10 bg-black/40 flex items-center justify-between text-xs text-ice-muted">
+        <div className="p-4 border-t border-ice-border/60 bg-ice-hover/40 flex items-center justify-between text-xs text-ice-subtext">
           <span>💡 Tài khoản Master Admin được bảo vệ an toàn, không thể bị xóa hoặc cấm.</span>
           <button
             type="button"
             onClick={onClose}
-            className="px-4 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold transition-all"
+            className="px-4 py-2 rounded-xl bg-ice-hover/60 hover:bg-ice-hover text-ice-text font-bold transition-all border border-ice-border"
           >
             Đóng
           </button>
@@ -302,16 +302,16 @@ export const AdminUserManagementModal: React.FC<AdminUserManagementModalProps> =
         {/* Ban Duration Popup Submodal */}
         {targetBanProfile && (
           <div className="absolute inset-0 z-20 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
-            <div className="w-full max-w-md bg-ice-bg border border-red-500/40 rounded-2xl p-5 shadow-2xl space-y-4 animate-scale-up">
-              <div className="flex items-center gap-2 text-red-400">
+            <div className="w-full max-w-md bg-ice-surface border border-red-500/40 rounded-2xl p-5 shadow-2xl space-y-4 animate-scale-up">
+              <div className="flex items-center gap-2 text-red-500">
                 <ShieldAlert className="w-5 h-5" />
-                <h3 className="font-bold text-sm text-white">
+                <h3 className="font-bold text-sm text-ice-text">
                   Cấm Tài Khoản: {targetBanProfile.nickname}
                 </h3>
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-ice-muted">Thời hạn cấm:</label>
+                <label className="text-xs font-semibold text-ice-subtext">Thời hạn cấm:</label>
                 <div className="grid grid-cols-3 gap-2">
                   {(['1h', '1d', '7d', '30d', 'permanent'] as const).map((d) => (
                     <button
@@ -321,7 +321,7 @@ export const AdminUserManagementModal: React.FC<AdminUserManagementModalProps> =
                       className={`py-1.5 px-2 rounded-lg text-xs font-bold border transition-all ${
                         banDuration === d
                           ? 'bg-red-500 text-white border-red-500 shadow-md'
-                          : 'bg-black/30 text-ice-muted border-ice-border hover:text-white'
+                          : 'bg-ice-hover/40 text-ice-subtext border-ice-border hover:text-ice-text'
                       }`}
                     >
                       {d === '1h' && '1 Giờ'}
@@ -335,13 +335,13 @@ export const AdminUserManagementModal: React.FC<AdminUserManagementModalProps> =
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-ice-muted">Lý do cấm (hiển thị khi đăng nhập):</label>
+                <label className="text-xs font-semibold text-ice-subtext">Lý do cấm (hiển thị khi đăng nhập):</label>
                 <textarea
                   value={banReason}
                   onChange={(e) => setBanReason(e.target.value)}
                   placeholder="Ví dụ: Vi phạm quy định sử dụng, chia sẻ liên kết độc hại..."
                   rows={3}
-                  className="w-full p-2.5 rounded-xl bg-black/40 border border-ice-border text-xs text-white placeholder-ice-muted focus:outline-none focus:border-red-400 resize-none font-medium"
+                  className="w-full p-2.5 rounded-xl bg-ice-hover/60 border border-ice-border text-xs text-ice-text placeholder-ice-subtext focus:outline-none focus:border-red-400 resize-none font-medium"
                 />
               </div>
 
@@ -349,7 +349,7 @@ export const AdminUserManagementModal: React.FC<AdminUserManagementModalProps> =
                 <button
                   type="button"
                   onClick={() => setTargetBanProfile(null)}
-                  className="px-3 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-xs font-bold text-white transition-all"
+                  className="px-3 py-1.5 rounded-xl bg-ice-hover/60 hover:bg-ice-hover text-xs font-bold text-ice-text border border-ice-border transition-all"
                 >
                   Hủy Bỏ
                 </button>

@@ -79,12 +79,12 @@ export const GameActionsWidget: React.FC<GameActionsWidgetProps> = ({
   };
 
   return (
-    <div className={`rounded-2xl bg-gradient-to-br from-[#121622] to-[#151926] border border-ice-border/80 p-3.5 sm:p-5 shadow-lg space-y-3.5 ${className}`}>
+    <div className={`rounded-2xl bg-ice-card border border-ice-border/80 p-3.5 sm:p-5 shadow-lg space-y-3.5 hover-depth-lift ${className}`}>
       {/* Title */}
-      <div className="flex items-center justify-between border-b border-white/5 pb-2.5">
+      <div className="flex items-center justify-between border-b border-ice-border/60 pb-2.5">
         <div className="flex items-center gap-2">
-          <Info className="w-4 h-4 text-amber-400" />
-          <h3 className="text-xs font-bold text-white uppercase tracking-wider">
+          <Info className="w-4 h-4 text-ice-accent" />
+          <h3 className="text-xs font-bold text-ice-text uppercase tracking-wider">
             Yêu Cầu & Hướng Dẫn Chơi
           </h3>
         </div>
@@ -92,8 +92,8 @@ export const GameActionsWidget: React.FC<GameActionsWidgetProps> = ({
 
       {/* Guidance Text Block */}
       {requirementsText && (
-        <div className="bg-ice-card border border-amber-500/20 rounded-xl p-3 text-xs text-ice-text leading-relaxed whitespace-pre-line flex items-start gap-2.5">
-          <span className="text-amber-400 shrink-0 text-sm mt-0.5">📌</span>
+        <div className="bg-ice-hover/40 border border-ice-accent/30 rounded-xl p-3 text-xs text-ice-text leading-relaxed whitespace-pre-line flex items-start gap-2.5">
+          <span className="text-ice-accent shrink-0 text-sm mt-0.5">📌</span>
           <div className="flex-1 text-xs leading-relaxed">{requirementsText}</div>
         </div>
       )}
@@ -101,7 +101,7 @@ export const GameActionsWidget: React.FC<GameActionsWidgetProps> = ({
       {/* Action Buttons List */}
       {buttons.length > 0 && (
         <div className="space-y-2">
-          <div className="text-[11px] font-semibold text-ice-muted uppercase tracking-wider">
+          <div className="text-[11px] font-semibold text-ice-subtext uppercase tracking-wider">
             Lối tắt ứng dụng & công cụ liên quan:
           </div>
 
@@ -122,7 +122,7 @@ export const GameActionsWidget: React.FC<GameActionsWidgetProps> = ({
                         ? 'bg-red-500/20 border-red-500/50 text-red-200'
                         : feedback
                         ? 'bg-emerald-500/20 border-emerald-500/50 text-emerald-200'
-                        : 'bg-ice-card hover:bg-ice-hover border-ice-border hover:border-amber-400 text-ice-text'
+                        : 'bg-ice-card hover:bg-ice-hover border-ice-border hover:border-ice-accent text-ice-text'
                     }`}
                   >
                     <div className="w-4 h-4 flex items-center justify-center shrink-0">
@@ -135,7 +135,7 @@ export const GameActionsWidget: React.FC<GameActionsWidgetProps> = ({
                       )}
                     </div>
 
-                    <span className="text-xs font-bold whitespace-nowrap text-white group-hover:text-amber-300 transition-colors">
+                    <span className="text-xs font-bold whitespace-nowrap text-ice-text group-hover:text-ice-accent transition-colors">
                       {shortLabel}
                     </span>
 
@@ -164,7 +164,7 @@ export const GameActionsWidget: React.FC<GameActionsWidgetProps> = ({
                         ? 'bg-red-500/20 border-red-500/50'
                         : feedback
                         ? 'bg-emerald-500/20 border-emerald-500/50'
-                        : 'bg-ice-card hover:bg-ice-hover border-ice-border hover:border-amber-400 text-ice-text'
+                        : 'bg-ice-card hover:bg-ice-hover border-ice-border hover:border-ice-accent text-ice-text'
                     }`}
                   >
                     {feedback?.isError ? (
@@ -193,10 +193,10 @@ export const GameActionsWidget: React.FC<GameActionsWidgetProps> = ({
                         ? 'bg-red-500/15 border-red-500/50 text-red-200'
                         : feedback
                         ? 'bg-emerald-500/15 border-emerald-500/50 text-emerald-200'
-                        : 'bg-ice-card hover:bg-ice-hover border-ice-border hover:border-amber-400/60 text-ice-text'
+                        : 'bg-ice-card hover:bg-ice-hover border-ice-border hover:border-ice-accent/60 text-ice-text'
                     }`}
                   >
-                    <div className="w-8 h-8 rounded-lg bg-black/40 flex items-center justify-center shrink-0 border border-white/5 group-hover:scale-110 transition-transform">
+                    <div className="w-8 h-8 rounded-lg bg-ice-hover/60 flex items-center justify-center shrink-0 border border-ice-border/60 group-hover:scale-110 transition-transform">
                       {feedback?.isError ? (
                         <AlertCircle className="w-4 h-4 text-red-400" />
                       ) : feedback ? (
@@ -207,11 +207,11 @@ export const GameActionsWidget: React.FC<GameActionsWidgetProps> = ({
                     </div>
 
                     <div className="flex-1 min-w-0">
-                      <div className="text-xs font-bold line-clamp-1 group-hover:text-amber-300 transition-colors break-words">
+                      <div className="text-xs font-bold line-clamp-1 group-hover:text-ice-accent transition-colors break-words">
                         {btn.label}
                       </div>
                       {btn.description && (
-                        <div className="text-[10px] text-ice-muted line-clamp-2 mt-0.5 leading-snug break-words">
+                        <div className="text-[10px] text-ice-subtext line-clamp-2 mt-0.5 leading-snug break-words">
                           {btn.description}
                         </div>
                       )}

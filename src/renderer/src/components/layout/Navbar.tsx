@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import { UserMenuWidget } from '../profile/UserMenuWidget';
 import { ThemeToggleSwitch } from '../common/ThemeToggleSwitch';
+import { useTheme } from '../../hooks/useTheme';
 import type { NavigationTab, UserProfile } from '../../types';
 
 interface NavbarProps {
@@ -62,6 +63,7 @@ export const Navbar: React.FC<NavbarProps> = ({
 }) => {
   const [logoError, setLogoError] = useState(false);
   const [isMaximized, setIsMaximized] = useState(false);
+  const { theme } = useTheme();
 
   useEffect(() => {
     if (window.api?.isWindowMaximized) {
@@ -127,7 +129,7 @@ export const Navbar: React.FC<NavbarProps> = ({
 
       {/* Main Full-Width Floating Island Navigation Bar with window drag support */}
       <div 
-        className="h-15 glass-header rounded-2xl px-4 flex items-center justify-between shadow-[0_8px_30px_rgba(0,0,0,0.12)] border border-ice-border/60 transition-all duration-300"
+        className="h-15 glass-header-elevated px-4 flex items-center justify-between transition-all duration-300"
         style={{ WebkitAppRegion: 'drag' } as React.CSSProperties}
         onDoubleClick={handleMaximize}
       >
@@ -168,17 +170,25 @@ export const Navbar: React.FC<NavbarProps> = ({
           <nav className="flex items-center gap-1.5 bg-ice-bg/40 p-1 rounded-xl border border-ice-border/40">
             {navItems.map((item) => {
               const isActive = currentTab === item.id;
+              const isAqua = theme === 'aqua';
+
               return (
                 <button
                   key={item.id}
                   onClick={() => onTabChange(item.id)}
-                  className={`relative px-3.5 py-1.5 text-xs font-bold tracking-wide rounded-lg transition-all ${
+                  className={`relative px-3.5 py-1.5 text-xs font-bold tracking-wide rounded-lg transition-all duration-300 cursor-pointer ${
                     isActive 
-                      ? 'bg-ice-accent text-white shadow-sm' 
+                      ? isAqua
+                        ? 'liquid-water-pill text-white shadow-[0_0_15px_rgba(56,189,248,0.55)] scale-[1.02]'
+                        : 'bg-ice-accent text-white shadow-sm' 
                       : 'text-ice-subtext hover:text-ice-text hover:bg-ice-hover/60'
                   }`}
                 >
                   {item.label}
+                  {/* Subtle water droplet bead on Aqua mode */}
+                  {isActive && isAqua && (
+                    <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-cyan-300 shadow-[0_0_6px_#38bdf8] animate-pulse" />
+                  )}
                 </button>
               );
             })}

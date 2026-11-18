@@ -157,16 +157,16 @@ export const GameInstallModal: React.FC<GameInstallModalProps> = ({
   return (
     <>
       <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fade-in select-none">
-        <div className="relative w-full max-w-lg bg-ice-surface/95 border border-ice-border rounded-2xl flex flex-col shadow-2xl overflow-hidden animate-scale-up">
+        <div className="relative w-full max-w-lg bg-ice-card border border-ice-border rounded-2xl flex flex-col shadow-2xl overflow-hidden animate-scale-up">
           {/* Header */}
-          <div className="p-4 border-b border-white/10 flex items-center justify-between bg-black/30">
+          <div className="p-4 border-b border-ice-border/60 flex items-center justify-between bg-ice-hover/40">
             <div className="flex items-center gap-2.5">
               <div className="w-9 h-9 rounded-xl bg-ice-accent/20 text-ice-accent border border-ice-accent/30 flex items-center justify-center">
                 <Settings2 className="w-5 h-5" />
               </div>
               <div>
-                <h2 className="text-sm font-black text-white">Cài Đặt Game & Điều Khiển</h2>
-                <p className="text-[11px] text-ice-muted truncate max-w-[280px]">
+                <h2 className="text-sm font-black text-ice-text">Cài Đặt Game & Điều Khiển</h2>
+                <p className="text-[11px] text-ice-subtext truncate max-w-[280px]">
                   {game.name} {expectedSizeGB ? `(~${expectedSizeGB} GB)` : ''}
                 </p>
               </div>
@@ -174,21 +174,21 @@ export const GameInstallModal: React.FC<GameInstallModalProps> = ({
             <button
               type="button"
               onClick={onClose}
-              className="p-1.5 rounded-lg text-ice-muted hover:text-white hover:bg-white/10 transition-colors"
+              className="p-1.5 rounded-lg text-ice-subtext hover:text-ice-text hover:bg-ice-hover transition-colors"
             >
               <X className="w-4 h-4" />
             </button>
           </div>
 
           {/* Subtabs: Storage vs Controller */}
-          <div className="px-5 pt-3 pb-0 flex items-center gap-2 border-b border-white/5 bg-black/20">
+          <div className="px-5 pt-3 pb-0 flex items-center gap-2 border-b border-ice-border/50 bg-ice-hover/20">
             <button
               type="button"
               onClick={() => setActiveTab('storage')}
               className={`pb-2.5 px-3 text-xs font-bold transition-all border-b-2 flex items-center gap-1.5 ${
                 activeTab === 'storage'
-                  ? 'border-ice-accent text-white'
-                  : 'border-transparent text-ice-muted hover:text-white'
+                  ? 'border-ice-accent text-ice-accent font-bold'
+                  : 'border-transparent text-ice-subtext hover:text-ice-text'
               }`}
             >
               <HardDrive className="w-3.5 h-3.5" />
@@ -199,8 +199,8 @@ export const GameInstallModal: React.FC<GameInstallModalProps> = ({
               onClick={() => setActiveTab('controller')}
               className={`pb-2.5 px-3 text-xs font-bold transition-all border-b-2 flex items-center gap-1.5 ${
                 activeTab === 'controller'
-                  ? 'border-amber-400 text-amber-300'
-                  : 'border-transparent text-ice-muted hover:text-white'
+                  ? 'border-amber-500 text-amber-500'
+                  : 'border-transparent text-ice-subtext hover:text-ice-text'
               }`}
             >
               <Gamepad2 className="w-3.5 h-3.5" />
@@ -231,16 +231,16 @@ export const GameInstallModal: React.FC<GameInstallModalProps> = ({
                           onClick={() => handleSelectDrive(d.drive)}
                           className={`p-2.5 rounded-xl border text-left transition-all flex flex-col gap-1 ${
                             isSelected
-                              ? 'bg-ice-accent/15 border-ice-accent text-white shadow-md'
-                              : 'bg-black/30 border-ice-border text-ice-subtext hover:border-white/20'
+                              ? 'bg-ice-accent/15 border-ice-accent text-ice-text shadow-md'
+                              : 'bg-ice-hover/40 border-ice-border text-ice-subtext hover:border-ice-accent/50'
                           }`}
                         >
                           <div className="flex items-center justify-between">
-                            <span className="font-bold text-xs text-white">Ổ đĩa {d.drive}</span>
+                            <span className="font-bold text-xs text-ice-text">Ổ đĩa {d.drive}</span>
                             {isSelected && <Check className="w-3.5 h-3.5 text-ice-accent" />}
                           </div>
-                          <span className="text-[11px] text-ice-muted">
-                            Trống: <strong className="text-emerald-400">{d.freeGB} GB</strong> / {d.totalGB} GB
+                          <span className="text-[11px] text-ice-subtext">
+                            Trống: <strong className="text-emerald-500 dark:text-emerald-400">{d.freeGB} GB</strong> / {d.totalGB} GB
                           </span>
                         </button>
                       );
@@ -259,20 +259,20 @@ export const GameInstallModal: React.FC<GameInstallModalProps> = ({
                       value={selectedFolder}
                       onChange={(e) => setSelectedFolder(e.target.value)}
                       placeholder="Ví dụ: D:\Games"
-                      className="flex-1 h-9 px-3 rounded-xl bg-black/40 border border-ice-border text-xs text-white font-mono placeholder-ice-muted focus:outline-none focus:border-ice-accent transition-colors"
+                      className="flex-1 h-9 px-3 rounded-xl bg-ice-hover/60 border border-ice-border text-xs text-ice-text font-mono placeholder-ice-subtext/60 focus:outline-none focus:border-ice-accent transition-colors"
                     />
                     <button
                       type="button"
                       onClick={handleBrowseFolder}
-                      className="px-3 h-9 rounded-xl bg-white/10 hover:bg-white/20 text-xs font-bold text-white flex items-center gap-1.5 transition-all shadow"
+                      className="px-3 h-9 rounded-xl bg-ice-hover hover:bg-ice-hover/80 text-xs font-bold text-ice-text flex items-center gap-1.5 transition-all shadow-sm border border-ice-border/60"
                       title="Duyệt thư mục trên máy tính"
                     >
-                      <FolderOpen className="w-4 h-4 text-amber-400" />
+                      <FolderOpen className="w-4 h-4 text-amber-500" />
                       <span>Duyệt...</span>
                     </button>
                   </div>
-                  <p className="text-[10px] text-ice-muted">
-                    📁 Game sẽ được giải nén vào thư mục con: <span className="font-mono text-white/80">{selectedFolder}\{game.name}</span>
+                  <p className="text-[10px] text-ice-subtext">
+                    📁 Game sẽ được giải nén vào thư mục con: <span className="font-mono text-ice-text font-bold">{selectedFolder}\{game.name}</span>
                   </p>
                 </div>
 
@@ -305,11 +305,11 @@ export const GameInstallModal: React.FC<GameInstallModalProps> = ({
                       onClick={() => handleModeChange('gamepad')}
                       className={`p-3 rounded-xl border flex flex-col items-center gap-1.5 transition-all ${
                         controllerMode === 'gamepad'
-                          ? 'bg-amber-500/15 border-amber-400 text-white shadow-lg'
-                          : 'bg-black/30 border-ice-border text-ice-muted hover:text-white'
+                          ? 'bg-amber-500/15 border-amber-500 text-ice-text shadow-md'
+                          : 'bg-ice-hover/40 border-ice-border text-ice-subtext hover:text-ice-text'
                       }`}
                     >
-                      <Gamepad2 className="w-5 h-5 text-amber-400" />
+                      <Gamepad2 className="w-5 h-5 text-amber-500" />
                       <span className="text-xs font-bold">Tay Cầm Ảo</span>
                     </button>
 
@@ -318,11 +318,11 @@ export const GameInstallModal: React.FC<GameInstallModalProps> = ({
                       onClick={() => handleModeChange('keyboard_mouse')}
                       className={`p-3 rounded-xl border flex flex-col items-center gap-1.5 transition-all ${
                         controllerMode === 'keyboard_mouse'
-                          ? 'bg-blue-500/15 border-blue-400 text-white shadow-lg'
-                          : 'bg-black/30 border-ice-border text-ice-muted hover:text-white'
+                          ? 'bg-blue-500/15 border-blue-500 text-ice-text shadow-md'
+                          : 'bg-ice-hover/40 border-ice-border text-ice-subtext hover:text-ice-text'
                       }`}
                     >
-                      <Keyboard className="w-5 h-5 text-blue-400" />
+                      <Keyboard className="w-5 h-5 text-blue-500" />
                       <span className="text-xs font-bold">Phím & Chuột</span>
                     </button>
 
@@ -331,18 +331,18 @@ export const GameInstallModal: React.FC<GameInstallModalProps> = ({
                       onClick={() => handleModeChange('disabled')}
                       className={`p-3 rounded-xl border flex flex-col items-center gap-1.5 transition-all ${
                         controllerMode === 'disabled'
-                          ? 'bg-red-500/15 border-red-400 text-white shadow-lg'
-                          : 'bg-black/30 border-ice-border text-ice-muted hover:text-white'
+                          ? 'bg-red-500/15 border-red-500 text-ice-text shadow-md'
+                          : 'bg-ice-hover/40 border-ice-border text-ice-subtext hover:text-ice-text'
                       }`}
                     >
-                      <X className="w-5 h-5 text-red-400" />
+                      <X className="w-5 h-5 text-red-500" />
                       <span className="text-xs font-bold">Tắt</span>
                     </button>
                   </div>
                 </div>
 
                 {controllerMode !== 'disabled' && (
-                  <div className="space-y-3 p-3.5 rounded-xl bg-black/40 border border-white/10 animate-fade-in">
+                  <div className="space-y-3 p-3.5 rounded-xl bg-ice-hover/40 border border-ice-border/60 animate-fade-in">
                     <div className="space-y-1.5">
                       <label className="text-[11px] font-bold text-ice-subtext uppercase tracking-wider">
                         Mẫu bố cục nút (Preset):
@@ -355,8 +355,8 @@ export const GameInstallModal: React.FC<GameInstallModalProps> = ({
                             onClick={() => handlePresetChange(p)}
                             className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
                               presetName === p
-                                ? 'bg-amber-400 text-black shadow'
-                                : 'bg-white/10 text-white hover:bg-white/20'
+                                ? 'bg-amber-500 text-white shadow'
+                                : 'bg-ice-card border border-ice-border text-ice-text hover:bg-ice-hover'
                             }`}
                           >
                             {p}
@@ -366,21 +366,21 @@ export const GameInstallModal: React.FC<GameInstallModalProps> = ({
                     </div>
 
                     {/* Customize Button Layout */}
-                    <div className="pt-2 border-t border-white/10 flex items-center justify-between">
-                      <div className="text-[11px] text-ice-muted">
-                        Bố cục: <span className="text-white font-bold">{customButtons.filter(b => b.enabled).length} nút đang bật</span>
+                    <div className="pt-2 border-t border-ice-border/40 flex items-center justify-between">
+                      <div className="text-[11px] text-ice-subtext">
+                        Bố cục: <span className="text-ice-text font-bold">{customButtons.filter(b => b.enabled).length} nút đang bật</span>
                       </div>
                       <button
                         type="button"
                         onClick={() => setIsLayoutEditorOpen(true)}
-                        className="px-3.5 py-1.5 rounded-lg bg-gradient-to-r from-amber-400 to-orange-400 hover:from-amber-300 hover:to-orange-300 text-black text-xs font-black shadow transition-all flex items-center gap-1.5"
+                        className="px-3.5 py-1.5 rounded-lg bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-white text-xs font-black shadow transition-all flex items-center gap-1.5"
                       >
                         <Sliders className="w-3.5 h-3.5" />
                         <span>Chỉnh Sửa Vị Trí Nút...</span>
                       </button>
                     </div>
 
-                    <p className="text-[10px] text-amber-300/80 italic flex items-center gap-1">
+                    <p className="text-[10px] text-amber-600 dark:text-amber-300 italic flex items-center gap-1">
                       <Sparkles className="w-3 h-3 flex-shrink-0" />
                       <span>Thẻ game sẽ hiện biểu tượng tay cầm và có nút "Chơi bằng tay cầm điện thoại".</span>
                     </p>
@@ -391,11 +391,11 @@ export const GameInstallModal: React.FC<GameInstallModalProps> = ({
           </div>
 
           {/* Footer Actions */}
-          <div className="p-4 border-t border-white/10 bg-black/30 flex items-center justify-end gap-2">
+          <div className="p-4 border-t border-ice-border/60 bg-ice-hover/40 flex items-center justify-end gap-2">
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-xs font-bold text-white transition-all"
+              className="px-4 py-2 rounded-xl bg-ice-card hover:bg-ice-hover text-xs font-bold text-ice-text border border-ice-border transition-all"
             >
               Hủy Bỏ
             </button>

@@ -129,9 +129,9 @@ export const GameDetailView: React.FC<GameDetailViewProps> = ({
         <div className="flex items-center gap-4">
           <button
             onClick={onBack}
-            className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-ice-bg hover:bg-ice-hover text-white text-xs font-semibold border border-ice-border transition-all hover:-translate-x-0.5"
+            className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-ice-bg hover:bg-ice-hover text-ice-text text-xs font-semibold border border-ice-border transition-all hover:-translate-x-0.5"
           >
-            <ArrowLeft className="w-4 h-4 text-amber-400" />
+            <ArrowLeft className="w-4 h-4 text-ice-accent" />
             <span>Quay lại</span>
           </button>
 
@@ -140,14 +140,14 @@ export const GameDetailView: React.FC<GameDetailViewProps> = ({
             <span>/</span>
             <span>Chi tiết Game</span>
             <span>/</span>
-            <span className="text-white font-bold truncate max-w-xs">{game.name}</span>
+            <span className="text-ice-text font-bold truncate max-w-xs">{game.name}</span>
           </div>
         </div>
 
         {/* Right Admin controls */}
         <div className="flex items-center gap-3">
           {game.hidden && (
-            <span className="px-2.5 py-1 rounded-full text-[11px] font-black uppercase tracking-wider bg-amber-500/20 text-amber-300 border border-amber-500/40 animate-pulse">
+            <span className="px-2.5 py-1 rounded-full text-[11px] font-black uppercase tracking-wider bg-amber-500/20 text-amber-500 border border-amber-500/40 animate-pulse">
               [ĐÃ ẨN KHỎI KHÁCH]
             </span>
           )}
@@ -160,7 +160,7 @@ export const GameDetailView: React.FC<GameDetailViewProps> = ({
                   className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold border transition-all ${
                     game.hidden
                       ? 'bg-amber-500 text-black border-amber-400'
-                      : 'bg-ice-card text-ice-subtext hover:text-white border-ice-border hover:bg-ice-hover'
+                      : 'bg-ice-card text-ice-subtext hover:text-ice-text border-ice-border hover:bg-ice-hover'
                   }`}
                   title={game.hidden ? 'Bỏ ẩn (Hiện lại cho mọi người)' : 'Ẩn game này'}
                 >
@@ -172,7 +172,7 @@ export const GameDetailView: React.FC<GameDetailViewProps> = ({
               {onEditGame && (
                 <button
                   onClick={() => onEditGame(game)}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-ice-card text-amber-400 hover:text-white border border-ice-border hover:bg-ice-hover text-xs font-bold transition-all"
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-ice-card text-ice-accent hover:text-ice-text border border-ice-border hover:bg-ice-hover text-xs font-bold transition-all"
                   title="Sửa thông tin / Căn chỉnh ảnh"
                 >
                   <Edit3 className="w-3.5 h-3.5" />
@@ -329,7 +329,7 @@ export const GameDetailView: React.FC<GameDetailViewProps> = ({
 
             {/* Title & Tags */}
             <div className="space-y-2">
-              <h1 className="text-2xl font-black text-white tracking-tight leading-snug">
+              <h1 className="text-2xl font-black text-ice-text tracking-tight leading-snug">
                 {game.name}
               </h1>
 
@@ -337,7 +337,7 @@ export const GameDetailView: React.FC<GameDetailViewProps> = ({
                 {tagsList.map((tag) => (
                   <span
                     key={tag}
-                    className="px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-black/50 text-white/90 border border-white/20"
+                    className="px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-ice-hover text-ice-text border border-ice-border/60"
                   >
                     {tag}
                   </span>
@@ -356,22 +356,22 @@ export const GameDetailView: React.FC<GameDetailViewProps> = ({
             <div className="space-y-2 text-xs border-y border-ice-border/60 py-3 text-ice-subtext">
               <div className="flex justify-between items-center">
                 <span>Dung lượng game:</span>
-                <span className="text-white font-mono font-semibold">{formatBytes(game.expectedSize)}</span>
+                <span className="text-ice-text font-mono font-semibold">{formatBytes(game.expectedSize)}</span>
               </div>
               <div className="flex justify-between items-center">
                 <span>Trạng thái:</span>
                 <span className="font-semibold">
-                  {isReady && <span className="text-emerald-400 flex items-center gap-1"><CheckCircle2 className="w-3.5 h-3.5" /> Sẵn sàng chơi</span>}
+                  {isReady && <span className="text-emerald-500 dark:text-emerald-400 flex items-center gap-1"><CheckCircle2 className="w-3.5 h-3.5" /> Sẵn sàng chơi</span>}
                   {isDownloading && <span className="text-ice-accent animate-pulse">Đang tải xuống ({percent}%)</span>}
-                  {isInstalling && <span className="text-amber-400 animate-pulse">Đang cài đặt ({percent}%)</span>}
+                  {isInstalling && <span className="text-amber-500 animate-pulse">Đang cài đặt ({percent}%)</span>}
                   {game.status === 'uninstalled' && <span className="text-ice-subtext">Chưa cài đặt</span>}
-                  {isError && <span className="text-red-400">Có lỗi xảy ra</span>}
+                  {isError && <span className="text-red-500">Có lỗi xảy ra</span>}
                 </span>
               </div>
               {game.lastPlayed && (
                 <div className="flex justify-between items-center">
                   <span>Lần chơi cuối:</span>
-                  <span className="text-white">{game.lastPlayed}</span>
+                  <span className="text-ice-text">{game.lastPlayed}</span>
                 </div>
               )}
             </div>
@@ -380,8 +380,8 @@ export const GameDetailView: React.FC<GameDetailViewProps> = ({
             <div className="space-y-2.5 pt-1">
               {/* Dynamic Live Progress Bar if downloading or installing */}
               {(isDownloading || isInstalling) && (
-                <div className="space-y-1.5 p-3 rounded-xl bg-black/60 border border-ice-border">
-                  <div className="flex justify-between text-xs text-white">
+                <div className="space-y-1.5 p-3 rounded-xl bg-ice-card border border-ice-border shadow-sm">
+                  <div className="flex justify-between text-xs text-ice-text">
                     <span className="font-semibold text-ice-accent">
                       {isInstalling ? 'Đang giải nén & cài đặt...' : 'Đang tải file từ Google Drive...'}
                     </span>
@@ -520,7 +520,7 @@ export const GameDetailView: React.FC<GameDetailViewProps> = ({
                 className={`w-full h-10 rounded-xl border flex items-center justify-center gap-2 text-xs font-bold transition-all ${
                   game.inLibrary
                     ? 'bg-ice-accent/20 border-ice-accent text-ice-accent'
-                    : 'bg-ice-card hover:bg-ice-hover text-white border-ice-border'
+                    : 'bg-ice-card hover:bg-ice-hover text-ice-text border-ice-border'
                 }`}
               >
                 {game.inLibrary ? <BookmarkCheck className="w-4 h-4" /> : <Bookmark className="w-4 h-4" />}
@@ -531,7 +531,7 @@ export const GameDetailView: React.FC<GameDetailViewProps> = ({
               {isReady && onOpenFolder && (
                 <button
                   onClick={() => onOpenFolder(game.id)}
-                  className="w-full h-9 rounded-xl border border-ice-border hover:bg-ice-hover text-ice-subtext hover:text-white text-xs font-medium flex items-center justify-center gap-2 transition-colors"
+                  className="w-full h-9 rounded-xl border border-ice-border hover:bg-ice-hover text-ice-subtext hover:text-ice-text text-xs font-medium flex items-center justify-center gap-2 transition-colors"
                 >
                   <FolderOpen className="w-3.5 h-3.5" />
                   <span>Mở thư mục cài đặt game</span>
@@ -552,8 +552,8 @@ export const GameDetailView: React.FC<GameDetailViewProps> = ({
         {/* Detailed Game Description & Notes (Bottom Full Width) */}
         <div className="bg-ice-card border border-ice-border rounded-2xl p-8 space-y-6 shadow-xl">
           <div className="border-b border-ice-border/60 pb-3">
-            <h2 className="text-lg font-bold text-white tracking-wide flex items-center gap-2">
-              <Sparkles className="w-4 h-4 text-amber-400" />
+            <h2 className="text-lg font-bold text-ice-text tracking-wide flex items-center gap-2">
+              <Sparkles className="w-4 h-4 text-ice-accent" />
               <span>Giới thiệu chi tiết & Hướng dẫn</span>
             </h2>
           </div>
@@ -565,7 +565,7 @@ export const GameDetailView: React.FC<GameDetailViewProps> = ({
           {/* Screenshots Grid View */}
           {screenshots.length > 0 && (
             <div className="space-y-3 pt-4 border-t border-ice-border/60">
-              <h3 className="text-sm font-bold text-white">Ảnh chụp màn hình (Screenshots Gallery)</h3>
+              <h3 className="text-sm font-bold text-ice-text">Ảnh chụp màn hình (Screenshots Gallery)</h3>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                 {screenshots.map((s, i) => (
                   <div
@@ -582,21 +582,21 @@ export const GameDetailView: React.FC<GameDetailViewProps> = ({
 
           {/* System & Installation Info */}
           <div className="pt-4 border-t border-ice-border/60 grid grid-cols-1 md:grid-cols-3 gap-4 text-xs text-ice-subtext">
-            <div className="p-3 bg-black/30 rounded-xl border border-ice-border/50">
-              <p className="font-semibold text-white mb-1">Thư mục cài đặt:</p>
+            <div className="p-3 bg-ice-hover/50 rounded-xl border border-ice-border/60 hover-depth-lift">
+              <p className="font-semibold text-ice-text mb-1">Thư mục cài đặt:</p>
               <p className="font-mono text-[11px] truncate text-ice-accent">
                 {game.installPath || `C:\\Icelauch\\Games\\${game.name}`}
               </p>
             </div>
-            <div className="p-3 bg-black/30 rounded-xl border border-ice-border/50">
-              <p className="font-semibold text-white mb-1">File chạy chính:</p>
-              <p className="font-mono text-[11px] truncate text-emerald-400">
+            <div className="p-3 bg-ice-hover/50 rounded-xl border border-ice-border/60 hover-depth-lift">
+              <p className="font-semibold text-ice-text mb-1">File chạy chính:</p>
+              <p className="font-mono text-[11px] truncate text-emerald-600 dark:text-emerald-400">
                 {game.mainExe || '(Tự động phát hiện)'}
               </p>
             </div>
-            <div className="p-3 bg-black/30 rounded-xl border border-ice-border/50">
-              <p className="font-semibold text-white mb-1">Quyền Quản Trị:</p>
-              <p className="text-white">
+            <div className="p-3 bg-ice-hover/50 rounded-xl border border-ice-border/60 hover-depth-lift">
+              <p className="font-semibold text-ice-text mb-1">Quyền Quản Trị:</p>
+              <p className="text-ice-subtext">
                 {game.runAsAdmin ? 'Yêu cầu Administrator (UAC)' : 'Khởi chạy tiêu chuẩn'}
               </p>
             </div>

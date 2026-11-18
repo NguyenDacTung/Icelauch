@@ -48,7 +48,7 @@ export const DevicePhoneFrame: React.FC<DevicePhoneFrameProps> = ({
 
   const renderBottomNav = () => (
     <div className="w-full px-4 pb-2 pt-1 shrink-0 z-40 select-none bg-transparent">
-      <nav className="h-15 w-full max-w-md mx-auto rounded-full glass-panel flex items-center justify-around px-2 py-1 shadow-[0_10px_35px_rgba(0,0,0,0.25)] border border-ice-border/70 transition-all duration-300">
+      <nav className="h-15 w-full max-w-md mx-auto rounded-full glass-pill-elevated flex items-center justify-around px-2 py-1 transition-all duration-300">
         {mobileNavItems.map((item) => {
           const isActive = currentTab === item.id;
           const Icon = item.icon;
@@ -81,7 +81,7 @@ export const DevicePhoneFrame: React.FC<DevicePhoneFrameProps> = ({
   // 1. SIMULATOR MODE (Only when Admin is previewing phone on PC Electron)
   if (isSimulated) {
     return (
-      <div className="flex-1 w-full h-full flex flex-col items-center justify-center p-3 select-none overflow-hidden relative bg-[#07090E]">
+      <div className="flex-1 w-full h-full flex flex-col items-center justify-center p-3 select-none overflow-hidden relative bg-ice-bg">
         {/* Top exit simulation indicator */}
         <div className="mb-2 flex items-center gap-2">
           <span className="text-xs text-ice-subtext font-semibold">Đang giả lập màn hình Điện Thoại</span>
@@ -89,7 +89,7 @@ export const DevicePhoneFrame: React.FC<DevicePhoneFrameProps> = ({
             <button
               type="button"
               onClick={onExitSimulation}
-              className="px-2 py-0.5 rounded-md bg-white/10 hover:bg-white/20 text-white text-[11px] font-bold flex items-center gap-1"
+              className="px-2 py-0.5 rounded-md bg-ice-hover/60 hover:bg-ice-hover text-ice-text text-[11px] font-bold flex items-center gap-1 border border-ice-border"
             >
               <X className="w-3 h-3" />
               <span>Thoát</span>

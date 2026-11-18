@@ -476,7 +476,7 @@ export const VideoTheaterView: React.FC<VideoTheaterViewProps> = ({
               {/* Aspect Ratio, Download & Action Buttons */}
               <div className="flex items-center gap-2">
                 {/* Aspect Ratio Toggle */}
-                <div className="flex items-center gap-1 bg-black/40 border border-ice-border/60 p-1 rounded-xl">
+                <div className="flex items-center gap-1 bg-ice-hover/50 border border-ice-border/60 p-1 rounded-xl">
                   <button
                     onClick={() => {
                       sfx.playClick();
@@ -484,8 +484,8 @@ export const VideoTheaterView: React.FC<VideoTheaterViewProps> = ({
                     }}
                     className={`px-2 py-1 rounded-lg text-xs font-bold transition-all flex items-center gap-1 ${
                       aspectMode === '16:9'
-                        ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40 shadow-sm'
-                        : 'text-ice-muted hover:text-white'
+                        ? 'bg-amber-500/20 text-amber-500 border border-amber-500/40 shadow-sm'
+                        : 'text-ice-subtext hover:text-ice-text'
                     }`}
                     title="Khung chuẩn 16:9 Điện ảnh"
                   >
@@ -499,8 +499,8 @@ export const VideoTheaterView: React.FC<VideoTheaterViewProps> = ({
                     }}
                     className={`px-2 py-1 rounded-lg text-xs font-bold transition-all flex items-center gap-1 ${
                       aspectMode === '9:16'
-                        ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40 shadow-sm'
-                        : 'text-ice-muted hover:text-white'
+                        ? 'bg-amber-500/20 text-amber-500 border border-amber-500/40 shadow-sm'
+                        : 'text-ice-subtext hover:text-ice-text'
                     }`}
                     title="Khung dọc 9:16 Reel"
                   >
@@ -717,7 +717,7 @@ export const VideoTheaterView: React.FC<VideoTheaterViewProps> = ({
                           }}
                           className="flex items-center gap-3 p-2 rounded-xl hover:bg-ice-hover cursor-pointer transition-all border border-transparent hover:border-ice-border/60"
                         >
-                          <div className="w-20 aspect-video rounded-lg overflow-hidden bg-black/50 shrink-0">
+                          <div className="w-20 aspect-video rounded-lg overflow-hidden bg-ice-hover/50 shrink-0 border border-ice-border/40">
                             {item.coverPath ? (
                               <img
                                 src={item.coverPath.startsWith('http') ? item.coverPath : `file://${item.coverPath}`}
@@ -731,8 +731,8 @@ export const VideoTheaterView: React.FC<VideoTheaterViewProps> = ({
                             )}
                           </div>
                           <div className="flex-1 truncate">
-                            <h4 className="text-xs font-semibold text-white truncate">{item.title}</h4>
-                            <p className="text-[10px] text-ice-muted">{item.tags?.[0] || 'Video'}</p>
+                            <h4 className="text-xs font-semibold text-ice-text truncate">{item.title}</h4>
+                            <p className="text-[10px] text-ice-subtext">{item.tags?.[0] || 'Video'}</p>
                           </div>
                         </div>
                       ))
@@ -745,7 +745,7 @@ export const VideoTheaterView: React.FC<VideoTheaterViewProps> = ({
               {sidebarTab === 'featured' && (
                 <div className="space-y-2">
                   <div className="pb-2 border-b border-ice-border/40">
-                    <span className="text-xs font-bold text-white flex items-center gap-1.5">
+                    <span className="text-xs font-bold text-ice-text flex items-center gap-1.5">
                       <Flame className="w-4 h-4 text-orange-400" />
                       <span>Video Thịnh Hành / Nổi Bật</span>
                     </span>
@@ -761,7 +761,7 @@ export const VideoTheaterView: React.FC<VideoTheaterViewProps> = ({
                         }}
                         className="flex items-center gap-3 p-2 rounded-xl hover:bg-ice-hover cursor-pointer transition-all border border-transparent hover:border-ice-border/60"
                       >
-                        <div className="w-20 aspect-video rounded-lg overflow-hidden bg-black/50 shrink-0">
+                        <div className="w-20 aspect-video rounded-lg overflow-hidden bg-ice-hover/50 shrink-0 border border-ice-border/40">
                           {item.coverPath ? (
                             <img
                               src={item.coverPath.startsWith('http') ? item.coverPath : `file://${item.coverPath}`}
@@ -775,8 +775,8 @@ export const VideoTheaterView: React.FC<VideoTheaterViewProps> = ({
                           )}
                         </div>
                         <div className="flex-1 truncate">
-                          <h4 className="text-xs font-semibold text-white truncate">{item.title}</h4>
-                          <p className="text-[10px] text-ice-muted">{item.tags?.[0] || 'Video'}</p>
+                          <h4 className="text-xs font-semibold text-ice-text truncate">{item.title}</h4>
+                          <p className="text-[10px] text-ice-subtext">{item.tags?.[0] || 'Video'}</p>
                         </div>
                       </div>
                     ))}

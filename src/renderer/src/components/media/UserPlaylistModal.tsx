@@ -121,29 +121,29 @@ export const UserPlaylistModal: React.FC<UserPlaylistModalProps> = ({
         <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-5 space-y-4 text-xs">
           {/* Name input */}
           <div className="space-y-1.5">
-            <label className="font-semibold text-white">Tên danh sách phát *</label>
+            <label className="font-semibold text-ice-text">Tên danh sách phát *</label>
             <input
               type="text"
               required
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="Ví dụ: Nhạc chill đêm khuya, Tuyển tập phim Anime..."
-              className="w-full bg-black/50 border border-white/15 rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-amber-400"
+              className="w-full bg-ice-hover/60 border border-ice-border rounded-xl px-3.5 py-2.5 text-xs text-ice-text placeholder-ice-subtext focus:outline-none focus:border-ice-accent"
             />
           </div>
 
           {/* Type Selector (Only when creating new) */}
           {!playlist && (
             <div className="space-y-1.5">
-              <label className="font-semibold text-white">Loại danh sách</label>
+              <label className="font-semibold text-ice-text">Loại danh sách</label>
               <div className="grid grid-cols-2 gap-2">
                 <button
                   type="button"
                   onClick={() => setType('video')}
                   className={`flex items-center justify-center gap-2 py-2.5 rounded-xl border font-bold text-xs transition-all ${
                     type === 'video'
-                      ? 'bg-blue-500/20 border-blue-400 text-blue-300'
-                      : 'bg-white/[0.03] border-white/10 text-slate-400 hover:text-white'
+                      ? 'bg-blue-500/20 border-blue-400 text-blue-400'
+                      : 'bg-ice-hover/40 border-ice-border text-ice-subtext hover:text-ice-text'
                   }`}
                 >
                   <Film className="w-3.5 h-3.5" />
@@ -154,8 +154,8 @@ export const UserPlaylistModal: React.FC<UserPlaylistModalProps> = ({
                   onClick={() => setType('audio')}
                   className={`flex items-center justify-center gap-2 py-2.5 rounded-xl border font-bold text-xs transition-all ${
                     type === 'audio'
-                      ? 'bg-amber-500/20 border-amber-400 text-amber-300'
-                      : 'bg-white/[0.03] border-white/10 text-slate-400 hover:text-white'
+                      ? 'bg-amber-500/20 border-amber-400 text-amber-500'
+                      : 'bg-ice-hover/40 border-ice-border text-ice-subtext hover:text-ice-text'
                   }`}
                 >
                   <Music className="w-3.5 h-3.5" />
@@ -167,14 +167,14 @@ export const UserPlaylistModal: React.FC<UserPlaylistModalProps> = ({
 
           {/* Item Reordering list (When editing) */}
           {playlist && (
-            <div className="space-y-2 pt-2 border-t border-white/10">
-              <div className="flex items-center justify-between text-slate-400 text-[11px]">
-                <span className="font-semibold text-white">Sắp xếp các mục ({itemIds.length})</span>
+            <div className="space-y-2 pt-2 border-t border-ice-border/60">
+              <div className="flex items-center justify-between text-ice-subtext text-[11px]">
+                <span className="font-semibold text-ice-text">Sắp xếp các mục ({itemIds.length})</span>
                 <span>Dùng nút 🔼 🔽 để đổi thứ tự</span>
               </div>
 
               {itemIds.length === 0 ? (
-                <div className="py-6 text-center text-slate-500 bg-black/20 rounded-xl border border-white/5">
+                <div className="py-6 text-center text-ice-subtext bg-ice-hover/30 rounded-xl border border-ice-border/40">
                   Danh sách này đang trống.
                 </div>
               ) : (
@@ -184,13 +184,13 @@ export const UserPlaylistModal: React.FC<UserPlaylistModalProps> = ({
                     return (
                       <div
                         key={itemId}
-                        className="flex items-center justify-between gap-2 p-2 rounded-xl bg-white/[0.03] border border-white/5"
+                        className="flex items-center justify-between gap-2 p-2 rounded-xl bg-ice-hover/40 border border-ice-border/60 hover-depth-lift"
                       >
                         <div className="flex items-center gap-2 min-w-0">
-                          <span className="w-5 text-[10px] font-mono text-slate-500 text-center">
+                          <span className="w-5 text-[10px] font-mono text-ice-subtext text-center">
                             #{idx + 1}
                           </span>
-                          <span className="text-xs text-white truncate max-w-[200px]">
+                          <span className="text-xs text-ice-text truncate max-w-[200px]">
                             {item?.title || 'Mục đã xoá hoặc không tồn tại'}
                           </span>
                         </div>
@@ -200,7 +200,7 @@ export const UserPlaylistModal: React.FC<UserPlaylistModalProps> = ({
                             type="button"
                             disabled={idx === 0}
                             onClick={() => handleMoveToTop(idx)}
-                            className="p-1 rounded bg-white/5 hover:bg-white/10 disabled:opacity-20 text-amber-400 hover:text-amber-300 transition-colors"
+                            className="p-1 rounded bg-ice-hover hover:bg-ice-hover/80 border border-ice-border/40 disabled:opacity-20 text-amber-500 hover:text-amber-600 transition-colors"
                             title="Đưa lên trên cùng"
                           >
                             <ChevronsUp className="w-3 h-3" />
@@ -209,7 +209,7 @@ export const UserPlaylistModal: React.FC<UserPlaylistModalProps> = ({
                             type="button"
                             disabled={idx === 0}
                             onClick={() => handleMoveUp(idx)}
-                            className="p-1 rounded bg-white/5 hover:bg-white/10 disabled:opacity-20 text-slate-300 hover:text-white transition-colors"
+                            className="p-1 rounded bg-ice-hover hover:bg-ice-hover/80 border border-ice-border/40 disabled:opacity-20 text-ice-subtext hover:text-ice-text transition-colors"
                             title="Di chuyển lên"
                           >
                             <ArrowUp className="w-3 h-3" />
@@ -218,7 +218,7 @@ export const UserPlaylistModal: React.FC<UserPlaylistModalProps> = ({
                             type="button"
                             disabled={idx === itemIds.length - 1}
                             onClick={() => handleMoveDown(idx)}
-                            className="p-1 rounded bg-white/5 hover:bg-white/10 disabled:opacity-20 text-slate-300 hover:text-white transition-colors"
+                            className="p-1 rounded bg-ice-hover hover:bg-ice-hover/80 border border-ice-border/40 disabled:opacity-20 text-ice-subtext hover:text-ice-text transition-colors"
                             title="Di chuyển xuống"
                           >
                             <ArrowDown className="w-3 h-3" />
@@ -227,7 +227,7 @@ export const UserPlaylistModal: React.FC<UserPlaylistModalProps> = ({
                             type="button"
                             disabled={idx === itemIds.length - 1}
                             onClick={() => handleMoveToBottom(idx)}
-                            className="p-1 rounded bg-white/5 hover:bg-white/10 disabled:opacity-20 text-amber-400 hover:text-amber-300 transition-colors"
+                            className="p-1 rounded bg-ice-hover hover:bg-ice-hover/80 border border-ice-border/40 disabled:opacity-20 text-amber-500 hover:text-amber-600 transition-colors"
                             title="Đưa xuống dưới cùng"
                           >
                             <ChevronsDown className="w-3 h-3" />
@@ -235,7 +235,7 @@ export const UserPlaylistModal: React.FC<UserPlaylistModalProps> = ({
                           <button
                             type="button"
                             onClick={() => handleRemoveItem(itemId)}
-                            className="p-1 rounded bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 transition-colors ml-1"
+                            className="p-1 rounded bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 transition-colors ml-1 border border-rose-500/20"
                             title="Xoá khỏi danh sách này"
                           >
                             <Trash2 className="w-3 h-3" />
@@ -250,7 +250,7 @@ export const UserPlaylistModal: React.FC<UserPlaylistModalProps> = ({
           )}
 
           {/* Footer */}
-          <div className="pt-3 border-t border-white/10 flex items-center justify-between gap-3">
+          <div className="pt-3 border-t border-ice-border/60 flex items-center justify-between gap-3">
             {playlist && onDelete && (
               <button
                 type="button"

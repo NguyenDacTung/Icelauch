@@ -115,8 +115,8 @@ export const MobileLibraryView: React.FC<MobileLibraryViewProps> = ({
               <Bookmark className="w-4 h-4 fill-cyan-400/20" />
             </div>
             <div>
-              <h1 className="text-base font-black text-white tracking-wide">Thư Viện</h1>
-              <p className="text-[10px] text-slate-400">
+              <h1 className="text-base font-black text-ice-text tracking-wide">Thư Viện</h1>
+              <p className="text-[10px] text-ice-subtext">
                 {activeProfile ? `Hồ sơ: ${activeProfile.nickname}` : 'Chế độ Khách'}
               </p>
             </div>
@@ -149,7 +149,7 @@ export const MobileLibraryView: React.FC<MobileLibraryViewProps> = ({
             className={`flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-bold whitespace-nowrap transition-all ${
               activeSubTab === 'videos'
                 ? 'bg-cyan-500 text-black shadow-md'
-                : 'text-slate-400 hover:text-white'
+                : 'text-ice-subtext hover:text-ice-text'
             }`}
           >
             <Film className="w-3.5 h-3.5" />
@@ -165,7 +165,7 @@ export const MobileLibraryView: React.FC<MobileLibraryViewProps> = ({
             className={`flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-bold whitespace-nowrap transition-all ${
               activeSubTab === 'music'
                 ? 'bg-cyan-500 text-black shadow-md'
-                : 'text-slate-400 hover:text-white'
+                : 'text-ice-subtext hover:text-ice-text'
             }`}
           >
             <Music className="w-3.5 h-3.5" />
@@ -181,7 +181,7 @@ export const MobileLibraryView: React.FC<MobileLibraryViewProps> = ({
             className={`flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-bold whitespace-nowrap transition-all ${
               activeSubTab === 'podcast'
                 ? 'bg-cyan-500 text-black shadow-md'
-                : 'text-slate-400 hover:text-white'
+                : 'text-ice-subtext hover:text-ice-text'
             }`}
           >
             <Radio className="w-3.5 h-3.5" />
@@ -197,7 +197,7 @@ export const MobileLibraryView: React.FC<MobileLibraryViewProps> = ({
             className={`flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-bold whitespace-nowrap transition-all ${
               activeSubTab === 'games'
                 ? 'bg-cyan-500 text-black shadow-md'
-                : 'text-slate-400 hover:text-white'
+                : 'text-ice-subtext hover:text-ice-text'
             }`}
           >
             <Gamepad2 className="w-3.5 h-3.5" />
@@ -222,13 +222,13 @@ export const MobileLibraryView: React.FC<MobileLibraryViewProps> = ({
       <div className="flex-1 w-full overflow-y-auto p-3.5 space-y-4 no-scrollbar">
         {/* CASE A: Guest Mode Prompt */}
         {!activeProfile && (
-          <div className="p-4 rounded-2xl bg-gradient-to-br from-cyan-950/30 via-[#10141E] to-[#0D1017] border border-cyan-500/30 shadow-lg flex flex-col items-center text-center space-y-3">
-            <div className="w-12 h-12 rounded-2xl bg-cyan-500/20 text-cyan-400 flex items-center justify-center border border-cyan-500/30">
+          <div className="p-4 rounded-2xl bg-ice-card border border-ice-border/70 shadow-lg flex flex-col items-center text-center space-y-3 hover-depth-lift">
+            <div className="w-12 h-12 rounded-2xl bg-cyan-500/20 text-cyan-500 flex items-center justify-center border border-cyan-500/30">
               <User className="w-6 h-6" />
             </div>
             <div className="space-y-1">
-              <h2 className="text-sm font-black text-white">Bạn Đang Ở Chế Độ Khách</h2>
-              <p className="text-xs text-slate-300 max-w-[280px]">
+              <h2 className="text-sm font-black text-ice-text">Bạn Đang Ở Chế Độ Khách</h2>
+              <p className="text-xs text-ice-subtext max-w-[280px]">
                 Hãy đăng nhập hoặc chọn hồ sơ để lưu trữ và đồng bộ Thư viện Game, Phim & Nhạc yêu thích của riêng bạn.
               </p>
             </div>
@@ -299,15 +299,15 @@ export const MobileLibraryView: React.FC<MobileLibraryViewProps> = ({
                       className="p-2.5 flex flex-col justify-between flex-1 cursor-pointer"
                     >
                       <div>
-                        <h3 className="text-xs font-bold text-white line-clamp-1 group-hover:text-cyan-400 transition-colors">
+                        <h3 className="text-xs font-bold text-ice-text line-clamp-1 group-hover:text-cyan-500 transition-colors">
                           {game.name}
                         </h3>
-                        <p className="text-[10px] text-slate-400 line-clamp-1 mt-0.5">
+                        <p className="text-[10px] text-ice-subtext line-clamp-1 mt-0.5">
                           {game.genre || 'Game PC'}
                         </p>
                       </div>
-                      <div className="mt-2 pt-2 border-t border-white/5 flex items-center justify-between text-[10px]">
-                        <span className="text-cyan-400 font-bold flex items-center gap-0.5">
+                      <div className="mt-2 pt-2 border-t border-ice-border/40 flex items-center justify-between text-[10px]">
+                        <span className="text-cyan-500 font-bold flex items-center gap-0.5">
                           Chi tiết <ChevronRight className="w-3 h-3" />
                         </span>
                       </div>
@@ -317,12 +317,12 @@ export const MobileLibraryView: React.FC<MobileLibraryViewProps> = ({
               </div>
             ) : (
               <div className="py-12 flex flex-col items-center justify-center text-center space-y-3">
-                <div className="w-14 h-14 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-slate-500">
+                <div className="w-14 h-14 rounded-2xl bg-ice-hover/40 border border-ice-border flex items-center justify-center text-ice-subtext">
                   <Gamepad2 className="w-7 h-7" />
                 </div>
                 <div className="space-y-1">
-                  <h3 className="text-sm font-bold text-white">Thư Viện Game Đang Trống</h3>
-                  <p className="text-xs text-slate-400 max-w-[260px]">
+                  <h3 className="text-sm font-bold text-ice-text">Thư Viện Game Đang Trống</h3>
+                  <p className="text-xs text-ice-subtext max-w-[260px]">
                     Bạn chưa lưu game nào vào thư viện cá nhân. Hãy khám phá và thêm game bạn thích!
                   </p>
                 </div>
@@ -333,7 +333,7 @@ export const MobileLibraryView: React.FC<MobileLibraryViewProps> = ({
                       sfx.playClick();
                       onNavigateTab('home');
                     }}
-                    className="px-4 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-bold flex items-center gap-1.5 transition-all"
+                    className="px-4 py-2 rounded-xl bg-ice-hover/60 hover:bg-ice-hover text-ice-text text-xs font-bold flex items-center gap-1.5 transition-all border border-ice-border"
                   >
                     <Plus className="w-3.5 h-3.5" />
                     <span>Khám Phá Danh Mục Game</span>
@@ -350,11 +350,11 @@ export const MobileLibraryView: React.FC<MobileLibraryViewProps> = ({
             {/* Section 1: User Playlists */}
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-black text-white flex items-center gap-1.5 uppercase tracking-wide">
-                  <ListMusic className="w-3.5 h-3.5 text-cyan-400" />
+                <span className="text-xs font-black text-ice-text flex items-center gap-1.5 uppercase tracking-wide">
+                  <ListMusic className="w-3.5 h-3.5 text-cyan-500" />
                   <span>Playlist Của Bạn</span>
                 </span>
-                <span className="text-[10px] text-cyan-400 font-semibold">
+                <span className="text-[10px] text-cyan-500 font-semibold">
                   {currentTabPlaylists.length} danh sách
                 </span>
               </div>
@@ -368,10 +368,10 @@ export const MobileLibraryView: React.FC<MobileLibraryViewProps> = ({
                     return (
                       <div
                         key={pl.id}
-                        className="flex items-center justify-between p-3 rounded-2xl bg-ice-card border border-ice-border hover:border-ice-accent/40 transition-all shadow-md"
+                        className="flex items-center justify-between p-3 rounded-2xl bg-ice-card border border-ice-border hover:border-ice-accent/40 transition-all shadow-md hover-depth-lift"
                       >
                         <div className="flex items-center gap-3 min-w-0 flex-1">
-                          <div className="w-12 h-12 rounded-xl bg-black/60 border border-white/10 flex items-center justify-center shrink-0 overflow-hidden relative">
+                          <div className="w-12 h-12 rounded-xl bg-ice-hover/50 border border-ice-border/60 flex items-center justify-center shrink-0 overflow-hidden relative">
                             {firstItem?.coverPath ? (
                               <SafeImage
                                 src={firstItem.coverPath}
@@ -381,12 +381,12 @@ export const MobileLibraryView: React.FC<MobileLibraryViewProps> = ({
                                 className="w-full h-full object-cover"
                               />
                             ) : (
-                              <ListMusic className="w-5 h-5 text-cyan-400" />
+                              <ListMusic className="w-5 h-5 text-cyan-500" />
                             )}
                           </div>
                           <div className="min-w-0 flex-1">
-                            <h4 className="text-xs font-bold text-white truncate">{pl.name}</h4>
-                            <p className="text-[10px] text-slate-400 mt-0.5">
+                            <h4 className="text-xs font-bold text-ice-text truncate">{pl.name}</h4>
+                            <p className="text-[10px] text-ice-subtext mt-0.5">
                               {count} {pl.type === 'video' ? 'video/tập phim' : 'bài hát/audio'}
                             </p>
                           </div>
@@ -463,11 +463,11 @@ export const MobileLibraryView: React.FC<MobileLibraryViewProps> = ({
             {/* Section 2: Favorited Media (2-Column Grid 4:6 aspect ratio) */}
             <div className="space-y-2 pt-2">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-black text-white flex items-center gap-1.5 uppercase tracking-wide">
+                <span className="text-xs font-black text-ice-text flex items-center gap-1.5 uppercase tracking-wide">
                   <Heart className="w-3.5 h-3.5 text-rose-500 fill-current" />
                   <span>Đã Lưu & Yêu Thích</span>
                 </span>
-                <span className="text-[10px] text-slate-400 font-semibold">
+                <span className="text-[10px] text-ice-subtext font-semibold">
                   {(activeSubTab === 'videos' ? filteredVideos : activeSubTab === 'music' ? filteredMusic : filteredPodcasts).length} mục
                 </span>
               </div>
@@ -482,9 +482,9 @@ export const MobileLibraryView: React.FC<MobileLibraryViewProps> = ({
                         if (item.type === 'video') onSelectMedia?.(item);
                         else onPlayAudio?.(item);
                       }}
-                      className="rounded-2xl overflow-hidden bg-ice-card border border-ice-border cursor-pointer group hover:border-ice-accent/50 transition-all shadow-md flex flex-col active:scale-98"
+                      className="rounded-2xl overflow-hidden bg-ice-card border border-ice-border cursor-pointer group hover:border-ice-accent/50 transition-all shadow-md flex flex-col active:scale-98 hover-depth-lift"
                     >
-                      <div className="relative aspect-[2/3] w-full bg-black overflow-hidden">
+                      <div className="relative aspect-[2/3] w-full bg-ice-hover/50 overflow-hidden">
                         <SafeImage
                           src={item.coverPath || item.bannerPath}
                           alt={item.title}
@@ -533,14 +533,14 @@ export const MobileLibraryView: React.FC<MobileLibraryViewProps> = ({
 
                       <div className="p-2.5 flex-1 flex flex-col justify-between space-y-1">
                         <div>
-                          <h4 className="text-xs font-bold text-white line-clamp-1 group-hover:text-cyan-400 transition-colors">
+                          <h4 className="text-xs font-bold text-ice-text line-clamp-1 group-hover:text-cyan-500 transition-colors">
                             {item.title}
                           </h4>
-                          <span className="text-[10px] text-slate-400 line-clamp-1">
+                          <span className="text-[10px] text-ice-subtext line-clamp-1">
                             {item.artist || item.category || (item.type === 'video' ? 'Phim' : 'Nhạc')}
                           </span>
                         </div>
-                        <div className="pt-1 flex items-center justify-between text-[10px] text-cyan-400 font-semibold">
+                        <div className="pt-1 flex items-center justify-between text-[10px] text-cyan-500 font-semibold">
                           <span>{item.type === 'video' ? 'Xem ngay' : 'Phát'}</span>
                           <Play className="w-3 h-3 fill-current" />
                         </div>
@@ -550,12 +550,12 @@ export const MobileLibraryView: React.FC<MobileLibraryViewProps> = ({
                 </div>
               ) : (
                 <div className="py-12 flex flex-col items-center justify-center text-center space-y-3">
-                  <div className="w-14 h-14 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-slate-500">
+                  <div className="w-14 h-14 rounded-2xl bg-ice-hover/40 border border-ice-border flex items-center justify-center text-ice-subtext">
                     <Heart className="w-7 h-7 text-rose-500/50" />
                   </div>
                   <div className="space-y-1">
-                    <h3 className="text-sm font-bold text-white">Chưa Có Mục Yêu Thích</h3>
-                    <p className="text-xs text-slate-400 max-w-[260px]">
+                    <h3 className="text-sm font-bold text-ice-text">Chưa Có Mục Yêu Thích</h3>
+                    <p className="text-xs text-ice-subtext max-w-[260px]">
                       Vào mục Giải Trí để bấm lưu và thưởng thức nội dung bạn yêu thích bất cứ lúc nào!
                     </p>
                   </div>
@@ -566,7 +566,7 @@ export const MobileLibraryView: React.FC<MobileLibraryViewProps> = ({
                         sfx.playClick();
                         onNavigateTab('media');
                       }}
-                      className="px-4 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-bold flex items-center gap-1.5 transition-all"
+                      className="px-4 py-2 rounded-xl bg-ice-hover/60 hover:bg-ice-hover text-ice-text text-xs font-bold flex items-center gap-1.5 transition-all border border-ice-border"
                     >
                       <Plus className="w-3.5 h-3.5" />
                       <span>Duyệt Mục Giải Trí</span>

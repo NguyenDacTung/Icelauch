@@ -266,13 +266,13 @@ export const BannerManagerModal: React.FC<BannerManagerModalProps> = ({
         {/* Content Body */}
         <div className="flex-1 overflow-y-auto p-6 space-y-6">
           {/* Section Rules & Configuration Controls */}
-          <div className="p-4 rounded-xl bg-black/40 border border-ice-border space-y-4">
+          <div className="p-4 rounded-xl bg-ice-hover/40 border border-ice-border space-y-4">
             <div className="flex items-center justify-between border-b border-ice-border/60 pb-2.5">
-              <span className="text-xs font-bold text-white flex items-center gap-2">
-                <Sliders className="w-4 h-4 text-amber-400" />
+              <span className="text-xs font-bold text-ice-text flex items-center gap-2">
+                <Sliders className="w-4 h-4 text-amber-500" />
                 <span>Quy Tắc Banner ({activeTab === 'games' ? 'Game' : activeTab === 'videos' ? 'Phim & Video' : activeTab === 'music' ? 'Nhạc' : 'Podcast'})</span>
               </span>
-              <span className="text-[11px] text-amber-400/90 font-mono">
+              <span className="text-[11px] text-amber-500 font-mono font-bold">
                 Tối đa: {currentSectionSettings.maxBanners} Slots
               </span>
             </div>
@@ -282,7 +282,7 @@ export const BannerManagerModal: React.FC<BannerManagerModalProps> = ({
               <div className="space-y-1.5">
                 <div className="flex justify-between text-ice-subtext">
                   <span>Số lượng Banner tối đa:</span>
-                  <span className="text-white font-bold">{currentSectionSettings.maxBanners} banner</span>
+                  <span className="text-ice-text font-bold">{currentSectionSettings.maxBanners} banner</span>
                 </div>
                 <input
                   type="range"
@@ -290,7 +290,7 @@ export const BannerManagerModal: React.FC<BannerManagerModalProps> = ({
                   max="10"
                   value={currentSectionSettings.maxBanners}
                   onChange={(e) => handleUpdateSection((prev) => ({ ...prev, maxBanners: parseInt(e.target.value, 10) }))}
-                  className="w-full accent-amber-400 h-1.5 bg-black/60 rounded-lg cursor-pointer"
+                  className="w-full accent-amber-500 h-1.5 bg-ice-hover rounded-lg cursor-pointer"
                 />
               </div>
 
@@ -298,7 +298,7 @@ export const BannerManagerModal: React.FC<BannerManagerModalProps> = ({
               <div className="space-y-1.5">
                 <div className="flex justify-between text-ice-subtext">
                   <span>Thời hạn nổi bật mặc định:</span>
-                  <span className="text-white font-bold">{currentSectionSettings.defaultExpiryDays} ngày</span>
+                  <span className="text-ice-text font-bold">{currentSectionSettings.defaultExpiryDays} ngày</span>
                 </div>
                 <input
                   type="range"
@@ -307,7 +307,7 @@ export const BannerManagerModal: React.FC<BannerManagerModalProps> = ({
                   step="1"
                   value={currentSectionSettings.defaultExpiryDays}
                   onChange={(e) => handleUpdateSection((prev) => ({ ...prev, defaultExpiryDays: parseInt(e.target.value, 10) }))}
-                  className="w-full accent-amber-400 h-1.5 bg-black/60 rounded-lg cursor-pointer"
+                  className="w-full accent-amber-500 h-1.5 bg-ice-hover rounded-lg cursor-pointer"
                 />
               </div>
 
@@ -315,7 +315,7 @@ export const BannerManagerModal: React.FC<BannerManagerModalProps> = ({
               <div className="space-y-1.5">
                 <div className="flex justify-between text-ice-subtext">
                   <span>Tự động chuyển slide:</span>
-                  <span className="text-white font-bold">{currentSectionSettings.autoSlideIntervalSeconds} giây</span>
+                  <span className="text-ice-text font-bold">{currentSectionSettings.autoSlideIntervalSeconds} giây</span>
                 </div>
                 <input
                   type="range"
@@ -324,7 +324,7 @@ export const BannerManagerModal: React.FC<BannerManagerModalProps> = ({
                   step="1"
                   value={currentSectionSettings.autoSlideIntervalSeconds}
                   onChange={(e) => handleUpdateSection((prev) => ({ ...prev, autoSlideIntervalSeconds: parseInt(e.target.value, 10) }))}
-                  className="w-full accent-amber-400 h-1.5 bg-black/60 rounded-lg cursor-pointer"
+                  className="w-full accent-amber-500 h-1.5 bg-ice-hover rounded-lg cursor-pointer"
                 />
               </div>
             </div>
@@ -477,35 +477,35 @@ export const BannerManagerModal: React.FC<BannerManagerModalProps> = ({
                 >
                   {/* Left: Slot Number + 16:9 Thumbnail + Title */}
                   <div className="flex items-center gap-3 flex-1 min-w-0">
-                    <span className="w-6 h-6 rounded-lg bg-black/60 border border-white/10 text-white font-mono text-xs font-bold flex items-center justify-center shrink-0">
+                    <span className="w-6 h-6 rounded-lg bg-ice-hover/60 border border-ice-border text-ice-text font-mono text-xs font-bold flex items-center justify-center shrink-0">
                       {index + 1}
                     </span>
 
-                    <div className="w-20 aspect-video rounded-lg overflow-hidden bg-black/80 border border-white/15 shrink-0">
+                    <div className="w-20 aspect-video rounded-lg overflow-hidden bg-ice-hover/50 border border-ice-border/60 shrink-0">
                       {image ? (
                         <img src={image} alt={title} className="w-full h-full object-cover" />
                       ) : (
-                        <div className="w-full h-full flex items-center justify-center text-[10px] text-ice-muted">16:9</div>
+                        <div className="w-full h-full flex items-center justify-center text-[10px] text-ice-subtext">16:9</div>
                       )}
                     </div>
 
                     <div className="min-w-0 flex-1">
-                      <p className="text-xs font-bold text-white truncate">{title}</p>
+                      <p className="text-xs font-bold text-ice-text truncate">{title}</p>
                       <div className="flex flex-wrap items-center gap-2 pt-0.5">
                         <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase border ${
                           resolved.badgeType === 'new'
-                            ? 'bg-amber-500/20 text-amber-300 border-amber-500/40'
+                            ? 'bg-amber-500/20 text-amber-500 border-amber-500/40'
                             : resolved.badgeType === 'popular'
-                            ? 'bg-rose-500/20 text-rose-300 border-rose-500/40'
+                            ? 'bg-rose-500/20 text-rose-500 border-rose-500/40'
                             : resolved.badgeType === 'random'
-                            ? 'bg-purple-500/20 text-purple-300 border-purple-500/40'
+                            ? 'bg-purple-500/20 text-purple-500 border-purple-500/40'
                             : 'bg-ice-accent/20 text-ice-accent border-ice-accent/40'
                         }`}>
                           {resolved.badgeText}
                         </span>
 
                         {isPinned && resolved.isPermanent && (
-                          <span className="text-[10px] text-amber-400 font-semibold flex items-center gap-0.5">
+                          <span className="text-[10px] text-amber-500 font-semibold flex items-center gap-0.5">
                             <Pin className="w-3 h-3" />
                             <span>Ghim vĩnh viễn (Không bị loại bởi FIFO)</span>
                           </span>
@@ -523,7 +523,7 @@ export const BannerManagerModal: React.FC<BannerManagerModalProps> = ({
                           type="button"
                           disabled={index === 0}
                           onClick={() => handleMoveOrder(index, 'up')}
-                          className="p-1 rounded bg-black/40 hover:bg-white/10 text-ice-subtext hover:text-white disabled:opacity-30 transition-colors"
+                          className="p-1 rounded bg-ice-hover/60 hover:bg-ice-hover text-ice-subtext hover:text-ice-text disabled:opacity-30 transition-colors border border-ice-border/60"
                           title="Đẩy lên trước"
                         >
                           <ArrowUp className="w-3.5 h-3.5" />
@@ -532,7 +532,7 @@ export const BannerManagerModal: React.FC<BannerManagerModalProps> = ({
                           type="button"
                           disabled={index >= (currentSectionSettings.pinnedItems || []).length - 1}
                           onClick={() => handleMoveOrder(index, 'down')}
-                          className="p-1 rounded bg-black/40 hover:bg-white/10 text-ice-subtext hover:text-white disabled:opacity-30 transition-colors"
+                          className="p-1 rounded bg-ice-hover/60 hover:bg-ice-hover text-ice-subtext hover:text-ice-text disabled:opacity-30 transition-colors border border-ice-border/60"
                           title="Đẩy xuống sau"
                         >
                           <ArrowDown className="w-3.5 h-3.5" />

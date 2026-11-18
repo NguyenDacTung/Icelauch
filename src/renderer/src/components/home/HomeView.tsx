@@ -273,9 +273,9 @@ export const HomeView: React.FC<HomeViewProps> = ({
                   sfx.playClick();
                   onSelectGame(game);
                 }}
-                className="flex items-center gap-3 bg-ice-card hover:bg-ice-hover border border-ice-border rounded-xl p-3 min-w-[280px] max-w-[320px] cursor-pointer transition-all hover:-translate-y-1 hover:shadow-xl hover:border-ice-accent/60 group shrink-0"
+                className="flex items-center gap-3 bg-ice-card hover:bg-ice-hover border border-ice-border rounded-xl p-3 min-w-[280px] max-w-[320px] cursor-pointer transition-all hover:border-ice-accent/60 group shrink-0 hover-depth-lift"
               >
-                <div className="w-12 h-16 rounded-lg overflow-hidden bg-black/60 shrink-0 border border-ice-border">
+                <div className="w-12 h-16 rounded-lg overflow-hidden bg-ice-hover/50 shrink-0 border border-ice-border">
                   {game.coverPath ? (
                     <img
                       src={game.coverPath.startsWith('http') ? game.coverPath : `file://${game.coverPath}`}
@@ -290,10 +290,10 @@ export const HomeView: React.FC<HomeViewProps> = ({
                 </div>
 
                 <div className="flex-1 min-w-0">
-                  <h4 className="text-xs font-bold text-white truncate group-hover:text-ice-accent transition-colors">
+                  <h4 className="text-xs font-bold text-ice-text truncate group-hover:text-ice-accent transition-colors">
                     {game.name}
                   </h4>
-                  <p className="text-[10px] text-ice-muted truncate mt-0.5 flex items-center gap-1">
+                  <p className="text-[10px] text-ice-subtext truncate mt-0.5 flex items-center gap-1">
                     <Clock className="w-3 h-3 text-ice-subtext" />
                     <span>{game.lastPlayed ? new Date(game.lastPlayed).toLocaleDateString('vi-VN') : 'Đã chơi'}</span>
                   </p>
@@ -320,7 +320,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
       {continueMedia.length > 0 && !searchQuery && (
         <section className="space-y-3">
           <div className="flex items-center justify-between">
-            <h2 className="text-sm font-bold text-white tracking-wider uppercase flex items-center gap-2">
+            <h2 className="text-sm font-bold text-ice-text tracking-wider uppercase flex items-center gap-2">
               <span className="w-2.5 h-2.5 rounded-full bg-red-500 animate-pulse" />
               <span>Tiếp Tục Xem & Nghe Dở</span>
             </h2>
@@ -338,9 +338,9 @@ export const HomeView: React.FC<HomeViewProps> = ({
                     sfx.playClick();
                     onSelectMedia?.(item);
                   }}
-                  className="flex items-center gap-3 bg-ice-card hover:bg-ice-hover border border-ice-border rounded-xl p-3 min-w-[300px] max-w-[340px] cursor-pointer transition-all hover:-translate-y-1 hover:shadow-xl hover:border-amber-400/60 group shrink-0"
+                  className="flex items-center gap-3 bg-ice-card hover:bg-ice-hover border border-ice-border rounded-xl p-3 min-w-[300px] max-w-[340px] cursor-pointer transition-all hover:border-amber-500/60 group shrink-0 hover-depth-lift"
                 >
-                  <div className="w-20 aspect-video rounded-lg overflow-hidden bg-black/70 shrink-0 border border-ice-border relative">
+                  <div className="w-20 aspect-video rounded-lg overflow-hidden bg-ice-hover/50 shrink-0 border border-ice-border relative">
                     {item.coverPath ? (
                       <img
                         src={item.coverPath.startsWith('http') ? item.coverPath : `file://${item.coverPath}`}
@@ -349,7 +349,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
                       />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center text-ice-muted">
-                        {isAudio ? <Music className="w-5 h-5 text-amber-400" /> : <Film className="w-5 h-5 text-blue-400" />}
+                        {isAudio ? <Music className="w-5 h-5 text-amber-500" /> : <Film className="w-5 h-5 text-blue-400" />}
                       </div>
                     )}
                     {/* Mini progress bar on thumbnail */}
@@ -359,18 +359,18 @@ export const HomeView: React.FC<HomeViewProps> = ({
                   </div>
 
                   <div className="flex-1 min-w-0">
-                    <span className="text-[10px] font-bold text-amber-400 uppercase tracking-wide">
+                    <span className="text-[10px] font-bold text-amber-500 uppercase tracking-wide">
                       {isAudio ? 'Nhạc • Đang nghe dở' : 'Video • Đang xem dở'}
                     </span>
-                    <h4 className="text-xs font-bold text-white truncate group-hover:text-amber-300 transition-colors">
+                    <h4 className="text-xs font-bold text-ice-text truncate group-hover:text-amber-500 transition-colors">
                       {item.title}
                     </h4>
-                    <p className="text-[10px] text-ice-muted truncate mt-0.5">
+                    <p className="text-[10px] text-ice-subtext truncate mt-0.5">
                       {formatTimeRemaining(item)} ({percent}%)
                     </p>
                   </div>
 
-                  <div className="p-2 rounded-full bg-amber-500/20 text-amber-400 group-hover:bg-amber-500 group-hover:text-black transition-all shrink-0">
+                  <div className="p-2 rounded-full bg-amber-500/20 text-amber-500 group-hover:bg-amber-500 group-hover:text-black transition-all shrink-0">
                     <Play className="w-3.5 h-3.5 fill-current ml-0.5" />
                   </div>
                 </div>
@@ -412,7 +412,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
       {spotlightGames.length > 0 && selectedMood === 'all' && !searchQuery && (
         <section className="space-y-3">
           <div className="flex items-center justify-between">
-            <h2 className="text-sm font-bold text-white tracking-wider uppercase flex items-center gap-2">
+            <h2 className="text-sm font-bold text-ice-text tracking-wider uppercase flex items-center gap-2">
               <Flame className="w-4 h-4 text-orange-400" />
               <span>Game Nổi Bật Trong Tuần</span>
             </h2>
@@ -501,7 +501,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
         {/* Controls: Title, Filter, Sort & Add Button */}
         <div className="flex flex-wrap items-center justify-between gap-4 border-b border-ice-border pb-3">
           <div className="flex items-center gap-3">
-            <h2 className="text-base font-bold text-white tracking-wide">
+            <h2 className="text-base font-bold text-ice-text tracking-wide">
               {searchQuery ? `Kết quả tìm kiếm cho "${searchQuery}"` : 'Kho Trò Chơi'}
             </h2>
             <span className="text-xs text-ice-subtext">({filteredGames.length})</span>

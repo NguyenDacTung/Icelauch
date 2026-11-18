@@ -327,8 +327,8 @@ export const GameFormModal: React.FC<GameFormModalProps> = ({
           />
 
           {/* Trailer YouTube */}
-          <div className="space-y-1.5 bg-black/30 p-3 rounded-lg border border-ice-border/60">
-            <label className="font-semibold text-white flex items-center gap-1.5">
+          <div className="space-y-1.5 bg-ice-hover/40 p-3 rounded-lg border border-ice-border/60">
+            <label className="font-semibold text-ice-text flex items-center gap-1.5">
               <Film className="w-4 h-4 text-red-500" />
               <span>Link YouTube Trailer (Tự động phát khi mở Trang Chi Tiết)</span>
             </label>
@@ -337,7 +337,7 @@ export const GameFormModal: React.FC<GameFormModalProps> = ({
               value={trailerUrl}
               onChange={(e) => setTrailerUrl(e.target.value)}
               placeholder="https://www.youtube.com/watch?v=... hoặc https://youtu.be/..."
-              className="w-full h-9 rounded bg-ice-bg border border-ice-border px-3 text-white focus:outline-none focus:border-red-500 font-mono text-[11px]"
+              className="w-full h-9 rounded bg-ice-hover/50 border border-ice-border px-3 text-ice-text focus:outline-none focus:border-red-500 font-mono text-[11px]"
             />
           </div>
 
@@ -439,9 +439,9 @@ export const GameFormModal: React.FC<GameFormModalProps> = ({
           </div>
 
           {/* Screenshots Gallery Section */}
-          <div className="space-y-2 bg-black/30 p-3.5 rounded-xl border border-ice-border/70">
+          <div className="space-y-2 bg-ice-hover/40 p-3.5 rounded-xl border border-ice-border/70">
             <div className="flex items-center justify-between">
-              <label className="font-semibold text-white flex items-center gap-1.5">
+              <label className="font-semibold text-ice-text flex items-center gap-1.5">
                 <Image className="w-4 h-4 text-ice-accent" />
                 <span>Ảnh mô tả game (Screenshots trên Trang Chi Tiết) ({screenshots.length})</span>
               </label>
@@ -688,7 +688,7 @@ export const GameFormModal: React.FC<GameFormModalProps> = ({
             </label>
 
             {/* Banner Section Settings */}
-            <div className="p-3 rounded-lg bg-black/40 border border-ice-border space-y-2">
+            <div className="p-3 rounded-lg bg-ice-hover/40 border border-ice-border space-y-2">
               <label className="flex items-center gap-2 cursor-pointer">
                 <input
                   type="checkbox"

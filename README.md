@@ -1,8 +1,8 @@
 # Icelauch - Trình Quản Lý Game & Rạp Giải Trí Đa Nền Tảng (Windows, Mobile & Android TV)
 
 **Phiên bản phát hành:** 
-- 🖥️ **Windows PC:** `v1.2.4`
-- 📱 **Android Điện Thoại:** `v1.2.4` (Mã phiên bản build: `versionCode 20`)
+- 🖥️ **Windows PC:** `v1.2.5`
+- 📱 **Android Điện Thoại:** `v1.2.5` (Mã phiên bản build: `versionCode 21`)
 - 📺 **Android TV Edition:** `v1.0.0` (Bản chuyên biệt điều khiển 100% bằng Remote)
 
 **Hệ điều hành hỗ trợ:** 
@@ -28,7 +28,45 @@ Tại trang Releases, bạn sẽ có các file cài đặt tương ứng với t
 
 ---
 
-## 2. Các Nâng Cấp Nổi Bật Trong Phiên Bản v1.2.4 (Nâng Cấp Toàn Diện Giao Diện Solar & Lunar Design System & Floating Glassmorphic UI)
+## 2. Các Nâng Cấp Nổi Bật Trong Phiên Bản v1.2.5 (Bộ Nhận Diện Thương Hiệu Mới & Đại Tu Hệ Thống 9 Chế Độ Thời Không)
+
+Bản cập nhật v1.2.5 mang đến cuộc cách mạng diện mạo cho **Icelauch**:
+
+### 2.1 Bộ Nhận Diện Thương Hiệu & Biểu Tượng App Độc Bản (New Brand Identity)
+- 💎 **Icon ứng dụng cao cấp:** Biểu tượng đóa hoa lục giác phát sáng đa tầng sinh động (Cyber Cyan - Ocean Blue - Neon Magenta) ôm trọn lõi kính mờ Frost Glass Hexagon trung tâm.
+- 🎨 **Tối ưu hiển thị đa nền tảng:** Nền trong suốt tự nhiên không viền hộp, hiển thị sắc nét từ kích thước nhỏ (16px favicon, 32px taskbar, 48px thanh điều hướng) đến kích thước lớn (192px Android launcher, 512px desktop icon, 640px Android TV banner).
+
+### 2.2 Hệ Thống 9 Chế Độ Thời Không Toàn Diện (9 Celestial Themes)
+Bảng màu 9 chế độ độc bản được chuẩn hóa công thái học và hiển thị đồng bộ 100% trên cả PC và Mobile:
+1. ☀️ **Solar:** Chế độ ngày rạng rỡ, đạt chuẩn tương phản cao WCAG AAA (`#181512` trên nền `#FAF8F5`), nghiêm cấm chữ vàng nhạt trên nền sáng.
+2. 🌙 **Lunar:** Không gian màn đêm điện ảnh tĩnh lặng Obsidian (`#0B0F19`), màu nhấn chàm thanh lịch.
+3. 🌊 **Aqua:** Đại dương sâu thẳm Dark Ocean (`#061524`), sóng nước dập dềnh liên tục trên thanh phát nhạc (`aqua-wave-motion`), nút tab viên nang nước lỏng (`liquid-water-pill`) phản chiếu ánh sáng và hiệu ứng bấm gợn nước đa vòng chân thực.
+4. 🔥 **Ignis:** Nham thạch & Lửa thiêng, viền dạ quang cam đỏ rực rỡ và hiệu ứng tro tàn bay bổng.
+5. 💨 **Aer:** Kính khí động học tối giản siêu nhẹ, khung lưới kỹ thuật và tắt hiệu ứng nặng giúp tiết kiệm pin tối đa.
+6. 🌿 **Terra:** Rừng già RPG & Đất phong rêu (`#121613` + `#84CC16`), góc vát hình học 8 cạnh mang phong cách dã chiến.
+7. 🌘 **Eclipse:** Nhật thực bóng tối với vành hào quang vàng hoàng kim Corona Glow tỏa rộng trên viền thanh công cụ và thẻ.
+8. 🌌 **Aurora:** Dải ánh sáng Bắc Cực ngọc bích & tím violet chuyển sắc uốn lượn liên tục trên thanh công cụ, thanh phát nhạc, thẻ và nền.
+9. 🔮 **Nebula:** Vũ trụ tinh vân tự động trích xuất tông màu chủ đạo từ ảnh banner bao phủ toàn màn hình, kết hợp bầu trời sao li ti lấp lánh.
+
+### 2.3 Sửa Dứt Điểm Stacking Context & Hộp Thoại CelestialThemeHub
+- 🪟 **Tích hợp React Portal:** Đưa hộp thoại chọn 9 chế độ ra ngoài cây DOM trực tiếp vào `document.body` với `z-[9999]`, loại bỏ hoàn toàn lỗi bị bẫy trong Navbar và luôn hiển thị ngay ngắn chính giữa màn hình.
+- 🎯 **Trải nghiệm băng chuyền Center-Focus:** Trượt biểu tượng vào tâm điểm mượt mà kèm phím tắt mũi tên Trái/Phải và nút Áp Dụng trực quan.
+
+### 2.4 Chuẩn Hóa Cực Tính Công Tắc Biến Hình (Sun/Moon Toggle Switch)
+- ⚖️ **Chuẩn công thái học chính xác:** Vị trí con trượt phản ánh đúng chế độ đang kích hoạt:
+  - **Trượt sang Trái:** Bật **Lunar 🌙 (Chế độ ban đêm)**.
+  - **Trượt sang Phải:** Bật **Solar ☀️ (Chế độ ban ngày)**.
+
+### 2.5 Nút Bấm & Trình Phát Nhạc Đồng Bộ Màu Nhấn Chủ Đề Động
+- 🎵 Toàn bộ nút Play/Pause, thanh tua, thanh âm lượng và equalizer trên **MiniPlayer PC** và **MobileMiniPlayer** nay tự động dùng màu chủ đề `bg-ice-accent` của mode đang chọn thay vì màu vàng cứng cũ.
+
+### 2.6 Khắc Phục Lỗi Tương Phản & Quét Sạch Hộp Đen Còn Sót
+- 🛠️ Sửa dứt điểm hộp nút liên kết Steam/Discord (`GameActionsWidget`) và các ô nhập liệu trong `SettingsView` không còn bị hiển thị màu đen ngòm ở Solar mode.
+- 🧪 **193/193 ca kiểm thử tự động PASS 100%:** Xác thực toàn bộ logic nghiệp vụ, giao diện và đóng gói hệ thống.
+
+---
+
+## 3. Các Nâng Cấp Nổi Bật Trong Phiên Bản v1.2.4 (Nâng Cấp Toàn Diện Giao Diện Solar & Lunar Design System & Floating Glassmorphic UI)
 
 Bản cập nhật v1.2.4 là bước nhảy vọt về mặt thẩm mỹ và trải nghiệm người dùng cao cấp (Premium UX), áp dụng phong cách **Kính Mờ Bo Tròn Nổi (Glassmorphism & Floating UI)** trên cả Windows PC và Thiết bị Di Động Android:
 

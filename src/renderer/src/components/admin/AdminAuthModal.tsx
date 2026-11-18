@@ -1,13 +1,13 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { 
-  Lock, 
-  Unlock, 
-  KeyRound, 
-  X, 
-  AlertCircle, 
-  Copy, 
-  Check, 
-  Eye, 
+import {
+  Lock,
+  Unlock,
+  KeyRound,
+  X,
+  AlertCircle,
+  Copy,
+  Check,
+  Eye,
   EyeOff,
   Delete
 } from 'lucide-react';
@@ -170,16 +170,16 @@ export const AdminAuthModal: React.FC<AdminAuthModalProps> = ({
           <div className="flex items-center gap-2">
             <Lock className="w-4 h-4 text-amber-400" />
             <h3 className="text-sm font-bold text-ice-text tracking-wide">
-              {!hasPinSet 
-                ? 'Thiết lập mã PIN Admin' 
-                : isResetMode 
-                ? 'Khôi phục mã PIN' 
-                : 'Xác thực Quyền Admin'}
+              {!hasPinSet
+                ? 'Thiết lập mã PIN Admin'
+                : isResetMode
+                  ? 'Khôi phục mã PIN'
+                  : 'Xác thực Quyền Admin'}
             </h3>
           </div>
-          <button 
+          <button
             type="button"
-            onClick={onClose} 
+            onClick={onClose}
             className="text-ice-subtext hover:text-white transition-colors p-1 rounded-lg hover:bg-white/5"
           >
             <X className="w-4 h-4" />
@@ -205,7 +205,7 @@ export const AdminAuthModal: React.FC<AdminAuthModalProps> = ({
                 <p className="text-ice-subtext leading-relaxed">
                   Hãy sao chép và lưu lại mã này ở nơi an toàn. Bạn sẽ cần mã này nếu quên PIN Admin:
                 </p>
-                <div className="flex items-center justify-between bg-black/50 p-2 rounded border border-ice-border font-mono text-sm text-white font-bold tracking-widest">
+                <div className="flex items-center justify-between bg-ice-hover/60 p-2 rounded border border-ice-border font-mono text-sm text-ice-text font-bold tracking-widest">
                   <span>{generatedKey}</span>
                   <button
                     onClick={copyKey}
@@ -453,11 +453,10 @@ export const AdminAuthModal: React.FC<AdminAuthModalProps> = ({
                   {Array.from({ length: 10 }).map((_, idx) => (
                     <div
                       key={idx}
-                      className={`w-2 h-2 rounded-full transition-all duration-200 ${
-                        idx < pin.length
+                      className={`w-2 h-2 rounded-full transition-all duration-200 ${idx < pin.length
                           ? 'bg-amber-400 scale-125 shadow-[0_0_6px_rgba(251,191,36,0.8)]'
                           : 'bg-white/15'
-                      }`}
+                        }`}
                     />
                   ))}
                 </div>

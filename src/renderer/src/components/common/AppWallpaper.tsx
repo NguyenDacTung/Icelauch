@@ -8,7 +8,7 @@ interface AppWallpaperProps {
 }
 
 export const AppWallpaper: React.FC<AppWallpaperProps> = ({ config, lowSpecMode = false }) => {
-  const { isSolar } = useTheme();
+  const { isLight } = useTheme();
   if (!config || !config.enabled || !config.imagePath) {
     return null;
   }
@@ -45,7 +45,7 @@ export const AppWallpaper: React.FC<AppWallpaperProps> = ({ config, lowSpecMode 
       <div
         className="absolute inset-0 transition-opacity duration-300 pointer-events-none"
         style={{
-          backgroundColor: isSolar ? '#FAF8F5' : '#07090e',
+          backgroundColor: isLight ? '#F8F6F1' : '#07090e',
           opacity: darkness / 100,
           pointerEvents: 'none',
         }}

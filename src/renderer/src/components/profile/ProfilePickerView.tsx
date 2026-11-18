@@ -571,10 +571,10 @@ export const ProfilePickerView: React.FC<ProfilePickerViewProps> = ({
         )}
 
         {/* SECTION 2: DIRECT LOGIN FORM */}
-        <div className="w-full max-w-md p-6 rounded-3xl bg-black/40 border border-white/10 shadow-2xl space-y-4 text-left">
-          <div className="flex items-center gap-2 border-b border-white/10 pb-3 select-none">
-            <LogIn className="w-4 h-4 text-amber-400" />
-            <span className="text-xs font-bold text-white uppercase tracking-wider">
+        <div className="w-full max-w-md p-6 rounded-3xl bg-ice-card border border-ice-border shadow-2xl space-y-4 text-left">
+          <div className="flex items-center gap-2 border-b border-ice-border/60 pb-3 select-none">
+            <LogIn className="w-4 h-4 text-ice-accent" />
+            <span className="text-xs font-bold text-ice-text uppercase tracking-wider">
               Đăng Nhập Tài Khoản
             </span>
           </div>
@@ -595,14 +595,14 @@ export const ProfilePickerView: React.FC<ProfilePickerViewProps> = ({
                   setLoginError(null);
                 }}
                 placeholder="Ví dụ: dactung hoặc admin"
-                className="w-full h-10 px-3.5 rounded-xl bg-black/50 border border-white/15 text-xs text-white placeholder-ice-muted focus:border-amber-400 focus:outline-none transition-colors font-medium select-text"
+                className="w-full h-10 px-3.5 rounded-xl bg-ice-hover/60 border border-ice-border text-xs text-ice-text placeholder-ice-subtext/60 focus:border-ice-accent focus:outline-none transition-colors font-medium select-text"
               />
             </div>
 
             {/* Password or Admin PIN Input */}
             {isDirectLoginAdmin ? (
               <div className="space-y-1 animate-fade-in">
-                <label className="text-[11px] font-bold text-amber-400 uppercase tracking-wider flex items-center gap-1.5 select-none">
+                <label className="text-[11px] font-bold text-amber-600 dark:text-amber-400 uppercase tracking-wider flex items-center gap-1.5 select-none">
                   <ShieldCheck className="w-3.5 h-3.5" />
                   <span>Mã PIN Quản Trị Viên (Admin):</span>
                 </label>
@@ -616,7 +616,7 @@ export const ProfilePickerView: React.FC<ProfilePickerViewProps> = ({
                     setLoginError(null);
                   }}
                   placeholder="Nhập mã PIN Admin..."
-                  className="w-full h-10 px-3.5 rounded-xl bg-black/50 border border-amber-400/40 text-xs text-white placeholder-ice-muted focus:border-amber-400 focus:outline-none transition-colors font-mono tracking-widest select-text"
+                  className="w-full h-10 px-3.5 rounded-xl bg-ice-hover/60 border border-amber-500/40 text-xs text-ice-text placeholder-ice-subtext/60 focus:border-amber-500 focus:outline-none transition-colors font-mono tracking-widest select-text"
                 />
               </div>
             ) : (
@@ -635,12 +635,12 @@ export const ProfilePickerView: React.FC<ProfilePickerViewProps> = ({
                       setLoginError(null);
                     }}
                     placeholder="Nhập mật khẩu tài khoản..."
-                    className="w-full h-10 pl-3.5 pr-10 rounded-xl bg-black/50 border border-white/15 text-xs text-white placeholder-ice-muted focus:border-amber-400 focus:outline-none transition-colors font-medium select-text"
+                    className="w-full h-10 pl-3.5 pr-10 rounded-xl bg-ice-hover/60 border border-ice-border text-xs text-ice-text placeholder-ice-subtext/60 focus:border-ice-accent focus:outline-none transition-colors font-medium select-text"
                   />
                   <button
                     type="button"
                     onClick={() => setShowLoginPassword(!showLoginPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-ice-muted hover:text-white transition-colors"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-ice-subtext hover:text-ice-text transition-colors"
                   >
                     {showLoginPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
@@ -809,7 +809,7 @@ export const ProfilePickerView: React.FC<ProfilePickerViewProps> = ({
                       }}
                       autoFocus
                       placeholder="Nhập mật khẩu..."
-                      className="w-full h-11 pl-4 pr-11 rounded-xl bg-black/40 border border-ice-border text-white text-sm focus:outline-none focus:border-ice-accent transition-colors font-medium"
+                      className="w-full h-11 pl-4 pr-11 rounded-xl bg-ice-hover/60 border border-ice-border text-ice-text text-sm focus:outline-none focus:border-ice-accent transition-colors font-medium"
                     />
                     <button
                       type="button"
@@ -905,7 +905,7 @@ export const ProfilePickerView: React.FC<ProfilePickerViewProps> = ({
                 value={adminBypassPin}
                 onChange={(e) => setAdminBypassPin(e.target.value)}
                 placeholder="Nhập mã PIN Admin..."
-                className="w-full h-11 px-3.5 rounded-xl bg-black/60 border border-amber-500/40 text-sm text-white focus:border-amber-400 focus:outline-none font-mono tracking-widest text-center"
+                className="w-full h-11 px-3.5 rounded-xl bg-ice-hover/60 border border-amber-500/40 text-sm text-ice-text focus:border-amber-500 focus:outline-none font-mono tracking-widest text-center"
                 autoFocus
               />
 

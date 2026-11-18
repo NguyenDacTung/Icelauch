@@ -253,7 +253,7 @@ export const DeviceManagerModal: React.FC<DeviceManagerModalProps> = ({ isOpen, 
               )}
             </div>
 
-            <div className="flex items-center justify-between bg-black/60 rounded-xl px-5 py-3 border border-white/10">
+            <div className="flex items-center justify-between bg-ice-hover/60 rounded-xl px-5 py-3 border border-ice-border/60">
               <span className="text-3xl font-mono font-black text-cyan-300 tracking-[0.4em]">
                 {activeOtpInfo.otpCode}
               </span>

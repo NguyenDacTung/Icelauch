@@ -240,32 +240,32 @@ export const AdminPlaylistManagerModal: React.FC<AdminPlaylistManagerModalProps>
                 return (
                   <div
                     key={pl.id}
-                    className="p-4 rounded-2xl bg-white/[0.03] hover:bg-white/[0.06] border border-white/10 hover:border-amber-400/40 transition-all flex flex-col justify-between space-y-3"
+                    className="p-4 rounded-2xl bg-ice-card hover:bg-ice-hover/50 border border-ice-border hover:border-ice-accent/40 transition-all flex flex-col justify-between space-y-3 hover-depth-lift"
                   >
                     <div className="flex items-start gap-3">
                       <div
-                        className={`overflow-hidden bg-black/60 rounded-xl border border-white/10 shrink-0 flex items-center justify-center ${
+                        className={`overflow-hidden bg-ice-hover/60 rounded-xl border border-ice-border/60 shrink-0 flex items-center justify-center ${
                           is169 ? 'w-24 aspect-video' : 'w-16 h-16'
                         }`}
                       >
                         {cover ? (
                           <img src={cover} alt={pl.name} className="w-full h-full object-cover" />
                         ) : (
-                          <ListMusic className="w-6 h-6 text-amber-400" />
+                          <ListMusic className="w-6 h-6 text-amber-500" />
                         )}
                       </div>
 
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-1.5">
-                          <span className="px-2 py-0.5 rounded bg-white/10 text-white/70 text-[10px] font-mono">
+                          <span className="px-2 py-0.5 rounded bg-ice-hover text-ice-subtext text-[10px] font-mono">
                             {pl.itemIds.length} mục
                           </span>
                         </div>
-                        <h3 className="text-sm font-bold text-white truncate mt-1">
+                        <h3 className="text-sm font-bold text-ice-text truncate mt-1">
                           {pl.name}
                         </h3>
                         {pl.description && (
-                          <p className="text-xs text-slate-400 line-clamp-2 mt-0.5">
+                          <p className="text-xs text-ice-subtext line-clamp-2 mt-0.5">
                             {pl.description}
                           </p>
                         )}

@@ -256,12 +256,12 @@ export const PlaylistFormModal: React.FC<PlaylistFormModalProps> = ({
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Giới thiệu nội dung, mùa phim, tập đặc biệt..."
               rows={2}
-              className="w-full px-3.5 py-2 rounded-xl bg-ice-bg border border-ice-border focus:border-ice-accent focus:outline-none text-white text-xs resize-none"
+              className="w-full px-3.5 py-2 rounded-xl bg-ice-hover/50 border border-ice-border focus:border-ice-accent focus:outline-none text-ice-text text-xs resize-none"
             />
           </div>
 
           {/* Cover Art & Aspect Ratio Alignment */}
-          <div className="space-y-3 p-4 rounded-xl bg-black/30 border border-ice-border/60">
+          <div className="space-y-3 p-4 rounded-xl bg-ice-hover/40 border border-ice-border/60">
             <div className="flex items-center justify-between">
               <label className="text-xs font-semibold text-ice-text flex items-center gap-1.5">
                 <ImageIcon className="w-4 h-4 text-amber-400" />
@@ -357,9 +357,9 @@ export const PlaylistFormModal: React.FC<PlaylistFormModalProps> = ({
 
             {/* Live Cover Preview */}
             {coverPath && (
-              <div className="flex items-center gap-3 p-2.5 rounded-xl bg-black/50 border border-white/10 mt-2">
+              <div className="flex items-center gap-3 p-2.5 rounded-xl bg-ice-hover/50 border border-ice-border/60 mt-2">
                 <div
-                  className={`overflow-hidden rounded-lg bg-black/80 border border-white/10 shrink-0 flex items-center justify-center ${
+                  className={`overflow-hidden rounded-lg bg-ice-hover border border-ice-border/60 shrink-0 flex items-center justify-center ${
                     coverAspectRatio === '16:9' ? 'w-24 aspect-video' : 'w-14 h-14'
                   }`}
                 >
@@ -373,8 +373,8 @@ export const PlaylistFormModal: React.FC<PlaylistFormModalProps> = ({
                   />
                 </div>
                 <div className="text-xs min-w-0 flex-1">
-                  <div className="text-white font-medium truncate">{coverPath.split(/[/\\]/).pop() || coverPath}</div>
-                  <div className="text-[11px] text-ice-muted mt-0.5">
+                  <div className="text-ice-text font-medium truncate">{coverPath.split(/[/\\]/).pop() || coverPath}</div>
+                  <div className="text-[11px] text-ice-subtext mt-0.5">
                     Hiển thị tỉ lệ {coverAspectRatio === '16:9' ? '16:9 (Màn ảnh rộng)' : '1:1 (Vuông chuẩn)'}
                   </div>
                 </div>
@@ -387,18 +387,18 @@ export const PlaylistFormModal: React.FC<PlaylistFormModalProps> = ({
             <div className="flex items-center justify-between">
               <label className="text-xs font-semibold text-ice-text flex items-center gap-1.5">
                 <span>Quản Lý Mục Trong Danh Sách</span>
-                <span className="px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-400 border border-amber-500/30 text-[10px] font-bold">
+                <span className="px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-500 border border-amber-500/30 text-[10px] font-bold">
                   {selectedIds.length} mục đã chọn
                 </span>
               </label>
-              <span className="text-[11px] text-ice-muted">
+              <span className="text-[11px] text-ice-subtext">
                 Điều hướng: ⏫ Đầu | 🔼 Lên | 🔽 Xuống | ⏬ Cuối
               </span>
             </div>
 
             {/* Currently selected items with intuitive reorder buttons */}
             {selectedIds.length > 0 ? (
-              <div className="p-2 rounded-xl bg-black/40 border border-ice-border/60 space-y-1.5 max-h-52 overflow-y-auto">
+              <div className="p-2 rounded-xl bg-ice-hover/40 border border-ice-border/60 space-y-1.5 max-h-52 overflow-y-auto">
                 {selectedIds.map((id, index) => {
                   const item = allMedia.find((m) => m.id === id);
                   const title = item ? item.title : `Mục #${id.slice(0, 8)}`;
@@ -408,25 +408,25 @@ export const PlaylistFormModal: React.FC<PlaylistFormModalProps> = ({
                   return (
                     <div
                       key={id}
-                      className="flex items-center justify-between p-2 rounded-lg bg-ice-card/80 border border-ice-border/50 text-xs hover:border-white/20 transition-colors"
+                      className="flex items-center justify-between p-2 rounded-lg bg-ice-card/80 border border-ice-border/50 text-xs hover:border-ice-accent/30 transition-colors"
                     >
                       <div className="flex items-center gap-2.5 truncate pr-2">
-                        <span className="w-5 h-5 rounded-full bg-ice-bg text-ice-muted flex items-center justify-center text-[10px] font-bold shrink-0 border border-white/5">
+                        <span className="w-5 h-5 rounded-full bg-ice-hover text-ice-subtext flex items-center justify-center text-[10px] font-bold shrink-0 border border-ice-border/40">
                           {index + 1}
                         </span>
-                        <span className="text-white font-medium truncate" title={title}>
+                        <span className="text-ice-text font-medium truncate" title={title}>
                           {title}
                         </span>
                       </div>
 
                       {/* Intuitive reorder control button group */}
-                      <div className="flex items-center gap-1 shrink-0 bg-black/30 p-1 rounded-lg border border-white/5">
+                      <div className="flex items-center gap-1 shrink-0 bg-ice-hover/60 p-1 rounded-lg border border-ice-border/50">
                         {/* Move to Top ⏫ */}
                         <button
                           type="button"
                           onClick={() => moveToTop(index)}
                           disabled={isFirst}
-                          className="p-1 rounded-md text-ice-muted hover:text-amber-400 hover:bg-white/10 disabled:opacity-20 disabled:cursor-not-allowed transition-all"
+                          className="p-1 rounded-md text-ice-subtext hover:text-amber-500 hover:bg-ice-hover disabled:opacity-20 disabled:cursor-not-allowed transition-all"
                           title="Đưa lên đầu danh sách ⏫ (Move to Top)"
                         >
                           <ChevronsUp className="w-3.5 h-3.5" />
