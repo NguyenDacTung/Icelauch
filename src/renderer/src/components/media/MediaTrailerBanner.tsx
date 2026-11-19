@@ -22,6 +22,7 @@ import { parseMediaUrl, getActiveProxyPort } from '../../utils/mediaUrl';
 import { detectHardwareDevice, isAndroidMobile, isAndroidTV, type DeviceType } from '../../utils/deviceDetector';
 import type { TrailerItem, TrailerSettings } from '../../types';
 import { sfx } from '../../utils/sfx';
+import { useTheme } from '../../hooks/useTheme';
 
 export interface MediaTrailerBannerProps {
   trailers?: TrailerItem[];
@@ -56,6 +57,8 @@ export const MediaTrailerBanner: React.FC<MediaTrailerBannerProps> = ({
   const isMobile = isAndroidMobile(effectiveDevice);
   const isTV = isAndroidTV(effectiveDevice);
   const isPC = !isMobile && !isTV;
+
+  const { theme } = useTheme();
 
   // Active trailer & playback state
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -344,7 +347,15 @@ export const MediaTrailerBanner: React.FC<MediaTrailerBannerProps> = ({
     >
       {/* 1. CINEMATIC VIDEO STAGE (Non-seekable) */}
       <div className="absolute inset-0 w-full h-full overflow-hidden bg-black flex items-center justify-center">
-        {isYouTube ? (
+        {theme === 'aer' ? (
+          <img
+            src={parsed?.thumbnailUrl || 'https://images.unsplash.com/photo-1536440136628-849c177e76a1?auto=format&fit=crop&w=1920&q=80'}
+            alt={currentTrailer.title}
+            loading="lazy"
+            decoding="async"
+            className="w-full h-full object-cover"
+          />
+        ) : isYouTube ? (
           <iframe
             ref={iframeRef}
             key={`yt-${currentTrailer.id}-${currentIndex}`}

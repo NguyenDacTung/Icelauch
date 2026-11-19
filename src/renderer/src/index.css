@@ -8,7 +8,8 @@
    ============================================================================ */
 
 /* 1. LUNAR (Standard Deep Night - Default) */
-:root, [data-theme="lunar"] {
+:root,
+[data-theme="lunar"] {
   --theme-bg: #0B0F19;
   --theme-card: #151C2C;
   --theme-card-elevated: #1B2438;
@@ -45,26 +46,36 @@
 
 /* 2. SOLAR (Standard Warm Day - WCAG AAA/AA Contrast & Distinct Surface Elevation) */
 [data-theme="solar"] {
-  --theme-bg: #EAE2D2; /* Warm Golden Sand canvas - clearly distinct from white */
-  --theme-card: #FFFFFF; /* Pure elevated crisp white card surface */
+  --theme-bg: #EAE2D2;
+  /* Warm Golden Sand canvas - clearly distinct from white */
+  --theme-card: #FFFFFF;
+  /* Pure elevated crisp white card surface */
   --theme-card-elevated: #F8F4EC;
   --theme-hover: #DFD3BE;
-  --theme-border: #D0C3AC; /* Solid warm stone border */
+  --theme-border: #D0C3AC;
+  /* Solid warm stone border */
   --theme-border-light: rgba(0, 0, 0, 0.08);
-  --theme-accent: #D97706; /* Amber 600 - WCAG AA 4.6:1 */
-  --theme-accentHover: #B45309; /* Amber 700 */
+  --theme-accent: #D97706;
+  /* Amber 600 - WCAG AA 4.6:1 */
+  --theme-accentHover: #B45309;
+  /* Amber 700 */
   --theme-accent-warm: #D97706;
-  --theme-success: #15803D; /* Green 700 */
+  --theme-success: #15803D;
+  /* Green 700 */
   --theme-warning: #D97706;
   --theme-error: #DC2626;
-  --theme-text: #181512; /* WCAG AAA 15.2:1 */
-  --theme-subtext: #524C46; /* WCAG AA 6.2:1 */
+  --theme-text: #181512;
+  /* WCAG AAA 15.2:1 */
+  --theme-subtext: #524C46;
+  /* WCAG AA 6.2:1 */
 
   /* Glassmorphism & Adaptive Geometry */
   --theme-radius: 16px;
   --glass-bg: rgba(255, 255, 255, 0.98);
-  --glass-header-bg: rgba(220, 206, 182, 0.98); /* Rich Champagne Sand toolbar - distinct from page & cards */
-  --glass-border: rgba(146, 64, 14, 0.35); /* Warm Amber rim */
+  --glass-header-bg: rgba(220, 206, 182, 0.98);
+  /* Rich Champagne Sand toolbar - distinct from page & cards */
+  --glass-border: rgba(146, 64, 14, 0.35);
+  /* Warm Amber rim */
   --glass-shadow: 0 4px 14px -1px rgba(120, 80, 30, 0.16), 0 2px 6px rgba(0, 0, 0, 0.06);
   --glass-inner-glow: inset 0 1px 0 rgba(255, 255, 255, 0.95);
 
@@ -79,147 +90,211 @@
   --theme-line-height: 1.5;
 }
 
-/* 3. AQUA (Thủy — Fluid Liquid Architecture, Light Fresh Ocean, Liquid Pill 24px) */
+/* 3. AQUA (Thủy — Fluid Liquid Architecture, Rich Fresh Ocean, Liquid Pill 24px) */
 [data-theme="aqua"] {
-  --theme-bg: #E0F7FA;
+  --theme-bg: #CEEBF8;
+  /* Rich Azure Water canvas - deep fresh lagoon */
   --theme-card: #FFFFFF;
-  --theme-card-elevated: #F0F9FF;
-  --theme-hover: #E0F2FE;
-  --theme-border: #BAE6FD;
-  --theme-border-light: rgba(56, 189, 248, 0.35);
-  --theme-accent: #0284C7; /* Ocean Sky 600 - WCAG AA 4.8:1 on fresh water */
-  --theme-accentHover: #0369A1; /* Sky 700 */
+  --theme-card-elevated: #E6F4FB;
+  --theme-hover: #BAE6FD;
+  --theme-border: #7DD3FC;
+  --theme-border-light: rgba(56, 189, 248, 0.55);
+  --theme-accent: #0284C7;
+  /* Ocean Sky 600 - WCAG AA 4.8:1 on fresh water */
+  --theme-accentHover: #0369A1;
+  /* Sky 700 */
   --theme-accent-warm: #0EA5E9;
   --theme-success: #059669;
   --theme-warning: #D97706;
   --theme-error: #DC2626;
-  --theme-text: #082F49; /* Sky 950 - WCAG AAA 12.8:1 on light cyan */
-  --theme-subtext: #334155; /* Slate 700 - WCAG AA 6.5:1 on light cyan */
+  --theme-text: #082F49;
+  /* Sky 950 - WCAG AAA 12.8:1 on light cyan */
+  --theme-subtext: #334155;
+  /* Slate 700 - WCAG AA 6.5:1 on light cyan */
 
   /* Glassmorphism & Liquid Pill Geometry */
   --theme-radius: 24px;
-  --glass-bg: rgba(255, 255, 255, 0.82);
-  --glass-header-bg: rgba(255, 255, 255, 0.90);
-  --glass-border: rgba(56, 189, 248, 0.45);
-  --glass-shadow: 0 8px 30px -4px rgba(2, 132, 199, 0.16), 0 2px 8px rgba(0, 0, 0, 0.04);
+  --glass-bg: rgba(255, 255, 255, 0.72);
+  --glass-header-bg: rgba(206, 235, 248, 0.88);
+  --glass-border: rgba(2, 132, 199, 0.40);
+  --glass-shadow: 0 8px 32px -4px rgba(2, 132, 199, 0.22), 0 2px 8px rgba(0, 0, 0, 0.04);
   --glass-inner-glow: inset 0 1px 0 rgba(255, 255, 255, 0.95);
 
-  --scrollbar-track: #E0F7FA;
-  --scrollbar-thumb: #BAE6FD;
+  --scrollbar-track: #CEEBF8;
+  --scrollbar-thumb: #7DD3FC;
   --scrollbar-thumb-hover: #0284C7;
-  --selection-bg: rgba(56, 189, 248, 0.35);
-  --ambient-overlay: rgba(224, 247, 250, 0.90);
+  --selection-bg: rgba(56, 189, 248, 0.40);
+  --ambient-overlay: rgba(206, 235, 248, 0.90);
   --theme-line-height: 1.5;
 }
 
-/* 4. IGNIS (Hỏa - Focus & Boost, Sharp Bevel 8px, Ember Rim) */
+/* 4. IGNIS (Hỏa - Thermal Combustion & Magma Architecture) */
 [data-theme="ignis"] {
-  --theme-bg: #140C0A;
-  --theme-card: #211310;
-  --theme-card-elevated: #2E1B17;
-  --theme-hover: #3B221D;
-  --theme-border: #3D221D;
-  --theme-border-light: rgba(249, 115, 22, 0.22);
+  --theme-bg: #110B09;
+  --theme-card: #1C120E;
+  --theme-card-elevated: #261712;
+  --theme-hover: #331C15;
+  --theme-border: #4A2518;
+  --theme-border-light: rgba(140, 67, 32, 0.45);
   --theme-accent: #F97316;
   --theme-accentHover: #EA580C;
-  --theme-accent-warm: #FB923C;
+  --theme-accent-warm: #FBBF24;
   --theme-success: #22C55E;
   --theme-warning: #F59E0B;
-  --theme-error: #EF4444;
-  --theme-text: #FFF1F2; /* WCAG AAA 15.5:1 */
-  --theme-subtext: #FCA5A5; /* WCAG AAA 7.5:1 */
+  --theme-error: #DC2626;
+  --theme-text: #FFF7ED;
+  /* WCAG AAA 16.2:1 */
+  --theme-subtext: #D6B4A6;
+  /* WCAG AA 7.4:1 */
 
-  /* Glassmorphism & Sharp Geometry */
+  /* Chiseled Obsidian Geometry & Magma Glow */
   --theme-radius: 8px;
-  --glass-bg: rgba(33, 19, 16, 0.90);
-  --glass-header-bg: rgba(20, 12, 10, 0.94);
-  --glass-border: rgba(249, 115, 22, 0.28);
-  --glass-shadow: 0 12px 35px rgba(20, 12, 10, 0.85), 0 0 18px rgba(249, 115, 22, 0.15);
-  --glass-inner-glow: inset 0 1px 0 rgba(251, 146, 60, 0.25);
+  --glass-bg: #1C120E;
+  --glass-header-bg: #261712;
+  --glass-border: #8C4320;
+  --glass-shadow: 0 12px 35px rgba(0, 0, 0, 0.85), 0 0 20px rgba(249, 115, 22, 0.18);
+  --glass-inner-glow: inset 0 1px 0 rgba(251, 191, 36, 0.25);
 
-  --scrollbar-track: #140C0A;
-  --scrollbar-thumb: #3D221D;
+  --scrollbar-track: #110B09;
+  --scrollbar-thumb: #381E15;
   --scrollbar-thumb-hover: #F97316;
-  --selection-bg: rgba(249, 115, 22, 0.4);
-  --ambient-overlay: rgba(20, 12, 10, 0.78);
+  --selection-bg: rgba(249, 115, 22, 0.45);
+  --ambient-overlay: rgba(17, 11, 9, 0.85);
   --theme-line-height: 1.5;
 }
 
-/* 5. AER (Phong - Lite & Battery-Saver Flat UI, 0ms Delay) */
+[data-theme="ignis"] body {
+  background-color: #110B09;
+  background-image:
+    radial-gradient(ellipse 90% 50% at 50% 100%, rgba(140, 45, 15, 0.22) 0%, transparent 80%),
+    radial-gradient(circle 800px at 50% -200px, rgba(249, 115, 22, 0.08) 0%, transparent 70%);
+  background-attachment: fixed;
+}
+
+/* 5. AER (Phong - Ultra-Performance & Zero-Gravity Architecture, 0ms Delay) */
 [data-theme="aer"] {
-  --theme-bg: #F4F6F8;
+  --theme-bg: #EEF2F6;
   --theme-card: #FFFFFF;
-  --theme-card-elevated: #F1F4F7;
-  --theme-hover: #E9ECEF;
-  --theme-border: #DDE2E7;
-  --theme-border-light: rgba(0, 0, 0, 0.08);
-  --theme-accent: #0D9488;
-  --theme-accentHover: #0F766E;
-  --theme-accent-warm: #14B8A6;
+  --theme-card-elevated: #FFFFFF;
+  --theme-hover: #E2E8F0;
+  --theme-border: #CBD5E1;
+  --theme-border-light: rgba(0, 0, 0, 0.06);
+  --theme-accent: #0284C7;
+  --theme-accentHover: #0369A1;
+  --theme-accent-warm: #38BDF8;
   --theme-success: #16A34A;
   --theme-warning: #D97706;
   --theme-error: #DC2626;
-  --theme-text: #0F172A; /* WCAG AAA 15.8:1 */
-  --theme-subtext: #475569; /* WCAG AAA 7.1:1 */
+  --theme-text: #0F172A;
+  /* WCAG AAA 15.8:1 */
+  --theme-subtext: #475569;
+  /* WCAG AAA 7.1:1 */
 
-  /* Flat Minimalist Geometry (Zero blur, low shadow) */
-  --theme-radius: 12px;
+  /* Flat Minimalist Geometry (Zero blur, zero shadow) */
+  --theme-radius: 10px;
   --glass-bg: #FFFFFF;
-  --glass-header-bg: #FFFFFF;
-  --glass-border: #DDE2E7;
-  --glass-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+  --glass-header-bg: #B8C7D9;
+  --glass-border: #94A3B8;
+  --glass-shadow: none;
   --glass-inner-glow: none;
 
-  --scrollbar-track: #F4F6F8;
+  --scrollbar-track: #EEF2F6;
   --scrollbar-thumb: #CBD5E1;
-  --scrollbar-thumb-hover: #0D9488;
-  --selection-bg: rgba(13, 148, 136, 0.25);
-  --ambient-overlay: rgba(244, 246, 248, 0.92);
+  --scrollbar-thumb-hover: #0284C7;
+  --selection-bg: rgba(2, 132, 199, 0.2);
+  --ambient-overlay: rgba(238, 242, 246, 0.95);
   --theme-line-height: 1.5;
+
+  /* Aer Specific Tokens */
+  --toolbar-aer: #B8C7D9;
+  --toolbar-border-aer: #64748B;
+  --surface-aer: #FFFFFF;
+  --surface-sub-aer: #E2E8F0;
 }
 
-/* Aer Mode Optimization Override: Zero heavy backdrop-filter */
+/* Aer Mode Universal Performance Overrides: Zero heavy effects */
+[data-theme="aer"] *,
+[data-theme="aer"] *::before,
+[data-theme="aer"] *::after {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
 [data-theme="aer"] .glass-panel,
 [data-theme="aer"] .glass-header,
 [data-theme="aer"] .glass-pill,
 [data-theme="aer"] .glass-header-elevated,
 [data-theme="aer"] .glass-pill-elevated {
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08) !important;
+  box-shadow: none !important;
 }
 
-/* 6. TERRA (Deep Forest Soil - Rừng Già & Đất Phong Rêu, 4px Geometry) */
+/* Aer Wireframe Capsules & Connectors */
+.aer-capsule {
+  background-color: #B8C7D9;
+  border: 1.5px solid #64748B;
+  border-radius: 12px;
+  box-shadow: none !important;
+}
+
+.aer-tab-active {
+  color: #0F172A !important;
+  font-weight: 700 !important;
+  position: relative;
+}
+
+.aer-tab-active::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 8px;
+  right: 8px;
+  height: 2.5px;
+  background-color: #0284C7;
+  border-radius: 9999px;
+}
+
+/* 6. TERRA (Thổ — Dark Earthy & Botanical Ladybug Architecture) */
 [data-theme="terra"] {
-  --theme-bg: #121613;
-  --theme-card: #1C241E;
-  --theme-card-elevated: #253028;
-  --theme-hover: #2E3B32;
-  --theme-border: #334337;
-  --theme-border-light: rgba(132, 204, 22, 0.25);
-  --theme-accent: #84CC16; /* Lime/Moss 500 - WCAG AA 6.5:1 on dark soil */
-  --theme-accentHover: #65A30D;
-  --theme-accent-warm: #A3E635;
-  --theme-success: #22C55E;
-  --theme-warning: #EAB308;
-  --theme-error: #EF4444;
-  --theme-text: #F4F6F4; /* WCAG AAA 16.2:1 */
-  --theme-subtext: #9CA3AF; /* WCAG AA 7.1:1 */
+  --theme-bg: #161310;
+  /* Nâu đen đất mùn sâu thẳm */
+  --theme-card: #211C17;
+  /* Nâu gỗ trầm - sáng hơn nền 1 bậc */
+  --theme-card-elevated: #2B241D;
+  /* Nâu đất nung đậm ấm */
+  --theme-hover: #2E261F;
+  --theme-border: #7C5332;
+  /* Viền đất rõ nét */
+  --theme-border-light: rgba(124, 83, 50, 0.40);
+  --theme-accent: #65A30D;
+  /* Xanh rêu tươi sáng - WCAG AA compliant */
+  --theme-accentHover: #4D7C0F;
+  /* Rêu đậm */
+  --theme-accent-warm: #84CC16;
+  /* Mầm non */
+  --theme-success: #65A30D;
+  --theme-warning: #D97706;
+  --theme-error: #DC2626;
+  /* Ripe Apple Red */
+  --theme-text: #F3ECE1;
+  /* Trắng kem giấy ấm - WCAG AAA 14.5:1 */
+  --theme-subtext: #B5A898;
+  /* Xám cát ấm - WCAG AA 6.5:1 */
 
-  /* Dark Forest Soil Chamfered Geometry */
-  --theme-radius: 4px;
-  --glass-bg: rgba(28, 36, 30, 0.95);
-  --glass-header-bg: rgba(22, 30, 24, 0.96);
-  --glass-border: rgba(132, 204, 22, 0.3);
-  --glass-shadow: 0 4px 12px rgba(0, 0, 0, 0.6), 0 0 15px rgba(132, 204, 22, 0.08);
-  --glass-inner-glow: inset 0 1px 0 rgba(132, 204, 22, 0.2);
+  /* Chiseled Dark Earth Geometry & Prominent Toolbars */
+  --theme-radius: 12px;
+  --glass-bg: #2B241D;
+  /* Nâu đất nung ấm nổi bật trên #161310 */
+  --glass-header-bg: #2B241D;
+  --glass-border: #7C5332;
+  --glass-shadow: 0 8px 24px rgba(0, 0, 0, 0.65);
+  --glass-inner-glow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
 
-  --scrollbar-track: #121613;
-  --scrollbar-thumb: #334337;
-  --scrollbar-thumb-hover: #84CC16;
-  --selection-bg: rgba(132, 204, 22, 0.3);
-  --ambient-overlay: rgba(18, 22, 19, 0.88);
-  --theme-line-height: 1.65;
+  --scrollbar-track: #161310;
+  --scrollbar-thumb: #3E3228;
+  --scrollbar-thumb-hover: #7C5332;
+  --selection-bg: rgba(101, 163, 13, 0.35);
+  --ambient-overlay: rgba(22, 19, 16, 0.85);
+  --theme-line-height: 1.6;
 }
 
 /* 7. ECLIPSE (Nhật Thực - 100% OLED Off-Pixel Black & Solar Corona) */
@@ -236,8 +311,10 @@
   --theme-success: #22C55E;
   --theme-warning: #F59E0B;
   --theme-error: #EF4444;
-  --theme-text: #F8FAFC; /* WCAG AAA 20.8:1 */
-  --theme-subtext: #A1A1AA; /* WCAG AAA 8.9:1 */
+  --theme-text: #F8FAFC;
+  /* WCAG AAA 20.8:1 */
+  --theme-subtext: #A1A1AA;
+  /* WCAG AAA 8.9:1 */
 
   /* OLED Deep Geometry with Corona Rim */
   --theme-radius: 14px;
@@ -269,8 +346,10 @@
   --theme-success: #10B981;
   --theme-warning: #F59E0B;
   --theme-error: #F43F5E;
-  --theme-text: #F9FAFB; /* WCAG AAA 16.2:1 */
-  --theme-subtext: #A7F3D0; /* WCAG AAA 10.5:1 */
+  --theme-text: #F9FAFB;
+  /* WCAG AAA 16.2:1 */
+  --theme-subtext: #A7F3D0;
+  /* WCAG AAA 10.5:1 */
 
   /* Aurora Northern Lights Geometry */
   --theme-radius: 18px;
@@ -302,8 +381,10 @@
   --theme-success: #34D399;
   --theme-warning: #FBBF24;
   --theme-error: #F43F5E;
-  --theme-text: #FAF5FF; /* WCAG AAA 16.0:1 */
-  --theme-subtext: #D8B4FE; /* WCAG AAA 8.4:1 */
+  --theme-text: #FAF5FF;
+  /* WCAG AAA 16.0:1 */
+  --theme-subtext: #D8B4FE;
+  /* WCAG AAA 8.4:1 */
 
   /* Nebula Sharp Workspace Geometry */
   --theme-radius: 12px;
@@ -350,7 +431,9 @@
   }
 
   /* Form controls must allow text selection and editing in Electron & WebKit */
-  input, textarea, [contenteditable="true"] {
+  input,
+  textarea,
+  [contenteditable="true"] {
     user-select: text !important;
     -webkit-user-select: text !important;
   }
@@ -366,13 +449,16 @@
     width: 6px;
     height: 6px;
   }
+
   ::-webkit-scrollbar-track {
     background: var(--scrollbar-track);
   }
+
   ::-webkit-scrollbar-thumb {
     background: var(--scrollbar-thumb);
     border-radius: 9999px;
   }
+
   ::-webkit-scrollbar-thumb:hover {
     background: var(--scrollbar-thumb-hover);
   }
@@ -404,7 +490,7 @@
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border: 1.5px solid var(--glass-border);
-  box-shadow: 
+  box-shadow:
     0 2px 4px -1px rgba(0, 0, 0, 0.04),
     0 8px 24px -4px rgba(0, 0, 0, 0.12),
     0 20px 48px -6px rgba(0, 0, 0, 0.08);
@@ -427,7 +513,7 @@
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
   border: 1.5px solid var(--glass-border);
-  box-shadow: 
+  box-shadow:
     0 2px 4px -1px rgba(0, 0, 0, 0.04),
     0 8px 24px -4px rgba(0, 0, 0, 0.12),
     0 20px 48px -6px rgba(0, 0, 0, 0.08);
@@ -447,30 +533,52 @@
   border: 1px solid var(--theme-border);
   transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s ease, border-color 0.25s ease;
 }
+
 .hover-depth-lift:hover {
   transform: translateY(-3px);
   box-shadow: 0 12px 28px -4px rgba(0, 0, 0, 0.25);
   border-color: var(--theme-accent);
 }
 
-/* Solar & Light Mode Text Contrast Enforcement (Strict Yellow Text Ban on Light Modes) */
+/* Solar & Light Mode Text Contrast Enforcement (Strict Yellow Text Ban on Light Modes: Solar, Aer, Aqua) */
 [data-theme="solar"] .text-amber-400,
 [data-theme="solar"] .text-amber-300,
 [data-theme="solar"] .text-yellow-400,
-[data-theme="solar"] .text-yellow-300,
+[data-theme="solar"] .text-yellow-300 {
+  color: #92400E !important;
+}
+
 [data-theme="aer"] .text-amber-400,
-[data-theme="aer"] .text-yellow-400 {
-  color: #B45309 !important; /* Deep Amber 700 - WCAG AAA/AA on light backgrounds */
+[data-theme="aer"] .text-amber-300,
+[data-theme="aer"] .text-yellow-400,
+[data-theme="aer"] .text-yellow-300 {
+  color: #0284C7 !important;
+}
+
+[data-theme="aqua"] .text-amber-400,
+[data-theme="aqua"] .text-amber-300,
+[data-theme="aqua"] .text-yellow-400,
+[data-theme="aqua"] .text-yellow-300 {
+  color: #0284C7 !important;
 }
 
 /* 7 Specialized Modes Signature Effects */
 
 /* 1. Aqua: Realistic Multi-Ring Water Ripple & Left-to-Right Wave Motion */
 @keyframes aqua-wave-shimmer {
-  0% { border-color: rgba(56, 189, 248, 0.3); }
-  50% { border-color: rgba(56, 189, 248, 0.75); }
-  100% { border-color: rgba(56, 189, 248, 0.3); }
+  0% {
+    border-color: rgba(56, 189, 248, 0.3);
+  }
+
+  50% {
+    border-color: rgba(56, 189, 248, 0.75);
+  }
+
+  100% {
+    border-color: rgba(56, 189, 248, 0.3);
+  }
 }
+
 [data-theme="aqua"] .glass-header-elevated,
 [data-theme="aqua"] .glass-pill-elevated {
   animation: aqua-wave-shimmer 4s ease-in-out infinite;
@@ -478,9 +586,15 @@
 
 /* Continuous Ocean Wave Motion for Audio Player */
 @keyframes aqua-wave-motion {
-  0% { background-position: -200% 0; }
-  100% { background-position: 200% 0; }
+  0% {
+    background-position: -200% 0;
+  }
+
+  100% {
+    background-position: 200% 0;
+  }
 }
+
 .aqua-wave-bar {
   background: linear-gradient(90deg, transparent 0%, rgba(56, 189, 248, 0.3) 25%, rgba(14, 165, 233, 0.55) 50%, rgba(56, 189, 248, 0.3) 75%, transparent 100%);
   background-size: 200% 100%;
@@ -489,15 +603,31 @@
 
 /* Continuous Ambient Wave Backdrop Keyframes */
 @keyframes aqua-wave-drift-slow {
-  0% { transform: translate3d(0, 0, 0); }
-  50% { transform: translate3d(-18%, 10px, 0); }
-  100% { transform: translate3d(0, 0, 0); }
+  0% {
+    transform: translate3d(0, 0, 0);
+  }
+
+  50% {
+    transform: translate3d(-18%, 10px, 0);
+  }
+
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
 }
 
 @keyframes aqua-wave-drift-fast {
-  0% { transform: translate3d(0, 0, 0); }
-  50% { transform: translate3d(-24%, -8px, 0); }
-  100% { transform: translate3d(0, 0, 0); }
+  0% {
+    transform: translate3d(0, 0, 0);
+  }
+
+  50% {
+    transform: translate3d(-24%, -8px, 0);
+  }
+
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
 }
 
 /* Aqua Mode Top-Attached Drop Header (Gắn mép trên màn hình, thắt eo giọt nước) */
@@ -528,8 +658,8 @@
   border-radius: 9999px;
   background: radial-gradient(circle at 35% 25%, rgba(255, 255, 255, 0.95) 0%, rgba(186, 230, 253, 0.8) 45%, rgba(56, 189, 248, 0.4) 80%, rgba(2, 132, 199, 0.3) 100%);
   border: 1.5px solid rgba(56, 189, 248, 0.75);
-  box-shadow: 
-    0 4px 14px rgba(2, 132, 199, 0.25), 
+  box-shadow:
+    0 4px 14px rgba(2, 132, 199, 0.25),
     inset 0 1.5px 3px rgba(255, 255, 255, 0.95),
     inset 0 -1.5px 3px rgba(2, 132, 199, 0.3);
   pointer-events: none;
@@ -542,12 +672,13 @@
   position: relative;
   background: radial-gradient(circle at 50% 20%, rgba(186, 230, 253, 0.6) 0%, rgba(56, 189, 248, 0.35) 70%, rgba(2, 132, 199, 0.25) 100%);
   border: 1.5px solid rgba(56, 189, 248, 0.75);
-  box-shadow: 
-    0 4px 16px rgba(56, 189, 248, 0.35), 
-    inset 0 1px 3px rgba(255, 255, 255, 0.8), 
+  box-shadow:
+    0 4px 16px rgba(56, 189, 248, 0.35),
+    inset 0 1px 3px rgba(255, 255, 255, 0.8),
     inset 0 -2px 4px rgba(2, 132, 199, 0.3);
   backdrop-filter: blur(12px);
 }
+
 .liquid-water-pill::after {
   content: '';
   position: absolute;
@@ -566,11 +697,13 @@
     transform: translate(-50%, -50%) scale(0.2);
     opacity: 0.85;
   }
+
   100% {
     transform: translate(-50%, -50%) scale(2.8);
     opacity: 0;
   }
 }
+
 .water-ripple-circle {
   position: fixed;
   border-radius: 9999px;
@@ -588,36 +721,48 @@
 [data-theme="eclipse"] .glass-header-elevated,
 [data-theme="eclipse"] .glass-pill-elevated {
   border-bottom: 2.5px solid rgba(245, 158, 11, 0.9) !important;
-  box-shadow: 
-    0 6px 30px -2px rgba(245, 158, 11, 0.55), 
-    0 0 18px rgba(245, 158, 11, 0.35), 
+  box-shadow:
+    0 6px 30px -2px rgba(245, 158, 11, 0.55),
+    0 0 18px rgba(245, 158, 11, 0.35),
     0 16px 40px rgba(0, 0, 0, 0.95) !important;
 }
+
 [data-theme="eclipse"] .adaptive-card,
 [data-theme="eclipse"] .hover-depth-lift {
   border: 1px solid rgba(245, 158, 11, 0.3) !important;
   border-bottom: 2px solid rgba(245, 158, 11, 0.7) !important;
-  box-shadow: 
-    0 4px 20px -2px rgba(245, 158, 11, 0.35), 
+  box-shadow:
+    0 4px 20px -2px rgba(245, 158, 11, 0.35),
     0 0 12px rgba(245, 158, 11, 0.15) !important;
 }
 
 /* 3. Aurora: Northern Lights Gradient Mesh Drift */
 @keyframes aurora-mesh-drift {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
+  0% {
+    background-position: 0% 50%;
+  }
+
+  50% {
+    background-position: 100% 50%;
+  }
+
+  100% {
+    background-position: 0% 50%;
+  }
 }
+
 [data-theme="aurora"] {
   background: linear-gradient(135deg, #090D16 0%, #064E3B 30%, #4338CA 70%, #090D16 100%) !important;
   background-size: 300% 300% !important;
   animation: aurora-mesh-drift 14s ease infinite !important;
 }
+
 [data-theme="aurora"] .glass-header-elevated,
 [data-theme="aurora"] .glass-pill-elevated {
   border: 1.5px solid rgba(16, 185, 129, 0.4) !important;
   box-shadow: 0 4px 20px rgba(16, 185, 129, 0.25), 0 0 25px rgba(139, 92, 246, 0.25) !important;
 }
+
 .aurora-drift-bar {
   background: linear-gradient(90deg, rgba(16, 185, 129, 0.4) 0%, rgba(139, 92, 246, 0.5) 50%, rgba(16, 185, 129, 0.4) 100%);
   background-size: 200% 100%;
@@ -626,12 +771,22 @@
 
 /* 4. Nebula: Fullscreen Ambient Glow & Twinkling Starfield */
 @keyframes star-twinkle {
-  0%, 100% { opacity: 0.25; transform: scale(0.9); }
-  50% { opacity: 0.95; transform: scale(1.15); }
+
+  0%,
+  100% {
+    opacity: 0.25;
+    transform: scale(0.9);
+  }
+
+  50% {
+    opacity: 0.95;
+    transform: scale(1.15);
+  }
 }
+
 [data-theme="nebula"] body {
   background-color: var(--theme-bg);
-  background-image: 
+  background-image:
     radial-gradient(2px 2px at 40px 60px, rgba(232, 121, 249, 0.8), transparent),
     radial-gradient(1.5px 1.5px at 150px 220px, rgba(168, 85, 247, 0.7), transparent),
     radial-gradient(2px 2px at 280px 120px, rgba(192, 132, 252, 0.85), transparent),
@@ -639,41 +794,193 @@
     radial-gradient(2.5px 2.5px at 520px 180px, rgba(255, 255, 255, 0.9), transparent);
   background-size: 350px 350px;
 }
+
 .nebula-fullscreen-ambient {
   position: fixed;
   inset: 0;
   pointer-events: none;
   z-index: 0;
-  background: 
+  background:
     radial-gradient(ellipse 110% 80% at 50% 15%, var(--nebula-ambient-tint, rgba(168, 85, 247, 0.3)) 0%, rgba(12, 8, 26, 0.1) 65%, transparent 85%),
     radial-gradient(ellipse 90% 70% at 85% 85%, var(--nebula-ambient-tint, rgba(168, 85, 247, 0.18)) 0%, transparent 60%);
   transition: background 1.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-/* 5. Ignis: Ember Underglow */
+/* 5. Ignis: Thermal Combustion & Obsidian Architecture */
+[data-theme="ignis"] .adaptive-card,
+[data-theme="ignis"] .bg-ice-card {
+  background-color: #1C120E !important;
+  border: 1px solid #4A2518 !important;
+  border-radius: 8px !important;
+  transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.35s ease, border-color 0.35s ease !important;
+}
+
 [data-theme="ignis"] .adaptive-card:hover,
-[data-theme="ignis"] .adaptive-card.active {
-  border-bottom: 2px solid #F97316 !important;
-  box-shadow: 0 8px 24px -4px rgba(249, 115, 22, 0.45) !important;
+[data-theme="ignis"] .bg-ice-card:hover {
+  border-color: #8C4320 !important;
+  box-shadow: 0 14px 32px -4px rgba(0, 0, 0, 0.85), 0 0 20px rgba(249, 115, 22, 0.35) !important;
+  z-index: 30 !important;
 }
 
-/* 6. Aer: Hairline Blueprint Grid */
+@keyframes magmaPulse {
+
+  0%,
+  100% {
+    filter: drop-shadow(0 0 3px #F97316) drop-shadow(0 0 8px rgba(234, 88, 12, 0.6));
+    opacity: 0.85;
+  }
+
+  50% {
+    filter: drop-shadow(0 0 8px #FBBF24) drop-shadow(0 0 16px rgba(249, 115, 22, 0.95));
+    opacity: 1;
+  }
+}
+
+@keyframes ignisFlameTurbulence {
+  0% {
+    transform: scaleY(1) translateY(0);
+  }
+
+  50% {
+    transform: scaleY(1.06) translateY(-3px);
+  }
+
+  100% {
+    transform: scaleY(1) translateY(0);
+  }
+}
+
+.obsidian-chamfer {
+  clip-path: polygon(12px 0%,
+      calc(100% - 12px) 0%,
+      100% 12px,
+      100% calc(100% - 12px),
+      calc(100% - 12px) 100%,
+      12px 100%,
+      0% calc(100% - 12px),
+      0% 12px);
+}
+
+.obsidian-chamfer-tab {
+  clip-path: polygon(6px 0%,
+      calc(100% - 6px) 0%,
+      100% 6px,
+      100% calc(100% - 6px),
+      calc(100% - 6px) 100%,
+      6px 100%,
+      0% calc(100% - 6px),
+      0% 6px);
+}
+
+@keyframes ignisPaperBurnRightToLeft {
+  0% {
+    -webkit-mask-image: linear-gradient(to left, transparent 0%, black 6%);
+    mask-image: linear-gradient(to left, transparent 0%, black 6%);
+    filter: brightness(1);
+  }
+
+  20% {
+    -webkit-mask-image: linear-gradient(to left, transparent 20%, black 32%);
+    mask-image: linear-gradient(to left, transparent 20%, black 32%);
+    filter: brightness(1.2) drop-shadow(-6px 0 12px rgba(249, 115, 22, 0.7));
+  }
+
+  50% {
+    -webkit-mask-image: linear-gradient(to left, transparent 52%, black 68%);
+    mask-image: linear-gradient(to left, transparent 52%, black 68%);
+    filter: brightness(1.3) drop-shadow(-10px 0 18px rgba(249, 115, 22, 0.85));
+  }
+
+  80% {
+    -webkit-mask-image: linear-gradient(to left, transparent 85%, black 98%);
+    mask-image: linear-gradient(to left, transparent 85%, black 98%);
+    filter: brightness(1.15) drop-shadow(-14px 0 22px rgba(220, 38, 38, 0.9));
+  }
+
+  100% {
+    -webkit-mask-image: linear-gradient(to left, transparent 100%, transparent 100%);
+    mask-image: linear-gradient(to left, transparent 100%, transparent 100%);
+    filter: brightness(0.2);
+    opacity: 0;
+  }
+}
+
+@keyframes ignisEmberSweep {
+  0% {
+    right: 0%;
+    opacity: 0.8;
+    transform: scaleY(0.6);
+  }
+
+  20% {
+    right: 20%;
+    opacity: 1;
+    transform: scaleY(1.1);
+  }
+
+  60% {
+    right: 65%;
+    opacity: 1;
+    transform: scaleY(1.15);
+  }
+
+  90% {
+    right: 95%;
+    opacity: 0.9;
+    transform: scaleY(1);
+  }
+
+  100% {
+    right: 105%;
+    opacity: 0;
+    transform: scaleY(0.7);
+  }
+}
+
+.ignis-burning-player {
+  animation: ignisPaperBurnRightToLeft 0.85s cubic-bezier(0.35, 0, 0.25, 1) forwards !important;
+  pointer-events: none;
+}
+
+/* 6. Aer: Hairline Blueprint Grid & Crisp Mist Canvas */
 [data-theme="aer"] body {
-  background-image: 
-    linear-gradient(to right, rgba(13, 148, 136, 0.05) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(13, 148, 136, 0.05) 1px, transparent 1px) !important;
-  background-size: 28px 28px !important;
+  background-color: #EEF2F6 !important;
+  background-image:
+    linear-gradient(to right, rgba(148, 163, 184, 0.14) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(148, 163, 184, 0.14) 1px, transparent 1px) !important;
+  background-size: 32px 32px !important;
 }
 
-/* 7. Terra: Chamfered Octagonal Clip-Path */
+/* 7. Terra: Chiseled Stone Border Radius & Organic Meadow Breeze */
 [data-theme="terra"] .adaptive-card {
-  clip-path: polygon(
-    8px 0%, calc(100% - 8px) 0%, 
-    100% 8px, 100% calc(100% - 8px), 
-    calc(100% - 8px) 100%, 8px 100%, 
-    0% calc(100% - 8px), 0% 8px
-  ) !important;
-  border-radius: 0px !important;
+  border-radius: 8px !important;
+}
+
+@keyframes terra-breeze {
+
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+
+  50% {
+    transform: rotate(1.8deg) skewX(0.8deg);
+  }
+}
+
+.terra-sway-slow {
+  transform-origin: bottom center;
+  animation: terra-breeze 4.2s ease-in-out infinite;
+}
+
+.terra-sway-mid {
+  transform-origin: bottom center;
+  animation: terra-breeze 3.4s ease-in-out infinite 0.7s;
+}
+
+.terra-sway-fast {
+  transform-origin: bottom center;
+  animation: terra-breeze 2.8s ease-in-out infinite 1.4s;
 }
 
 /* Nebula layout density modifier */
@@ -688,6 +995,7 @@
   width: 0 !important;
   height: 0 !important;
 }
+
 .no-scrollbar {
   -ms-overflow-style: none !important;
   scrollbar-width: none !important;
@@ -701,6 +1009,7 @@
   margin-top: 0.6rem;
   margin-bottom: 0.3rem;
 }
+
 .release-notes-content h3 {
   font-size: 0.85rem;
   font-weight: 700;
@@ -708,19 +1017,23 @@
   margin-top: 0.5rem;
   margin-bottom: 0.25rem;
 }
+
 .release-notes-content ul {
   list-style-type: disc;
   padding-left: 1.25rem;
   margin-top: 0.3rem;
   margin-bottom: 0.3rem;
 }
+
 .release-notes-content li {
   margin-bottom: 0.25rem;
   line-height: 1.5;
 }
+
 .release-notes-content strong {
   color: #ffffff;
 }
+
 .release-notes-content code {
   background-color: rgba(255, 255, 255, 0.12);
   padding: 0.1rem 0.35rem;
@@ -728,10 +1041,12 @@
   font-family: monospace;
   font-size: 0.75rem;
 }
+
 .release-notes-content a {
   color: #38bdf8;
   text-decoration: underline;
 }
+
 .release-notes-content hr {
   border-color: rgba(255, 255, 255, 0.1);
   margin: 0.6rem 0;
@@ -755,9 +1070,21 @@
   box-shadow: 0 4px 16px -2px rgba(130, 95, 45, 0.08), 0 2px 6px rgba(0, 0, 0, 0.04);
 }
 
-/* Eliminate Poster Bottom White Fog in Solar */
-[data-theme="solar"] .game-card-poster-fog {
+/* Eliminate Poster Bottom White Fog in Light Themes */
+[data-theme="solar"] .game-card-poster-fog,
+[data-theme="aer"] .game-card-poster-fog,
+[data-theme="aqua"] .game-card-poster-fog {
   display: none !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+}
+
+/* Ensure Game Card Genre Badges always have white text on dark pill */
+.game-card-genre-badge,
+[data-theme] .game-card-genre-badge {
+  color: #FFFFFF !important;
+  background-color: rgba(0, 0, 0, 0.75) !important;
+  border-color: rgba(255, 255, 255, 0.20) !important;
 }
 
 /* Universal Text Contrast Shields in Solar Mode: Prevent White-on-White Text */
@@ -784,7 +1111,8 @@
 [data-theme="solar"] .text-amber-400\/90,
 [data-theme="solar"] .text-cyan-300,
 [data-theme="solar"] .text-cyan-400 {
-  color: #78350F !important; /* Amber 900 - Dark Amber Brown, WCAG AAA compliant */
+  color: #78350F !important;
+  /* Amber 900 - Dark Amber Brown, WCAG AAA compliant */
 }
 
 /* Hover States Shield: Ban Hovering into Pale Yellow */
@@ -792,7 +1120,23 @@
 [data-theme="solar"] .hover\:text-amber-400:hover,
 [data-theme="solar"] .group:hover .group-hover\:text-amber-300,
 [data-theme="solar"] .group:hover .group-hover\:text-amber-400 {
-  color: #78350F !important; /* Deep Amber 900 */
+  color: #78350F !important;
+  /* Deep Amber 900 */
+}
+
+/* Aer & Aqua Hover States Shields: Strict High Contrast Sky Blue Accent */
+[data-theme="aer"] .hover\:text-amber-300:hover,
+[data-theme="aer"] .hover\:text-amber-400:hover,
+[data-theme="aer"] .hover\:border-amber-400:hover,
+[data-theme="aer"] .hover\:border-amber-400\/60:hover,
+[data-theme="aer"] .hover\:border-amber-400\/80:hover,
+[data-theme="aqua"] .hover\:text-amber-300:hover,
+[data-theme="aqua"] .hover\:text-amber-400:hover,
+[data-theme="aqua"] .hover\:border-amber-400:hover,
+[data-theme="aqua"] .hover\:border-amber-400\/60:hover,
+[data-theme="aqua"] .hover\:border-amber-400\/80:hover {
+  border-color: #0284C7 !important;
+  color: #0284C7 !important;
 }
 
 /* Guarantee no dark backgrounds or gradients leak into Solar mode */
@@ -842,21 +1186,21 @@
 [data-theme="aqua"] .bg-ice-card {
   background-color: rgba(255, 255, 255, 0.88) !important;
   background-image: none !important;
-  border-color: rgba(186, 230, 253, 0.85) !important;
-  box-shadow: 0 8px 26px -4px rgba(2, 132, 199, 0.12), 0 2px 6px rgba(0, 0, 0, 0.03) !important;
+  border-color: rgba(125, 211, 252, 0.90) !important;
+  box-shadow: 0 8px 26px -4px rgba(2, 132, 199, 0.16), 0 2px 6px rgba(0, 0, 0, 0.03) !important;
   color: var(--theme-text) !important;
 }
 
 [data-theme="aqua"] .glass-panel {
-  background-color: rgba(255, 255, 255, 0.92) !important;
-  border-color: rgba(186, 230, 253, 0.85) !important;
+  background-color: rgba(255, 255, 255, 0.88) !important;
+  border-color: rgba(125, 211, 252, 0.90) !important;
   backdrop-filter: blur(24px) !important;
   color: var(--theme-text) !important;
 }
 
 [data-theme="aqua"] .bg-ice-hover\/50,
 [data-theme="aqua"] .bg-ice-hover\/40 {
-  background-color: rgba(224, 242, 254, 0.70) !important;
+  background-color: rgba(186, 230, 253, 0.75) !important;
   color: var(--theme-text) !important;
 }
 
@@ -890,4 +1234,124 @@
 [data-theme="aqua"] .bg-ice-accent {
   background-color: #0284C7 !important;
   color: #FFFFFF !important;
+}
+
+/* ========================================================= */
+/* TERRA MODE DARK EARTHY & BOTANICAL LADYBUG ARCHITECTURE */
+/* ========================================================= */
+
+/* Earthy Soil Border & Dark Wood Card Elevation */
+[data-theme="terra"] .bg-ice-card,
+[data-theme="terra"] .adaptive-card {
+  background-color: #211C17 !important;
+  background-image: none !important;
+  border: 2px solid #7C5332 !important;
+  box-sizing: border-box !important;
+  box-shadow: 0 4px 16px -2px rgba(0, 0, 0, 0.5), inset 0 0 0 1px rgba(124, 83, 50, 0.15) !important;
+  border-radius: 12px !important;
+  color: var(--theme-text) !important;
+}
+
+[data-theme="terra"] .glass-panel {
+  background-color: #211C17 !important;
+  border: 2px solid #7C5332 !important;
+  box-sizing: border-box !important;
+  box-shadow: 0 4px 16px -2px rgba(0, 0, 0, 0.5) !important;
+  border-radius: 12px !important;
+  color: var(--theme-text) !important;
+}
+
+/* 2 Prominent Toolbars in Terra Mode (Header PC, MiniPlayer & Mobile Tab Bar) */
+[data-theme="terra"] .glass-header,
+[data-theme="terra"] .glass-header-elevated {
+  background-color: #2B241D !important;
+  border: 2px solid #7C5332 !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.65) !important;
+  color: var(--theme-text) !important;
+}
+
+[data-theme="terra"] [class*="bg-ice-hover"],
+[data-theme="terra"] .bg-ice-hover {
+  background-color: #2E261F !important;
+  color: var(--theme-text) !important;
+}
+
+/* Vibrant Forest Moss Accent on Buttons & Icons */
+[data-theme="terra"] .text-ice-accent {
+  color: #65A30D !important;
+}
+
+[data-theme="terra"] .bg-ice-accent {
+  background-color: #65A30D !important;
+  color: #FFFFFF !important;
+}
+
+/* Lock out default white slider thumbs across all browsers in Terra Mode */
+[data-theme="terra"] input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 0;
+  height: 0;
+  opacity: 0;
+  border: none;
+  background: transparent;
+}
+
+[data-theme="terra"] input[type="range"]::-moz-range-thumb {
+  width: 0;
+  height: 0;
+  opacity: 0;
+  border: none;
+  background: transparent;
+}
+
+/* ========================================================= */
+/* IGNIS MODE THERMAL COMBUSTION & MAGMA ARCHITECTURE */
+/* ========================================================= */
+
+/* Obsidian Toolbars in Ignis Mode (Header PC, MiniPlayer & Mobile Tab Bar) */
+[data-theme="ignis"] .glass-header,
+[data-theme="ignis"] .glass-header-elevated {
+  background-color: #261712 !important;
+  border: 2px solid #8C4320 !important;
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.85) !important;
+  color: var(--theme-text) !important;
+}
+
+[data-theme="ignis"] [class*="bg-ice-hover"],
+[data-theme="ignis"] .bg-ice-hover {
+  background-color: #381E15 !important;
+  color: var(--theme-text) !important;
+}
+
+/* Radiant Magma Orange Accent on Buttons & Icons */
+[data-theme="ignis"] .text-ice-accent {
+  color: #F97316 !important;
+}
+
+[data-theme="ignis"] .bg-ice-accent {
+  background-color: #F97316 !important;
+  color: #FFF7ED !important;
+}
+
+/* Obsidian Header Block Enhancement in Ignis Mode */
+.obsidian-header-block {
+  background: linear-gradient(180deg, #2D1A13 0%, #1A0D08 100%) !important;
+  border: 2px solid #8C4320 !important;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.95), inset 0 1px 0 rgba(251, 191, 36, 0.22) !important;
+  filter: drop-shadow(0 4px 14px rgba(0, 0, 0, 0.85));
+}
+
+/* Active Magma Tab Glow & Fissure Embers */
+.ignis-tab-active {
+  background: linear-gradient(135deg, rgba(249, 115, 22, 0.38) 0%, rgba(220, 38, 38, 0.28) 50%, rgba(249, 115, 22, 0.38) 100%) !important;
+  border: 2px solid #FBBF24 !important;
+  box-shadow: inset 0 0 14px rgba(249, 115, 22, 0.75), 0 0 16px rgba(249, 115, 22, 0.7), 0 0 24px rgba(220, 38, 38, 0.45) !important;
+  color: #FFFBEB !important;
+}
+
+.ignis-tab-active-text {
+  color: #FFFBEB !important;
+  font-weight: 900 !important;
+  text-shadow: 0 0 8px #FBBF24, 0 0 14px #F97316, 0 0 20px #DC2626 !important;
 }

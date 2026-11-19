@@ -34,6 +34,27 @@ export interface GameExtension {
   createdAt: string;
 }
 
+export interface ImageSlotTransform {
+  aspectRatio?: 'banner' | 'cover' | 'listCard' | '16:9' | '4:6' | '1:1' | 'video' | 'audio';
+  pan: { x: number; y: number }; // 0 - 100 percentage
+  zoom: number;                  // 1.0 - 3.0
+  rotation?: number;             // 0, 90, 180, 270 degrees
+  crop?: { x: number; y: number; width: number; height: number }; // 0 - 100 percentage
+  filters?: {
+    blur?: number;               // 0 - 12 px
+    darkness?: number;           // 0 - 80 %
+    edgeDarkness?: number;       // 0 - 100 %
+    sharpen?: number;            // 0 - 100 %
+  };
+}
+
+export interface ImageTransformMetadata {
+  version: number;
+  cover?: ImageSlotTransform;
+  banner?: ImageSlotTransform;
+  listCard?: ImageSlotTransform;
+}
+
 export interface Game {
   id: string;
   name: string;
@@ -51,6 +72,7 @@ export interface Game {
   bannerEdgeDarkness?: number; // 0 - 100: side fade darkness (0 = crystal clear, no side fade)
   bannerSharpen?: number;
   coverSharpen?: number;
+  transform_metadata?: ImageTransformMetadata;
   bannerFeaturedUntil?: string; // ISO date for expiration
   isBannerPermanent?: boolean;
   isBannerPinned?: boolean;
@@ -101,6 +123,7 @@ export interface MediaPlaylist {
   createdAt: string;
   ownerProfileId?: string;
   isUserCustom?: boolean;
+  transform_metadata?: ImageTransformMetadata;
 }
 
 export interface MediaItem {
@@ -130,6 +153,7 @@ export interface MediaItem {
   bannerEdgeDarkness?: number; // 0 - 100: side fade darkness (0 = crystal clear, no side fade)
   bannerSharpen?: number;
   coverSharpen?: number;
+  transform_metadata?: ImageTransformMetadata;
   bannerFeaturedUntil?: string; // ISO date for expiration
   isBannerPermanent?: boolean;
   isBannerPinned?: boolean;

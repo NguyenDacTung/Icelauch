@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import { useTheme } from '../../hooks/useTheme';
+import { TerraAppleFavoriteIcon } from '../common/TerraAppleFavoriteIcon';
 import { 
   Play, 
   Download, 
@@ -41,6 +43,7 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({
   onIncompatibleClick,
   onActiveBannerChange,
 }) => {
+  const { theme } = useTheme();
   const resolvedList = resolveBannerItems(bannerSettings, games, 'game');
   const displayGames = resolvedList.map((r) => r.item);
 
@@ -50,13 +53,14 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({
   const slideInterval = (bannerSettings?.autoSlideIntervalSeconds || 7) * 1000;
 
   useEffect(() => {
-    if (displayGames.length <= 1) return;
+    // In Aer Mode: pause auto-slide to reach ~0% CPU/GPU at idle
+    if (displayGames.length <= 1 || theme === 'aer') return;
     const interval = setInterval(() => {
       setCurrentIndex((prev) => (prev + 1) % displayGames.length);
       setHoveredScreenshot(null);
     }, slideInterval);
     return () => clearInterval(interval);
-  }, [displayGames.length, slideInterval]);
+  }, [displayGames.length, slideInterval, theme]);
 
   if (displayGames.length === 0) return null;
 
@@ -100,9 +104,22 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({
           </span>
           <button
             onClick={() => onToggleLibrary(currentGame.id)}
-            className="p-1.5 rounded-lg bg-black/60 text-white backdrop-blur-md border border-white/20"
+            className={`p-1.5 rounded-lg border backdrop-blur-md transition-colors ${
+              theme === 'terra'
+                ? currentGame.inLibrary
+                  ? 'bg-[#2B241D] text-red-500 border border-[#7C5332]'
+                  : 'bg-[#2B241D]/90 text-[#7C5332] border border-[#7C5332]/60'
+                : 'bg-black/60 text-white border border-white/20'
+            }`}
+            title={currentGame.inLibrary ? 'Đã lưu trong thư viện' : 'Lưu vào thư viện'}
           >
-            {currentGame.inLibrary ? <BookmarkCheck className="w-3.5 h-3.5 text-ice-accent" /> : <Bookmark className="w-3.5 h-3.5" />}
+            {theme === 'terra' ? (
+              <TerraAppleFavoriteIcon isFavorite={currentGame.inLibrary} size={15} />
+            ) : currentGame.inLibrary ? (
+              <BookmarkCheck className="w-3.5 h-3.5 text-ice-accent" />
+            ) : (
+              <Bookmark className="w-3.5 h-3.5" />
+            )}
           </button>
         </div>
 
@@ -328,13 +345,23 @@ export const HeroBanner: React.FC<HeroBannerProps> = ({
             <button
               onClick={() => onToggleLibrary(currentGame.id)}
               className={`h-11 px-3.5 rounded-xl border text-xs font-semibold flex items-center justify-center transition-all shrink-0 ${
-                currentGame.inLibrary
+                theme === 'terra'
+                  ? currentGame.inLibrary
+                    ? 'bg-[#2B241D] text-red-500 border border-[#7C5332] shadow-sm'
+                    : 'bg-[#211C17] text-[#B5A898] hover:text-[#F3ECE1] hover:bg-[#2B241D] border border-[#7C5332]/50'
+                  : currentGame.inLibrary
                   ? 'bg-ice-accent/20 border-ice-accent text-ice-accent'
                   : 'bg-ice-card border-ice-border text-ice-subtext hover:text-ice-text hover:bg-ice-hover'
               }`}
               title={currentGame.inLibrary ? 'Đã lưu trong thư viện' : 'Lưu vào thư viện'}
             >
-              {currentGame.inLibrary ? <BookmarkCheck className="w-4 h-4" /> : <Bookmark className="w-4 h-4" />}
+              {theme === 'terra' ? (
+                <TerraAppleFavoriteIcon isFavorite={currentGame.inLibrary} size={18} />
+              ) : currentGame.inLibrary ? (
+                <BookmarkCheck className="w-4 h-4" />
+              ) : (
+                <Bookmark className="w-4 h-4" />
+              )}
             </button>
           </div>
 

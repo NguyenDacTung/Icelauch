@@ -20,7 +20,7 @@ import {
 } from 'lucide-react';
 import { TagSelector } from './TagSelector';
 import { ImagePositionSelector } from './ImagePositionSelector';
-import type { Game, AppActionButton } from '../../types';
+import type { Game, AppActionButton, ImageTransformMetadata } from '../../types';
 
 interface GameFormModalProps {
   game: Game | null; // null if adding new
@@ -52,8 +52,11 @@ export const GameFormModal: React.FC<GameFormModalProps> = ({
   const [bannerPosition, setBannerPosition] = useState('50% 30%');
   const [coverZoom, setCoverZoom] = useState(1);
   const [bannerZoom, setBannerZoom] = useState(1);
+  const [coverRotation, setCoverRotation] = useState(0);
+  const [bannerRotation, setBannerRotation] = useState(0);
   const [listCardPosition, setListCardPosition] = useState('50% 50%');
   const [listCardZoom, setListCardZoom] = useState(1);
+  const [listCardRotation, setListCardRotation] = useState(0);
   const [bannerBlur, setBannerBlur] = useState(0);
   const [bannerDarkness, setBannerDarkness] = useState(30);
   const [bannerEdgeDarkness, setBannerEdgeDarkness] = useState(10);
@@ -100,6 +103,33 @@ export const GameFormModal: React.FC<GameFormModalProps> = ({
         setBannerEdgeDarkness(game.bannerEdgeDarkness ?? 10);
         setCoverSharpen(game.coverSharpen ?? 0);
         setBannerSharpen(game.bannerSharpen ?? 0);
+        const meta = game.transform_metadata;
+        if (meta?.cover) {
+          if (meta.cover.pan) setCoverPosition(`${meta.cover.pan.x}% ${meta.cover.pan.y}%`);
+          if (meta.cover.zoom) setCoverZoom(meta.cover.zoom);
+          if (meta.cover.rotation !== undefined) setCoverRotation(meta.cover.rotation);
+          if (meta.cover.filters?.sharpen !== undefined) setCoverSharpen(meta.cover.filters.sharpen);
+        } else {
+          setCoverRotation(0);
+        }
+        if (meta?.banner) {
+          if (meta.banner.pan) setBannerPosition(`${meta.banner.pan.x}% ${meta.banner.pan.y}%`);
+          if (meta.banner.zoom) setBannerZoom(meta.banner.zoom);
+          if (meta.banner.rotation !== undefined) setBannerRotation(meta.banner.rotation);
+          if (meta.banner.filters?.blur !== undefined) setBannerBlur(meta.banner.filters.blur);
+          if (meta.banner.filters?.darkness !== undefined) setBannerDarkness(meta.banner.filters.darkness);
+          if (meta.banner.filters?.edgeDarkness !== undefined) setBannerEdgeDarkness(meta.banner.filters.edgeDarkness);
+          if (meta.banner.filters?.sharpen !== undefined) setBannerSharpen(meta.banner.filters.sharpen);
+        } else {
+          setBannerRotation(0);
+        }
+        if (meta?.listCard) {
+          if (meta.listCard.pan) setListCardPosition(`${meta.listCard.pan.x}% ${meta.listCard.pan.y}%`);
+          if (meta.listCard.zoom) setListCardZoom(meta.listCard.zoom);
+          if (meta.listCard.rotation !== undefined) setListCardRotation(meta.listCard.rotation);
+        } else {
+          setListCardRotation(0);
+        }
         setIsBannerPinned(game.isBannerPinned ?? game.featured ?? false);
         setIsBannerPermanent(game.isBannerPermanent ?? false);
         setBannerExpiryDays(7);
@@ -244,6 +274,46 @@ export const GameFormModal: React.FC<GameFormModalProps> = ({
       bannerFeaturedUntil = new Date(Date.now() + bannerExpiryDays * 24 * 60 * 60 * 1000).toISOString();
     }
 
+    const parseCoord = (str?: string): { x: number; y: number } => {
+      if (!str) return { x: 50, y: 50 };
+      const parts = str.trim().split(/\s+/);
+      const x = parts[0] ? parseFloat(parts[0].replace('%', '')) : 50;
+      const y = parts[1] ? parseFloat(parts[1].replace('%', '')) : 50;
+      return { x: isNaN(x) ? 50 : x, y: isNaN(y) ? 50 : y };
+    };
+
+    const transform_metadata: ImageTransformMetadata = {
+      version: 1,
+      cover: {
+        aspectRatio: 'cover',
+        pan: parseCoord(coverPosition),
+        zoom: coverZoom,
+        rotation: coverRotation,
+        crop: { x: 0, y: 0, width: 100, height: 100 },
+        filters: { sharpen: coverSharpen }
+      },
+      banner: {
+        aspectRatio: 'banner',
+        pan: parseCoord(bannerPosition),
+        zoom: bannerZoom,
+        rotation: bannerRotation,
+        crop: { x: 0, y: 0, width: 100, height: 100 },
+        filters: {
+          blur: bannerBlur,
+          darkness: bannerDarkness,
+          edgeDarkness: bannerEdgeDarkness,
+          sharpen: bannerSharpen
+        }
+      },
+      listCard: {
+        aspectRatio: 'listCard',
+        pan: parseCoord(listCardPosition),
+        zoom: listCardZoom,
+        rotation: listCardRotation,
+        crop: { x: 0, y: 0, width: 100, height: 100 }
+      }
+    };
+
     const mergedGame: Partial<Game> = {
       ...(game || {}),
       id: game?.id,
@@ -261,6 +331,7 @@ export const GameFormModal: React.FC<GameFormModalProps> = ({
       bannerEdgeDarkness,
       coverSharpen,
       bannerSharpen,
+      transform_metadata,
       isBannerPinned,
       isBannerPermanent,
       bannerFeaturedUntil,
@@ -398,6 +469,8 @@ export const GameFormModal: React.FC<GameFormModalProps> = ({
                   onChange={setListCardPosition}
                   zoom={listCardZoom}
                   onZoomChange={setListCardZoom}
+                  rotation={listCardRotation}
+                  onRotationChange={setListCardRotation}
                   sharpen={coverSharpen}
                   onSharpenChange={setCoverSharpen}
                   demoTitle={name}
@@ -410,6 +483,8 @@ export const GameFormModal: React.FC<GameFormModalProps> = ({
                   onChange={setCoverPosition}
                   zoom={coverZoom}
                   onZoomChange={setCoverZoom}
+                  rotation={coverRotation}
+                  onRotationChange={setCoverRotation}
                   sharpen={coverSharpen}
                   onSharpenChange={setCoverSharpen}
                   demoTitle={name}
@@ -425,6 +500,8 @@ export const GameFormModal: React.FC<GameFormModalProps> = ({
                 onChange={setBannerPosition}
                 zoom={bannerZoom}
                 onZoomChange={setBannerZoom}
+                rotation={bannerRotation}
+                onRotationChange={setBannerRotation}
                 blur={bannerBlur}
                 onBlurChange={setBannerBlur}
                 darkness={bannerDarkness}

@@ -436,6 +436,17 @@ export class SupabaseSyncService {
     return res.status >= 200 && res.status < 300;
   }
 
+  public async deleteProfile(supabaseUrl: string, anonKey: string, profileId: string): Promise<boolean> {
+    const baseUrl = this.cleanUrl(supabaseUrl);
+    await this.makeRequest(`${baseUrl}/rest/v1/icelauch_user_data?profile_id=eq.${encodeURIComponent(profileId)}`, anonKey, {
+      method: 'DELETE',
+    });
+    const res = await this.makeRequest(`${baseUrl}/rest/v1/icelauch_profiles?id=eq.${encodeURIComponent(profileId)}`, anonKey, {
+      method: 'DELETE',
+    });
+    return res.status >= 200 && res.status < 300;
+  }
+
   // --- 2. GAMES CATALOG ---
 
   public async pullGames(supabaseUrl: string, anonKey: string): Promise<Game[]> {
@@ -482,6 +493,7 @@ export class SupabaseSyncService {
         bannerSharpen: meta.bannerSharpen,
         listCardPosition: meta.listCardPosition,
         listCardZoom: meta.listCardZoom,
+        transform_metadata: r.transform_metadata || meta.transform_metadata || undefined,
       };
     });
   }
@@ -503,10 +515,11 @@ export class SupabaseSyncService {
       bannerSharpen: game.bannerSharpen,
       listCardPosition: game.listCardPosition,
       listCardZoom: game.listCardZoom,
+      transform_metadata: game.transform_metadata,
     };
     const finalDescription = encodeDescriptionMetadata(game.description || '', meta);
 
-    const payload = {
+    const payload: Record<string, any> = {
       id: game.id,
       name: game.name,
       drive_url: game.downloadLinks && game.downloadLinks.length > 0 ? game.downloadLinks.join('\n') : null,
@@ -522,6 +535,9 @@ export class SupabaseSyncService {
       file_size: game.expectedSize ? Math.round(game.expectedSize) : null,
       updated_at: new Date().toISOString(),
     };
+    if (game.transform_metadata) {
+      payload.transform_metadata = game.transform_metadata;
+    }
 
     const res = await this.makeRequest(endpoint, anonKey, {
       method: 'POST',
@@ -529,6 +545,35 @@ export class SupabaseSyncService {
       headers: { 'Prefer': 'resolution=merge-duplicates' },
     });
     return res.status >= 200 && res.status < 300;
+  }
+
+  public async deleteGame(supabaseUrl: string, anonKey: string, gameId: string): Promise<boolean> {
+    const baseUrl = this.cleanUrl(supabaseUrl);
+    const endpoint = `${baseUrl}/rest/v1/icelauch_games?id=eq.${encodeURIComponent(gameId)}`;
+    const res = await this.makeRequest(endpoint, anonKey, {
+      method: 'DELETE',
+    });
+    return res.status >= 200 && res.status < 300;
+  }
+
+  public async deleteMediaItem(supabaseUrl: string, anonKey: string, mediaId: string): Promise<boolean> {
+    const baseUrl = this.cleanUrl(supabaseUrl);
+    const endpoint = `${baseUrl}/rest/v1/icelauch_media?id=eq.${encodeURIComponent(mediaId)}`;
+    const res = await this.makeRequest(endpoint, anonKey, {
+      method: 'DELETE',
+    });
+    return res.status >= 200 && res.status < 300;
+  }
+
+  public async publishSystemSettings(supabaseUrl: string, anonKey: string, systemSettings: any): Promise<boolean> {
+    return this.upsertPlaylist(supabaseUrl, anonKey, {
+      id: '__system_catalog_settings__',
+      name: '__system_catalog_settings__',
+      type: 'video',
+      description: JSON.stringify(systemSettings),
+      itemIds: [],
+      createdAt: new Date().toISOString(),
+    });
   }
 
   // --- 3. MEDIA CATALOG ---
@@ -576,6 +621,7 @@ export class SupabaseSyncService {
         bannerSharpen: meta.bannerSharpen,
         listCardPosition: meta.listCardPosition,
         listCardZoom: meta.listCardZoom,
+        transform_metadata: r.transform_metadata || meta.transform_metadata || undefined,
       };
     });
   }
@@ -599,10 +645,11 @@ export class SupabaseSyncService {
       bannerSharpen: item.bannerSharpen,
       listCardPosition: item.listCardPosition,
       listCardZoom: item.listCardZoom,
+      transform_metadata: item.transform_metadata,
     };
     const finalDescription = encodeDescriptionMetadata(item.description || '', meta);
 
-    const payload = {
+    const payload: Record<string, any> = {
       id: item.id,
       title: item.title,
       type: item.type || 'video',
@@ -617,6 +664,9 @@ export class SupabaseSyncService {
       hidden: Boolean(item.hidden),
       updated_at: new Date().toISOString(),
     };
+    if (item.transform_metadata) {
+      payload.transform_metadata = item.transform_metadata;
+    }
 
     const res = await this.makeRequest(endpoint, anonKey, {
       method: 'POST',
@@ -876,6 +926,7 @@ export class SupabaseSyncService {
         if (rg.listCardZoom) local.listCardZoom = rg.listCardZoom;
         if (rg.bannerPosition) local.bannerPosition = rg.bannerPosition;
         if (rg.bannerZoom) local.bannerZoom = rg.bannerZoom;
+        if (rg.transform_metadata) local.transform_metadata = rg.transform_metadata;
       }
     }
     const finalGames = Array.from(gameMap.values());
@@ -915,6 +966,7 @@ export class SupabaseSyncService {
         if (rm.listCardZoom) local.listCardZoom = rm.listCardZoom;
         if (rm.bannerPosition) local.bannerPosition = rm.bannerPosition;
         if (rm.bannerZoom) local.bannerZoom = rm.bannerZoom;
+        if (rm.transform_metadata) local.transform_metadata = rm.transform_metadata;
       }
     }
     const finalMedia = Array.from(mediaMap.values());

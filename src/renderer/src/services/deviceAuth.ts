@@ -632,20 +632,26 @@ export async function listAuthorizedDevices(): Promise<AuthorizedDevice[]> {
   }
 }
 
+export const APP_VERSION = '1.2.6';
+
 /**
  * Session version check: Requires re-login when app version changes
  */
-export function shouldRequireReLoginForNewVersion(currentVersion: string): boolean {
+export function shouldRequireReLoginForNewVersion(currentVersion: string = APP_VERSION): boolean {
   try {
     const lastVersion = localStorage.getItem(STORAGE_KEY_LAST_LOGIN_VERSION);
-    if (!lastVersion) return false; // First time or legacy, allow normal session
+    if (!lastVersion) {
+      // Seed current version so subsequent launches keep auto-login
+      localStorage.setItem(STORAGE_KEY_LAST_LOGIN_VERSION, currentVersion);
+      return false;
+    }
     return lastVersion !== currentVersion;
   } catch {
     return false;
   }
 }
 
-export function markCurrentVersionLoggedIn(currentVersion: string): void {
+export function markCurrentVersionLoggedIn(currentVersion: string = APP_VERSION): void {
   try {
     localStorage.setItem(STORAGE_KEY_LAST_LOGIN_VERSION, currentVersion);
   } catch {}

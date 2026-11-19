@@ -24,6 +24,7 @@ import { parseMediaUrl, getActiveProxyPort } from '../../utils/mediaUrl';
 import type { MediaItem, MediaPlaylist } from '../../types';
 import { SafeImage } from '../common/SafeImage';
 import { sfx } from '../../utils/sfx';
+import { lockToLandscape, unlockOrientation } from '../../utils/screenOrientation';
 
 interface MobileVideoTheaterViewProps {
   media: MediaItem;
@@ -89,6 +90,71 @@ export const MobileVideoTheaterView: React.FC<MobileVideoTheaterViewProps> = ({
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
+
+  // Landscape Theater & Fullscreen state
+  const [isLandscapeTheater, setIsLandscapeTheater] = useState(false);
+  const [videoFitMode, setVideoFitMode] = useState<'contain' | 'cover'>('cover');
+  const [showLandscapeHud, setShowLandscapeHud] = useState(true);
+  const hudTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const youtubeContainerRef = useRef<HTMLDivElement>(null);
+
+  // Auto-listen to Fullscreen change events on Android WebView and Browser
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      const isFs = !!(
+        document.fullscreenElement ||
+        (document as any).webkitFullscreenElement
+      );
+      if (isFs) {
+        setIsLandscapeTheater(true);
+        lockToLandscape();
+      } else {
+        setIsLandscapeTheater(false);
+        unlockOrientation();
+      }
+    };
+
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
+
+    return () => {
+      document.removeEventListener('fullscreenchange', handleFullscreenChange);
+      document.removeEventListener('webkitfullscreenchange', handleFullscreenChange);
+      unlockOrientation();
+      if (hudTimerRef.current) clearTimeout(hudTimerRef.current);
+    };
+  }, []);
+
+  const triggerHudAutoHide = () => {
+    setShowLandscapeHud(true);
+    if (hudTimerRef.current) clearTimeout(hudTimerRef.current);
+    hudTimerRef.current = setTimeout(() => {
+      setShowLandscapeHud(false);
+    }, 3500);
+  };
+
+  const handleEnterLandscapeTheater = async () => {
+    sfx.playClick();
+    setIsLandscapeTheater(true);
+    triggerHudAutoHide();
+    await lockToLandscape();
+    try {
+      if (youtubeContainerRef.current?.requestFullscreen) {
+        await youtubeContainerRef.current.requestFullscreen();
+      }
+    } catch {}
+  };
+
+  const handleExitLandscapeTheater = async () => {
+    sfx.playClick();
+    setIsLandscapeTheater(false);
+    await unlockOrientation();
+    try {
+      if (document.fullscreenElement) {
+        await document.exitFullscreen();
+      }
+    } catch {}
+  };
 
   const driveEmbedUrl = parsed.id
     ? `https://drive.google.com/file/d/${parsed.id}/preview`
@@ -226,47 +292,48 @@ export const MobileVideoTheaterView: React.FC<MobileVideoTheaterViewProps> = ({
       <div className="relative w-full h-[275px] sm:h-[320px] bg-black flex items-center justify-center shrink-0 shadow-2xl overflow-hidden">
         {/* MODE 1: EXTERNAL APP LAUNCHER CARD (VLC / MX PLAYER / DRIVE) */}
         {playbackMode === 'external' ? (
-          <div className="absolute inset-0 w-full h-full flex flex-col items-center justify-center p-4 text-center overflow-hidden">
-            {/* Background Poster Blur */}
-            <div className="absolute inset-0 -z-10">
+          <div className="absolute inset-0 w-full h-full flex flex-col items-center justify-center p-4 text-center overflow-hidden group">
+            {/* Crisp 16:9 Cover Image & Ambient Cinematic Scrim */}
+            <div className="absolute inset-0 -z-10 overflow-hidden">
               <SafeImage
                 src={media.bannerPath || media.coverPath}
                 alt={media.title}
                 title={media.title}
                 fallbackType="video"
-                className="w-full h-full object-cover filter blur-md opacity-30 scale-105"
+                className="w-full h-full object-cover scale-100 group-hover:scale-105 transition-transform duration-700 ease-out"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-black via-black/80 to-black/60" />
+              {/* Subtle Cinematic Vignette - Never black out the cover image */}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/35 to-black/40 group-hover:via-black/25 transition-colors duration-500" />
             </div>
 
-            {/* Glowing Big Play Button */}
+            {/* Glowing Big Play Button with Pulse Aura */}
             <button
               type="button"
               onClick={handleOpenExternal}
-              className="group relative flex flex-col items-center gap-2.5 active:scale-95 transition-all"
+              className="group/btn relative flex flex-col items-center gap-2.5 active:scale-95 transition-all"
             >
-              <div className="w-16 h-16 rounded-full bg-gradient-to-tr from-cyan-500 to-blue-600 flex items-center justify-center shadow-xl shadow-cyan-500/30 group-hover:scale-110 transition-transform">
-                <Play className="w-8 h-8 fill-black text-black ml-1" />
+              <div className="w-16 h-16 rounded-full bg-gradient-to-tr from-cyan-400 to-blue-600 flex items-center justify-center shadow-[0_0_30px_rgba(6,182,212,0.6)] group-hover/btn:scale-110 group-hover/btn:shadow-[0_0_40px_rgba(6,182,212,0.8)] transition-all">
+                <Play className="w-8 h-8 fill-black text-black ml-1 drop-shadow-sm" />
               </div>
-              <div className="space-y-0.5">
-                <span className="text-sm font-black text-white tracking-wide block">
+              <div className="space-y-1">
+                <span className="text-sm font-black text-white tracking-wide block drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)]">
                   MỞ BẰNG APP NGOÀI (VLC / DRIVE)
                 </span>
-                <span className="text-[11px] text-cyan-300 font-medium block">
-                  Tăng tốc GPU • 60-120fps • Vuốt chỉnh âm lượng & độ sáng
+                <span className="text-[11px] text-cyan-300 font-semibold block drop-shadow-[0_1px_4px_rgba(0,0,0,0.8)]">
+                  Xem 16:9 Cinema • Tăng tốc GPU • 60-120fps
                 </span>
               </div>
             </button>
 
             {/* Sub-actions */}
-            <div className="mt-4 flex items-center gap-2">
+            <div className="mt-4 flex items-center gap-2 z-10">
               <button
                 type="button"
                 onClick={() => {
                   sfx.playClick();
                   setPlaybackMode('desktop');
                 }}
-                className="px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-white text-[11px] font-semibold border border-white/10 flex items-center gap-1.5"
+                className="px-3 py-1.5 rounded-lg bg-black/60 hover:bg-black/80 backdrop-blur-md text-white text-[11px] font-semibold border border-white/20 flex items-center gap-1.5 shadow-md"
               >
                 <Tv className="w-3.5 h-3.5 text-amber-400" />
                 <span>Xem trong App (Rạp Desktop)</span>
@@ -279,7 +346,7 @@ export const MobileVideoTheaterView: React.FC<MobileVideoTheaterViewProps> = ({
                     sfx.playClick();
                     setPlaybackMode('embed');
                   }}
-                  className="px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-slate-300 text-[11px] font-semibold border border-white/10 flex items-center gap-1.5"
+                  className="px-3 py-1.5 rounded-lg bg-black/60 hover:bg-black/80 backdrop-blur-md text-slate-200 text-[11px] font-semibold border border-white/20 flex items-center gap-1.5 shadow-md"
                 >
                   <Globe className="w-3.5 h-3.5 text-cyan-400" />
                   <span>Drive Preview Gốc</span>
@@ -314,15 +381,27 @@ export const MobileVideoTheaterView: React.FC<MobileVideoTheaterViewProps> = ({
             className="w-full h-full border-0 absolute inset-0"
           />
         ) : playbackMode === 'embed' && isYouTube ? (
-          <iframe
-            src={youtubeEmbedUrl}
-            title={media.title}
-            referrerPolicy="strict-origin-when-cross-origin"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-            allowFullScreen
-            onLoad={() => setIsLoadingStream(false)}
-            className="w-full h-full border-0 absolute inset-0"
-          />
+          <div className="relative w-full h-full">
+            <iframe
+              src={youtubeEmbedUrl}
+              title={media.title}
+              referrerPolicy="strict-origin-when-cross-origin"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen"
+              allowFullScreen
+              onLoad={() => setIsLoadingStream(false)}
+              className="w-full h-full border-0 absolute inset-0"
+            />
+            {/* Quick Landscape Fullscreen Button */}
+            <button
+              type="button"
+              onClick={handleEnterLandscapeTheater}
+              className="absolute top-2.5 right-2.5 z-20 flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-black/80 hover:bg-black text-cyan-400 hover:text-cyan-300 font-bold text-xs border border-cyan-500/40 shadow-xl backdrop-blur-md active:scale-95 transition-all"
+              title="Phóng to & Tự động xoay ngang"
+            >
+              <Maximize2 className="w-3.5 h-3.5" />
+              <span>Xoay ngang</span>
+            </button>
+          </div>
         ) : playbackMode === 'embed' && isGoogleDrive ? (
           <iframe
             src={driveEmbedUrl}
@@ -732,6 +811,70 @@ export const MobileVideoTheaterView: React.FC<MobileVideoTheaterViewProps> = ({
           </div>
         )}
       </div>
+
+      {/* FULLSCREEN LANDSCAPE THEATER OVERLAY (YOUTUBE ZERO BLACK BARS & AUTO-ROTATE) */}
+      {isLandscapeTheater && isYouTube && (
+        <div
+          ref={youtubeContainerRef}
+          onClick={triggerHudAutoHide}
+          className="fixed inset-0 z-[9999] w-screen h-screen bg-black flex items-center justify-center overflow-hidden select-none"
+        >
+          {/* YouTube Video iframe with Fit vs Fill Scale */}
+          <div className="relative w-full h-full flex items-center justify-center overflow-hidden">
+            <iframe
+              src={youtubeEmbedUrl}
+              title={media.title}
+              referrerPolicy="strict-origin-when-cross-origin"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen"
+              allowFullScreen
+              className={`w-full h-full border-0 absolute inset-0 transition-transform duration-300 ${
+                videoFitMode === 'cover'
+                  ? 'scale-[1.18] sm:scale-[1.12] origin-center'
+                  : 'scale-100 object-contain'
+              }`}
+            />
+          </div>
+
+          {/* Minimal Floating HUD Overlay (Auto-Hides) */}
+          <div
+            className={`absolute inset-x-0 top-0 p-3 pt-[max(0.5rem,env(safe-area-inset-top,0px))] flex items-center justify-between pointer-events-none transition-opacity duration-300 ${
+              showLandscapeHud ? 'opacity-100' : 'opacity-0'
+            }`}
+          >
+            {/* Exit Fullscreen Button */}
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                handleExitLandscapeTheater();
+              }}
+              className="pointer-events-auto flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-black/75 hover:bg-black/90 backdrop-blur-md text-white font-bold text-xs border border-white/20 active:scale-95 shadow-xl"
+            >
+              <ArrowLeft className="w-4 h-4 text-cyan-400" />
+              <span>Thoát</span>
+            </button>
+
+            <div className="pointer-events-none text-center px-2 min-w-0">
+              <p className="text-xs font-bold text-white truncate drop-shadow-md">{media.title}</p>
+            </div>
+
+            {/* Toggle Aspect Ratio: Fit 16:9 vs Fill Phone */}
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                sfx.playClick();
+                setVideoFitMode((prev) => (prev === 'cover' ? 'contain' : 'cover'));
+              }}
+              className="pointer-events-auto flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-black/75 hover:bg-black/90 backdrop-blur-md text-white font-bold text-xs border border-white/20 active:scale-95 shadow-xl"
+              title={videoFitMode === 'cover' ? 'Chuyển sang Vừa màn hình (16:9)' : 'Chuyển sang Tràn viền (Fill)'}
+            >
+              <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+              <span>{videoFitMode === 'cover' ? 'Tràn viền (Không vệt đen)' : 'Chuẩn 16:9'}</span>
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

@@ -177,8 +177,8 @@ When implementing celestial and elemental modes:
 - Bấm vào nút gạt này trong chế độ chuyên biệt sẽ kích hoạt lệnh thoát chế độ chuyên biệt, đưa ứng dụng quay về chế độ cơ sở tương ứng (`isLight ? 'solar' : 'lunar'`).
 
 ### 7.13 Aqua Fluid Architecture & High-Contrast Light Ocean Standard
-- **Bảng màu:**
-  - Nền chính: Gradient xanh nước nhạt `#E0F7FA` → `#BAE6FD`.
+- **Bảng màu (Rich Azure Water):**
+  - Nền chính: Gradient xanh nước hồ đậm đà rõ nét `#CEEBF8` → `#92D6F5`.
   - Thẻ & Bề mặt kính: Trắng ánh xanh xuyên thấu `rgba(255, 255, 255, 0.78)` kèm `backdrop-blur(18px)`.
   - Chữ chính: Xanh đại dương rất đậm `#082F49` (đạt chuẩn WCAG AAA 12.8:1).
   - Chữ phụ: Xanh xám đậm `#334155` (đạt chuẩn WCAG AA 6.5:1).
@@ -189,9 +189,168 @@ When implementing celestial and elemental modes:
 - Các lớp sóng nền di chuyển bằng GPU-accelerated CSS `transform: translate3d(x, 0, 0)` hoặc SVG clip-path nhẹ, CPU tiêu thụ < 1%.
 - Hiệu ứng chạm gợn nước chỉ gồm 1 vòng nhỏ bán kính < 48px, thời gian tồn tại < 800ms, có nút bật/tắt lưu tại `localStorage.getItem('icelauch_aqua_ripple_enabled')`.
 
+### 7.15 Quy Tắc Chiều Sâu Màu Nước & Xuyên Thấu Mặt Nước Trong Aqua Mode (Water-Depth & Translucency Invariant)
+1. **Độ Bão Hòa & Độ Đậm Màu Nước (Rich Ocean Cyan/Sky Saturation):**
+   - Nền canvas và các bề mặt của Aqua Mode không được dùng màu ngả quá gần về trắng tinh (`#F0FDFA` / `#E0F7FA`). Phải duy trì sắc thái xanh dương/xanh ngọc rõ rệt (dải tham chiếu: `#CEEBF8` → `#92D6F5`), giúp người dùng nhận biết ngay lập tức chế độ nước mát.
+   - Text chữ chính luôn duy trì Deep Ocean Navy `#082F49` đảm bảo tỷ lệ tương phản vượt chuẩn WCAG AAA (> 12:1).
+2. **Hiệu Ứng Xuyên Thấu Mặt Nước Trên Thanh Phát Nhạc (Translucent Liquid Player):**
+   - Nghiêm cấm đặt nền đục trắng đặc (`bg-white/80+`) lên thanh MiniPlayer hay các thanh công cụ dạng viên nang trong Aqua Mode.
+   - Phải sử dụng độ trong suốt lỏng (`bg-sky-100/35`) kết hợp `backdrop-blur-2xl` và viền sáng khúc xạ (`border-sky-300/50`, `shadow-[0_12px_36px_rgba(2,132,199,0.25),inset_0_1px_1px_rgba(255,255,255,0.7)]`), tạo cảm giác như đang nhìn xuyên thấu qua một lớp nước trong vắt xuống nội dung cuộn bên dưới.
+
+### 7.16 Quy Tắc Thiết Kế Sinh Thái Tối & Bọ Rùa Trong Terra Mode (Dark Earthy & Ladybug Invariant)
+1. **Bảng Màu Phân Tầng Nâu Đất Đậm (Dark Earthy Layering):**
+   - Canvas nền chính: Nâu đen đất mùn `#161310`.
+   - Nền thẻ nội dung (Game, Phim, Nhạc, Audio): Nâu gỗ trầm `#211C17`.
+   - Nền 2 Thanh công cụ (Header PC, MiniPlayer PC, Mobile Floating Tab Bar): Nâu đất nung đậm ấm `#2B241D`, viền đất dày rõ nét `#7C5332`, bóng đổ đa tầng `0 8px 24px rgba(0, 0, 0, 0.65)` nổi bật rõ trên nền canvas.
+   - Chữ chính: Trắng kem giấy ấm `#F3ECE1` (WCAG AAA). Chữ phụ: Xám cát ấm `#B5A898`.
+   - Màu nhấn chính & mầm cây: Xanh rêu tươi sáng `#65A30D` pha `#84CC16`.
+   - Nút yêu thích Quả Táo: Đỏ táo chín `#DC2626` với lá xanh `#65A30D`.
+
+2. **Bất Biến Bám Sát Viền Thẻ & Sinh Trưởng Dây Leo (Zero Gap & Zero Overlap Invariant):**
+   - Dây leo và mầm lá của `TerraBotanicalCardFrame` bắt buộc phải neo gốc bám khít trực tiếp lên đường viền đất (`border: 2px solid #7C5332`) của chính thẻ đó (`inset: 0`), không được để lơ lửng ngoài khoảng trống giữa hai thẻ, không lấn quá nửa khoảng cách `gap` giữa các thẻ để triệt tiêu 100% hiện tượng đè lên thẻ lân cận.
+   - Trạng thái chưa yêu thích: Chỉ hiển thị mầm lá nhỏ kín đáo ở 2 góc đối diện với tông xanh trầm dịu mắt (`#4D7C0F`).
+   - Trạng thái đã yêu thích: Kích hoạt hoạt ảnh mọc vươn dài bám sát các mép cạnh viền thẻ (`stroke-dashoffset` & `scale`), bung mở lá non xanh tươi (`#65A30D` & `#84CC16`).
+
+3. **Đồng Bộ Trạng Thái Lưu Game Với Profile Người Dùng (User Library State Binding):**
+   - Mọi view hiển thị Game (`HomeView`, `HeroBanner`, `GameDetailView`, `MobileHomeView`) bắt buộc phải nhận `userLibraryIds` từ `activeProfile.library` và liên kết động `inLibrary = userLibraryIds?.includes(game.id) ?? game.inLibrary`. Tuyệt đối không đọc đơn lẻ thuộc tính tĩnh `game.inLibrary` để đảm bảo nút Quả Táo đỏ và hiệu ứng dây leo kích hoạt lập tức khi bấm lưu/bỏ lưu.
+
+4. **Đồ Họa Cỏ Viền MiniPlayer Dạng Đường Cong Hữu Cơ & Gradient Tự Nhiên (Organic Meadow Curves):**
+   - Dải cỏ sinh thái mép trên MiniPlayer sử dụng đường cong Bézier bậc 3 uốn lượn mềm mại tự nhiên, đan xen cỏ cao/thấp, dương xỉ và nụ hoa dại, kết hợp `linearGradient` từ gốc xanh rêu sẫm (`#3F6212`) lên ngọn xanh non (`#84CC16`), lan tỏa mượt mà theo vị trí con bọ rùa thông qua mặt nạ chuyển tiếp gradient.
+
+5. **Bọ Rùa Tiến Độ Tối Giản (Minimal Geometric Ladybug Thumb):**
+   - Nút kéo tiến độ (`thumb`) trên thanh phát nhạc là hình tượng chú bọ rùa hình học tối giản: thân tròn đỏ `#DC2626`, đầu đen nhỏ hướng sang BÊN PHẢI (`rotate(90deg)` theo hướng chạy), không chân, không râu.
+   - Ẩn hoàn toàn chấm tròn trắng mặc định của browser slider thumb (`::-webkit-slider-thumb { appearance: none; display: none; }`).
+   - Căn chỉnh điểm bắt đầu của track sao cho bọ rùa tại `0%` không đè lên nhãn thời gian `0:00`.
+
+### 7.17 Quy Tắc Kiến Trúc Ignis Mode (Hỏa — Thermal Combustion & Magma Invariant)
+1. **Bảng Màu Obsidian, Tro Tàn & Nham Thạch (Dark Volcanic Palette):**
+   - Canvas nền chính: Đen đá núi lửa sâu thẳm `#110B09`.
+   - Bề mặt thẻ card: Đen tro ấm `#1C120E` kết hợp Nâu nham thạch tối `#261712`, viền kim loại nguội `#4A2518`.
+   - Nền thanh công cụ: Khối đá đen Obsidian vát chéo 45 độ với viền kim loại nung ám khói `#8C4320` và bóng đổ sâu đa tầng (`0 12px 32px rgba(0,0,0,0.95)`).
+   - Chữ chính: Trắng kem ánh lửa `#FFF7ED` (WCAG AAA 16.2:1). Chữ phụ: Cam khói nhạt `#D6B4A6` (WCAG AA 7.4:1).
+   - Màu nhấn nhiệt lượng: Cam lửa `#F97316`, Vàng dung nham `#FBBF24`, Đỏ than hồng `#DC2626`.
+
+2. **Kiến Trúc Header PC 3 Khối Đá Sắc Nét & Tab Active Nứt Dung Nham (Header Magma Fissure):**
+   - Header PC tách thành 3 khối đá Obsidian vát chéo 45 độ nằm trên cùng hàng ngang (Khối Logo/Tên - Khối Menu điều hướng - Khối Tìm kiếm/Solar/Lunar/Cửa sổ).
+   - Tại tab điều hướng đang chọn: Khung bao quanh nứt rộng ra để lộ dòng dung nham nóng chảy rực sáng (`#FBBF24` & `#F97316`) bên trong khe nứt, đồng thời chữ trên nút chuyển sang hiệu ứng chữ nung đỏ cam sáng rực (`drop-shadow-[0_0_8px_#FBBF24]`).
+
+3. **Bất Biến KHÔNG Phủ Màu Đè Lên Nội Dung Thẻ & Quầng Lửa Liền Mạch (Zero Content Tint & Seamless Flame Halo):**
+   - **TUYỆT ĐỐI KHÔNG phủ bất kỳ lớp màu cam/đỏ nào đè lên ảnh bìa hay chữ:** Ảnh bìa poster và tên game/phim/nhạc phải giữ nguyên 100% độ sắc nét và màu sắc gốc. Không đặt gradient nhiệt hay overlay đè lên vùng nội dung thẻ.
+   - **Quầng lửa liền mạch quanh viền ngoài (Seamless Flame Halo):** Thay thế các khối/cục lửa rời rạc ở 4 góc bằng một quầng lửa chuyển động mềm mại, liền mạch bao quanh toàn bộ 4 cạnh viền ngoài của thẻ (lõi sáng vàng trắng sát viền thẻ, chuyển sang cam rực và tan thành làn khói mờ ở rìa ngoài).
+   - Tương tác hover: Thẻ phóng to toàn khối `scale(1.06)`, quầng lửa bùng lên êm ái. Khi rời chuột: ngọn lửa từ từ hạ thấp, thu nhỏ và tắt lịm mượt mà trong đúng `0.45s`.
+
+4. **Vùng Đệm An Toàn Cho Hàng Thẻ Cuộn (Row Container Clearance Invariant):**
+   - Các container chứa hàng thẻ (`GenreShelfScroller` và các grid/flex hàng thẻ) bắt buộc phải cung cấp đủ vùng đệm an toàn theo chiều dọc (`py-6 -my-3`) kết hợp nâng `z-index` của thẻ đang hover.
+   - Tuyệt đối không để mép trên hoặc mép dưới của ngọn lửa và thẻ phóng to bị cắt ngang sắc lẹm, đồng thời không tạo thanh cuộn dọc thừa trên hàng thẻ.
+
+5. **Rãnh Nứt Nham Thạch Hữu Cơ Đa Tầng (Organic Volcanic Fissures Invariant):**
+   - Các vết nứt trên thanh phát nhạc bắt buộc phải là đường rãnh nứt tự nhiên có độ dày mỏng không đều, rẽ nhánh hữu cơ như bề mặt đá núi lửa thật, tuyệt đối không dùng các đường kẻ thẳng gấp khúc đơn giản.
+   - *Trạng thái Paused:* Khung co gọn; các rãnh nứt khép lại thành đường vân rãnh tối màu chìm trên mặt đá đen (`#26140D`, không phát sáng cam vàng).
+   - *Trạng thái Playing:* Khung giãn nở nhẹ `scale(1.015)`, rãnh nứt tách rộng (`strokeWidth="2.8"`) để lộ dòng dung nham nóng chảy (`#FBBF24`, `#F97316`, `#EF4444`) phát sáng rực rỡ từ sâu bên trong với hiệu ứng tỏa nhiệt ấm (`inner glow` và `@keyframes magmaPulse`).
+
+6. **Cơ Chế Thiêu Rụi Giấy Cháy Từ Tâm Nút X (0.85s Paper-Burn Dissolve Close Invariant):**
+   - Khi bấm nút `X` tắt thanh phát nhạc, bắt buộc chặn việc ẩn ngay lập tức, trì hoãn đúng `0.85 giây` (850ms) để chạy trọn vẹn hoạt ảnh đốt cháy.
+   - *Diễn tiến cháy lan:*
+     - `0.0s`: Đốm lửa bùng lên tại tâm nút `X` bên phải.
+     - `0.1s -> 0.75s`: Mặt trận lửa hình vòng cung răng cưa nham nhở (`CSS mask-image` + `SVG feTurbulence`) lan dần từ phải sang hết bên trái. Lửa cháy lan tới đâu, thanh phát nhạc phía bên phải biến thành tro đen và biến mất tới đó.
+     - *Mép cháy:* Viền than hồng sáng rực màu cam vàng (`Glowing Ember Edge`), kèm tàn tro nhỏ li ti và làn khói mỏng bay nhẹ lên trên trước khi gọi hàm đóng gốc.
+
+7. **An Toàn Tương Tác & Phản Cực Solar/Lunar:**
+   - Mọi lớp đồ họa ngọn lửa, tàn lửa, khói và dung nham bắt buộc mang `pointer-events: none`.
+   - Khi ở Ignis Mode, nút gạt Solar/Lunar tự động mờ và mất màu (`opacity: 0.4` + `grayscale(100%)`). Bấm vào nút gạt này sẽ thoát Ignis để quay về Solar hoặc Lunar.
+   - Đồng bộ 100% mọi màn hình sang ngôn ngữ Ignis khi được kích hoạt.
+
+### 7.18 Aer Mode (Phong — Ultra-Performance & Zero-Gravity Architecture) Invariants (v6.4)
+When `theme === 'aer'` or `[data-theme="aer"]`, the application strictly adheres to the Ultra-Performance & Zero-Gravity Swiss Wireframe Architecture:
+1. **Zero Heavy GPU/CPU Effects (Universal Master Override):**
+   - Disables 100% of `backdrop-filter: blur(...)` across all panels, modals, toolbars, and cards (`backdrop-filter: none !important;`).
+   - Eliminates multi-layered ambient `box-shadow` (`box-shadow: none !important;`).
+   - Disables SVG displacement/turbulence filters and continuous particle/canvas loops.
+2. **Strict Tonal Stepping Hierarchy (No Blur Separation):**
+   - App Canvas: Mist Slate (`#EEF2F6`).
+   - Content Cards (Game, Phim, Nhạc, Thư viện): Pure White (`#FFFFFF`) with crisp hairline border (`#CBD5E1`).
+   - Sub-boxes & Search inputs: Atmospheric Slate (`#E2E8F0`).
+   - Toolbars (Header PC, MiniPlayer, Mobile Tab Bar): Steel Mist (`#CAD6E2`) with 1.5px border (`#94A3B8`).
+   - Primary Text: Deep Slate Ink (`#0F172A`, WCAG AAA > 14:1).
+   - Secondary Text: Slate Neutral (`#475569`, WCAG AA > 5.5:1).
+   - Accent: Airy Cyan-Teal (`#0284C7`).
+3. **Instant Interaction (0ms Delay & Zero Bloat):**
+   - Card Hover: `scale(1)` (no layout shifts, no delayed scale animations), immediate hairline border switch to `#0284C7` (`transition-none` / 0ms).
+   - MiniPlayer Close: Instant unmount (`0ms delay`), no burning/dissolution delays.
+4. **Connected Floating Wireframe Header (PC):**
+   - 3 distinct capsules (Logo/Brand, 5 Tabs, Controls) connected by a central horizontal hairline axis (`1px solid #CBD5E1`).
+   - Active Tab: Sharply defined by a `2.5px` bottom hairline bar (`#0284C7`) and an aerodynamic indicator dot (`w-1.5 h-1.5 bg-[#0284C7]`).
+5. **Ultra-Slim Aerodynamic Scrubber (MiniPlayer PC & Mobile):**
+   - Direct `3px` linear progress bar (`#0284C7`) with a minimalist vertical cursor line (`w-1 h-3.5 bg-[#0284C7] rounded-sm`).
+6. **Battery & Resource Optimization:**
+   - Image tags enforce `loading="lazy"` and `decoding="async"`.
+   - Idle CPU/GPU usage reaches ~0% when user is not interacting (pausing auto-slide carousel in HeroBanner and background teaser video in MediaTrailerBanner).
+7. **Business Logic & Control Completeness Invariant:**
+   - 100% of buttons, inputs, modals, search, playback controls, admin tools, and routing are strictly preserved.
+   - Theme toggle switch shows dimmed + grayscale (`opacity: 0.4 grayscale(100%)`) in Aer Mode; clicking it safely exits back to Lunar or Solar mode.
+
+### 7.19 Light Themes (Aer, Solar, Aqua) Chromatic Invariants & Anti-Washout Standard (v6.5)
+When the active theme is one of the light modes (`aer`, `solar`, `aqua`), the application strictly adheres to the following chromatic and legibility standards:
+1. **Zero Yellow Text on Light Backgrounds (Strict WCAG Invariant):**
+   - Strictly prohibit `text-amber-300`, `text-amber-400`, and `text-yellow-300` on white or light backgrounds.
+   - Text color must resolve to high-contrast dark ink tones (Aer: `#0F172A`, `#0284C7`; Aqua: `#0C4A6E`, `#0284C7`; Solar: `#0F172A`, `#92400E` / `#D97706`).
+   - Active buttons with amber accents in Solar must use dark slate ink text (`bg-amber-400 text-slate-950 font-extrabold`).
+2. **Global CSS Safety Guard (Double Shield):**
+   - In `index.css`, enforce automatic high-contrast overrides under `[data-theme="aer"]`, `[data-theme="solar"]`, and `[data-theme="aqua"]` to guarantee zero unreadable light-amber text survives any component or plugin injection.
+3. **Complete Elimination of Poster Fog Overlays:**
+   - On light backgrounds, bottom gradients (`from-ice-card via-transparent to-transparent`) create an opaque white milk fog that degrades game and media artwork.
+   - All light modes (`aer`, `solar`, `aqua`) must completely suppress `.game-card-poster-fog` (`display: none !important;`) and conditionally omit the fog element in JSX.
+4. **Genre & Status Badge Legibility on Media Cards:**
+   - Any badge overlaid on top of game or media artwork must use explicit high-contrast styling: `text-white font-semibold bg-black/75 border border-white/20 backdrop-blur-sm`, avoiding `text-ice-subtext` which resolves to dark grey in light themes.
+5. **Harmonized 4-Tab & Sub-Tab Architecture:**
+   - In Library (Game, Movie, Music, Podcast) and Entertainment sub-tabs, active tabs must cleanly reflect the native theme palette:
+     - **Aer:** Clean solid `#0284C7` with white text, zero shadow.
+     - **Aqua:** Ocean sky blue (`bg-sky-500`) with crisp white text.
+     - **Solar:** Radiant amber-500 (`bg-amber-500`) with dark slate ink text (`#0F172A`).
+6. **Toolbar Depth Separation in Aer Mode:**
+   - The Aer Mode toolbars (PC Header capsules, MiniPlayer, Mobile Navigation) must maintain distinct elevation from the `#EEF2F6` canvas using `#CAD6E2` (Steel Mist) with `#94A3B8` hairline borders.
+
+### 7.20 Auto-Login Session Persistence & Immediate Admin Cloud Sync Invariants (v6.6)
+1. **Single Source of Truth for App Version (Version Invalidation):**
+   - The application version must be defined from a single synchronized constant `APP_VERSION` (matching `package.json`).
+   - When a user logs in, `markCurrentVersionLoggedIn(APP_VERSION)` must record the exact current version in storage.
+   - On app startup, `shouldRequireReLoginForNewVersion(APP_VERSION)` only invalidates the session if a previously recorded version exists and differs from `APP_VERSION`. If the version matches, the app must automatically restore the active profile silently without prompting the login screen.
+2. **Zero-Session Data Loss on Cloud Sync Startup:**
+   - On startup, if cloud profiles sync after initial local load, the app must reconcile the remembered/active profile ID against freshly pulled cloud profiles rather than resetting to a blank session.
+3. **Immediate Real-time Cloud Sync for All Admin Mutations (No Lock Dependency):**
+   - Strictly prohibit deferring cloud persistence to the Admin Lock action.
+   - Any mutation performed by Admin (Adding, editing, deleting, or toggling hidden status of games/media, editing tags, changing banner settings, approving devices, or modifying profiles) must immediately invoke the corresponding Supabase Cloud upsert/delete operations.
+4. **Instant Cloud Pull on Admin Activation:**
+   - Opening the Admin mode (via PIN or Master PIN verification in `handleAdminSuccess`) must immediately trigger a Cloud Pull (`syncCloud()` on Electron, `fetchDirectCloudCatalog()` on Mobile/Web) to ensure the Admin interface immediately displays the freshest state from the central cloud database.
+
 ---
 
-## 8. Quick Reference — Key Files
+## 8. Mobile Edge-to-Edge Cutout, Floating Island & Video Theater Architecture
+
+1. **Edge-to-Edge Display Cutout Integration (Camera Giọt Nước / Punch-Hole):**
+   - In `MainActivity.java` (Android 9+ / API 28+), always enforce `lp.layoutInDisplayCutoutMode = WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES`.
+   - Always invoke `WindowCompat.setDecorFitsSystemWindows(getWindow(), false)` with transparent status and navigation bars.
+   - In frontend React components, NEVER place empty spacer elements (e.g. `<div className="h-[env(safe-area-inset-top)] shrink-0" />`) in top-level flex column layouts, as this creates artificial black letterboxing bars on notched devices. Instead, apply padding inline directly on content headers (`pt-[max(0.75rem,env(safe-area-inset-top,0px))]`) while letting the background canvas stretch 100% edge-to-edge.
+
+2. **Pure Floating Island Bottom Navigation (Ốc Đảo Nổi Thuần Túy):**
+   - The Mobile Bottom Navigation Bar and MiniPlayer must be positioned as a floating overlay (`absolute bottom-0 inset-x-0 z-40 pointer-events-none flex flex-col items-center pb-[max(0.5rem,env(safe-area-inset-bottom,0px))] px-3.5`).
+   - The interactive nav pill elements must have `pointer-events-auto`.
+   - Never wrap the bottom nav in a solid full-width rectangle bar. Content lists must scroll freely behind and around all 4 sides of the rounded pill, using `pb-28` to ensure the final items can scroll comfortably above the floating island.
+   - Special mode glasses: Mode Aqua must employ translucent water glass (`bg-sky-100/35 border-sky-300/50 backdrop-blur-2xl`) allowing posters and titles to glide visibly underneath.
+
+3. **Horizontal Scroll Container Padding (Zero Ring Clipping):**
+   - Whenever horizontal scrollers with `overflow-x-auto` (such as Celestial Themes row in Mobile Settings) contain items with active rings (`ring-2 ring-ice-accent`), always allocate vertical breathing room (`pt-2.5 pb-2.5 px-2 -mx-2`). Failure to provide top padding causes the parent's `overflow-y: hidden` to clip off the top 2px ring border.
+
+4. **Mobile Video Player Fullscreen Auto-Rotate & Letterbox Elimination:**
+   - YouTube iframe and HTML5 video players must listen to `fullscreenchange` and `webkitfullscreenchange`.
+   - When entering fullscreen, the app must automatically lock to sensor landscape (`ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE` via `ScreenOrientationPlugin.java` and `screen.orientation?.lock('landscape')`).
+   - Fullscreen landscape theater must occupy `fixed inset-0 z-[9999] w-screen h-screen bg-black` without safe area insets or header bars pushing the video down.
+   - An aspect ratio switcher (`Fit 16:9` vs `Tràn Viền (Fill)`) must be provided, where fill scales the video slightly (`1.15x`–`1.18x`) to eliminate all edge black bars on ultra-wide 20:9/21:9 smartphone displays.
+   - Drive/External video launcher cards must display the crisp 16:9 thumbnail preview banner (`media.bannerPath || media.coverPath`) with a subtle cinematic gradient and glowing play button instead of a pitch-black blurred screen.
+
+---
+
+## 9. Quick Reference — Key Files
 
 | Concern | File(s) |
 |---------|---------|
@@ -203,9 +362,12 @@ When implementing celestial and elemental modes:
 | Hidden filter — Media | `src/renderer/src/components/media/MediaView.tsx` (baseMedia) |
 | Electron window focus | `src/main/index.ts` |
 | Android IME / keyboard | `android/app/src/main/AndroidManifest.xml`, `capacitor.config.json` |
+| Android Display Cutout & Native Orientation | `android/app/src/main/java/com/icelauch/app/MainActivity.java`, `ScreenOrientationPlugin.java` |
+| Mobile Floating Island & Phone Frame | `src/renderer/src/components/common/DevicePhoneFrame.tsx` |
+| Mobile Video Theater & YouTube Fullscreen | `src/renderer/src/components/mobile/MobileVideoTheaterView.tsx`, `src/renderer/src/utils/screenOrientation.ts` |
 | Theme engine & tokens | `src/renderer/src/index.css`, `src/renderer/src/hooks/useTheme.ts` |
 | Verification suite | `scripts/run-all-verifications.cjs` |
 
 ---
 
-*Last updated: 2026-11-18 | Icelauch v1.2.5 / v6.4 UI Deep Refinement & Polish*
+*Last updated: 2026-11-19 | Icelauch v1.2.6 / Mobile Edge-to-Edge Cutout, Floating Island & Video Theater Overhaul*

@@ -23,6 +23,10 @@ import { SafeImage } from '../common/SafeImage';
 import { UserPlaylistModal } from '../media/UserPlaylistModal';
 import { AddToPlaylistModal } from '../media/AddToPlaylistModal';
 import { sfx } from '../../utils/sfx';
+import { useTheme } from '../../hooks/useTheme';
+import { TerraBotanicalCardFrame } from '../common/TerraBotanicalCardFrame';
+import { TerraAppleFavoriteIcon } from '../common/TerraAppleFavoriteIcon';
+import { IgnisFireAura } from '../common/IgnisFireAura';
 
 interface MobileLibraryViewProps {
   games: Game[];
@@ -68,12 +72,14 @@ export const MobileLibraryView: React.FC<MobileLibraryViewProps> = ({
   onDeleteUserPlaylist,
   onToggleItemInUserPlaylist,
 }) => {
+  const { theme } = useTheme();
   // Mobile Library defaults to Phim ('videos') per user instruction!
   const [activeSubTab, setActiveSubTab] = useState<'videos' | 'music' | 'podcast' | 'games'>('videos');
   const [searchQuery, setSearchQuery] = useState('');
   const [isUserPlaylistModalOpen, setIsUserPlaylistModalOpen] = useState(false);
   const [editingUserPlaylist, setEditingUserPlaylist] = useState<MediaPlaylist | null>(null);
   const [targetMediaForPlaylist, setTargetMediaForPlaylist] = useState<MediaItem | null>(null);
+  const [hoveredCardId, setHoveredCardId] = useState<string | null>(null);
 
   // 1. Resolve Personal User Library
   const profileLibraryIds = activeProfile?.library || userLibraryIds;
@@ -108,7 +114,7 @@ export const MobileLibraryView: React.FC<MobileLibraryViewProps> = ({
   return (
     <div className="flex-1 w-full h-full flex flex-col bg-ice-bg text-ice-text select-none overflow-hidden relative">
       {/* 1. TOP MOBILE HEADER */}
-      <header className="px-3.5 pt-3 pb-2.5 glass-panel border-b border-ice-border/60 flex flex-col gap-2.5 shrink-0">
+      <header className="px-3.5 pt-[max(0.75rem,env(safe-area-inset-top,0px))] pb-2.5 glass-panel border-b border-ice-border/60 flex flex-col gap-2.5 shrink-0">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-xl bg-cyan-500/15 border border-cyan-500/30 flex items-center justify-center text-cyan-400">
@@ -146,11 +152,10 @@ export const MobileLibraryView: React.FC<MobileLibraryViewProps> = ({
               sfx.playClick();
               setActiveSubTab('videos');
             }}
-            className={`flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-bold whitespace-nowrap transition-all ${
-              activeSubTab === 'videos'
-                ? 'bg-cyan-500 text-black shadow-md'
-                : 'text-ice-subtext hover:text-ice-text'
-            }`}
+            className={`flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-bold whitespace-nowrap transition-all ${activeSubTab === 'videos'
+              ? 'bg-cyan-500 text-black shadow-md'
+              : 'text-ice-subtext hover:text-ice-text'
+              }`}
           >
             <Film className="w-3.5 h-3.5" />
             <span>Phim ({libraryVideos.length})</span>
@@ -162,11 +167,10 @@ export const MobileLibraryView: React.FC<MobileLibraryViewProps> = ({
               sfx.playClick();
               setActiveSubTab('music');
             }}
-            className={`flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-bold whitespace-nowrap transition-all ${
-              activeSubTab === 'music'
-                ? 'bg-cyan-500 text-black shadow-md'
-                : 'text-ice-subtext hover:text-ice-text'
-            }`}
+            className={`flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-bold whitespace-nowrap transition-all ${activeSubTab === 'music'
+              ? 'bg-cyan-500 text-black shadow-md'
+              : 'text-ice-subtext hover:text-ice-text'
+              }`}
           >
             <Music className="w-3.5 h-3.5" />
             <span>Nhạc ({libraryMusic.length})</span>
@@ -178,11 +182,10 @@ export const MobileLibraryView: React.FC<MobileLibraryViewProps> = ({
               sfx.playClick();
               setActiveSubTab('podcast');
             }}
-            className={`flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-bold whitespace-nowrap transition-all ${
-              activeSubTab === 'podcast'
-                ? 'bg-cyan-500 text-black shadow-md'
-                : 'text-ice-subtext hover:text-ice-text'
-            }`}
+            className={`flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-bold whitespace-nowrap transition-all ${activeSubTab === 'podcast'
+              ? 'bg-cyan-500 text-black shadow-md'
+              : 'text-ice-subtext hover:text-ice-text'
+              }`}
           >
             <Radio className="w-3.5 h-3.5" />
             <span>Audio ({libraryPodcasts.length})</span>
@@ -194,11 +197,10 @@ export const MobileLibraryView: React.FC<MobileLibraryViewProps> = ({
               sfx.playClick();
               setActiveSubTab('games');
             }}
-            className={`flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-bold whitespace-nowrap transition-all ${
-              activeSubTab === 'games'
-                ? 'bg-cyan-500 text-black shadow-md'
-                : 'text-ice-subtext hover:text-ice-text'
-            }`}
+            className={`flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-bold whitespace-nowrap transition-all ${activeSubTab === 'games'
+              ? 'bg-cyan-500 text-black shadow-md'
+              : 'text-ice-subtext hover:text-ice-text'
+              }`}
           >
             <Gamepad2 className="w-3.5 h-3.5" />
             <span>Game ({libraryGames.length})</span>
@@ -219,7 +221,7 @@ export const MobileLibraryView: React.FC<MobileLibraryViewProps> = ({
       </header>
 
       {/* 2. BODY CONTENT */}
-      <div className="flex-1 w-full overflow-y-auto p-3.5 space-y-4 no-scrollbar">
+      <div className="flex-1 w-full overflow-y-auto p-3.5 pb-28 space-y-4 no-scrollbar">
         {/* CASE A: Guest Mode Prompt */}
         {!activeProfile && (
           <div className="p-4 rounded-2xl bg-ice-card border border-ice-border/70 shadow-lg flex flex-col items-center text-center space-y-3 hover-depth-lift">
@@ -482,9 +484,26 @@ export const MobileLibraryView: React.FC<MobileLibraryViewProps> = ({
                         if (item.type === 'video') onSelectMedia?.(item);
                         else onPlayAudio?.(item);
                       }}
-                      className="rounded-2xl overflow-hidden bg-ice-card border border-ice-border cursor-pointer group hover:border-ice-accent/50 transition-all shadow-md flex flex-col active:scale-98 hover-depth-lift"
+                      className={`relative rounded-2xl cursor-pointer group flex flex-col ${theme === 'aer'
+                        ? 'bg-white border border-[#CBD5E1] shadow-none overflow-hidden active:border-[#0284C7] transition-none'
+                        : theme === 'ignis'
+                          ? 'bg-ice-card border border-ice-border shadow-md transition-all hover-depth-lift overflow-visible active:scale-105'
+                          : theme === 'terra'
+                            ? 'bg-ice-card border border-ice-border shadow-md transition-all hover-depth-lift overflow-visible active:scale-98'
+                            : 'bg-ice-card border border-ice-border shadow-md transition-all hover-depth-lift overflow-hidden active:scale-98'
+                        }`}
                     >
-                      <div className="relative aspect-[2/3] w-full bg-ice-hover/50 overflow-hidden">
+                      {/* Ignis Mode: Bottom-to-Top Organic Fire Aura */}
+                      {theme === 'ignis' && (
+                        <IgnisFireAura isHovered={hoveredCardId === item.id} />
+                      )}
+
+                      {/* Terra Mode: Outer Botanical Vine Frame */}
+                      {theme === 'terra' && (
+                        <TerraBotanicalCardFrame isFavorite={true} />
+                      )}
+
+                      <div className="relative aspect-[2/3] w-full bg-ice-hover/50 overflow-hidden rounded-t-2xl">
                         <SafeImage
                           src={item.coverPath || item.bannerPath}
                           alt={item.title}
@@ -522,10 +541,17 @@ export const MobileLibraryView: React.FC<MobileLibraryViewProps> = ({
                                 sfx.playClick();
                                 onToggleFavoriteMedia(item.id);
                               }}
-                              className="p-1 rounded-full bg-rose-500 text-white backdrop-blur-sm"
+                              className={`p-1 rounded-full backdrop-blur-sm transition-all ${theme === 'terra'
+                                ? 'bg-[#2B241D] text-red-500 border border-[#7C5332] shadow-sm'
+                                : 'bg-rose-500 text-white'
+                                }`}
                               title="Bỏ thích"
                             >
-                              <Heart className="w-3 h-3 fill-current" />
+                              {theme === 'terra' ? (
+                                <TerraAppleFavoriteIcon isFavorite={true} size={13} />
+                              ) : (
+                                <Heart className="w-3 h-3 fill-current" />
+                              )}
                             </button>
                           )}
                         </div>

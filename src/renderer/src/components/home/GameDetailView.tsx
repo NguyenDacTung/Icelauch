@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import { useTheme } from '../../hooks/useTheme';
+import { TerraAppleFavoriteIcon } from '../common/TerraAppleFavoriteIcon';
 import { 
   ArrowLeft, 
   Play, 
@@ -70,6 +72,7 @@ export const GameDetailView: React.FC<GameDetailViewProps> = ({
   onSaveExtensions,
   globalActionButtons = [],
 }) => {
+  const { theme } = useTheme();
   const [isExtensionsModalOpen, setIsExtensionsModalOpen] = useState(false);
   // Media showcase state
   const hasTrailer = Boolean(game.trailerUrl && game.trailerUrl.trim());
@@ -518,12 +521,22 @@ export const GameDetailView: React.FC<GameDetailViewProps> = ({
               <button
                 onClick={() => onToggleLibrary(game.id)}
                 className={`w-full h-10 rounded-xl border flex items-center justify-center gap-2 text-xs font-bold transition-all ${
-                  game.inLibrary
+                  theme === 'terra'
+                    ? game.inLibrary
+                      ? 'bg-[#2B241D] text-red-500 border border-[#7C5332] shadow-sm'
+                      : 'bg-[#211C17] text-[#B5A898] hover:text-[#F3ECE1] hover:bg-[#2B241D] border border-[#7C5332]/50'
+                    : game.inLibrary
                     ? 'bg-ice-accent/20 border-ice-accent text-ice-accent'
                     : 'bg-ice-card hover:bg-ice-hover text-ice-text border-ice-border'
                 }`}
               >
-                {game.inLibrary ? <BookmarkCheck className="w-4 h-4" /> : <Bookmark className="w-4 h-4" />}
+                {theme === 'terra' ? (
+                  <TerraAppleFavoriteIcon isFavorite={game.inLibrary} size={18} />
+                ) : game.inLibrary ? (
+                  <BookmarkCheck className="w-4 h-4" />
+                ) : (
+                  <Bookmark className="w-4 h-4" />
+                )}
                 <span>{game.inLibrary ? 'Đã có trong Thư Viện' : 'Lưu vào Thư Viện'}</span>
               </button>
 

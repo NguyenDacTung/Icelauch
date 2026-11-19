@@ -316,18 +316,61 @@ app.whenReady().then(async () => {
   });
 
   ipcMain.handle('settings:save', async (_event, settings: Partial<AppSettings>) => {
-    return storage.updateSettings(settings);
+    const updated = storage.updateSettings(settings);
+    try {
+      const syncSettings = storage.getCloudSyncSettings();
+      const targetUrl = (syncSettings?.supabaseUrl && syncSettings.supabaseUrl.trim()) || DEFAULT_SUPABASE_URL;
+      const targetKey = (syncSettings?.supabaseAnonKey && syncSettings.supabaseAnonKey.trim()) || DEFAULT_SUPABASE_ANON_KEY;
+      if (targetUrl && targetKey) {
+        const appSettings = storage.getSettings();
+        const catalogSettings = {
+          gameTags: appSettings.gameTags,
+          movieTags: appSettings.movieTags,
+          musicTags: appSettings.musicTags,
+          podcastTags: appSettings.podcastTags,
+          bannerSettings: appSettings.bannerSettings,
+          globalActionButtons: appSettings.globalActionButtons,
+          adminPinHash: appSettings.pinHash,
+          adminPinSalt: appSettings.pinSalt,
+        };
+        SupabaseSyncService.getInstance().publishSystemSettings(targetUrl, targetKey, catalogSettings).catch(console.warn);
+      }
+    } catch (e) {
+      console.warn('Failed to sync settings save to Supabase:', e);
+    }
+    return updated;
   });
 
   // Game Handlers
   ipcMain.handle('game:save', async (_event, gameInput: Partial<Game>) => {
     const saved = storage.saveGame(gameInput);
     mainWindow?.webContents.send('game:updated', saved);
+    try {
+      const syncSettings = storage.getCloudSyncSettings();
+      const targetUrl = (syncSettings?.supabaseUrl && syncSettings.supabaseUrl.trim()) || DEFAULT_SUPABASE_URL;
+      const targetKey = (syncSettings?.supabaseAnonKey && syncSettings.supabaseAnonKey.trim()) || DEFAULT_SUPABASE_ANON_KEY;
+      if (targetUrl && targetKey) {
+        SupabaseSyncService.getInstance().upsertGame(targetUrl, targetKey, saved).catch(console.warn);
+      }
+    } catch (e) {
+      console.warn('Failed to sync game save to Supabase:', e);
+    }
     return saved;
   });
 
   ipcMain.handle('game:delete', async (_event, id: string, deleteFiles: boolean) => {
-    return storage.deleteGame(id, deleteFiles);
+    const res = storage.deleteGame(id, deleteFiles);
+    try {
+      const syncSettings = storage.getCloudSyncSettings();
+      const targetUrl = (syncSettings?.supabaseUrl && syncSettings.supabaseUrl.trim()) || DEFAULT_SUPABASE_URL;
+      const targetKey = (syncSettings?.supabaseAnonKey && syncSettings.supabaseAnonKey.trim()) || DEFAULT_SUPABASE_ANON_KEY;
+      if (targetUrl && targetKey) {
+        SupabaseSyncService.getInstance().deleteGame(targetUrl, targetKey, id).catch(console.warn);
+      }
+    } catch (e) {
+      console.warn('Failed to sync game delete to Supabase:', e);
+    }
+    return res;
   });
 
   ipcMain.handle('game:toggle-library', async (_event, id: string) => {
@@ -441,11 +484,32 @@ app.whenReady().then(async () => {
   ipcMain.handle('media:save', async (_event, mediaInput: Partial<MediaItem>) => {
     const saved = storage.saveMedia(mediaInput);
     mainWindow?.webContents.send('media:updated', saved);
+    try {
+      const syncSettings = storage.getCloudSyncSettings();
+      const targetUrl = (syncSettings?.supabaseUrl && syncSettings.supabaseUrl.trim()) || DEFAULT_SUPABASE_URL;
+      const targetKey = (syncSettings?.supabaseAnonKey && syncSettings.supabaseAnonKey.trim()) || DEFAULT_SUPABASE_ANON_KEY;
+      if (targetUrl && targetKey) {
+        SupabaseSyncService.getInstance().upsertMediaItem(targetUrl, targetKey, saved).catch(console.warn);
+      }
+    } catch (e) {
+      console.warn('Failed to sync media save to Supabase:', e);
+    }
     return saved;
   });
 
   ipcMain.handle('media:delete', async (_event, id: string) => {
-    return storage.deleteMedia(id);
+    const res = storage.deleteMedia(id);
+    try {
+      const syncSettings = storage.getCloudSyncSettings();
+      const targetUrl = (syncSettings?.supabaseUrl && syncSettings.supabaseUrl.trim()) || DEFAULT_SUPABASE_URL;
+      const targetKey = (syncSettings?.supabaseAnonKey && syncSettings.supabaseAnonKey.trim()) || DEFAULT_SUPABASE_ANON_KEY;
+      if (targetUrl && targetKey) {
+        SupabaseSyncService.getInstance().deleteMediaItem(targetUrl, targetKey, id).catch(console.warn);
+      }
+    } catch (e) {
+      console.warn('Failed to sync media delete to Supabase:', e);
+    }
+    return res;
   });
 
   ipcMain.handle('media:update-progress', async (_event, id: string, position: number, watched: boolean) => {
@@ -777,11 +841,33 @@ app.whenReady().then(async () => {
   });
 
   ipcMain.handle('profile:save', (_event, profile: UserProfile) => {
-    return storage.saveProfile(profile);
+    const saved = storage.saveProfile(profile);
+    try {
+      const syncSettings = storage.getCloudSyncSettings();
+      const targetUrl = (syncSettings?.supabaseUrl && syncSettings.supabaseUrl.trim()) || DEFAULT_SUPABASE_URL;
+      const targetKey = (syncSettings?.supabaseAnonKey && syncSettings.supabaseAnonKey.trim()) || DEFAULT_SUPABASE_ANON_KEY;
+      if (targetUrl && targetKey) {
+        SupabaseSyncService.getInstance().upsertProfile(targetUrl, targetKey, profile).catch(console.warn);
+      }
+    } catch (e) {
+      console.warn('Failed to sync profile save to Supabase:', e);
+    }
+    return saved;
   });
 
   ipcMain.handle('profile:delete', (_event, id: string) => {
-    return storage.deleteProfile(id);
+    const res = storage.deleteProfile(id);
+    try {
+      const syncSettings = storage.getCloudSyncSettings();
+      const targetUrl = (syncSettings?.supabaseUrl && syncSettings.supabaseUrl.trim()) || DEFAULT_SUPABASE_URL;
+      const targetKey = (syncSettings?.supabaseAnonKey && syncSettings.supabaseAnonKey.trim()) || DEFAULT_SUPABASE_ANON_KEY;
+      if (targetUrl && targetKey) {
+        SupabaseSyncService.getInstance().deleteProfile(targetUrl, targetKey, id).catch(console.warn);
+      }
+    } catch (e) {
+      console.warn('Failed to sync profile delete to Supabase:', e);
+    }
+    return res;
   });
 
   ipcMain.handle('profile:ban', (_event, { id, bannedUntil, reason }: { id: string; bannedUntil: string | null; reason?: string }) => {

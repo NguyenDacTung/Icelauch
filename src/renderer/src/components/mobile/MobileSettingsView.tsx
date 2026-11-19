@@ -227,7 +227,7 @@ export const MobileSettingsView: React.FC<MobileSettingsViewProps> = ({
   const currentInterval = cloudSync?.autoSyncIntervalMinutes ?? 5;
 
   return (
-    <div className="flex-1 w-full h-full flex flex-col bg-ice-bg select-none overflow-y-auto no-scrollbar p-3.5 space-y-4">
+    <div className="flex-1 w-full h-full flex flex-col bg-ice-bg select-none overflow-y-auto no-scrollbar p-3.5 pt-[max(0.75rem,env(safe-area-inset-top,0px))] pb-28 space-y-4">
       {/* 1. TOP HEADER & TOAST */}
       <div className="flex items-center justify-between shrink-0 pt-1">
         <div className="flex items-center gap-2">
@@ -441,7 +441,7 @@ export const MobileSettingsView: React.FC<MobileSettingsViewProps> = ({
             </span>
             <span className="text-[10px] text-ice-subtext">Chạm để đổi</span>
           </div>
-          <div className="flex items-center gap-2 overflow-x-auto pb-1 no-scrollbar -mx-1 px-1">
+          <div className="flex items-center gap-2.5 overflow-x-auto pt-2.5 pb-2.5 px-2 -mx-2 no-scrollbar">
             {allThemes.map((t) => {
               const isSelected = currentTheme === t.id;
               return (

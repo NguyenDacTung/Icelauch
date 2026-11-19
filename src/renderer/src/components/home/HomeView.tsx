@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { HeroBanner } from './HeroBanner';
 import { GameCard } from './GameCard';
 import { SurpriseGameModal } from './SurpriseGameModal';
@@ -27,6 +27,7 @@ import type { Game, MediaItem, AppSettings } from '../../types';
 import type { DeviceType } from '../../utils/deviceDetector';
 import { sfx } from '../../utils/sfx';
 import { matchSmartSearch } from '../../utils/searchHelper';
+import { useTheme } from '../../hooks/useTheme';
 
 interface HomeViewProps {
   games: Game[];
@@ -52,6 +53,7 @@ interface HomeViewProps {
   onOpenTagManager?: (mode?: 'game' | 'movie' | 'music' | 'podcast') => void;
   onLoadDemoData: () => void;
   onActiveBannerChange?: (bannerImg: string) => void;
+  userLibraryIds?: string[];
 }
 
 export const HomeView: React.FC<HomeViewProps> = ({
@@ -61,6 +63,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
   isAdmin,
   searchQuery,
   deviceType = 'windows_pc',
+  userLibraryIds,
   onIncompatibleClick,
   onSelectGame,
   onSelectMedia,
@@ -79,6 +82,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
   onLoadDemoData,
   onActiveBannerChange,
 }) => {
+  const { theme } = useTheme();
   const [selectedGenre, setSelectedGenre] = useState<string>('Tất cả');
   const [selectedMood, setSelectedMood] = useState<string>('all');
   const [sortBy, setSortBy] = useState<'newest' | 'name'>('newest');
@@ -90,14 +94,22 @@ export const HomeView: React.FC<HomeViewProps> = ({
     setVisibleCount(24);
   }, [searchQuery, selectedGenre, selectedMood, sortBy, showHiddenOnly]);
 
+  // Enhance games dynamically with active user's library binding
+  const resolvedGames = useMemo(() => {
+    return games.map((g) => ({
+      ...g,
+      inLibrary: userLibraryIds ? userLibraryIds.includes(g.id) : Boolean(g.inLibrary),
+    }));
+  }, [games, userLibraryIds]);
+
   // Filter out hidden games for normal users; apply admin hidden filter if active
-  const baseGames = games.filter((g) => {
+  const baseGames = resolvedGames.filter((g) => {
     if (!isAdmin && g.hidden) return false;
     if (isAdmin && showHiddenOnly) return g.hidden;
     return true;
   });
 
-  const hiddenCount = games.filter((g) => g.hidden).length;
+  const hiddenCount = resolvedGames.filter((g) => g.hidden).length;
 
   // Extract unique genres / tags
   const genres = [
@@ -230,10 +242,20 @@ export const HomeView: React.FC<HomeViewProps> = ({
               sfx.playClick();
               setIsSurpriseOpen(true);
             }}
-            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 hover:from-amber-400 hover:to-orange-400 text-black font-extrabold text-xs shadow-xl shadow-amber-500/20 transition-all hover:scale-105 active:scale-95"
+            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl font-extrabold text-xs transition-all hover:scale-105 active:scale-95 ${
+              theme === 'aer'
+                ? 'bg-[#0284C7] hover:bg-[#0369A1] text-white shadow-none font-bold'
+                : theme === 'aqua'
+                ? 'bg-gradient-to-r from-sky-400 to-blue-600 hover:from-sky-300 hover:to-blue-500 text-white shadow-lg shadow-sky-500/25'
+                : theme === 'solar'
+                ? 'bg-gradient-to-r from-amber-400 to-yellow-500 hover:from-amber-300 hover:to-yellow-400 text-slate-950 font-black shadow-lg shadow-amber-500/20'
+                : theme === 'ignis'
+                ? 'bg-gradient-to-r from-[#DC2626] via-[#F97316] to-[#FBBF24] text-black shadow-xl shadow-orange-500/30'
+                : 'bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 hover:from-amber-400 hover:to-orange-400 text-black shadow-xl shadow-amber-500/20'
+            }`}
             title="Mở vòng quay ngẫu nhiên chọn game cực vui"
           >
-            <Dices className="w-4 h-4 animate-bounce" />
+            <Dices className={`w-4 h-4 animate-bounce ${theme === 'solar' ? 'text-slate-950' : 'text-current'}`} />
             <span>HÔM NAY CHƠI GÌ?</span>
             <Sparkles className="w-3.5 h-3.5" />
           </button>
@@ -265,7 +287,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
             </h2>
           </div>
 
-          <div className="flex items-center gap-4 overflow-x-auto pb-2 scrollbar-thin">
+          <div className="flex items-center gap-4 overflow-x-auto overflow-y-hidden py-1 pb-2 scrollbar-thin">
             {recentGames.map((game) => (
               <div
                 key={game.id}
@@ -326,7 +348,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
             </h2>
           </div>
 
-          <div className="flex items-center gap-4 overflow-x-auto pb-2 scrollbar-thin">
+          <div className="flex items-center gap-4 overflow-x-auto overflow-y-hidden py-1 pb-2 scrollbar-thin">
             {continueMedia.map((item) => {
               const percent = item.duration ? Math.min(100, Math.round((item.lastPosition / item.duration) * 100)) : 0;
               const isAudio = item.type === 'audio';
@@ -451,7 +473,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
       {selectedGenre === 'Tất cả' && !searchQuery && (
         <div className="space-y-6 pt-1">
           {genres.filter((g) => g !== 'Tất cả').slice(0, 10).map((genre) => {
-            const genreGames = games.filter(
+            const genreGames = baseGames.filter(
               (g) => (g.tags && g.tags.includes(genre)) || (g.genre && g.genre.toLowerCase().includes(genre.toLowerCase()))
             );
             if (genreGames.length === 0) return null;

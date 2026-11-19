@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 import type { MediaItem } from '../../types';
 import { sfx } from '../../utils/sfx';
+import { useTheme } from '../../hooks/useTheme';
 
 interface SurpriseMediaModalProps {
   isOpen: boolean;
@@ -30,6 +31,8 @@ export const SurpriseMediaModal: React.FC<SurpriseMediaModalProps> = ({
   type,
   onPlay,
 }) => {
+  const { theme } = useTheme();
+  const isLightMode = ['solar', 'aer', 'aqua'].includes(theme);
   const [selectedItem, setSelectedItem] = useState<MediaItem | null>(null);
   const [isRolling, setIsRolling] = useState(false);
 
@@ -110,7 +113,15 @@ export const SurpriseMediaModal: React.FC<SurpriseMediaModalProps> = ({
 
         {/* Header Title */}
         <div className="space-y-1">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-500 dark:text-amber-400 text-xs font-bold uppercase tracking-wider">
+          <div className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider ${
+            theme === 'aer'
+              ? 'bg-[#0284C7]/15 border border-[#0284C7]/40 text-[#0284C7]'
+              : theme === 'aqua'
+              ? 'bg-sky-500/15 border border-sky-400/40 text-sky-600'
+              : theme === 'solar'
+              ? 'bg-amber-500/20 border border-amber-500/40 text-amber-900 font-black'
+              : 'bg-amber-500/10 border border-amber-500/30 text-amber-300'
+          }`}>
             <Dices className="w-4 h-4 animate-bounce" />
             <span>{titleText}</span>
             <Sparkles className="w-3.5 h-3.5" />
@@ -126,7 +137,15 @@ export const SurpriseMediaModal: React.FC<SurpriseMediaModalProps> = ({
             }`}
           >
             {/* Poster / Thumbnail */}
-            <div className="relative w-44 aspect-[2/3] rounded-2xl overflow-hidden bg-black/70 border-2 border-amber-400/80 shadow-2xl shadow-amber-500/20 flex items-center justify-center">
+            <div className={`relative w-44 aspect-[2/3] rounded-2xl overflow-hidden bg-black/70 border-2 shadow-2xl flex items-center justify-center ${
+              theme === 'aer'
+                ? 'border-[#0284C7]'
+                : theme === 'aqua'
+                ? 'border-sky-400 shadow-sky-500/20'
+                : theme === 'solar'
+                ? 'border-amber-500 shadow-amber-500/20'
+                : 'border-amber-400/80 shadow-amber-500/20'
+            }`}>
               {coverUrl ? (
                 <img
                   src={coverUrl}
@@ -150,7 +169,15 @@ export const SurpriseMediaModal: React.FC<SurpriseMediaModalProps> = ({
               <h3 className="text-lg font-black text-ice-text truncate">
                 {selectedItem.title}
               </h3>
-              <p className="text-xs text-amber-600 dark:text-amber-300/80 font-medium truncate">
+              <p className={`text-xs font-semibold truncate ${
+                theme === 'aer'
+                  ? 'text-[#0284C7]'
+                  : theme === 'aqua'
+                  ? 'text-sky-600'
+                  : theme === 'solar'
+                  ? 'text-amber-800'
+                  : 'text-amber-300/80'
+              }`}>
                 {selectedItem.artist || selectedItem.category || 'Nhiều nghệ sĩ'}
               </p>
               {selectedItem.tags && selectedItem.tags.length > 0 && (
@@ -179,7 +206,11 @@ export const SurpriseMediaModal: React.FC<SurpriseMediaModalProps> = ({
             type="button"
             disabled={isRolling || !selectedItem}
             onClick={rollRandom}
-            className="flex items-center gap-2 px-5 py-3 rounded-2xl bg-ice-hover hover:bg-ice-hover/80 text-ice-text text-xs font-bold border border-ice-border transition-all active:scale-95 disabled:opacity-50"
+            className={`flex items-center gap-2 px-5 py-3 rounded-2xl text-xs font-bold border transition-all active:scale-95 disabled:opacity-50 ${
+              isLightMode
+                ? 'bg-ice-card hover:bg-ice-hover text-slate-800 hover:text-slate-950 border-ice-border'
+                : 'bg-ice-hover hover:bg-ice-hover/80 text-ice-text border-ice-border'
+            }`}
           >
             <RotateCcw className={`w-4 h-4 ${isRolling ? 'animate-spin' : ''}`} />
             <span>Đổi Mục Khác</span>
@@ -195,9 +226,17 @@ export const SurpriseMediaModal: React.FC<SurpriseMediaModalProps> = ({
                 onPlay(selectedItem);
               }
             }}
-            className="flex items-center gap-2 px-6 py-3 rounded-2xl bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-black text-xs font-black shadow-lg shadow-amber-500/25 transition-all hover:scale-105 active:scale-95 disabled:opacity-50"
+            className={`flex items-center gap-2 px-6 py-3 rounded-2xl text-xs font-black shadow-lg transition-all hover:scale-105 active:scale-95 disabled:opacity-50 ${
+              theme === 'aer'
+                ? 'bg-[#0284C7] hover:bg-[#0369A1] text-white shadow-none font-bold'
+                : theme === 'aqua'
+                ? 'bg-sky-500 hover:bg-sky-400 text-white shadow-sky-500/25 font-bold'
+                : theme === 'solar'
+                ? 'bg-amber-500 hover:bg-amber-400 text-slate-950 font-black shadow-amber-500/20'
+                : 'bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-black shadow-amber-500/25'
+            }`}
           >
-            <Play className="w-4 h-4 fill-black ml-0.5" />
+            <Play className={`w-4 h-4 ml-0.5 ${theme === 'aer' || theme === 'aqua' ? 'fill-white text-white' : 'fill-black'}`} />
             <span>PHÁT NGAY</span>
           </button>
         </div>

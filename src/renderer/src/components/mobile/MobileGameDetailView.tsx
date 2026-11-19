@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import { useTheme } from '../../hooks/useTheme';
+import { TerraAppleFavoriteIcon } from '../common/TerraAppleFavoriteIcon';
 import {
   ArrowLeft,
   Monitor,
@@ -41,6 +43,7 @@ export const MobileGameDetailView: React.FC<MobileGameDetailViewProps> = ({
   onSaveExtensions,
   globalActionButtons = [],
 }) => {
+  const { theme } = useTheme();
   const [showFullDesc, setShowFullDesc] = useState(false);
   const [selectedScreenshot, setSelectedScreenshot] = useState<string | null>(null);
   const [isExtensionsModalOpen, setIsExtensionsModalOpen] = useState(false);
@@ -164,13 +167,23 @@ export const MobileGameDetailView: React.FC<MobileGameDetailViewProps> = ({
               type="button"
               onClick={() => onToggleLibrary(game.id)}
               className={`w-11 h-11 rounded-xl border flex items-center justify-center transition-all shrink-0 active:scale-95 ${
-                game.inLibrary
+                theme === 'terra'
+                  ? game.inLibrary
+                    ? 'bg-[#2B241D] text-red-500 border border-[#7C5332] shadow-sm'
+                    : 'bg-[#211C17] text-[#B5A898] hover:text-[#F3ECE1] hover:bg-[#2B241D] border border-[#7C5332]/50'
+                  : game.inLibrary
                   ? 'bg-ice-accent/25 border-ice-accent text-ice-accent shadow-md shadow-blue-500/20'
                   : 'bg-ice-card border-ice-border text-ice-text hover:bg-ice-hover'
               }`}
               title={game.inLibrary ? 'Đã lưu trong thư viện' : 'Lưu vào thư viện'}
             >
-              {game.inLibrary ? <BookmarkCheck className="w-5 h-5 text-ice-accent" /> : <Bookmark className="w-5 h-5" />}
+              {theme === 'terra' ? (
+                <TerraAppleFavoriteIcon isFavorite={game.inLibrary} size={20} />
+              ) : game.inLibrary ? (
+                <BookmarkCheck className="w-5 h-5 text-ice-accent" />
+              ) : (
+                <Bookmark className="w-5 h-5" />
+              )}
             </button>
           </div>
 

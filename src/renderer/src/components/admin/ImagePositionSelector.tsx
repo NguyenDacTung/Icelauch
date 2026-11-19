@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Move, Sliders, RotateCcw, ZoomIn, ZoomOut, Eye, Sparkles } from 'lucide-react';
+import { Move, Sliders, RotateCcw, RotateCw, ZoomIn, ZoomOut, Eye, Sparkles } from 'lucide-react';
 
 interface ImagePositionSelectorProps {
   label: string;
@@ -9,6 +9,8 @@ interface ImagePositionSelectorProps {
   onChange: (val: string) => void;
   zoom?: number;
   onZoomChange?: (zoom: number) => void;
+  rotation?: number;
+  onRotationChange?: (rotation: number) => void;
   blur?: number;
   onBlurChange?: (blur: number) => void;
   darkness?: number;
@@ -28,6 +30,8 @@ export const ImagePositionSelector: React.FC<ImagePositionSelectorProps> = ({
   onChange,
   zoom = 1,
   onZoomChange,
+  rotation = 0,
+  onRotationChange,
   blur = 0,
   onBlurChange,
   darkness = 30,
@@ -71,6 +75,7 @@ export const ImagePositionSelector: React.FC<ImagePositionSelectorProps> = ({
   const [currentDarkness, setCurrentDarkness] = useState(darkness ?? 30);
   const [currentEdgeDarkness, setCurrentEdgeDarkness] = useState(edgeDarkness ?? 10);
   const [currentSharpen, setCurrentSharpen] = useState(sharpen || 0);
+  const [currentRotation, setCurrentRotation] = useState(rotation || 0);
   const [isAdvanced, setIsAdvanced] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const dragStartRef = useRef<{ x: number; y: number; posX: number; posY: number } | null>(null);
@@ -85,6 +90,10 @@ export const ImagePositionSelector: React.FC<ImagePositionSelectorProps> = ({
   useEffect(() => {
     if (zoom !== undefined) setCurrentZoom(zoom);
   }, [zoom]);
+
+  useEffect(() => {
+    if (rotation !== undefined) setCurrentRotation(rotation);
+  }, [rotation]);
 
   useEffect(() => {
     if (blur !== undefined) setCurrentBlur(blur);
@@ -116,6 +125,12 @@ export const ImagePositionSelector: React.FC<ImagePositionSelectorProps> = ({
     if (onZoomChange) onZoomChange(z);
   };
 
+  const updateRotation = (newR: number) => {
+    const r = ((newR % 360) + 360) % 360;
+    setCurrentRotation(r);
+    if (onRotationChange) onRotationChange(r);
+  };
+
   const updateBlur = (newB: number) => {
     setCurrentBlur(newB);
     if (onBlurChange) onBlurChange(newB);
@@ -141,6 +156,7 @@ export const ImagePositionSelector: React.FC<ImagePositionSelectorProps> = ({
   const handleReset = () => {
     updatePosition(50, 50);
     updateZoom(1);
+    updateRotation(0);
     updateSharpen(0);
     if (aspectRatio === 'banner') {
       updateBlur(0);
@@ -218,6 +234,15 @@ export const ImagePositionSelector: React.FC<ImagePositionSelectorProps> = ({
         </label>
 
         <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => updateRotation(currentRotation + 90)}
+            className="text-[11px] text-ice-subtext hover:text-white px-2 py-1 rounded bg-white/5 hover:bg-white/10 flex items-center gap-1 transition-colors"
+            title={`Xoay 90 độ (Hiện tại: ${currentRotation}°)`}
+          >
+            <RotateCw className="w-3 h-3 text-amber-400" />
+            <span>Xoay {currentRotation > 0 ? `${currentRotation}°` : '90°'}</span>
+          </button>
           <button
             type="button"
             onClick={handleReset}
@@ -484,7 +509,7 @@ export const ImagePositionSelector: React.FC<ImagePositionSelectorProps> = ({
                   draggable={false}
                   style={{
                     objectPosition: currentObjPos,
-                    transform: `scale(${currentZoom})`,
+                    transform: `scale(${currentZoom}) rotate(${currentRotation}deg)`,
                     transformOrigin: currentObjPos,
                     filter: [
                       currentBlur > 0 ? `blur(${currentBlur}px)` : '',

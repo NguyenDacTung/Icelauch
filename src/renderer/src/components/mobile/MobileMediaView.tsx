@@ -22,6 +22,10 @@ import { AddToPlaylistModal } from '../media/AddToPlaylistModal';
 import { SurpriseMediaModal } from '../media/SurpriseMediaModal';
 import { sfx } from '../../utils/sfx';
 import { matchSmartSearch } from '../../utils/searchHelper';
+import { useTheme } from '../../hooks/useTheme';
+import { TerraBotanicalCardFrame } from '../common/TerraBotanicalCardFrame';
+import { TerraAppleFavoriteIcon } from '../common/TerraAppleFavoriteIcon';
+import { IgnisFireAura } from '../common/IgnisFireAura';
 
 interface MobileMediaViewProps {
   media: MediaItem[];
@@ -67,6 +71,7 @@ export const MobileMediaView: React.FC<MobileMediaViewProps> = ({
   onDownloadMedia,
   onDeleteDownloaded,
 }) => {
+  const { theme } = useTheme();
   const [mediaTab, setMediaTab] = useState<'video' | 'music' | 'podcast'>('video');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [localSearch, setLocalSearch] = useState<string>('');
@@ -74,6 +79,7 @@ export const MobileMediaView: React.FC<MobileMediaViewProps> = ({
   const deferredSearch = useDeferredValue(localSearch);
   const [localActiveTheaterMedia, setLocalActiveTheaterMedia] = useState<MediaItem | null>(null);
   const [targetMediaForPlaylist, setTargetMediaForPlaylist] = useState<MediaItem | null>(null);
+  const [hoveredCardId, setHoveredCardId] = useState<string | null>(null);
   const [isSurpriseOpen, setIsSurpriseOpen] = useState(false);
 
   useEffect(() => {
@@ -159,7 +165,7 @@ export const MobileMediaView: React.FC<MobileMediaViewProps> = ({
   }
 
   return (
-    <div className="flex-1 w-full h-full flex flex-col bg-ice-bg text-ice-text select-none overflow-y-auto no-scrollbar p-3.5 space-y-4">
+    <div className="flex-1 w-full h-full flex flex-col bg-ice-bg text-ice-text select-none overflow-y-auto no-scrollbar p-3.5 pt-[max(0.75rem,env(safe-area-inset-top,0px))] pb-28 space-y-4">
       {/* 1. TOP MOBILE SEARCH BAR & SUB-TABS */}
       <div className="space-y-2.5 shrink-0 pt-1">
         {/* Search Input Form - Adaptive Pill Bar */}
@@ -269,10 +275,20 @@ export const MobileMediaView: React.FC<MobileMediaViewProps> = ({
               sfx.playClick();
               setIsSurpriseOpen(true);
             }}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-amber-500/20 to-amber-600/20 hover:from-amber-500/30 text-amber-300 border border-amber-500/40 text-xs font-bold transition-all shadow-sm active:scale-95 shrink-0"
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all shadow-sm active:scale-95 shrink-0 cursor-pointer ${
+              theme === 'aer'
+                ? 'bg-[#0284C7] hover:bg-[#0369A1] text-white border border-[#0284C7] shadow-none'
+                : theme === 'aqua'
+                ? 'bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-400 hover:to-blue-500 text-white border border-sky-400 shadow-md shadow-sky-500/20'
+                : theme === 'solar'
+                ? 'bg-gradient-to-r from-amber-400 to-yellow-500 hover:from-amber-300 hover:to-yellow-400 text-slate-950 font-black border border-amber-400 shadow-md'
+                : 'bg-gradient-to-r from-amber-500/20 to-amber-600/20 hover:from-amber-500/30 text-amber-300 border border-amber-500/40'
+            }`}
             title={mediaTab === 'video' ? 'Hôm nay xem gì?' : 'Hôm nay nghe gì?'}
           >
-            <Sparkles className="w-3.5 h-3.5 text-amber-400 animate-pulse" />
+            <Sparkles className={`w-3.5 h-3.5 animate-pulse ${
+              theme === 'aer' || theme === 'aqua' ? 'text-white' : theme === 'solar' ? 'text-slate-950' : 'text-amber-400'
+            }`} />
             <span>{mediaTab === 'video' ? 'Xem gì?' : 'Nghe gì?'}</span>
           </button>
         </div>
@@ -315,9 +331,27 @@ export const MobileMediaView: React.FC<MobileMediaViewProps> = ({
                     if (item.type === 'video') handleSetActiveMedia(item);
                     else onPlayAudio?.(item);
                   }}
-                  className="w-32 aspect-[2/3] rounded-2xl overflow-hidden bg-ice-card border border-ice-border relative shrink-0 cursor-pointer group shadow-md active:scale-98 transition-all flex flex-col"
+                  className={`w-32 aspect-[2/3] rounded-2xl relative shrink-0 cursor-pointer group flex flex-col ${
+                    theme === 'aer'
+                      ? 'bg-white border border-[#CBD5E1] shadow-none overflow-hidden active:border-[#0284C7] transition-none'
+                      : theme === 'ignis'
+                      ? 'bg-ice-card border border-ice-border shadow-md transition-all overflow-visible active:scale-105'
+                      : theme === 'terra'
+                      ? 'bg-ice-card border border-ice-border shadow-md transition-all overflow-visible active:scale-98'
+                      : 'bg-ice-card border border-ice-border shadow-md transition-all overflow-hidden active:scale-98'
+                  }`}
                 >
-                  <div className="relative w-full h-full bg-black">
+                  {/* Ignis Mode: Bottom-to-Top Organic Fire Aura */}
+                  {theme === 'ignis' && (
+                    <IgnisFireAura isHovered={hoveredCardId === item.id} />
+                  )}
+
+                  {/* Terra Mode: Outer Botanical Vine Frame */}
+                  {theme === 'terra' && (
+                    <TerraBotanicalCardFrame isFavorite={isFav} />
+                  )}
+
+                  <div className="relative w-full h-full bg-black rounded-2xl overflow-hidden">
                     <SafeImage
                       src={item.coverPath || item.bannerPath}
                       alt={item.title}
@@ -355,12 +389,22 @@ export const MobileMediaView: React.FC<MobileMediaViewProps> = ({
                             sfx.playClick();
                             onToggleFavoriteMedia(item.id);
                           }}
-                          className={`p-1 rounded-full backdrop-blur-sm ${
-                            isFav ? 'bg-rose-500 text-white' : 'bg-black/70 text-white/80 hover:text-rose-400'
+                          className={`p-1 rounded-full backdrop-blur-sm transition-all ${
+                            theme === 'terra'
+                              ? isFav
+                                ? 'bg-[#2B241D] text-red-500 border border-[#7C5332] shadow-sm'
+                                : 'bg-[#2B241D]/90 text-[#7C5332] hover:bg-[#332A21] border border-[#7C5332]/60'
+                              : isFav
+                              ? 'bg-rose-500 text-white'
+                              : 'bg-black/70 text-white/80 hover:text-rose-400'
                           }`}
                           title={isFav ? 'Bỏ thích' : 'Yêu thích'}
                         >
-                          <Heart className={`w-3 h-3 ${isFav ? 'fill-current' : ''}`} />
+                          {theme === 'terra' ? (
+                            <TerraAppleFavoriteIcon isFavorite={isFav} size={13} />
+                          ) : (
+                            <Heart className={`w-3 h-3 ${isFav ? 'fill-current' : ''}`} />
+                          )}
                         </button>
                       )}
                     </div>
@@ -554,10 +598,28 @@ export const MobileMediaView: React.FC<MobileMediaViewProps> = ({
                       if (item.type === 'video') handleSetActiveMedia(item);
                       else onPlayAudio?.(item);
                     }}
-                    className="rounded-2xl overflow-hidden bg-ice-card border border-ice-border cursor-pointer group hover:border-ice-accent/60 transition-all shadow-md flex flex-col active:scale-98 hover-depth-lift"
+                    className={`rounded-2xl cursor-pointer group flex flex-col ${
+                      theme === 'aer'
+                        ? 'bg-white border border-[#CBD5E1] shadow-none overflow-hidden active:border-[#0284C7] transition-none'
+                        : theme === 'ignis'
+                        ? 'bg-ice-card border border-ice-border shadow-md transition-all hover-depth-lift overflow-visible active:scale-105'
+                        : theme === 'terra'
+                        ? 'bg-ice-card border border-ice-border shadow-md transition-all hover-depth-lift overflow-visible active:scale-98'
+                        : 'bg-ice-card border border-ice-border shadow-md transition-all hover-depth-lift overflow-hidden active:scale-98'
+                    }`}
                   >
+                    {/* Ignis Mode: Bottom-to-Top Organic Fire Aura */}
+                    {theme === 'ignis' && (
+                      <IgnisFireAura isHovered={hoveredCardId === item.id} />
+                    )}
+
+                    {/* Terra Mode: Outer Botanical Vine Frame */}
+                    {theme === 'terra' && (
+                      <TerraBotanicalCardFrame isFavorite={isFav} />
+                    )}
+
                     {/* 4:6 (2:3) List Card Poster */}
-                    <div className="relative aspect-[2/3] w-full bg-ice-hover/50 overflow-hidden">
+                    <div className="relative aspect-[2/3] w-full bg-ice-hover/50 overflow-hidden rounded-t-2xl">
                       <SafeImage
                         src={item.coverPath || item.bannerPath}
                         alt={item.title}
@@ -595,12 +657,22 @@ export const MobileMediaView: React.FC<MobileMediaViewProps> = ({
                               sfx.playClick();
                               onToggleFavoriteMedia(item.id);
                             }}
-                            className={`p-1 rounded-full backdrop-blur-sm ${
-                              isFav ? 'bg-rose-500 text-white' : 'bg-black/70 text-white/80 hover:text-rose-400'
+                            className={`p-1 rounded-full backdrop-blur-sm transition-all ${
+                              theme === 'terra'
+                                ? isFav
+                                  ? 'bg-[#2B241D] text-red-500 border border-[#7C5332] shadow-sm'
+                                  : 'bg-[#2B241D]/90 text-[#7C5332] hover:bg-[#332A21] border border-[#7C5332]/60'
+                                : isFav
+                                ? 'bg-rose-500 text-white'
+                                : 'bg-black/70 text-white/80 hover:text-rose-400'
                             }`}
                             title={isFav ? 'Bỏ thích' : 'Yêu thích'}
                           >
-                            <Heart className={`w-3 h-3 ${isFav ? 'fill-current' : ''}`} />
+                            {theme === 'terra' ? (
+                              <TerraAppleFavoriteIcon isFavorite={isFav} size={13} />
+                            ) : (
+                              <Heart className={`w-3 h-3 ${isFav ? 'fill-current' : ''}`} />
+                            )}
                           </button>
                         )}
                       </div>

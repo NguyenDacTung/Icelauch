@@ -21,6 +21,9 @@ import {
   clearMediaSession 
 } from '../../utils/mediaSession';
 import { useTheme } from '../../hooks/useTheme';
+import { TerraLadybugThumb } from '../common/TerraLadybugThumb';
+import { TerraExteriorGrass } from '../common/TerraExteriorGrass';
+import { IgnisMagmaCracks } from '../common/IgnisMagmaCracks';
 
 interface MiniPlayerProps {
   currentTrack: MediaItem | null;
@@ -77,14 +80,38 @@ export const MiniPlayer: React.FC<MiniPlayerProps> = ({
   const [isShuffle, setIsShuffle] = useState<boolean>(false);
   const [proxyAudioSrc, setProxyAudioSrc] = useState<string>('');
   const [fallbackLevel, setFallbackLevel] = useState<number>(0);
+  const [isBurningToClose, setIsBurningToClose] = useState<boolean>(false);
+  const closeTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   const effectiveVolume = externalVolume !== undefined ? externalVolume : volume;
   const effectiveIsMuted = externalIsMuted !== undefined ? externalIsMuted : isMuted;
 
-  // Reset fallback level whenever current track changes
+  // Reset fallback level & burn state whenever current track changes
   useEffect(() => {
     setFallbackLevel(0);
+    setIsBurningToClose(false);
   }, [currentTrack?.id]);
+
+  // Cleanup close timer on unmount
+  useEffect(() => {
+    return () => {
+      if (closeTimerRef.current) {
+        clearTimeout(closeTimerRef.current);
+      }
+    };
+  }, []);
+
+  const handleClosePlayer = () => {
+    if (theme === 'ignis' && !isBurningToClose) {
+      setIsBurningToClose(true);
+      closeTimerRef.current = setTimeout(() => {
+        onClose();
+        setIsBurningToClose(false);
+      }, 850);
+    } else {
+      onClose();
+    }
+  };
 
   // Resolve direct audio stream synchronously with multi-endpoint fallback
   const audioSrc = useMemo(() => {
@@ -280,6 +307,9 @@ export const MiniPlayer: React.FC<MiniPlayerProps> = ({
         : `file://${currentTrack.coverPath}`)
     : '';
 
+  const safeEffectiveDuration = duration > 0 ? duration : (audioRef.current?.duration || 100);
+  const safeProgressPercent = safeEffectiveDuration > 0 ? Math.min(100, Math.max(0, (currentTime / safeEffectiveDuration) * 100)) : 0;
+
   return (
     <>
       {/* 
@@ -302,13 +332,50 @@ export const MiniPlayer: React.FC<MiniPlayerProps> = ({
       {/* Floating Pill MiniPlayer (Centered at bottom 16px, auto slide-up animation) */}
       {currentTrack && !isTurntableActive && !hideVisualBar && (
         <div className="fixed bottom-4 left-1/2 -translate-x-1/2 w-[94%] max-w-3xl z-40 select-none pointer-events-auto transition-all duration-300 animate-in fade-in slide-in-from-bottom-6">
+          {/* Terra Mode: Exterior Botanical Grass Growth along top outer edge! */}
+          {theme === 'terra' && (
+            <TerraExteriorGrass progressPercent={safeProgressPercent} />
+          )}
+
           <div className={`backdrop-blur-2xl px-5 py-2.5 flex items-center justify-between gap-3 relative overflow-hidden transition-all duration-300 ${
-            theme === 'aqua' 
-              ? 'rounded-full bg-white/85 border border-sky-300/60 shadow-[0_12px_36px_rgba(2,132,199,0.22)]' 
+            theme === 'aer'
+              ? 'rounded-xl bg-[#B8C7D9] border-[1.5px] border-[#64748B] shadow-none backdrop-blur-none'
+              : theme === 'ignis'
+              ? `rounded-2xl bg-[#261712] border-2 border-[#8C4320] shadow-[0_12px_36px_rgba(0,0,0,0.85)] ${isPlaying ? 'scale-[1.015]' : 'scale-100'} ${isBurningToClose ? 'ignis-burning-player' : ''}`
+              : theme === 'aqua' 
+              ? 'rounded-full bg-sky-100/35 backdrop-blur-2xl border border-sky-300/50 shadow-[0_12px_36px_rgba(2,132,199,0.25),inset_0_1px_1px_rgba(255,255,255,0.7)]' 
+              : theme === 'terra'
+              ? 'rounded-2xl bg-[#2B241D] border-2 border-[#7C5332] shadow-[0_8px_24px_rgba(0,0,0,0.65)]'
               : theme === 'aurora' 
               ? 'glass-pill-elevated aurora-drift-bar border-emerald-400/30' 
               : 'glass-pill-elevated'
           }`}>
+            {/* Ignis Mode: Basalt Magma Cracks Veins */}
+            {theme === 'ignis' && (
+              <IgnisMagmaCracks isPlaying={isPlaying} />
+            )}
+
+            {/* Ignis Mode: Paper-Burn Dissolution Ember Wave sweeping right-to-left from Button X */}
+            {theme === 'ignis' && isBurningToClose && (
+              <div className="absolute inset-0 pointer-events-none z-30 overflow-visible">
+                {/* Moving incandescent ember front */}
+                <div
+                  className="absolute inset-y-0 w-10 pointer-events-none"
+                  style={{
+                    animation: 'ignisEmberSweep 0.85s cubic-bezier(0.35, 0, 0.25, 1) forwards',
+                    background: 'linear-gradient(to left, rgba(255, 251, 235, 0.95) 0%, rgba(251, 191, 36, 0.85) 30%, rgba(249, 115, 22, 0.7) 65%, transparent 100%)',
+                    boxShadow: '0 0 16px 4px rgba(249, 115, 22, 0.9), 0 0 28px 8px rgba(220, 38, 38, 0.6)',
+                    filter: 'blur(1px)',
+                  }}
+                />
+                {/* Drifting Sparks & Embers */}
+                <span className="absolute right-4 top-2 w-1.5 h-1.5 rounded-full bg-[#FFFBEB] shadow-[0_0_8px_#FBBF24] animate-ping" />
+                <span className="absolute right-14 top-4 w-2 h-2 rounded-full bg-[#FBBF24] shadow-[0_0_10px_#F97316] animate-ping" style={{ animationDelay: '0.15s' }} />
+                <span className="absolute right-28 top-1 w-1.5 h-1.5 rounded-full bg-[#F97316] shadow-[0_0_8px_#EA580C] animate-ping" style={{ animationDelay: '0.3s' }} />
+                <span className="absolute right-48 top-3 w-2 h-2 rounded-full bg-[#EF4444] shadow-[0_0_8px_#DC2626] animate-ping" style={{ animationDelay: '0.45s' }} />
+                <span className="absolute right-72 top-2 w-1.5 h-1.5 rounded-full bg-[#FBBF24] shadow-[0_0_8px_#F97316] animate-ping" style={{ animationDelay: '0.6s' }} />
+              </div>
+            )}
             {/* Ambient Wave Motion Bar for Aqua Theme */}
             {theme === 'aqua' && (
               <div className="absolute inset-x-0 bottom-0 h-1.5 aqua-wave-bar pointer-events-none" />
@@ -326,6 +393,8 @@ export const MiniPlayer: React.FC<MiniPlayerProps> = ({
                   <img
                     src={coverUrl}
                     alt={currentTrack.title}
+                    loading="lazy"
+                    decoding="async"
                     className="w-10 h-10 object-cover rounded-xl shadow-md border border-ice-border/70 group-hover:border-ice-accent transition-all group-hover:scale-105"
                   />
                 ) : (
@@ -402,11 +471,15 @@ export const MiniPlayer: React.FC<MiniPlayerProps> = ({
                   <SkipBack className="w-4 h-4" />
                 </button>
 
-                {/* Glowing Play/Pause button styled with active theme accent */}
+                {/* Play/Pause button */}
                 <button
                   type="button"
                   onClick={onPlayPause}
-                  className="w-9 h-9 rounded-full bg-ice-accent hover:opacity-90 text-white flex items-center justify-center shadow-lg shadow-ice-accent/30 transition-all hover:scale-105 active:scale-95 cursor-pointer"
+                  className={`w-9 h-9 flex items-center justify-center cursor-pointer ${
+                    theme === 'aer'
+                      ? 'rounded-lg bg-[#0284C7] text-white hover:bg-[#0369A1] transition-none shadow-none active:scale-95'
+                      : 'rounded-full bg-ice-accent hover:opacity-90 text-white shadow-lg shadow-ice-accent/30 transition-all hover:scale-105 active:scale-95'
+                  }`}
                   title={isPlaying ? 'Tạm dừng' : 'Phát'}
                 >
                   {isPlaying ? (
@@ -438,7 +511,7 @@ export const MiniPlayer: React.FC<MiniPlayerProps> = ({
               </div>
 
               {/* Seek Bar */}
-              <div className="flex items-center gap-2 w-full text-[10px] font-mono text-ice-subtext">
+              <div className="flex items-center gap-3.5 w-full text-[10px] font-mono text-ice-subtext">
                 <span className="w-8 text-right tabular-nums">{formatTime(currentTime)}</span>
                 <div className="relative flex-1 flex items-center group/seek">
                   <input
@@ -448,8 +521,32 @@ export const MiniPlayer: React.FC<MiniPlayerProps> = ({
                     step={0.5}
                     value={currentTime}
                     onChange={handleSeek}
-                    className="w-full h-1 bg-ice-border/60 rounded-lg appearance-none cursor-pointer accent-ice-accent hover:h-1.5 transition-all"
+                    className={`w-full h-1 bg-ice-border/60 rounded-lg appearance-none cursor-pointer transition-all ${
+                      theme === 'aer' ? 'h-[3px] bg-[#CBD5E1] accent-[#0284C7] rounded-none' : theme === 'terra' ? 'accent-transparent hover:h-1.5' : 'accent-ice-accent hover:h-1.5'
+                    }`}
                   />
+
+                  {/* Aer Mode: Minimalist Vertical Cursor Line */}
+                  {theme === 'aer' && (
+                    <div
+                      className="absolute pointer-events-none -translate-x-1/2 top-1/2 -translate-y-1/2 w-1 h-3.5 bg-[#0284C7] rounded-sm transition-[left] duration-75"
+                      style={{
+                        left: `${safeProgressPercent}%`,
+                      }}
+                    />
+                  )}
+
+                  {/* Terra Mode: Ladybug Progress Thumb crawling on seekbar */}
+                  {theme === 'terra' && (
+                    <div
+                      className="absolute pointer-events-none -translate-x-1/2 top-1/2 -translate-y-1/2 transition-[left] duration-100 ease-out"
+                      style={{
+                        left: `calc(9px + (100% - 18px) * ${safeProgressPercent / 100})`,
+                      }}
+                    >
+                      <TerraLadybugThumb size={18} />
+                    </div>
+                  )}
                 </div>
                 <span className="w-8 text-left tabular-nums">{formatTime(duration)}</span>
               </div>
@@ -494,8 +591,12 @@ export const MiniPlayer: React.FC<MiniPlayerProps> = ({
 
               <button
                 type="button"
-                onClick={onClose}
-                className="p-1.5 rounded-lg text-ice-subtext hover:text-rose-400 hover:bg-ice-hover/60 transition-colors ml-0.5"
+                onClick={handleClosePlayer}
+                className={`p-1.5 rounded-lg transition-colors ml-0.5 ${
+                  theme === 'ignis'
+                    ? 'text-[#D6B4A6] hover:text-[#DC2626] hover:bg-[#381E15]'
+                    : 'text-ice-subtext hover:text-rose-400 hover:bg-ice-hover/60'
+                }`}
                 title="Đóng trình phát"
               >
                 <X className="w-4 h-4" />

@@ -1,8 +1,12 @@
 package com.icelauch.app;
 
+import android.graphics.Color;
+import android.os.Build;
 import android.os.Bundle;
+import android.view.WindowManager;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
+import androidx.core.view.WindowCompat;
 import com.getcapacitor.BridgeActivity;
 
 public class MainActivity extends BridgeActivity {
@@ -30,16 +34,35 @@ public class MainActivity extends BridgeActivity {
         } catch (Exception ignored) {}
     }
 
+    private void configureEdgeToEdgeAndCutout() {
+        try {
+            // Android 9+ (API 28+): Extend window behind waterdrop / punch-hole camera cutouts
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                WindowManager.LayoutParams lp = getWindow().getAttributes();
+                lp.layoutInDisplayCutoutMode = WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
+                getWindow().setAttributes(lp);
+            }
+
+            // WindowCompat edge-to-edge layout
+            WindowCompat.setDecorFitsSystemWindows(getWindow(), false);
+            getWindow().setStatusBarColor(Color.TRANSPARENT);
+            getWindow().setNavigationBarColor(Color.TRANSPARENT);
+        } catch (Exception ignored) {}
+    }
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         registerPlugin(ApkInstallerPlugin.class);
+        registerPlugin(ScreenOrientationPlugin.class);
         super.onCreate(savedInstanceState);
+        configureEdgeToEdgeAndCutout();
         configureWebViewSettings();
     }
 
     @Override
     public void onResume() {
         super.onResume();
+        configureEdgeToEdgeAndCutout();
         configureWebViewSettings();
     }
 }

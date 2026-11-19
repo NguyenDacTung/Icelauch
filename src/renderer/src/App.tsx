@@ -61,6 +61,7 @@ import {
   isDeviceLocallyApproved,
   shouldRequireReLoginForNewVersion,
   markCurrentVersionLoggedIn,
+  APP_VERSION,
 } from './services/deviceAuth';
 import { App as CapApp } from '@capacitor/app';
 import {
@@ -504,6 +505,17 @@ export default function App() {
                 const freshProfiles = await window.api.getProfiles();
                 if (freshProfiles && freshProfiles.length > 0) {
                   setProfiles(freshProfiles);
+                  // Zero-Session Data Loss: Reconcile session if activeProfile is missing but remembered profile exists
+                  if (!isNewVersion) {
+                    const rememberedId = await window.api.getRememberedProfileId();
+                    if (rememberedId) {
+                      const matched = freshProfiles.find((p: UserProfile) => p.id === rememberedId);
+                      if (matched) {
+                        setActiveProfile((curr) => curr || matched);
+                        setIsProfilePickerOpen(false);
+                      }
+                    }
+                  }
                 }
               }
             }
@@ -515,6 +527,14 @@ export default function App() {
     } else {
       console.log('Running on Android / Web platform (no Electron IPC). Fetching from Supabase Cloud...');
       try {
+        const isNewVersion = shouldRequireReLoginForNewVersion(APP_VERSION);
+        if (isNewVersion) {
+          try {
+            localStorage.removeItem('icelauch_active_profile_id');
+            localStorage.removeItem('icelauch_remembered_profile_id');
+          } catch {}
+        }
+
         const cloudData = await fetchDirectCloudCatalog();
         const sys = (cloudData as any).systemSettings || {};
         setAppData({
@@ -537,9 +557,9 @@ export default function App() {
         });
         const fetchedProfiles = cloudData.profiles || [];
         setProfiles(fetchedProfiles);
-        const localSessionProfileId =
-          localStorage.getItem('icelauch_remembered_profile_id') ||
-          localStorage.getItem('icelauch_active_profile_id');
+        const localSessionProfileId = !isNewVersion
+          ? (localStorage.getItem('icelauch_remembered_profile_id') || localStorage.getItem('icelauch_active_profile_id'))
+          : null;
         const matchedProfile = localSessionProfileId
           ? fetchedProfiles.find((p) => p.id === localSessionProfileId)
           : null;
@@ -705,49 +725,49 @@ export default function App() {
     };
   }, [isAdmin]);
 
+  const showAdminCloudToast = (msg = 'Đã lưu thay đổi lên Cloud!') => {
+    setAdminSyncToast(msg);
+    setTimeout(() => setAdminSyncToast(null), 2000);
+  };
+
   const handleLockAdmin = async () => {
     setIsAdmin(false);
-    // Auto-upload shared catalog data (games, media, playlists, tags, banner) to Supabase Cloud on Admin Lock
-    try {
-      if (window.api?.publishCatalog) {
-        await window.api.publishCatalog();
-      } else {
-        const sysSettings = {
-          gameTags: appData?.settings.gameTags,
-          movieTags: appData?.settings.movieTags,
-          musicTags: appData?.settings.musicTags,
-          podcastTags: appData?.settings.podcastTags,
-          bannerSettings: appData?.settings.bannerSettings,
-          globalActionButtons: appData?.settings.globalActionButtons,
-          adminPinHash: appData?.settings.pinHash,
-          adminPinSalt: appData?.settings.pinSalt,
-        };
-        await fetch(`${DEFAULT_SUPABASE_URL}/rest/v1/icelauch_playlists`, {
-          method: 'POST',
-          headers: {
-            apikey: DEFAULT_SUPABASE_ANON_KEY,
-            Authorization: `Bearer ${DEFAULT_SUPABASE_ANON_KEY}`,
-            'Content-Type': 'application/json',
-            Prefer: 'resolution=merge-duplicates',
-          },
-          body: JSON.stringify({
-            id: '__system_catalog_settings__',
-            title: '__system_catalog_settings__',
-            description: JSON.stringify(sysSettings),
-            itemIds: [],
-          }),
-        });
-      }
-      setAdminSyncToast('Đã khóa Admin & tự động cập nhật dữ liệu chung lên Cloud thành công!');
-      setTimeout(() => setAdminSyncToast(null), 4000);
-      sfx.playSuccess();
-    } catch (err) {
-      console.warn('Auto-publish catalog on lock admin failed:', err);
+    // Background publish catalog snapshot on lock as an extra consistency safeguard
+    if (window.api?.publishCatalog) {
+      window.api.publishCatalog().catch(console.warn);
     }
   };
 
-  const handleAdminSuccess = () => {
+  const handleAdminSuccess = async () => {
     setIsAdmin(true);
+    sfx.playSuccess();
+    showAdminCloudToast('Đã vào chế độ Admin & lấy dữ liệu mới nhất từ Cloud!');
+
+    // Immediately pull latest data from Supabase Cloud
+    if (window.api?.syncCloud) {
+      window.api.syncCloud().then(async (syncRes: any) => {
+        if (syncRes && syncRes.success) {
+          const freshData = await window.api.getAppData();
+          if (freshData) setAppData(freshData);
+          if (window.api.getProfiles) {
+            const freshProfiles = await window.api.getProfiles();
+            if (freshProfiles) setProfiles(freshProfiles);
+          }
+        }
+      }).catch(console.warn);
+    } else {
+      fetchDirectCloudCatalog().then((cloudData) => {
+        if (cloudData) {
+          setAppData((prev) => prev ? {
+            ...prev,
+            games: cloudData.games,
+            media: cloudData.media,
+            playlists: cloudData.playlists,
+          } : null);
+          if (cloudData.profiles) setProfiles(cloudData.profiles);
+        }
+      }).catch(console.warn);
+    }
   };
 
   // Game actions
@@ -1000,6 +1020,40 @@ export default function App() {
       }
 
       await loadData();
+      showAdminCloudToast('Đã lưu thay đổi game lên Cloud!');
+    } else {
+      try {
+        const finalGame = {
+          id: gameData.id || `game-${Date.now()}`,
+          name: gameData.name || 'Untitled',
+          drive_url: gameData.downloadLinks && gameData.downloadLinks.length > 0 ? gameData.downloadLinks.join('\n') : null,
+          trailer_url: gameData.trailerUrl || null,
+          banner_url: gameData.bannerPath || null,
+          cover_url: gameData.coverPath || null,
+          description: gameData.description || '',
+          genre: gameData.genre || '',
+          tags: gameData.tags || [],
+          action_buttons: gameData.actionButtonIds || [],
+          featured: Boolean(gameData.featured),
+          hidden: Boolean(gameData.hidden),
+          transform_metadata: gameData.transform_metadata || null,
+          updated_at: new Date().toISOString(),
+        };
+        await fetch(`${DEFAULT_SUPABASE_URL}/rest/v1/icelauch_games`, {
+          method: 'POST',
+          headers: {
+            apikey: DEFAULT_SUPABASE_ANON_KEY,
+            Authorization: `Bearer ${DEFAULT_SUPABASE_ANON_KEY}`,
+            'Content-Type': 'application/json',
+            Prefer: 'resolution=merge-duplicates',
+          },
+          body: JSON.stringify(finalGame),
+        });
+        showAdminCloudToast('Đã lưu thay đổi game lên Cloud!');
+        await loadData();
+      } catch (e) {
+        console.warn('Failed to save game to cloud:', e);
+      }
     }
   };
 
@@ -1032,6 +1086,7 @@ export default function App() {
       if (window.api) {
         await window.api.deleteGame(id, deleteFiles);
         await loadData();
+        showAdminCloudToast('Đã xoá game và đồng bộ Cloud!');
       } else {
         try {
           await fetch(`${DEFAULT_SUPABASE_URL}/rest/v1/icelauch_games?id=eq.${encodeURIComponent(id)}`, {
@@ -1041,6 +1096,7 @@ export default function App() {
               Authorization: `Bearer ${DEFAULT_SUPABASE_ANON_KEY}`,
             },
           });
+          showAdminCloudToast('Đã xoá game và đồng bộ Cloud!');
         } catch (e) {
           console.warn('Failed to delete game on cloud:', e);
         }
@@ -1289,6 +1345,40 @@ export default function App() {
       }
 
       await loadData();
+      showAdminCloudToast('Đã lưu thay đổi media lên Cloud!');
+    } else {
+      try {
+        const finalMedia = {
+          id: mediaData.id || `media-${Date.now()}`,
+          title: mediaData.title || 'Untitled',
+          type: mediaData.type || 'video',
+          link: [mediaData.link, ...(mediaData.backupLinks || [])].filter(Boolean).join('\n'),
+          cover_path: mediaData.coverPath || null,
+          banner_path: mediaData.bannerPath || null,
+          description: mediaData.description || '',
+          category: mediaData.category || '',
+          tags: mediaData.tags || [],
+          duration: mediaData.duration || 0,
+          is_banner_pinned: Boolean(mediaData.isBannerPinned),
+          hidden: Boolean(mediaData.hidden),
+          transform_metadata: mediaData.transform_metadata || null,
+          updated_at: new Date().toISOString(),
+        };
+        await fetch(`${DEFAULT_SUPABASE_URL}/rest/v1/icelauch_media`, {
+          method: 'POST',
+          headers: {
+            apikey: DEFAULT_SUPABASE_ANON_KEY,
+            Authorization: `Bearer ${DEFAULT_SUPABASE_ANON_KEY}`,
+            'Content-Type': 'application/json',
+            Prefer: 'resolution=merge-duplicates',
+          },
+          body: JSON.stringify(finalMedia),
+        });
+        showAdminCloudToast('Đã lưu thay đổi media lên Cloud!');
+        await loadData();
+      } catch (e) {
+        console.warn('Failed to save media to cloud:', e);
+      }
     }
   };
 
@@ -1528,6 +1618,7 @@ export default function App() {
       if (window.api) {
         await window.api.deleteMedia(id);
         await loadData();
+        showAdminCloudToast('Đã xoá media và đồng bộ Cloud!');
       } else {
         try {
           await fetch(`${DEFAULT_SUPABASE_URL}/rest/v1/icelauch_media?id=eq.${encodeURIComponent(id)}`, {
@@ -1537,6 +1628,7 @@ export default function App() {
               Authorization: `Bearer ${DEFAULT_SUPABASE_ANON_KEY}`,
             },
           });
+          showAdminCloudToast('Đã xoá media và đồng bộ Cloud!');
         } catch (e) {
           console.warn('Failed to delete media on cloud:', e);
         }
@@ -1596,7 +1688,7 @@ export default function App() {
         }
         setActiveProfile(res.profile);
         setIsProfilePickerOpen(false);
-        markCurrentVersionLoggedIn('1.2.2');
+        markCurrentVersionLoggedIn(APP_VERSION);
         sfx.playSuccess();
         return { success: true };
       }
@@ -1643,7 +1735,7 @@ export default function App() {
     }
     setActiveProfile(profile);
     setIsProfilePickerOpen(false);
-    markCurrentVersionLoggedIn('1.2.2');
+    markCurrentVersionLoggedIn(APP_VERSION);
     sfx.playSuccess();
     return { success: true };
   };

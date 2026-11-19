@@ -75,7 +75,38 @@ Bảng màu 9 chế độ độc bản được chuẩn hóa công thái học v
 ### 2.5 Nút Bấm & Trình Phát Nhạc Đồng Bộ Màu Nhấn Chủ Đề Động
 - 🎵 Toàn bộ nút Play/Pause, thanh tua, thanh âm lượng và equalizer trên **MiniPlayer PC** và **MobileMiniPlayer** nay tự động dùng màu chủ đề `bg-ice-accent` của mode đang chọn thay vì màu vàng cứng cũ.
 
-### 2.6 Khắc Phục Lỗi Tương Phản & Quét Sạch Hộp Đen Còn Sót
+### 2.6 Cơ Chế Tự Động Đăng Nhập 1 Lần & Quản Lý Phiên Bản (Auto-Login Persistence)
+- 🔑 **Đăng nhập một lần, dùng mãi mãi:** Đồng nhất hằng số phiên bản `APP_VERSION = '1.2.6'` trên toàn hệ thống. Người dùng chỉ cần đăng nhập hồ sơ một lần duy nhất, các lần khởi động tiếp theo ứng dụng tự động đưa vào màn hình chính mà không cần chọn lại hồ sơ.
+- 🔄 **Xác thực phiên bản thông minh:** Ứng dụng chỉ yêu cầu xác thực lại khi có cập nhật phiên bản lớn thực sự, ngăn chặn hoàn toàn lỗi mất phiên khi khởi động lại app.
+- ☁️ **Ưu tiên đám mây (Cloud First):** Tự động đối chiếu hồ sơ đã ghi nhớ khi dữ liệu từ Supabase Cloud được đồng bộ về, đảm bảo dữ liệu luôn nhất quán giữa các thiết bị.
+
+### 2.7 Đồng Bộ Dữ Liệu Quản Trị Viên (Admin) Thời Gian Thực Lên Cloud (Real-time Cloud Sync)
+- ⚡ **Ghi tức thì không cần nút khóa:** Mọi thao tác quản trị (Thêm, sửa, xoá Game, Phim, Nhạc, Banner, Thẻ phân loại, Quản lý tài khoản) lập tức được đẩy trực tiếp lên Cloud Database Supabase qua IPC Service kèm thông báo Toast 2s ("Đã lưu thay đổi lên Cloud!").
+- 📥 **Kéo dữ liệu tức thì khi mở Admin:** Đăng nhập chế độ Quản trị viên lập tức kích hoạt kéo dữ liệu đám mây mới nhất về máy, đảm bảo các thiết bị khác luôn thấy ngay các thay đổi vừa thực hiện.
+
+### 2.8 Đồng Bộ Trạng Thái Căn Chỉnh Ảnh Non-Destructive (`transform_metadata`)
+- 🖼️ **Bảo toàn 100% ảnh gốc trên Storage:** Không ghi đè hay làm nén giảm chất lượng file ảnh gốc trên Supabase Storage.
+- 📐 **Lưu trữ thông số tọa độ phần trăm:** Mọi tùy chỉnh Pan x/y (%), Mức Zoom, Góc Xoay 90° (`RotateCw`) và Độ sắc nét/tương phản được chuẩn hóa vào cột `transform_metadata` (kiểu `JSONB`) trên database.
+- 📱 **Hiển thị hoàn hảo trên mọi độ phân giải:** Cho phép tái hiện chính xác góc nhìn và bố cục ảnh bìa trên cả PC, Điện thoại và Android TV.
+
+### 2.9 Tinh Chỉnh & Đồng Nhất Bảng Màu 3 Chế Độ Sáng (Aer, Solar, Aqua)
+- 💨 **Aer Mode (Phong):** Làm đậm và đầm màu nền thanh công cụ PC Header và thanh phát nhạc MiniPlayer từ `#CAD6E2` sang `#B8C7D9` với đường viền sắc nét `#64748B`, tạo độ tương phản nổi bật với nền canvas `#EEF2F6`.
+- 🎨 **Triệt tiêu hiện tượng chữ vàng trên nền trắng:** Đồng nhất màu sắc theo từng mode cho nút "Hôm nay chơi gì", "Playlist của tôi", "Hôm nay xem gì", "Hôm nay nghe gì", các tab thư viện và hiệu ứng rê chuột (hover).
+- 🏷️ **Thẻ thể loại game chuẩn hóa:** Chữ trắng trên nền đen mờ (`rgba(0, 0, 0, 0.75)`) với viền mỏng tinh tế, hiển thị rõ ràng trên mọi hình ảnh.
+- 🌫️ **Loại bỏ sương mờ trắng:** Tắt hoàn toàn lớp phủ sương mờ trên thẻ hiển thị, trả lại 100% độ sắc nét cho hình ảnh poster.
+
+### 2.10 Đại Tu Giao Diện Mobile, Display Cutout & Trình Phát Video Điện Thoại
+- 📱 **Tràn viền Edge-to-Edge qua Camera Giọt Nước:** Cấu hình `LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES` và `WindowCompat.setDecorFitsSystemWindows(false)` cho Android 9+, loại bỏ hoàn toàn dải đen letterbox trên cùng. Màn hình app tràn trọn vẹn lên tận mép kính ôm trọn camera giọt nước.
+- 🏝️ **Ốc đảo nổi thuần túy (Pure Floating Island Navigation):** Xóa bỏ khối hình chữ nhật đặc chắn ngang đáy màn hình. Thanh điều hướng bo góc và MiniPlayer chuyển thành lớp phủ nổi (`absolute bottom-0 inset-x-0`), cho phép danh sách game/phim/nhạc cuộn tự do bên dưới và xuyên qua 4 phía xung quanh thanh nav.
+- 💧 **Kính nước trong suốt Aqua (Aqua Water-Glass):** Thanh điều hướng đáy và MiniPlayer ở mode Aqua sử dụng hiệu ứng thủy lưu khúc xạ trong suốt (`bg-sky-100/35 border-sky-300/50 backdrop-blur-2xl`), nhìn xuyên thấu nội dung trôi bên dưới như nhìn qua mặt nước trong vắt.
+- ⚙️ **Cài đặt Mobile:** Thêm khoảng đệm cho hàng 9 Celestial Themes, loại bỏ hoàn toàn lỗi khuyết mép trên của vòng hào quang `ring-2`.
+- 🎬 **Trình phát YouTube Mobile: Tự động xoay ngang & Triệt tiêu vệt đen:**
+  - Plugin native `ScreenOrientationPlugin.java` cho Capacitor: Khi bấm mở to (hoặc nút "Xoay ngang" mới), app tự động chuyển sang chế độ xoay ngang cảm biến (`SCREEN_ORIENTATION_SENSOR_LANDSCAPE`) và tự khôi phục khi thoát.
+  - Lớp phủ Rạp Chiếu Toàn Màn Hình tràn viền 100% `fixed inset-0 z-[9999]`, loại bỏ toàn bộ lề/padding. Bổ sung nút chuyển đổi thông minh: **Chuẩn 16:9** (vừa màn) và **Tràn viền (Fill)** (scale nhẹ `1.18x` lấp kín toàn bộ tỷ lệ 20:9/21:9 của điện thoại, loại bỏ hoàn toàn 2 vệt đen trên dưới).
+- 🎬 **Trình phát Google Drive Mobile: Hiển thị ảnh bìa 16:9 sắc nét:**
+  - Loại bỏ hoàn toàn màn hình đen mờ, thay bằng ảnh bìa poster tỉ lệ 16:9 sắc nét kết hợp lớp phủ gradient điện ảnh mềm và nút phát sáng trung tâm (Glowing Cyan Play Button), mang đến giao diện trực quan và cao cấp.
+
+### 2.11 Khắc Phục Lỗi Tương Phản & Quét Sạch Hộp Đen Còn Sót
 - 🛠️ Sửa dứt điểm hộp nút liên kết Steam/Discord (`GameActionsWidget`) và các ô nhập liệu trong `SettingsView` không còn bị hiển thị màu đen ngòm ở Solar mode.
 - 🧪 **193/193 ca kiểm thử tự động PASS 100%:** Xác thực toàn bộ logic nghiệp vụ, giao diện và đóng gói hệ thống.
 

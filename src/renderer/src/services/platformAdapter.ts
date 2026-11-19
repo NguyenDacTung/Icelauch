@@ -188,6 +188,7 @@ export async function fetchDirectCloudCatalog(
         bannerSharpen: meta.bannerSharpen,
         listCardPosition: meta.listCardPosition,
         listCardZoom: meta.listCardZoom,
+        transform_metadata: row.transform_metadata || meta.transform_metadata || undefined,
       };
     });
 
@@ -223,6 +224,7 @@ export async function fetchDirectCloudCatalog(
         bannerSharpen: meta.bannerSharpen,
         listCardPosition: meta.listCardPosition,
         listCardZoom: meta.listCardZoom,
+        transform_metadata: row.transform_metadata || meta.transform_metadata || undefined,
       };
     });
 

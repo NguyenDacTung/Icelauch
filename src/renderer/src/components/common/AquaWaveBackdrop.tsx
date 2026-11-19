@@ -15,25 +15,25 @@ export const AquaWaveBackdrop: React.FC<AquaWaveBackdropProps> = ({ lowSpecMode 
       className="fixed inset-0 pointer-events-none select-none overflow-hidden z-0"
       aria-hidden="true"
     >
-      {/* 1. Base Gradient Canvas */}
-      <div className="absolute inset-0 bg-gradient-to-b from-[#E0F7FA] via-[#E0F2FE] to-[#BAE6FD]" />
+      {/* 1. Base Gradient Canvas (Rich Azure Water ~25% deeper) */}
+      <div className="absolute inset-0 bg-gradient-to-b from-[#CEEBF8] via-[#B8E2F6] to-[#8FD5F5]" />
 
       {/* 2. Ambient Sunlight Caustic Glimmer (Subtle Refraction) */}
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_0%,rgba(255,255,255,0.7)_0%,rgba(186,230,253,0.2)_60%,transparent_100%)] opacity-80" />
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_0%,rgba(255,255,255,0.7)_0%,rgba(125,211,252,0.3)_60%,transparent_100%)] opacity-80" />
 
       {/* 3. Flowing Wave Layers (GPU Compositor Animated) */}
       {!lowSpecMode && (
         <>
           {/* Deep Slow Wave Layer */}
           <div
-            className="absolute -bottom-10 -left-1/2 w-[200%] h-72 opacity-35"
+            className="absolute -bottom-10 -left-1/2 w-[200%] h-72 opacity-45"
             style={{
               animation: 'aqua-wave-drift-slow 22s ease-in-out infinite',
               willChange: 'transform',
             }}
           >
             <svg
-              className="w-full h-full fill-sky-300"
+              className="w-full h-full fill-sky-400"
               viewBox="0 0 1440 320"
               preserveAspectRatio="none"
             >
@@ -43,14 +43,14 @@ export const AquaWaveBackdrop: React.FC<AquaWaveBackdropProps> = ({ lowSpecMode 
 
           {/* Middle Translucent Cyan Wave Layer */}
           <div
-            className="absolute -bottom-6 -left-1/3 w-[200%] h-60 opacity-40"
+            className="absolute -bottom-6 -left-1/3 w-[200%] h-60 opacity-50"
             style={{
               animation: 'aqua-wave-drift-fast 16s ease-in-out infinite reverse',
               willChange: 'transform',
             }}
           >
             <svg
-              className="w-full h-full fill-cyan-200"
+              className="w-full h-full fill-cyan-300"
               viewBox="0 0 1440 320"
               preserveAspectRatio="none"
             >
@@ -60,7 +60,7 @@ export const AquaWaveBackdrop: React.FC<AquaWaveBackdropProps> = ({ lowSpecMode 
 
           {/* Foreground Crisp Water Crest (Frosted White-Sky Highlight) */}
           <div
-            className="absolute -bottom-2 -left-1/4 w-[180%] h-44 opacity-50"
+            className="absolute -bottom-2 -left-1/4 w-[180%] h-44 opacity-40"
             style={{
               animation: 'aqua-wave-drift-slow 12s ease-in-out infinite',
               willChange: 'transform',

@@ -633,11 +633,11 @@ CREATE POLICY "Public Update Assets" ON storage.objects FOR UPDATE TO anon WITH 
               setActiveTab('appearance');
             }}
             className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-black transition-all ${activeTab === 'appearance'
-              ? 'bg-amber-500/25 text-amber-950 border border-amber-500/60 shadow-md'
+              ? 'bg-amber-500/25 text-amber-950 dark:text-amber-200 border border-amber-500/60 shadow-md'
               : 'text-ice-subtext hover:text-ice-text hover:bg-ice-hover border border-transparent'
               }`}
           >
-            <Palette className="w-4 h-4 text-amber-600" />
+            <Palette className="w-4 h-4 text-amber-600 dark:text-amber-400" />
             <span>Giao Diện & Trải Nghiệm</span>
           </button>
 
@@ -647,11 +647,11 @@ CREATE POLICY "Public Update Assets" ON storage.objects FOR UPDATE TO anon WITH 
               setActiveTab('integrations');
             }}
             className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-black transition-all ${activeTab === 'integrations'
-              ? 'bg-blue-600/25 text-blue-950 border border-blue-500/60 shadow-md'
+              ? 'bg-blue-600/25 text-blue-950 dark:text-blue-200 border border-blue-500/60 shadow-md'
               : 'text-ice-subtext hover:text-ice-text hover:bg-ice-hover border border-transparent'
               }`}
           >
-            <ExternalLink className="w-4 h-4 text-blue-600" />
+            <ExternalLink className="w-4 h-4 text-blue-600 dark:text-blue-400" />
             <span>Nút Liên Kết & Tích Hợp</span>
             <span className="text-[10px] font-mono px-1.5 py-0.2 rounded-full bg-ice-hover text-ice-text border border-ice-border/50">
               {actionButtons.length}
@@ -664,11 +664,11 @@ CREATE POLICY "Public Update Assets" ON storage.objects FOR UPDATE TO anon WITH 
               setActiveTab('storage');
             }}
             className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-black transition-all ${activeTab === 'storage'
-              ? 'bg-emerald-600/25 text-emerald-950 border border-emerald-500/60 shadow-md'
+              ? 'bg-emerald-600/25 text-emerald-950 dark:text-emerald-200 border border-emerald-500/60 shadow-md'
               : 'text-ice-subtext hover:text-ice-text hover:bg-ice-hover border border-transparent'
               }`}
           >
-            <HardDrive className="w-4 h-4 text-emerald-600" />
+            <HardDrive className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
             <span>Lưu Trữ & Thư Mục</span>
           </button>
 
@@ -678,11 +678,11 @@ CREATE POLICY "Public Update Assets" ON storage.objects FOR UPDATE TO anon WITH 
               setActiveTab('cloud');
             }}
             className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-black transition-all ${activeTab === 'cloud'
-              ? 'bg-indigo-600/25 text-indigo-950 border border-indigo-500/60 shadow-md'
+              ? 'bg-indigo-600/25 text-indigo-950 dark:text-indigo-200 border border-indigo-500/60 shadow-md'
               : 'text-ice-subtext hover:text-ice-text hover:bg-ice-hover border border-transparent'
               }`}
           >
-            <Cloud className="w-4 h-4 text-indigo-600" />
+            <Cloud className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
             <span>Đồng Bộ Đám Mây</span>
             {cloudEnabled && (
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" title="Đang bật đồng bộ" />
@@ -699,13 +699,13 @@ CREATE POLICY "Public Update Assets" ON storage.objects FOR UPDATE TO anon WITH 
               }
             }}
             className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-black transition-all ${activeTab === 'admin'
-              ? 'bg-red-500/25 text-red-950 border border-red-500/60 shadow-md'
+              ? 'bg-red-500/25 text-red-950 dark:text-red-200 border border-red-500/60 shadow-md'
               : 'text-ice-subtext hover:text-ice-text hover:bg-ice-hover border border-transparent'
               }`}
           >
-            {isAdmin ? <ShieldCheck className="w-4 h-4 text-amber-600" /> : <Lock className="w-4 h-4 text-ice-muted" />}
+            {isAdmin ? <ShieldCheck className="w-4 h-4 text-amber-600 dark:text-amber-400" /> : <Lock className="w-4 h-4 text-ice-muted" />}
             <span>Quản Trị Hệ Thống</span>
-            {!isAdmin && <span className="text-[10px] text-amber-800 bg-amber-500/20 px-1.5 py-0.5 rounded font-bold">Khóa</span>}
+            {!isAdmin && <span className="text-[10px] text-amber-800 dark:text-amber-300 bg-amber-500/20 px-1.5 py-0.5 rounded font-bold">Khóa</span>}
           </button>
 
           <button
@@ -714,13 +714,13 @@ CREATE POLICY "Public Update Assets" ON storage.objects FOR UPDATE TO anon WITH 
               setActiveTab('updates');
             }}
             className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-black transition-all ${activeTab === 'updates'
-              ? 'bg-cyan-500/25 text-cyan-950 border border-cyan-500/60 shadow-md'
+              ? 'bg-cyan-500/25 text-cyan-950 dark:text-cyan-200 border border-cyan-500/60 shadow-md'
               : 'text-ice-subtext hover:text-ice-text hover:bg-ice-hover border border-transparent'
               }`}
           >
-            <RefreshCw className={`w-4 h-4 text-cyan-600 ${updaterStatus === 'checking' ? 'animate-spin' : ''}`} />
+            <RefreshCw className={`w-4 h-4 text-cyan-600 dark:text-cyan-400 ${updaterStatus === 'checking' ? 'animate-spin' : ''}`} />
             <span>Phiên Bản & Cập Nhật</span>
-            <span className="text-[10px] font-mono px-1.5 py-0.5 rounded-full bg-cyan-500/20 text-cyan-900 font-bold">
+            <span className="text-[10px] font-mono px-1.5 py-0.5 rounded-full bg-cyan-500/20 text-cyan-900 dark:text-cyan-200 font-bold">
               v{appVersion}
             </span>
           </button>
@@ -991,11 +991,11 @@ CREATE POLICY "Public Update Assets" ON storage.objects FOR UPDATE TO anon WITH 
               <div className="flex items-center justify-between border-b border-ice-border/60 pb-3">
                 <div className="flex items-center gap-2">
                   <ImageIcon className="w-5 h-5 text-amber-400" />
-                  <h3 className="text-sm font-bold text-white uppercase tracking-wider">
+                  <h3 className="text-sm font-bold text-ice-text uppercase tracking-wider">
                     Hình Nền Ứng Dụng Tùy Chỉnh (Custom App Wallpaper)
                   </h3>
                 </div>
-                <label className="flex items-center gap-2 cursor-pointer text-xs font-semibold text-white select-none">
+                <label className="flex items-center gap-2 cursor-pointer text-xs font-semibold text-ice-text select-none">
                   <input
                     type="checkbox"
                     checked={wallpaperEnabled}
@@ -1102,7 +1102,7 @@ CREATE POLICY "Public Update Assets" ON storage.objects FOR UPDATE TO anon WITH 
                     </div>
                   </div>
 
-                  <label className="flex items-center gap-2 cursor-pointer text-xs text-white select-none pt-2">
+                  <label className="flex items-center gap-2 cursor-pointer text-xs text-ice-text select-none pt-2">
                     <input
                       type="checkbox"
                       checked={showWithParticles}
@@ -1117,13 +1117,13 @@ CREATE POLICY "Public Update Assets" ON storage.objects FOR UPDATE TO anon WITH 
 
             {/* Sound & Title */}
             <section className="bg-ice-card rounded-2xl border border-ice-border p-6 space-y-4">
-              <h3 className="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2 border-b border-ice-border/60 pb-3">
+              <h3 className="text-sm font-bold text-ice-text uppercase tracking-wider flex items-center gap-2 border-b border-ice-border/60 pb-3">
                 <Volume2 className="w-4 h-4 text-amber-400" />
                 Âm Thanh Tương Tác & Danh Hiệu
               </h3>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <label className="flex items-center gap-2.5 cursor-pointer text-xs text-white select-none">
+                <label className="flex items-center gap-2.5 cursor-pointer text-xs text-ice-text select-none">
                   <input
                     type="checkbox"
                     checked={sfxEnabled}
@@ -1133,7 +1133,7 @@ CREATE POLICY "Public Update Assets" ON storage.objects FOR UPDATE TO anon WITH 
                   <span>Âm thanh tương tác UI (Clicks & Hovers)</span>
                 </label>
 
-                <label className="flex items-center gap-2.5 cursor-pointer text-xs text-white select-none">
+                <label className="flex items-center gap-2.5 cursor-pointer text-xs text-ice-text select-none">
                   <input
                     type="checkbox"
                     checked={bgAudioEnabled}
@@ -1427,11 +1427,11 @@ CREATE POLICY "Public Update Assets" ON storage.objects FOR UPDATE TO anon WITH 
 
             {/* Extraction Defaults */}
             <section className="bg-ice-card rounded-2xl border border-ice-border p-6 space-y-4">
-              <h3 className="text-sm font-bold text-white uppercase tracking-wider border-b border-ice-border/60 pb-3">
+              <h3 className="text-sm font-bold text-ice-text uppercase tracking-wider border-b border-ice-border/60 pb-3">
                 Tùy Chọn Cài Đặt Mặc Định
               </h3>
               <div className="space-y-3">
-                <label className="flex items-center gap-2.5 cursor-pointer text-xs text-white select-none">
+                <label className="flex items-center gap-2.5 cursor-pointer text-xs text-ice-text select-none">
                   <input
                     type="checkbox"
                     checked={deleteArchive}
@@ -1444,7 +1444,7 @@ CREATE POLICY "Public Update Assets" ON storage.objects FOR UPDATE TO anon WITH 
                   <span>Tự động xóa file nén sau khi cài đặt thành công (Tiết kiệm bộ nhớ)</span>
                 </label>
 
-                <label className="flex items-center gap-2.5 cursor-pointer text-xs text-white select-none">
+                <label className="flex items-center gap-2.5 cursor-pointer text-xs text-ice-text select-none">
                   <input
                     type="checkbox"
                     checked={runAdminDefault}
@@ -1556,7 +1556,7 @@ CREATE POLICY "Public Update Assets" ON storage.objects FOR UPDATE TO anon WITH 
             <section className="p-6 rounded-2xl bg-ice-card border border-ice-border shadow-md space-y-4">
               <div className="flex items-center justify-between border-b border-ice-border/60 pb-3">
                 <div>
-                  <span className="text-sm font-bold text-white block">Tùy Chọn Tự Động Đồng Bộ Ngầm</span>
+                  <span className="text-sm font-bold text-ice-text block">Tùy Chọn Tự Động Đồng Bộ Ngầm</span>
                   <span className="text-xs text-ice-subtext block mt-0.5">
                     Tự động đồng bộ tiến độ phim, danh sách yêu thích và thư viện game sau mỗi khoảng thời gian
                   </span>
@@ -1628,8 +1628,8 @@ CREATE POLICY "Public Update Assets" ON storage.objects FOR UPDATE TO anon WITH 
                 <section className="p-6 rounded-2xl bg-ice-card border border-amber-500/40 shadow-md space-y-5">
                   <div className="flex items-center justify-between pb-4 border-b border-ice-border/60">
                     <div className="space-y-0.5">
-                      <span className="text-sm font-bold text-white flex items-center gap-2">
-                        <ShieldCheck className="w-4 h-4 text-amber-400" />
+                      <span className="text-sm font-bold text-ice-text flex items-center gap-2">
+                        <ShieldCheck className="w-4 h-4 text-amber-500 dark:text-amber-400" />
                         <span>Cấu Hình Kết Nối Supabase (Quản Trị Viên)</span>
                       </span>
                       <span className="text-xs text-ice-subtext block">
@@ -1722,7 +1722,7 @@ CREATE POLICY "Public Update Assets" ON storage.objects FOR UPDATE TO anon WITH 
                 <section className="p-6 rounded-2xl bg-ice-card border border-ice-border shadow-md space-y-4">
                   <div className="flex items-center justify-between">
                     <div className="space-y-0.5">
-                      <span className="text-sm font-bold text-white block">Hướng Dẫn Khởi Tạo Bảng Supabase (1 Lần Duy Nhất)</span>
+                      <span className="text-sm font-bold text-ice-text block">Hướng Dẫn Khởi Tạo Bảng Supabase (1 Lần Duy Nhất)</span>
                       <span className="text-xs text-ice-subtext block">
                         Nếu bạn vừa tạo Project Supabase mới, hãy sao chép đoạn mã SQL này và chạy trong SQL Editor
                       </span>
@@ -1776,8 +1776,8 @@ CREATE POLICY "Public Update Assets" ON storage.objects FOR UPDATE TO anon WITH 
           <div className="space-y-6">
             {!isAdmin ? (
               <div className="p-8 text-center bg-ice-card rounded-2xl border border-ice-border space-y-4">
-                <ShieldCheck className="w-12 h-12 text-amber-400 mx-auto" />
-                <h3 className="text-base font-bold text-white">Yêu Cầu Quyền Quản Trị Viên (Admin)</h3>
+                <ShieldCheck className="w-12 h-12 text-amber-500 dark:text-amber-400 mx-auto" />
+                <h3 className="text-base font-bold text-ice-text">Yêu Cầu Quyền Quản Trị Viên (Admin)</h3>
                 <p className="text-xs text-ice-subtext max-w-md mx-auto leading-relaxed">
                   Khu vực này chứa các chức năng nhạy cảm như đổi mã PIN, quản lý tags thể loại, sao lưu JSON và nạp dữ liệu.
                 </p>
@@ -1793,13 +1793,13 @@ CREATE POLICY "Public Update Assets" ON storage.objects FOR UPDATE TO anon WITH 
                 {/* Security & PIN */}
                 <section className="bg-ice-card rounded-2xl border border-ice-border p-6 space-y-4">
                   <div className="flex items-center justify-between border-b border-ice-border/60 pb-3">
-                    <h3 className="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
-                      <KeyRound className="w-4 h-4 text-amber-400" />
+                    <h3 className="text-sm font-bold text-ice-text uppercase tracking-wider flex items-center gap-2">
+                      <KeyRound className="w-4 h-4 text-amber-500 dark:text-amber-400" />
                       Bảo Mật & Mã PIN Quản Trị
                     </h3>
                     <button
                       onClick={onChangePin}
-                      className="px-4 py-1.5 rounded-xl bg-amber-500/20 text-amber-300 border border-amber-500/40 hover:bg-amber-500/30 text-xs font-bold transition-all"
+                      className="px-4 py-1.5 rounded-xl bg-amber-500/20 text-amber-800 dark:text-amber-300 border border-amber-500/40 hover:bg-amber-500/30 text-xs font-bold transition-all"
                     >
                       Đổi Mã PIN (4 - 10 số)
                     </button>
@@ -1814,8 +1814,8 @@ CREATE POLICY "Public Update Assets" ON storage.objects FOR UPDATE TO anon WITH 
                   <section className="bg-ice-card rounded-2xl border border-ice-border p-6 space-y-4">
                     <div className="flex items-center justify-between border-b border-ice-border/60 pb-3">
                       <div className="flex items-center gap-2">
-                        <Users className="w-5 h-5 text-blue-400" />
-                        <h3 className="text-sm font-bold text-white uppercase tracking-wider">
+                        <Users className="w-5 h-5 text-blue-500 dark:text-blue-400" />
+                        <h3 className="text-sm font-bold text-ice-text uppercase tracking-wider">
                           Quản Trị Người Dùng & Tài Khoản
                         </h3>
                       </div>
@@ -1838,8 +1838,8 @@ CREATE POLICY "Public Update Assets" ON storage.objects FOR UPDATE TO anon WITH 
                   <section className="bg-ice-card rounded-2xl border border-ice-border p-6 space-y-4">
                     <div className="flex items-center justify-between border-b border-ice-border/60 pb-3">
                       <div className="flex items-center gap-2">
-                        <Shield className="w-5 h-5 text-cyan-400" />
-                        <h3 className="text-sm font-bold text-white uppercase tracking-wider">
+                        <Shield className="w-5 h-5 text-cyan-500 dark:text-cyan-400" />
+                        <h3 className="text-sm font-bold text-ice-text uppercase tracking-wider">
                           Quản Lý Thiết Bị Được Cấp Quyền (Device Whitelist)
                         </h3>
                       </div>
@@ -1861,8 +1861,8 @@ CREATE POLICY "Public Update Assets" ON storage.objects FOR UPDATE TO anon WITH 
                 <section className="bg-ice-card rounded-2xl border border-ice-border p-6 space-y-4">
                   <div className="flex items-center justify-between border-b border-ice-border/60 pb-3">
                     <div className="flex items-center gap-2">
-                      <Sparkles className="w-5 h-5 text-amber-400" />
-                      <h3 className="text-sm font-bold text-white uppercase tracking-wider">
+                      <Sparkles className="w-5 h-5 text-amber-500 dark:text-amber-400" />
+                      <h3 className="text-sm font-bold text-ice-text uppercase tracking-wider">
                         Quản Lý Banner Nổi Bật Toàn Hệ Thống
                       </h3>
                     </div>
@@ -1883,15 +1883,15 @@ CREATE POLICY "Public Update Assets" ON storage.objects FOR UPDATE TO anon WITH 
 
                 {/* Tag Management */}
                 <section className="bg-ice-card rounded-2xl border border-ice-border p-6 space-y-6">
-                  <h3 className="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2 border-b border-ice-border/60 pb-3">
-                    <Tag className="w-4 h-4 text-amber-400" />
+                  <h3 className="text-sm font-bold text-ice-text uppercase tracking-wider flex items-center gap-2 border-b border-ice-border/60 pb-3">
+                    <Tag className="w-4 h-4 text-amber-500 dark:text-amber-400" />
                     Quản Lý Danh Mục Thể Loại (Tags)
                   </h3>
 
                   {/* Game Tags */}
                   <div className="space-y-3">
                     <div className="flex items-center justify-between">
-                      <span className="text-xs font-bold text-white flex items-center gap-1.5">
+                      <span className="text-xs font-bold text-ice-text flex items-center gap-1.5">
                         <Gamepad2 className="w-4 h-4 text-ice-accent" />
                         Thể Loại Game
                       </span>
@@ -2140,8 +2140,8 @@ CREATE POLICY "Public Update Assets" ON storage.objects FOR UPDATE TO anon WITH 
               <section className="bg-ice-card rounded-2xl border border-amber-500/40 p-6 space-y-3">
                 <div className="flex items-center justify-between border-b border-ice-border/60 pb-3">
                   <div className="flex items-center gap-2">
-                    <Sparkles className="w-4 h-4 text-amber-400" />
-                    <h3 className="text-sm font-bold text-white">
+                    <Sparkles className="w-4 h-4 text-amber-500 dark:text-amber-400" />
+                    <h3 className="text-sm font-bold text-ice-text">
                       Thông Tin Bản Cập Nhật Mới: v{newVersionInfo.version}
                     </h3>
                   </div>

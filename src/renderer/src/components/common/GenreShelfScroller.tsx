@@ -123,22 +123,23 @@ export const GenreShelfScroller: React.FC<GenreShelfScrollerProps> = ({
       <div className="relative group/shelf">
         {/* Soft Left Fader */}
         <div
-          className={`pointer-events-none absolute left-0 top-0 bottom-2 w-8 bg-gradient-to-r from-ice-bg to-transparent z-10 transition-opacity duration-300 ${
+          className={`pointer-events-none absolute left-0 top-0 bottom-0 w-8 bg-gradient-to-r from-ice-bg to-transparent z-10 transition-opacity duration-300 ${
             canScrollLeft ? 'opacity-80' : 'opacity-0'
           }`}
         />
 
-        {/* Horizontal Track */}
+        {/* Horizontal Track with ample vertical breathing room so hover scaling & flame auras are never clipped */}
         <div
           ref={scrollRef}
-          className="flex items-center gap-4 overflow-x-auto pb-2 scroll-smooth [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
+          className="flex items-center gap-4 overflow-x-auto overflow-y-hidden py-6 -my-3 pb-6 scroll-smooth [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
+          style={{ touchAction: 'pan-x' }}
         >
           {children}
         </div>
 
         {/* Soft Right Fader */}
         <div
-          className={`pointer-events-none absolute right-0 top-0 bottom-2 w-8 bg-gradient-to-l from-ice-bg to-transparent z-10 transition-opacity duration-300 ${
+          className={`pointer-events-none absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-ice-bg to-transparent z-10 transition-opacity duration-300 ${
             canScrollRight ? 'opacity-80' : 'opacity-0'
           }`}
         />

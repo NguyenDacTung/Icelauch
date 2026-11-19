@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useDeferredValue } from 'react';
+import React, { useState, useEffect, useDeferredValue, useMemo } from 'react';
 import {
   Gamepad2,
   Sparkles,
@@ -26,6 +26,7 @@ interface MobileHomeViewProps {
   onIncompatibleClick?: (game: Game) => void;
   onToggleLibrary: (id: string) => void;
   onOpenSurprise?: () => void;
+  userLibraryIds?: string[];
 }
 
 export const MobileHomeView: React.FC<MobileHomeViewProps> = ({
@@ -38,11 +39,21 @@ export const MobileHomeView: React.FC<MobileHomeViewProps> = ({
   onIncompatibleClick,
   onToggleLibrary,
   onOpenSurprise,
+  userLibraryIds,
 }) => {
   const [localSearch, setLocalSearch] = useState('');
   const deferredSearch = useDeferredValue(localSearch);
   const [visibleCount, setVisibleCount] = useState<number>(10);
-  const visibleGames = games.filter((g) => !g.hidden);
+
+  // Enhance games dynamically with active user's library binding
+  const resolvedGames = useMemo(() => {
+    return games.map((g) => ({
+      ...g,
+      inLibrary: userLibraryIds ? userLibraryIds.includes(g.id) : Boolean(g.inLibrary),
+    }));
+  }, [games, userLibraryIds]);
+
+  const visibleGames = resolvedGames.filter((g) => !g.hidden);
 
   const effectiveSearch = (deferredSearch || searchQuery).trim().toLowerCase();
 
@@ -65,7 +76,7 @@ export const MobileHomeView: React.FC<MobileHomeViewProps> = ({
   };
 
   return (
-    <div className="flex-1 w-full h-full flex flex-col bg-ice-bg text-ice-text select-none overflow-y-auto no-scrollbar p-3.5 space-y-4">
+    <div className="flex-1 w-full h-full flex flex-col bg-ice-bg text-ice-text select-none overflow-y-auto no-scrollbar p-3.5 pt-[max(0.75rem,env(safe-area-inset-top,0px))] pb-28 space-y-4">
       {/* 0. TOP MOBILE SEARCH FORM */}
       <form
         action=""

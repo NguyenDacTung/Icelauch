@@ -41,6 +41,10 @@ import { GenreShelfScroller } from '../common/GenreShelfScroller';
 import { SurpriseMediaModal } from './SurpriseMediaModal';
 import { AdminPlaylistManagerModal } from '../admin/AdminPlaylistManagerModal';
 import { parseMediaUrl } from '../../utils/mediaUrl';
+import { useTheme } from '../../hooks/useTheme';
+import { TerraBotanicalCardFrame } from '../common/TerraBotanicalCardFrame';
+import { TerraAppleFavoriteIcon } from '../common/TerraAppleFavoriteIcon';
+import { IgnisFireAura } from '../common/IgnisFireAura';
 import type { MediaItem, MediaPlaylist, MediaSubType, AppBannerSettings, AppSettings } from '../../types';
 import { sfx } from '../../utils/sfx';
 import { matchSmartSearch } from '../../utils/searchHelper';
@@ -138,12 +142,15 @@ export const MediaView: React.FC<MediaViewProps> = ({
   onNavigateToUserPlaylists,
   onActiveBannerChange,
 }) => {
+  const { theme } = useTheme();
+  const isLightMode = ['solar', 'aer', 'aqua'].includes(theme);
   // 3 Sub-Tabs: 'video' | 'music' | 'podcast'
   const [activeTab, setActiveTab] = useState<'video' | 'music' | 'podcast'>('video');
   const [selectedTag, setSelectedTag] = useState<string>('all');
   const [filterOfflineOnly, setFilterOfflineOnly] = useState(false);
   const [activeVideo, setActiveVideo] = useState<MediaItem | null>(null);
   const [internalActiveAudioTrack, setInternalActiveAudioTrack] = useState<MediaItem | null>(null);
+  const [hoveredCardId, setHoveredCardId] = useState<string | null>(null);
   const effectiveActiveAudioTrack = propActiveAudioTrack !== undefined ? propActiveAudioTrack : internalActiveAudioTrack;
 
   const setActiveAudio = (track: MediaItem | null) => {
@@ -286,25 +293,50 @@ export const MediaView: React.FC<MediaViewProps> = ({
     const IconComponent = item.type === 'video' ? Film : item.subType === 'podcast' ? Mic : Music;
     const isPlayingCurrent = currentTrack && item.id === currentTrack.id;
 
+    const isCardHovered = hoveredCardId === item.id;
+
     return (
       <div
         key={item.id}
+        onMouseEnter={() => setHoveredCardId(item.id)}
+        onMouseLeave={() => setHoveredCardId(null)}
         onClick={() => {
           if (item.type === 'video') handleOpenVideo(item);
           else handleOpenAudio(item);
         }}
         style={{ isolation: 'isolate' }}
-        className={`group relative bg-ice-card rounded-xl overflow-hidden border ${isPlayingCurrent
-          ? 'border-amber-400 ring-2 ring-amber-500/50 shadow-amber-500/20'
-          : 'border-ice-border hover:border-amber-400/80 hover:shadow-xl'
-          } cursor-pointer transition-all duration-300 hover:-translate-y-1 flex flex-col ${isShelf ? 'w-[170px] shrink-0' : ''
+        className={`group relative rounded-xl border cursor-pointer flex flex-col ${theme === 'aer'
+          ? 'bg-white border-[#CBD5E1] hover:border-[#0284C7] transition-none shadow-none overflow-hidden'
+          : theme === 'ignis'
+            ? 'bg-ice-card border-ice-border hover:border-ice-accent/60 hover:shadow-xl transition-all duration-300 overflow-visible hover:scale-[1.06] hover:z-30'
+            : theme === 'terra'
+              ? 'bg-ice-card border-ice-border hover:border-ice-accent/60 hover:shadow-xl transition-all duration-300 overflow-visible hover:-translate-y-1'
+              : isLightMode
+                ? 'bg-ice-card border-ice-border hover:border-ice-accent/80 hover:shadow-xl transition-all duration-300 overflow-hidden hover:-translate-y-1'
+                : 'bg-ice-card border-ice-border hover:border-amber-400/80 hover:shadow-xl transition-all duration-300 overflow-hidden hover:-translate-y-1'
+          } ${isPlayingCurrent
+            ? theme === 'aer' ? 'border-[#0284C7] ring-2 ring-[#0284C7]/40' : theme === 'aqua' ? 'border-sky-500 ring-2 ring-sky-500/40 shadow-sky-500/20' : 'border-amber-400 ring-2 ring-amber-500/50 shadow-amber-500/20'
+            : ''
+          } ${isShelf ? 'w-[170px] shrink-0' : ''
           }`}
       >
-        <div style={{ isolation: 'isolate' }} className="aspect-[2/3] w-full relative overflow-hidden bg-black flex items-center justify-center">
+        {/* Ignis Mode: Bottom-to-Top Organic Fire Aura */}
+        {theme === 'ignis' && (
+          <IgnisFireAura isHovered={isCardHovered} />
+        )}
+
+        {/* Terra Mode: Outer Botanical Vine Frame */}
+        {theme === 'terra' && (
+          <TerraBotanicalCardFrame isFavorite={isFav} />
+        )}
+
+        <div style={{ isolation: 'isolate' }} className="aspect-[2/3] w-full relative overflow-hidden bg-black flex items-center justify-center rounded-t-xl">
           {hasCover && coverImg ? (
             <img
               src={coverImg.startsWith('http') ? coverImg : `file://${coverImg}`}
               alt={item.title}
+              loading="lazy"
+              decoding="async"
               style={{
                 objectPosition: item.listCardPosition || item.coverPosition || '50% 50%',
                 transform: (item.listCardZoom || item.coverZoom) ? `scale(${item.listCardZoom || item.coverZoom})` : undefined,
@@ -335,7 +367,11 @@ export const MediaView: React.FC<MediaViewProps> = ({
                   sfx.playClick();
                   setTargetMediaForPlaylist(item);
                 }}
-                className="p-1.5 rounded-full backdrop-blur-md bg-black/60 text-white/70 hover:text-amber-400 hover:bg-black/80 transition-all"
+                className={`p-1.5 rounded-full backdrop-blur-md bg-black/60 transition-all ${
+                  isLightMode
+                    ? 'text-white/80 hover:text-white hover:bg-black/80'
+                    : 'text-white/70 hover:text-amber-400 hover:bg-black/80'
+                }`}
                 title="Thêm vào danh sách phát cá nhân"
               >
                 <ListPlus className="w-3.5 h-3.5" />
@@ -349,25 +385,42 @@ export const MediaView: React.FC<MediaViewProps> = ({
                   sfx.playClick();
                   onToggleFavoriteMedia(item.id);
                 }}
-                className={`p-1.5 rounded-full backdrop-blur-md transition-all ${isFav ? 'bg-rose-500 text-white' : 'bg-black/60 text-white/70 hover:text-rose-400'
+                className={`p-1.5 rounded-full backdrop-blur-md transition-all ${theme === 'terra'
+                  ? isFav
+                    ? 'bg-[#2B241D] text-red-500 border border-[#7C5332] shadow-sm'
+                    : 'bg-[#2B241D]/90 text-[#7C5332] hover:bg-[#332A21] border border-[#7C5332]/60'
+                  : isFav
+                    ? 'bg-rose-500 text-white'
+                    : 'bg-black/60 text-white/70 hover:text-rose-400'
                   }`}
                 title={isFav ? 'Bỏ thích' : 'Yêu thích'}
               >
-                <Heart className={`w-3.5 h-3.5 ${isFav ? 'fill-current' : ''}`} />
+                {theme === 'terra' ? (
+                  <TerraAppleFavoriteIcon isFavorite={isFav} size={15} />
+                ) : (
+                  <Heart className={`w-3.5 h-3.5 ${isFav ? 'fill-current' : ''}`} />
+                )}
               </button>
             )}
           </div>
 
           {/* Optional order index badge */}
           {orderIndex !== undefined && (
-            <div className="absolute top-2 left-2 px-1.5 py-0.5 rounded bg-black/80 text-[10px] font-mono text-amber-300 font-bold border border-white/10 z-10">
+            <div className="absolute top-2 left-2 px-1.5 py-0.5 rounded bg-black/80 text-[10px] font-mono text-white font-bold border border-white/20 z-10 shadow-sm">
               #{orderIndex}
             </div>
           )}
 
           <div className="absolute inset-0 bg-black/30 group-hover:bg-black/10 flex items-center justify-center transition-colors">
-            <div className="w-10 h-10 rounded-full bg-amber-400 text-black flex items-center justify-center shadow-lg transform scale-75 opacity-0 group-hover:opacity-100 group-hover:scale-100 transition-all">
-              <Play className="w-4 h-4 fill-black ml-0.5" />
+            <div className={`w-10 h-10 rounded-full flex items-center justify-center shadow-lg transform scale-75 opacity-0 group-hover:opacity-100 group-hover:scale-100 transition-all ${theme === 'aer'
+              ? 'bg-[#0284C7] text-white shadow-none'
+              : theme === 'aqua'
+                ? 'bg-sky-500 text-white shadow-sky-500/30'
+                : theme === 'solar'
+                  ? 'bg-amber-500 text-slate-950 font-black shadow-amber-500/20'
+                  : 'bg-amber-400 text-black'
+              }`}>
+              <Play className={`w-4 h-4 ml-0.5 ${theme === 'aer' || theme === 'aqua' ? 'fill-white text-white' : 'fill-current'}`} />
             </div>
           </div>
 
@@ -539,6 +592,8 @@ export const MediaView: React.FC<MediaViewProps> = ({
               <img
                 src={viewingPlaylist.coverPath.startsWith('http') ? viewingPlaylist.coverPath : `file://${viewingPlaylist.coverPath}`}
                 alt={viewingPlaylist.name}
+                loading="lazy"
+                decoding="async"
                 className="w-full h-full object-cover"
               />
             ) : (
@@ -578,9 +633,16 @@ export const MediaView: React.FC<MediaViewProps> = ({
                       handleOpenAudio(first);
                     }
                   }}
-                  className="flex items-center gap-2 px-4 py-2 rounded-xl bg-amber-400 hover:bg-amber-300 text-black text-xs font-bold transition-all shadow-lg shadow-amber-400/20 active:scale-95"
+                  className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all shadow-lg active:scale-95 ${theme === 'aer'
+                    ? 'bg-[#0284C7] hover:bg-[#0369A1] text-white shadow-none'
+                    : theme === 'aqua'
+                      ? 'bg-sky-500 hover:bg-sky-400 text-white shadow-sky-500/20'
+                      : theme === 'solar'
+                        ? 'bg-amber-500 hover:bg-amber-400 text-slate-950 font-black shadow-amber-500/20'
+                        : 'bg-amber-400 hover:bg-amber-300 text-black shadow-amber-400/20'
+                    }`}
                 >
-                  <Play className="w-4 h-4 fill-black" />
+                  <Play className={`w-4 h-4 ${theme === 'aer' || theme === 'aqua' ? 'fill-white' : 'fill-black'}`} />
                   <span>Phát Tất Cả</span>
                 </button>
               )}
@@ -612,8 +674,16 @@ export const MediaView: React.FC<MediaViewProps> = ({
                   setIsPlaylistRepeat(!isPlaylistRepeat);
                 }}
                 className={`flex items-center gap-1.5 px-3 py-2 rounded-xl border text-xs font-semibold transition-all active:scale-95 ${isPlaylistRepeat
-                  ? 'bg-amber-400/20 border-amber-400/50 text-amber-300'
-                  : 'bg-white/5 border-white/10 text-white/70 hover:text-white'
+                  ? theme === 'aer'
+                    ? 'bg-[#0284C7]/20 border-[#0284C7] text-[#0284C7]'
+                    : theme === 'aqua'
+                      ? 'bg-sky-500/20 border-sky-400 text-sky-700'
+                      : theme === 'solar'
+                        ? 'bg-amber-400/20 border-amber-500 text-amber-900 font-bold'
+                        : 'bg-amber-400/20 border-amber-400/50 text-amber-300'
+                  : isLightMode
+                    ? 'bg-slate-100 border-slate-300 text-slate-700 hover:text-slate-950'
+                    : 'bg-white/5 border-white/10 text-white/70 hover:text-white'
                   }`}
                 title={isPlaylistRepeat ? 'Đang bật lặp lại danh sách' : 'Bật lặp lại danh sách'}
               >
@@ -621,17 +691,25 @@ export const MediaView: React.FC<MediaViewProps> = ({
                 <span>{isPlaylistRepeat ? 'Lặp: Bật' : 'Lặp Lại'}</span>
               </button>
 
-              {/* Favorite Heart Button */}
+              {/* Favorite Heart / Apple Button */}
               {onToggleFavoritePlaylist && (
                 <button
                   onClick={() => onToggleFavoritePlaylist(viewingPlaylist.id)}
-                  className={`flex items-center gap-1.5 px-3 py-2 rounded-xl border text-xs font-semibold transition-all active:scale-95 ${isPlaylistFavorite
-                    ? 'bg-rose-500/20 border-rose-500/50 text-rose-400'
-                    : 'bg-white/5 border-white/10 text-white/70 hover:text-white'
+                  className={`flex items-center gap-1.5 px-3 py-2 rounded-xl border text-xs font-semibold transition-all active:scale-95 ${theme === 'terra'
+                    ? isPlaylistFavorite
+                      ? 'bg-[#FAF7F2] text-red-600 border border-[#78553A]/70 shadow-sm'
+                      : 'bg-[#FAF7F2]/90 text-[#78553A] hover:bg-[#EDE6D8] border border-[#78553A]/40'
+                    : isPlaylistFavorite
+                      ? 'bg-rose-500/20 border-rose-500/50 text-rose-400'
+                      : 'bg-white/5 border-white/10 text-white/70 hover:text-white'
                     }`}
                   title={isPlaylistFavorite ? 'Đã yêu thích' : 'Lưu vào yêu thích'}
                 >
-                  <Heart className={`w-3.5 h-3.5 ${isPlaylistFavorite ? 'fill-current text-rose-500' : ''}`} />
+                  {theme === 'terra' ? (
+                    <TerraAppleFavoriteIcon isFavorite={isPlaylistFavorite} size={15} />
+                  ) : (
+                    <Heart className={`w-3.5 h-3.5 ${isPlaylistFavorite ? 'fill-current text-rose-500' : ''}`} />
+                  )}
                   <span>{isPlaylistFavorite ? 'Đã Lưu' : 'Lưu Danh Sách'}</span>
                 </button>
               )}
@@ -709,7 +787,10 @@ export const MediaView: React.FC<MediaViewProps> = ({
                     sfx.playClick();
                     setIsPlaylistSearchOpen(true);
                   }}
-                  className="p-1.5 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-ice-subtext hover:text-amber-400 transition-colors"
+                  className={`p-1.5 rounded-lg border transition-colors ${isLightMode
+                    ? 'bg-slate-100 hover:bg-slate-200 border-slate-300 text-slate-600 hover:text-ice-accent'
+                    : 'bg-white/5 hover:bg-white/10 border-white/10 text-ice-subtext hover:text-amber-400'
+                    }`}
                   title="Tìm kiếm trong danh sách này"
                 >
                   <Search className="w-4 h-4" />
@@ -744,7 +825,19 @@ export const MediaView: React.FC<MediaViewProps> = ({
             }}
             title="Phim & Video"
             className={`flex items-center gap-2 py-2 rounded-xl text-xs font-bold transition-all duration-300 ${activeTab === 'video'
-              ? 'px-4 bg-blue-600/30 text-blue-400 border border-blue-500/50 shadow-md'
+              ? theme === 'aer'
+                ? 'px-4 bg-[#0284C7] text-white border border-[#0284C7] shadow-none'
+                : theme === 'aqua'
+                ? 'px-4 bg-sky-500 text-white border border-sky-400 shadow-md shadow-sky-500/20'
+                : theme === 'solar'
+                ? 'px-4 bg-amber-500 text-slate-950 font-black border border-amber-400 shadow-md shadow-amber-500/20'
+                : 'px-4 bg-white/10 text-white border border-white/20 shadow-md'
+              : theme === 'aer'
+              ? 'px-3 text-slate-600 hover:text-[#0284C7] hover:bg-slate-200/70 border border-transparent'
+              : theme === 'aqua'
+              ? 'px-3 text-slate-600 hover:text-sky-700 hover:bg-sky-50 border border-transparent'
+              : theme === 'solar'
+              ? 'px-3 text-slate-700 hover:text-amber-950 hover:bg-amber-100/60 border border-transparent'
               : 'px-3 text-ice-subtext hover:text-white hover:bg-white/5 border border-transparent'
               }`}
           >
@@ -760,7 +853,19 @@ export const MediaView: React.FC<MediaViewProps> = ({
             }}
             title="Âm Nhạc"
             className={`flex items-center gap-2 py-2 rounded-xl text-xs font-bold transition-all duration-300 ${activeTab === 'music'
-              ? 'px-4 bg-amber-500/20 text-amber-300 border border-amber-500/50 shadow-md'
+              ? theme === 'aer'
+                ? 'px-4 bg-[#0284C7] text-white border border-[#0284C7] shadow-none'
+                : theme === 'aqua'
+                ? 'px-4 bg-sky-500 text-white border border-sky-400 shadow-md shadow-sky-500/20'
+                : theme === 'solar'
+                ? 'px-4 bg-amber-500 text-slate-950 font-black border border-amber-400 shadow-md shadow-amber-500/20'
+                : 'px-4 bg-white/10 text-white border border-white/20 shadow-md'
+              : theme === 'aer'
+              ? 'px-3 text-slate-600 hover:text-[#0284C7] hover:bg-slate-200/70 border border-transparent'
+              : theme === 'aqua'
+              ? 'px-3 text-slate-600 hover:text-sky-700 hover:bg-sky-50 border border-transparent'
+              : theme === 'solar'
+              ? 'px-3 text-slate-700 hover:text-amber-950 hover:bg-amber-100/60 border border-transparent'
               : 'px-3 text-ice-subtext hover:text-white hover:bg-white/5 border border-transparent'
               }`}
           >
@@ -776,7 +881,19 @@ export const MediaView: React.FC<MediaViewProps> = ({
             }}
             title="Podcast & Sách Nói"
             className={`flex items-center gap-2 py-2 rounded-xl text-xs font-bold transition-all duration-300 ${activeTab === 'podcast'
-              ? 'px-4 bg-purple-600/30 text-purple-300 border border-purple-500/50 shadow-md'
+              ? theme === 'aer'
+                ? 'px-4 bg-[#0284C7] text-white border border-[#0284C7] shadow-none'
+                : theme === 'aqua'
+                ? 'px-4 bg-sky-500 text-white border border-sky-400 shadow-md shadow-sky-500/20'
+                : theme === 'solar'
+                ? 'px-4 bg-amber-500 text-slate-950 font-black border border-amber-400 shadow-md shadow-amber-500/20'
+                : 'px-4 bg-white/10 text-white border border-white/20 shadow-md'
+              : theme === 'aer'
+              ? 'px-3 text-slate-600 hover:text-[#0284C7] hover:bg-slate-200/70 border border-transparent'
+              : theme === 'aqua'
+              ? 'px-3 text-slate-600 hover:text-sky-700 hover:bg-sky-50 border border-transparent'
+              : theme === 'solar'
+              ? 'px-3 text-slate-700 hover:text-amber-950 hover:bg-amber-100/60 border border-transparent'
               : 'px-3 text-ice-subtext hover:text-white hover:bg-white/5 border border-transparent'
               }`}
           >
@@ -793,7 +910,15 @@ export const MediaView: React.FC<MediaViewProps> = ({
                 sfx.playClick();
                 onNavigateToUserPlaylists();
               }}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 border border-amber-500/30 text-xs font-bold transition-all shadow-sm active:scale-95"
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all shadow-sm active:scale-95 ${
+                theme === 'aer'
+                  ? 'bg-[#B8C7D9] hover:bg-[#A6B8CB] text-[#0284C7] border border-[#64748B]'
+                  : theme === 'aqua'
+                  ? 'bg-sky-100 hover:bg-sky-200 text-sky-800 border border-sky-300'
+                  : theme === 'solar'
+                  ? 'bg-amber-100 hover:bg-amber-200 text-amber-950 font-bold border border-amber-300'
+                  : 'bg-white/10 hover:bg-white/15 text-white border border-white/15'
+              }`}
               title="Xem danh sách phát cá nhân trong Thư Viện"
             >
               <ListMusic className="w-3.5 h-3.5" />
@@ -808,7 +933,9 @@ export const MediaView: React.FC<MediaViewProps> = ({
             }}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all ${filterOfflineOnly
               ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/40 shadow-sm'
-              : 'bg-ice-card text-ice-subtext border-ice-border hover:text-white'
+              : isLightMode
+                ? 'bg-ice-card text-slate-700 border-ice-border hover:text-slate-950'
+                : 'bg-ice-card text-ice-subtext border-ice-border hover:text-white'
               }`}
           >
             <Download className="w-3.5 h-3.5" />
@@ -821,10 +948,19 @@ export const MediaView: React.FC<MediaViewProps> = ({
               sfx.playClick();
               setIsSurpriseModalOpen(true);
             }}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-amber-400/20 to-amber-500/20 hover:from-amber-400/30 hover:to-amber-500/30 border border-amber-400/40 text-amber-300 text-xs font-bold transition-all shadow-sm active:scale-95 cursor-pointer"
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all shadow-sm active:scale-95 cursor-pointer ${theme === 'aer'
+              ? 'bg-[#0284C7] hover:bg-[#0369A1] text-white border border-[#0284C7] shadow-none'
+              : theme === 'aqua'
+                ? 'bg-sky-500 hover:bg-sky-400 text-white border border-sky-400 shadow-md shadow-sky-500/20'
+                : theme === 'solar'
+                ? 'bg-amber-500 hover:bg-amber-400 text-slate-950 font-black border border-amber-400 shadow-md shadow-amber-500/20'
+                : 'bg-gradient-to-r from-amber-400/20 to-amber-500/20 hover:from-amber-400/30 hover:to-amber-500/30 border border-amber-400/40 text-amber-300'
+            }`}
             title={activeTab === 'video' ? 'Vòng quay ngẫu nhiên gợi ý phim hay' : 'Gợi ý ngẫu nhiên một giai điệu hay'}
           >
-            <Sparkles className="w-3.5 h-3.5 text-amber-400 animate-pulse" />
+            <Sparkles className={`w-3.5 h-3.5 animate-pulse ${
+              theme === 'solar' ? 'text-slate-950' : 'text-white'
+            }`} />
             <span>{activeTab === 'video' ? 'Hôm Nay Xem Gì?' : 'Hôm Nay Nghe Gì?'}</span>
           </button>
 
@@ -835,8 +971,12 @@ export const MediaView: React.FC<MediaViewProps> = ({
                 setShowHiddenOnly(!showHiddenOnly);
               }}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all ${showHiddenOnly
-                ? 'bg-amber-500/20 text-amber-400 border-amber-500/50 shadow-sm'
-                : 'bg-ice-card text-ice-subtext border-ice-border hover:text-white'
+                ? isLightMode
+                  ? 'bg-amber-500/20 text-amber-800 border-amber-500/50 shadow-sm font-bold'
+                  : 'bg-amber-500/20 text-amber-400 border-amber-500/50 shadow-sm'
+                : isLightMode
+                  ? 'bg-ice-card text-slate-700 border-ice-border hover:text-slate-950'
+                  : 'bg-ice-card text-ice-subtext border-ice-border hover:text-white'
                 }`}
             >
               {showHiddenOnly ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
@@ -852,10 +992,13 @@ export const MediaView: React.FC<MediaViewProps> = ({
                     sfx.playClick();
                     onOpenTagManager(activeTab === 'video' ? 'movie' : activeTab === 'music' ? 'music' : 'podcast');
                   }}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/10 hover:bg-white/15 border border-white/15 text-white text-xs font-bold transition-all shadow-sm active:scale-95"
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all shadow-sm active:scale-95 border ${isLightMode
+                    ? 'bg-slate-200/80 hover:bg-slate-300 text-slate-800 border-slate-300'
+                    : 'bg-white/10 hover:bg-white/15 text-white border-white/15'
+                    }`}
                   title="Quản lý thể loại / tag giải trí"
                 >
-                  <Tag className="w-3.5 h-3.5 text-amber-400" />
+                  <Tag className={`w-3.5 h-3.5 ${isLightMode ? 'text-ice-accent' : 'text-amber-400'}`} />
                   <span>Quản Lý Thể Loại</span>
                 </button>
               )}
@@ -867,10 +1010,13 @@ export const MediaView: React.FC<MediaViewProps> = ({
                     sfx.playClick();
                     setIsAdminPlaylistManagerOpen(true);
                   }}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/10 hover:bg-white/15 border border-white/15 text-white text-xs font-bold transition-all shadow-sm active:scale-95"
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all shadow-sm active:scale-95 border ${isLightMode
+                    ? 'bg-slate-200/80 hover:bg-slate-300 text-slate-800 border-slate-300'
+                    : 'bg-white/10 hover:bg-white/15 text-white border-white/15'
+                    }`}
                   title="Quản lý danh sách phát Admin cho Phim, Nhạc, Audio"
                 >
-                  <ListMusic className="w-3.5 h-3.5 text-amber-400" />
+                  <ListMusic className={`w-3.5 h-3.5 ${isLightMode ? 'text-ice-accent' : 'text-amber-400'}`} />
                   <span>Quản Lý Playlist</span>
                 </button>
               )}
@@ -882,9 +1028,12 @@ export const MediaView: React.FC<MediaViewProps> = ({
                     setEditingPlaylist(null);
                     setIsPlaylistModalOpen(true);
                   }}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/10 hover:bg-white/15 border border-white/15 text-white text-xs font-bold transition-all shadow-sm active:scale-95"
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all shadow-sm active:scale-95 border ${isLightMode
+                    ? 'bg-slate-200/80 hover:bg-slate-300 text-slate-800 border-slate-300'
+                    : 'bg-white/10 hover:bg-white/15 text-white border-white/15'
+                    }`}
                 >
-                  <ListPlus className="w-3.5 h-3.5 text-amber-400" />
+                  <ListPlus className={`w-3.5 h-3.5 ${isLightMode ? 'text-ice-accent' : 'text-amber-400'}`} />
                   <span>Tạo Danh Sách</span>
                 </button>
               )}
@@ -894,7 +1043,14 @@ export const MediaView: React.FC<MediaViewProps> = ({
                   sfx.playClick();
                   onOpenAddMedia();
                 }}
-                className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-amber-400 hover:bg-amber-300 text-black text-xs font-bold transition-all shadow-sm active:scale-95"
+                className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all shadow-sm active:scale-95 ${theme === 'aer'
+                  ? 'bg-[#0284C7] hover:bg-[#0369A1] text-white shadow-none'
+                  : theme === 'aqua'
+                    ? 'bg-sky-500 hover:bg-sky-400 text-white shadow-sky-500/20'
+                    : theme === 'solar'
+                      ? 'bg-amber-500 hover:bg-amber-400 text-slate-950 font-black shadow-amber-500/20'
+                      : 'bg-amber-400 hover:bg-amber-300 text-black'
+                  }`}
               >
                 <Plus className="w-3.5 h-3.5 stroke-[3]" />
                 <span>Thêm Mới</span>
@@ -943,13 +1099,16 @@ export const MediaView: React.FC<MediaViewProps> = ({
                     setActiveVideo(item);
                   }
                 }}
-                className="flex items-center gap-3 bg-ice-card hover:bg-ice-hover border border-ice-border rounded-xl p-3 min-w-[280px] max-w-[320px] cursor-pointer transition-all hover:-translate-y-1 hover:shadow-xl hover:border-amber-400/60 group shrink-0"
+                className={`flex items-center gap-3 bg-ice-card hover:bg-ice-hover border border-ice-border rounded-xl p-3 min-w-[280px] max-w-[320px] cursor-pointer transition-all hover:-translate-y-1 hover:shadow-xl group shrink-0 ${isLightMode ? 'hover:border-ice-accent/60' : 'hover:border-amber-400/60'
+                  }`}
               >
                 <div className="w-16 aspect-video rounded-lg overflow-hidden bg-black/70 shrink-0 border border-ice-border relative">
                   {item.coverPath ? (
                     <img
                       src={item.coverPath.startsWith('http') ? item.coverPath : `file://${item.coverPath}`}
                       alt={item.title}
+                      loading="lazy"
+                      decoding="async"
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform"
                     />
                   ) : (
@@ -969,7 +1128,14 @@ export const MediaView: React.FC<MediaViewProps> = ({
                   <p className="text-[10px] text-ice-muted truncate mt-0.5">Đã xem {percent}%</p>
                 </div>
 
-                <div className="p-2 rounded-full bg-amber-500/20 text-amber-400 group-hover:bg-amber-500 group-hover:text-black transition-all shrink-0">
+                <div className={`p-2 rounded-full transition-all shrink-0 ${theme === 'aer'
+                  ? 'bg-[#0284C7]/20 text-[#0284C7] group-hover:bg-[#0284C7] group-hover:text-white'
+                  : theme === 'aqua'
+                    ? 'bg-sky-500/20 text-sky-600 group-hover:bg-sky-500 group-hover:text-white'
+                    : theme === 'solar'
+                      ? 'bg-amber-500/20 text-amber-700 group-hover:bg-amber-500 group-hover:text-slate-950'
+                      : 'bg-amber-500/20 text-amber-400 group-hover:bg-amber-500 group-hover:text-black'
+                  }`}>
                   <Play className="w-3.5 h-3.5 fill-current ml-0.5" />
                 </div>
               </div>
@@ -982,7 +1148,7 @@ export const MediaView: React.FC<MediaViewProps> = ({
       {featuredMedia.length > 0 && !searchQuery && (
         <GenreShelfScroller
           title="Nổi Bật & Mới Cập Nhật"
-          iconAccentColor="bg-amber-400"
+          iconAccentColor={theme === 'aer' ? 'bg-[#0284C7]' : theme === 'aqua' ? 'bg-sky-500' : theme === 'solar' ? 'bg-amber-500' : 'bg-amber-400'}
           count={featuredMedia.length}
         >
           {featuredMedia.map((item) => renderMediaCard(item, true))}
@@ -998,7 +1164,19 @@ export const MediaView: React.FC<MediaViewProps> = ({
               setSelectedTag('all');
             }}
             className={`px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all border ${selectedTag === 'all'
-              ? 'bg-amber-500/20 text-amber-300 border-amber-500/50 shadow-sm'
+              ? theme === 'aer'
+                ? 'bg-[#0284C7] text-white border-[#0284C7]'
+                : theme === 'aqua'
+                ? 'bg-sky-500 text-white border-sky-400 shadow-sm'
+                : theme === 'solar'
+                ? 'bg-amber-500 text-slate-950 font-black border-amber-400 shadow-sm'
+                : 'bg-amber-500/20 text-amber-300 border-amber-500/50 shadow-sm'
+              : theme === 'aer'
+              ? 'bg-white text-slate-700 border-slate-300 hover:text-[#0284C7] hover:border-[#0284C7]'
+              : theme === 'aqua'
+              ? 'bg-white text-slate-700 border-sky-200 hover:text-sky-700 hover:border-sky-400'
+              : theme === 'solar'
+              ? 'bg-white text-slate-700 border-amber-200 hover:text-amber-950 hover:border-amber-400'
               : 'bg-ice-card text-ice-text border-ice-border hover:text-white'
               }`}
           >
@@ -1012,7 +1190,19 @@ export const MediaView: React.FC<MediaViewProps> = ({
                 setSelectedTag(tag);
               }}
               className={`px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all border ${selectedTag === tag
-                ? 'bg-amber-500/20 text-amber-300 border-amber-500/50 shadow-sm'
+                ? theme === 'aer'
+                  ? 'bg-[#0284C7] text-white border-[#0284C7]'
+                  : theme === 'aqua'
+                  ? 'bg-sky-500 text-white border-sky-400 shadow-sm'
+                  : theme === 'solar'
+                  ? 'bg-amber-500 text-slate-950 font-black border-amber-400 shadow-sm'
+                  : 'bg-amber-500/20 text-amber-300 border-amber-500/50 shadow-sm'
+                : theme === 'aer'
+                ? 'bg-white text-slate-700 border-slate-300 hover:text-[#0284C7] hover:border-[#0284C7]'
+                : theme === 'aqua'
+                ? 'bg-white text-slate-700 border-sky-200 hover:text-sky-700 hover:border-sky-400'
+                : theme === 'solar'
+                ? 'bg-white text-slate-700 border-amber-200 hover:text-amber-950 hover:border-amber-400'
                 : 'bg-ice-card text-ice-text border-ice-border hover:text-white'
                 }`}
             >
@@ -1082,7 +1272,10 @@ export const MediaView: React.FC<MediaViewProps> = ({
                     sfx.playClick();
                     setVisibleCount((prev) => prev + 24);
                   }}
-                  className="px-6 py-2.5 rounded-xl bg-ice-card hover:bg-white/10 text-white font-bold text-xs border border-ice-border hover:border-amber-400 transition-all shadow-md active:scale-95"
+                  className={`px-6 py-2.5 rounded-xl font-bold text-xs border border-ice-border transition-all shadow-md active:scale-95 ${isLightMode
+                    ? 'bg-ice-card hover:bg-slate-100 text-slate-800 hover:border-ice-accent'
+                    : 'bg-ice-card hover:bg-white/10 text-white hover:border-amber-400'
+                    }`}
                 >
                   Xem thêm ({filteredMedia.length - visibleCount} mục nữa)
                 </button>

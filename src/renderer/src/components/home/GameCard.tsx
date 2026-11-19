@@ -1,4 +1,8 @@
 import React, { useState } from 'react';
+import { useTheme } from '../../hooks/useTheme';
+import { TerraBotanicalCardFrame } from '../common/TerraBotanicalCardFrame';
+import { TerraAppleFavoriteIcon } from '../common/TerraAppleFavoriteIcon';
+import { IgnisFireAura } from '../common/IgnisFireAura';
 import {
   Play,
   Download,
@@ -49,7 +53,9 @@ export const GameCard: React.FC<GameCardProps> = ({
   onEditGame,
   onDeleteGame,
 }) => {
+  const { theme } = useTheme();
   const [showMenu, setShowMenu] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
 
   const isDownloading = game.status === 'downloading';
   const isInstalling = game.status === 'installing';
@@ -66,8 +72,27 @@ export const GameCard: React.FC<GameCardProps> = ({
 
   return (
     <div
-      className="group relative flex flex-col bg-ice-card rounded-lg overflow-hidden border border-ice-border hover:border-ice-accent/60 hover:shadow-xl hover:-translate-y-1 transition-all duration-200 select-none"
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+      className={`group relative flex flex-col rounded-lg select-none ${
+        theme === 'aer'
+          ? 'bg-white border border-[#CBD5E1] hover:border-[#0284C7] transition-none shadow-none overflow-hidden'
+          : theme === 'ignis'
+          ? 'bg-ice-card border border-ice-border hover:border-ice-accent/60 hover:shadow-xl transition-all duration-300 overflow-visible hover:scale-[1.06] hover:z-30'
+          : theme === 'terra'
+          ? 'bg-ice-card border border-ice-border hover:border-ice-accent/60 hover:shadow-xl transition-all duration-300 overflow-visible hover:-translate-y-1'
+          : 'bg-ice-card border border-ice-border hover:border-ice-accent/60 hover:shadow-xl transition-all duration-300 overflow-hidden hover:-translate-y-1'
+      }`}
     >
+      {/* Ignis Mode: Bottom-to-Top Organic Fire Aura */}
+      {theme === 'ignis' && (
+        <IgnisFireAura isHovered={isHovered} />
+      )}
+
+      {/* Terra Mode: Outer Botanical Vine Frame */}
+      {theme === 'terra' && (
+        <TerraBotanicalCardFrame isHovered={isHovered} isFavorite={game.inLibrary} />
+      )}
       {/* Cover Image Container (2:3 Aspect Ratio) */}
       <div
         onClick={() => onSelectGame(game)}
@@ -76,6 +101,8 @@ export const GameCard: React.FC<GameCardProps> = ({
         <img
           src={game.coverPath || 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=600&q=80'}
           alt={game.name}
+          loading="lazy"
+          decoding="async"
           style={{
             objectPosition: game.listCardPosition || game.coverPosition || '50% 50%',
             transform: (game.listCardZoom || game.coverZoom) ? `scale(${game.listCardZoom || game.coverZoom})` : undefined,
@@ -86,8 +113,10 @@ export const GameCard: React.FC<GameCardProps> = ({
           className="w-full h-full object-cover transition-transform duration-300"
         />
 
-        {/* Gradient Overlay - Hidden in Solar to eliminate poster washout */}
-        <div className="game-card-poster-fog absolute inset-0 bg-gradient-to-t from-ice-card via-transparent to-transparent opacity-80" />
+        {/* Gradient Overlay - Hidden in Light Themes (Solar, Aer, Aqua) to eliminate poster washout */}
+        {!['solar', 'aer', 'aqua'].includes(theme) && (
+          <div className="game-card-poster-fog absolute inset-0 bg-gradient-to-t from-ice-card via-transparent to-transparent opacity-80" />
+        )}
 
         {/* Top Badges: InLibrary & 3-Dot Menu */}
         <div className="absolute top-2.5 left-2.5 right-2.5 flex items-center justify-between">
@@ -97,13 +126,24 @@ export const GameCard: React.FC<GameCardProps> = ({
                 e.stopPropagation();
                 onToggleLibrary(game.id);
               }}
-              className={`p-1.5 rounded-full backdrop-blur-md transition-colors ${game.inLibrary
-                ? 'bg-ice-accent text-white shadow-md'
-                : 'bg-black/60 text-white/70 hover:text-white hover:bg-black/80'
-                }`}
+              className={`p-1.5 rounded-full backdrop-blur-md transition-colors ${
+                theme === 'terra'
+                  ? game.inLibrary
+                    ? 'bg-[#2B241D] text-red-500 border border-[#7C5332] shadow-sm'
+                    : 'bg-[#2B241D]/90 text-[#7C5332] hover:bg-[#332A21] border border-[#7C5332]/60'
+                  : game.inLibrary
+                  ? 'bg-ice-accent text-white shadow-md'
+                  : 'bg-black/60 text-white/70 hover:text-white hover:bg-black/80'
+              }`}
               title={game.inLibrary ? 'Đã có trong thư viện' : 'Lưu vào thư viện'}
             >
-              {game.inLibrary ? <BookmarkCheck className="w-3.5 h-3.5" /> : <Bookmark className="w-3.5 h-3.5" />}
+              {theme === 'terra' ? (
+                <TerraAppleFavoriteIcon isFavorite={game.inLibrary} size={15} />
+              ) : game.inLibrary ? (
+                <BookmarkCheck className="w-3.5 h-3.5" />
+              ) : (
+                <Bookmark className="w-3.5 h-3.5" />
+              )}
             </button>
 
             {game.controllerConfig?.mode && game.controllerConfig.mode !== 'disabled' && (
@@ -251,7 +291,7 @@ export const GameCard: React.FC<GameCardProps> = ({
             </span>
           )}
           {(game.tags && game.tags.length > 0 ? game.tags[0] : game.genre) && (
-            <span className="text-[10px] text-ice-subtext/90 ml-auto bg-black/50 px-2 py-0.5 rounded-full border border-white/10 backdrop-blur-sm truncate max-w-[100px]">
+            <span className="game-card-genre-badge text-[10px] text-white font-semibold ml-auto bg-black/75 px-2 py-0.5 rounded-full border border-white/20 backdrop-blur-sm truncate max-w-[100px] shadow-sm">
               {game.tags && game.tags.length > 0 ? game.tags[0] : game.genre}
             </span>
           )}

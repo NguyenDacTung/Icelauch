@@ -34,6 +34,10 @@ import { SafeImage } from '../common/SafeImage';
 import type { Game, AppActionButton, MediaItem, MediaPlaylist } from '../../types';
 import { GameActionsWidget } from '../common/GameActionsWidget';
 import { sfx } from '../../utils/sfx';
+import { useTheme } from '../../hooks/useTheme';
+import { TerraBotanicalCardFrame } from '../common/TerraBotanicalCardFrame';
+import { TerraAppleFavoriteIcon } from '../common/TerraAppleFavoriteIcon';
+import { IgnisFireAura } from '../common/IgnisFireAura';
 
 interface LibraryViewProps {
   games: Game[];
@@ -95,9 +99,11 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
   onDeleteUserPlaylist,
   onToggleItemInUserPlaylist,
 }) => {
+  const { theme } = useTheme();
   const [activeTab, setActiveTab] = useState<'game' | 'movie' | 'music' | 'podcast'>('game');
   const [filter, setFilter] = useState<'all' | 'installed' | 'downloading' | 'saved' | 'error'>('all');
   const [search, setSearch] = useState('');
+  const [hoveredCardId, setHoveredCardId] = useState<string | null>(null);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
   // Media Library state
@@ -156,6 +162,38 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
     return matchesType && matchesSearch;
   });
 
+  const isLightMode = ['solar', 'aer', 'aqua'].includes(theme);
+
+  const getLibraryTabClass = (tab: 'game' | 'movie' | 'music' | 'podcast') => {
+    const isActive = activeTab === tab;
+    if (isActive) {
+      if (theme === 'aer') return 'bg-[#0284C7] text-white font-bold shadow-none';
+      if (theme === 'aqua') return 'bg-sky-500 text-white font-bold shadow-md shadow-sky-500/20';
+      if (theme === 'solar') return 'bg-amber-500 text-slate-950 font-black shadow-md shadow-amber-500/20';
+      if (theme === 'ignis') return 'bg-[#EA580C] text-white font-bold border border-[#F97316] shadow-md shadow-orange-500/25';
+      if (theme === 'terra') return 'bg-[#78350F] text-emerald-300 font-bold border border-[#92400E] shadow-md';
+      return 'bg-amber-400 text-black font-bold shadow-md';
+    }
+    if (theme === 'aer') return 'text-slate-600 hover:text-[#0284C7] hover:bg-slate-200/70 font-semibold';
+    if (theme === 'aqua') return 'text-slate-600 hover:text-sky-700 hover:bg-sky-50 font-semibold';
+    if (theme === 'solar') return 'text-slate-700 hover:text-amber-950 hover:bg-amber-100/60 font-semibold';
+    return 'text-ice-subtext hover:text-ice-text hover:bg-ice-hover font-semibold';
+  };
+
+  const getFilterPillClass = (targetFilter: 'all' | 'installed' | 'downloading') => {
+    const isFilterActive = filter === targetFilter;
+    if (isFilterActive) {
+      if (theme === 'aer') return 'bg-[#0284C7] text-white font-bold';
+      if (theme === 'aqua') return 'bg-sky-500 text-white font-bold shadow-sm';
+      if (theme === 'solar') return 'bg-amber-500 text-slate-950 font-black shadow-sm';
+      return 'bg-ice-accent text-white font-semibold';
+    }
+    if (theme === 'aer') return 'text-slate-600 hover:text-[#0284C7] hover:bg-slate-200/60';
+    if (theme === 'aqua') return 'text-slate-600 hover:text-sky-700 hover:bg-sky-50';
+    if (theme === 'solar') return 'text-slate-700 hover:text-amber-950 hover:bg-amber-100/60';
+    return 'text-ice-subtext hover:text-ice-text';
+  };
+
   return (
     <div className="flex-1 flex flex-col overflow-hidden select-none">
       {/* 4-Tab Bar: Trò Chơi / Phim & Video / Âm Nhạc / Podcast & Audio */}
@@ -166,11 +204,7 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
               sfx.playClick();
               setActiveTab('game');
             }}
-            className={`flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all ${
-              activeTab === 'game'
-                ? 'bg-amber-400 text-black shadow-md'
-                : 'text-ice-subtext hover:text-ice-text hover:bg-ice-hover'
-            }`}
+            className={`flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs transition-all ${getLibraryTabClass('game')}`}
           >
             <Gamepad2 className="w-3.5 h-3.5" />
             <span>Trò Chơi ({libraryGames.length})</span>
@@ -181,11 +215,7 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
               sfx.playClick();
               setActiveTab('movie');
             }}
-            className={`flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all ${
-              activeTab === 'movie'
-                ? 'bg-amber-400 text-black shadow-md'
-                : 'text-ice-subtext hover:text-ice-text hover:bg-ice-hover'
-            }`}
+            className={`flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs transition-all ${getLibraryTabClass('movie')}`}
           >
             <Film className="w-3.5 h-3.5" />
             <span>Phim & Video</span>
@@ -196,11 +226,7 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
               sfx.playClick();
               setActiveTab('music');
             }}
-            className={`flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all ${
-              activeTab === 'music'
-                ? 'bg-amber-400 text-black shadow-md'
-                : 'text-ice-subtext hover:text-ice-text hover:bg-ice-hover'
-            }`}
+            className={`flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs transition-all ${getLibraryTabClass('music')}`}
           >
             <Music className="w-3.5 h-3.5" />
             <span>Âm Nhạc</span>
@@ -211,11 +237,7 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
               sfx.playClick();
               setActiveTab('podcast');
             }}
-            className={`flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all ${
-              activeTab === 'podcast'
-                ? 'bg-amber-400 text-black shadow-md'
-                : 'text-ice-subtext hover:text-ice-text hover:bg-ice-hover'
-            }`}
+            className={`flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs transition-all ${getLibraryTabClass('podcast')}`}
           >
             <Mic className="w-3.5 h-3.5" />
             <span>Podcast & Audio</span>
@@ -244,25 +266,19 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
           <div className="flex items-center gap-1 overflow-x-auto text-[11px] pb-1">
             <button
               onClick={() => setFilter('all')}
-              className={`px-2 py-0.5 rounded transition-colors whitespace-nowrap ${
-                filter === 'all' ? 'bg-ice-accent text-white font-semibold' : 'text-ice-subtext hover:text-ice-text'
-              }`}
+              className={`px-2 py-0.5 rounded transition-colors whitespace-nowrap ${getFilterPillClass('all')}`}
             >
               Tất cả ({libraryGames.length})
             </button>
             <button
               onClick={() => setFilter('installed')}
-              className={`px-2 py-0.5 rounded transition-colors whitespace-nowrap ${
-                filter === 'installed' ? 'bg-ice-accent text-white font-semibold' : 'text-ice-subtext hover:text-ice-text'
-              }`}
+              className={`px-2 py-0.5 rounded transition-colors whitespace-nowrap ${getFilterPillClass('installed')}`}
             >
               Đã cài
             </button>
             <button
               onClick={() => setFilter('downloading')}
-              className={`px-2 py-0.5 rounded transition-colors whitespace-nowrap ${
-                filter === 'downloading' ? 'bg-ice-accent text-white font-semibold' : 'text-ice-subtext hover:text-ice-text'
-              }`}
+              className={`px-2 py-0.5 rounded transition-colors whitespace-nowrap ${getFilterPillClass('downloading')}`}
             >
               Đang tải
             </button>
@@ -296,13 +312,23 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
                   onClick={() => onSelectGame(game)}
                   className={`flex items-center gap-2.5 px-3 py-2.5 cursor-pointer transition-colors ${
                     isSelected
-                      ? 'bg-ice-accent/15 border-l-2 border-ice-accent text-ice-text font-semibold'
+                      ? theme === 'aer'
+                        ? 'bg-[#0284C7]/15 border-l-2 border-[#0284C7] text-[#0284C7] font-bold'
+                        : theme === 'aqua'
+                        ? 'bg-sky-500/15 border-l-2 border-sky-500 text-sky-800 font-bold'
+                        : theme === 'solar'
+                        ? 'bg-amber-500/20 border-l-2 border-amber-500 text-amber-950 font-bold'
+                        : 'bg-ice-accent/15 border-l-2 border-ice-accent text-ice-text font-semibold'
+                      : isLightMode
+                      ? 'hover:bg-slate-100 text-slate-700 hover:text-slate-950'
                       : 'hover:bg-ice-hover text-ice-text/90'
                   }`}
                 >
                   <img
                     src={game.coverPath || 'https://via.placeholder.com/40x55'}
                     alt={game.name}
+                    loading="lazy"
+                    decoding="async"
                     style={{ objectPosition: game.coverPosition || '50% 50%' }}
                     className="w-7 h-10 object-cover rounded border border-ice-border flex-shrink-0"
                   />
@@ -365,8 +391,15 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
               />
             )}
 
-            <div className="absolute inset-0 bg-gradient-to-t from-ice-bg via-ice-bg/60 to-transparent" />
-            <div className="absolute inset-0 bg-gradient-to-r from-ice-bg/80 via-transparent to-transparent w-2/3" />
+            {/* Ambient gradients - suppressed in Light Modes to prevent milky white fog overlay */}
+            {!isLightMode ? (
+              <>
+                <div className="absolute inset-0 bg-gradient-to-t from-ice-bg via-ice-bg/60 to-transparent" />
+                <div className="absolute inset-0 bg-gradient-to-r from-ice-bg/80 via-transparent to-transparent w-2/3" />
+              </>
+            ) : (
+              <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent pointer-events-none" />
+            )}
 
             {/* Poster & Title Content */}
             <div className="absolute bottom-6 left-8 right-8 flex items-end gap-6 z-10">
@@ -384,7 +417,7 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
               <div className="flex-1 min-w-0 space-y-2.5">
                 <div className="flex flex-wrap items-center gap-2">
                   {selectedGame.hidden && (
-                    <span className="px-2.5 py-0.5 rounded-full text-[11px] font-black uppercase tracking-wider bg-amber-500/20 text-amber-300 border border-amber-500/40">
+                    <span className="px-2.5 py-0.5 rounded-full text-[11px] font-black uppercase tracking-wider bg-amber-500/20 text-amber-800 dark:text-amber-300 border border-amber-500/40">
                       [ĐÃ ẨN]
                     </span>
                   )}
@@ -730,7 +763,15 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
               setEditingUserPlaylist(null);
               setIsUserPlaylistModalOpen(true);
             }}
-            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs transition-all shadow-md active:scale-95"
+            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all shadow-md active:scale-95 ${
+              theme === 'aer'
+                ? 'bg-[#0284C7] hover:bg-[#0369A1] text-white shadow-none font-bold'
+                : theme === 'aqua'
+                ? 'bg-sky-500 hover:bg-sky-400 text-white shadow-sky-500/25 font-bold'
+                : theme === 'solar'
+                ? 'bg-amber-500 hover:bg-amber-400 text-slate-950 font-black shadow-amber-500/20'
+                : 'bg-amber-500 hover:bg-amber-600 text-white font-bold'
+            }`}
           >
             <Plus className="w-4 h-4 stroke-[3]" />
             <span>Tạo Playlist Mới</span>
@@ -742,7 +783,15 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
       <section className="space-y-4">
         <div className="flex items-center justify-between">
           <h3 className="text-sm font-bold text-ice-text uppercase tracking-wider flex items-center gap-2">
-            <ListMusic className="w-4 h-4 text-amber-500 dark:text-amber-400" />
+            <ListMusic className={`w-4 h-4 ${
+              theme === 'aer'
+                ? 'text-[#0284C7]'
+                : theme === 'aqua'
+                ? 'text-sky-600'
+                : theme === 'solar'
+                ? 'text-amber-800'
+                : 'text-amber-500 dark:text-amber-400'
+            }`} />
             <span>Danh Sách Phát Của Bạn</span>
             <span className="text-xs text-ice-muted font-mono font-normal">({tabUserPlaylists.length})</span>
           </h3>
@@ -757,7 +806,15 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
               return (
                 <div
                   key={pl.id}
-                  className="group bg-ice-card border border-ice-border hover:border-amber-400/70 rounded-2xl p-4 flex flex-col justify-between transition-all duration-300 hover:shadow-xl hover:-translate-y-1"
+                  className={`group bg-ice-card border rounded-2xl p-4 flex flex-col justify-between transition-all duration-300 hover:shadow-xl hover:-translate-y-1 ${
+                    theme === 'aer'
+                      ? 'border-[#CBD5E1] hover:border-[#0284C7]'
+                      : theme === 'aqua'
+                      ? 'border-sky-200 hover:border-sky-400'
+                      : theme === 'solar'
+                      ? 'border-amber-200 hover:border-amber-400'
+                      : 'border-ice-border hover:border-amber-400/70'
+                  }`}
                 >
                   <div className="flex items-center gap-3">
                     <div className="w-14 h-14 rounded-xl bg-black/60 border border-white/10 flex items-center justify-center shrink-0 overflow-hidden relative">
@@ -768,7 +825,15 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
                           className="w-full h-full object-cover"
                         />
                       ) : (
-                        <ListMusic className="w-6 h-6 text-amber-400" />
+                        <ListMusic className={`w-6 h-6 ${
+                          theme === 'aer'
+                            ? 'text-[#0284C7]'
+                            : theme === 'aqua'
+                            ? 'text-sky-500'
+                            : theme === 'solar'
+                            ? 'text-amber-700'
+                            : 'text-amber-400'
+                        }`} />
                       )}
                     </div>
 
@@ -791,7 +856,15 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
                         }
                       }}
                       disabled={count === 0}
-                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-400/10 hover:bg-amber-400/20 text-amber-300 text-xs font-bold disabled:opacity-40 transition-colors"
+                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold disabled:opacity-40 transition-colors ${
+                        theme === 'aer'
+                          ? 'bg-[#0284C7]/15 hover:bg-[#0284C7]/25 text-[#0284C7]'
+                          : theme === 'aqua'
+                          ? 'bg-sky-500/15 hover:bg-sky-500/25 text-sky-700'
+                          : theme === 'solar'
+                          ? 'bg-amber-500/20 hover:bg-amber-500/30 text-amber-950 font-black'
+                          : 'bg-amber-400/10 hover:bg-amber-400/20 text-amber-300'
+                      }`}
                     >
                       <Play className="w-3.5 h-3.5 fill-current" />
                       <span>Phát</span>
@@ -804,7 +877,11 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
                           setEditingUserPlaylist(pl);
                           setIsUserPlaylistModalOpen(true);
                         }}
-                        className="p-1.5 rounded-lg text-ice-subtext hover:text-amber-400 hover:bg-white/5 transition-colors"
+                        className={`p-1.5 rounded-lg transition-colors ${
+                          isLightMode
+                            ? 'text-slate-600 hover:text-ice-accent hover:bg-slate-100'
+                            : 'text-ice-subtext hover:text-amber-400 hover:bg-white/5'
+                        }`}
                         title="Sắp xếp & Đổi tên"
                       >
                         <Edit3 className="w-3.5 h-3.5" />
@@ -840,7 +917,15 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
                   setEditingUserPlaylist(null);
                   setIsUserPlaylistModalOpen(true);
                 }}
-                className="text-xs text-amber-400 font-bold hover:underline inline-block pt-1"
+                className={`text-xs font-bold hover:underline inline-block pt-1 ${
+                  theme === 'aer'
+                    ? 'text-[#0284C7]'
+                    : theme === 'aqua'
+                    ? 'text-sky-600'
+                    : theme === 'solar'
+                    ? 'text-amber-800'
+                    : 'text-amber-400'
+                }`}
               >
                 + Tạo danh sách phát đầu tiên
               </button>
@@ -864,13 +949,37 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
             {favoriteTabMedia.map((item) => (
               <div
                 key={item.id}
+                onMouseEnter={() => setHoveredCardId(item.id)}
+                onMouseLeave={() => setHoveredCardId(null)}
                 onClick={() => {
                   sfx.playClick();
                   onPlayMedia?.(item);
                 }}
-                className="group relative bg-ice-card rounded-2xl overflow-hidden border border-ice-border hover:border-amber-400/80 hover:shadow-2xl cursor-pointer transition-all duration-300 hover:-translate-y-1.5 flex flex-col"
+                className={`group relative rounded-2xl border cursor-pointer flex flex-col ${
+                  theme === 'aer'
+                    ? 'bg-white border-[#CBD5E1] hover:border-[#0284C7] transition-none shadow-none overflow-hidden'
+                    : theme === 'aqua'
+                    ? 'bg-white border-sky-200 hover:border-sky-400 hover:shadow-xl transition-all duration-300 overflow-hidden hover:-translate-y-1'
+                    : theme === 'solar'
+                    ? 'bg-white border-amber-200 hover:border-amber-400 hover:shadow-xl transition-all duration-300 overflow-hidden hover:-translate-y-1'
+                    : theme === 'ignis'
+                    ? 'bg-ice-card border-ice-border hover:border-amber-400/80 hover:shadow-2xl transition-all duration-300 overflow-visible hover:scale-[1.06] hover:z-30'
+                    : theme === 'terra'
+                    ? 'bg-ice-card border-ice-border hover:border-amber-400/80 hover:shadow-2xl transition-all duration-300 overflow-visible hover:-translate-y-1.5'
+                    : 'bg-ice-card border-ice-border hover:border-amber-400/80 hover:shadow-2xl transition-all duration-300 overflow-hidden hover:-translate-y-1.5'
+                }`}
               >
-                <div className="aspect-[2/3] w-full relative overflow-hidden bg-black flex items-center justify-center">
+                {/* Ignis Mode: Bottom-to-Top Organic Fire Aura */}
+                {theme === 'ignis' && (
+                  <IgnisFireAura isHovered={hoveredCardId === item.id} />
+                )}
+
+                {/* Terra Mode: Outer Botanical Vine Frame */}
+                {theme === 'terra' && (
+                  <TerraBotanicalCardFrame isFavorite={true} />
+                )}
+
+                <div className="aspect-[2/3] w-full relative overflow-hidden bg-black flex items-center justify-center rounded-t-2xl">
                   <SafeImage
                     src={item.coverPath || item.bannerPath}
                     alt={item.title}
@@ -894,7 +1003,11 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
                           sfx.playClick();
                           setTargetMediaForPlaylist(item);
                         }}
-                        className="p-1.5 rounded-full bg-black/70 text-white/70 hover:text-amber-400 backdrop-blur-md"
+                        className={`p-1.5 rounded-full backdrop-blur-md transition-colors ${
+                          isLightMode
+                            ? 'bg-black/60 text-white/90 hover:text-white'
+                            : 'bg-black/70 text-white/70 hover:text-amber-400'
+                        }`}
                         title="Thêm vào playlist cá nhân"
                       >
                         <ListPlus className="w-3.5 h-3.5" />
@@ -908,17 +1021,33 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
                           sfx.playClick();
                           onToggleFavoriteMedia(item.id);
                         }}
-                        className="p-1.5 rounded-full bg-rose-500 text-white backdrop-blur-md"
+                        className={`p-1.5 rounded-full backdrop-blur-md transition-all ${
+                          theme === 'terra'
+                            ? 'bg-[#2B241D] text-red-500 border border-[#7C5332] shadow-sm'
+                            : 'bg-rose-500 text-white'
+                        }`}
                         title="Bỏ thích"
                       >
-                        <Heart className="w-3.5 h-3.5 fill-current" />
+                        {theme === 'terra' ? (
+                          <TerraAppleFavoriteIcon isFavorite={true} size={15} />
+                        ) : (
+                          <Heart className="w-3.5 h-3.5 fill-current" />
+                        )}
                       </button>
                     )}
                   </div>
 
                   <div className="absolute inset-0 bg-black/30 group-hover:bg-black/10 flex items-center justify-center transition-colors">
-                    <div className="w-10 h-10 rounded-full bg-amber-400 text-black flex items-center justify-center shadow-lg transform scale-75 opacity-0 group-hover:opacity-100 group-hover:scale-100 transition-all">
-                      <Play className="w-4 h-4 fill-black ml-0.5" />
+                    <div className={`w-10 h-10 rounded-full flex items-center justify-center shadow-lg transform scale-75 opacity-0 group-hover:opacity-100 group-hover:scale-100 transition-all ${
+                      theme === 'aer'
+                        ? 'bg-[#0284C7] text-white shadow-none'
+                        : theme === 'aqua'
+                        ? 'bg-sky-500 text-white shadow-sky-500/25'
+                        : theme === 'solar'
+                        ? 'bg-amber-500 text-slate-950 font-black shadow-amber-500/20'
+                        : 'bg-amber-400 text-black'
+                    }`}>
+                      <Play className={`w-4 h-4 ml-0.5 ${theme === 'aer' || theme === 'aqua' ? 'fill-white text-white' : 'fill-black text-black'}`} />
                     </div>
                   </div>
                 </div>
