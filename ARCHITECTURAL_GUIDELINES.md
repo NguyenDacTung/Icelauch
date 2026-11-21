@@ -400,11 +400,24 @@ When the active theme is one of the light modes (`aer`, `solar`, `aqua`), the ap
 ### 12.4 Android Gesture Bar Contrast Elimination
 - On Android 10+ (API 29+), call `getWindow().setNavigationBarContrastEnforced(false)` in `MainActivity.java` and declare `enforceNavigationBarContrast = false` in `values-v29/styles.xml` to eliminate the dark overlay bar over bottom system gestures.
 
-| Mobile Floating Island & Phone Frame | `src/renderer/src/components/common/DevicePhoneFrame.tsx` |
-| Mobile Video Theater & YouTube Fullscreen | `src/renderer/src/components/mobile/MobileVideoTheaterView.tsx`, `src/renderer/src/utils/screenOrientation.ts` |
-| Theme engine & tokens | `src/renderer/src/index.css`, `src/renderer/src/hooks/useTheme.ts` |
-| Verification suite | `scripts/run-all-verifications.cjs` |
+---
+
+## 13. Cross-Device E2E Testing Protocol & Data Sandboxing
+
+### 13.1 Data Sandboxing & Zero-Leftover Teardown
+- **Test Item Prefix:** All media, games, and tags created during automated tests MUST carry the `[E2E_TEST]` prefix.
+- **Teardown Lifecycle:** Every test runner execution must guarantee clean teardown (via `try...finally`), purging 100% of `[E2E_TEST]` entities from local storage and Supabase Cloud.
+
+### 13.2 Dual-Bridge Hybrid Architecture
+- **PC Automation:** Connects to Electron Chrome DevTools Protocol (`127.0.0.1:9222`) for direct DOM control, state evaluation, and renderer screenshotting.
+- **Mobile Hybrid Automation:** Connects via ADB (`adb.exe`) to forwarded Android WebView DevTools (`127.0.0.1:9223`) for DOM/state operations, combined with native `adb exec-out screencap -p` for true edge-to-edge physical screen verification (including system gesture bar inspection).
+
+### 13.3 Triple-Layer Concurrent Verification
+Every state-mutating test case (hide/unhide, tag deletion, transform adjustment, metadata edits) MUST verify three layers concurrently:
+1. **Layer 1 (Local UI):** Immediate UI state reflection & toast confirmation.
+2. **Layer 2 (Cloud DB):** Direct Supabase query asserting correct column values and metadata serialization without duplicate primary keys.
+3. **Layer 3 (Cross-Device Reflection):** Secondary device pull/sync verification confirming end-to-end multi-device consistency.
 
 ---
 
-*Last updated: 2026-11-21 | Icelauch v1.2.7 / Video Backup Player, Privacy Shield & Multi-Playlist Overhaul*
+*Last updated: 2026-11-21 | Icelauch v1.2.8 / Banner Inline Drawer, Cloud Tag Sync & Cross-Device E2E Automation*

@@ -15,6 +15,7 @@
     "test:tier2": "node scripts/test-suites/tier2-boundary-tests.cjs",
     "test:tier3": "node scripts/test-suites/tier3-combination-tests.cjs",
     "test:tier4": "node scripts/test-suites/tier4-application-scenarios.cjs",
+    "test:e2e": "node scripts/e2e-cross-device-runner.cjs",
     "cap:sync": "cap sync android",
     "cap:build:android": "npm run build && cap sync android",
     "dist": "tsc && vite build && electron-builder",
