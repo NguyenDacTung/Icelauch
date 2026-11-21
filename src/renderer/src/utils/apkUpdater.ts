@@ -1,7 +1,7 @@
 import { registerPlugin } from '@capacitor/core';
 import { DEFAULT_SUPABASE_URL, DEFAULT_SUPABASE_ANON_KEY } from '../services/platformAdapter';
 
-export const CURRENT_MOBILE_VERSION = '1.2.9';
+export const CURRENT_MOBILE_VERSION = '1.2.10';
 export const CURRENT_TV_VERSION = '1.0.0';
 const GITHUB_REPO = 'NguyenDacTung/Icelauch';
 

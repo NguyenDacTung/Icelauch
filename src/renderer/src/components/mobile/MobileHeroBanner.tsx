@@ -71,8 +71,31 @@ export const MobileHeroBanner: React.FC<MobileHeroBannerProps> = ({
         className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-102"
         style={{
           objectPosition: currentItem.bannerPosition || currentItem.coverPosition || '50% 50%',
+          filter: [
+            currentItem.bannerBlur ? `blur(${currentItem.bannerBlur}px)` : '',
+            currentItem.bannerSharpen ? `contrast(${100 + currentItem.bannerSharpen * 10}%)` : '',
+          ].filter(Boolean).join(' ') || undefined,
+          transform: currentItem.bannerZoom ? `scale(${currentItem.bannerZoom})` : undefined,
         }}
       />
+
+      {/* Admin Configured Darkness Overlay */}
+      {currentItem.bannerDarkness !== undefined && currentItem.bannerDarkness > 0 && (
+        <div
+          className="absolute inset-0 pointer-events-none"
+          style={{ backgroundColor: `rgba(10, 12, 16, ${currentItem.bannerDarkness / 100})` }}
+        />
+      )}
+
+      {/* Admin Configured Edge Darkness (Side Vignette) */}
+      {currentItem.bannerEdgeDarkness !== undefined && currentItem.bannerEdgeDarkness > 0 && (
+        <div
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            background: `linear-gradient(to right, rgba(0,0,0,${currentItem.bannerEdgeDarkness / 100}) 0%, transparent 18%, transparent 82%, rgba(0,0,0,${currentItem.bannerEdgeDarkness / 100}) 100%)`,
+          }}
+        />
+      )}
 
       {/* Cinematic Dark Gradient Overlay */}
       <div className="absolute inset-0 bg-gradient-to-t from-[#0A0C10] via-black/45 to-transparent pointer-events-none" />

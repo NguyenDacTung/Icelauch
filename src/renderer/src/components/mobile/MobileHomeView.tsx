@@ -15,6 +15,7 @@ import type { Game, MediaItem, AppSettings, SectionBannerSettings } from '../../
 import { MobileHeroBanner } from './MobileHeroBanner';
 import { HorizontalScroller } from '../common/HorizontalScroller';
 import { SafeImage } from '../common/SafeImage';
+import { PullToRefresh } from '../common/PullToRefresh';
 
 interface MobileHomeViewProps {
   games: Game[];
@@ -27,6 +28,7 @@ interface MobileHomeViewProps {
   onToggleLibrary: (id: string) => void;
   onOpenSurprise?: () => void;
   userLibraryIds?: string[];
+  onPullRefresh?: () => Promise<void>;
 }
 
 export const MobileHomeView: React.FC<MobileHomeViewProps> = ({
@@ -40,6 +42,7 @@ export const MobileHomeView: React.FC<MobileHomeViewProps> = ({
   onToggleLibrary,
   onOpenSurprise,
   userLibraryIds,
+  onPullRefresh,
 }) => {
   const [localSearch, setLocalSearch] = useState('');
   const deferredSearch = useDeferredValue(localSearch);
@@ -76,7 +79,10 @@ export const MobileHomeView: React.FC<MobileHomeViewProps> = ({
   };
 
   return (
-    <div className="flex-1 w-full h-full flex flex-col bg-ice-bg text-ice-text select-none overflow-y-auto no-scrollbar p-3.5 pt-[max(0.75rem,env(safe-area-inset-top,0px))] pb-28 space-y-4">
+    <PullToRefresh
+      onRefresh={onPullRefresh}
+      className="flex-1 w-full h-full flex flex-col bg-ice-bg text-ice-text select-none p-3.5 pt-[max(0.75rem,env(safe-area-inset-top,0px))] pb-28 space-y-4"
+    >
       {/* 0. TOP MOBILE SEARCH FORM */}
       <form
         action=""
@@ -254,6 +260,6 @@ export const MobileHomeView: React.FC<MobileHomeViewProps> = ({
           </div>
         )}
       </div>
-    </div>
+    </PullToRefresh>
   );
 };

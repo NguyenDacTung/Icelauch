@@ -420,4 +420,23 @@ Every state-mutating test case (hide/unhide, tag deletion, transform adjustment,
 
 ---
 
-*Last updated: 2026-11-21 | Icelauch v1.2.8 / Banner Inline Drawer, Cloud Tag Sync & Cross-Device E2E Automation*
+## 14. Mobile View Invariant, Schema Metadata Envelopes & On-Demand Pull-to-Refresh
+
+### 14.1 Mobile Content Visibility Invariant
+- All mobile catalog views (`MobileMediaView`, `MobileHomeView`, `MobileLibraryView`) MUST strictly filter out `hidden === true` items for non-admin users (`!isAdmin && m.hidden`).
+- For authenticated admins, hidden items display with an `opacity-65` treatment and an amber `EyeOff` indicator badge so administrators retain full oversight and toggle control.
+
+### 14.2 Schema-Safe Metadata Envelopes
+- Custom catalog attributes without physical PostgreSQL columns on Supabase (`hidden`, `transform_metadata`, `bannerBlur`, `bannerDarkness`, `bannerEdgeDarkness`, `coverSharpen`, `bannerSharpen`, `secondaryTitle`, `episode`, `coverPosition`, `listCardPosition`, `listCardZoom`) MUST be serialized inside `<!--ICELAUCH_META:{...}-->` within the `description` column.
+- Never pass unmapped attributes as top-level fields in PostgREST payloads to prevent `HTTP 400 Bad Request (PGRST204)` schema cache rejections.
+
+### 14.3 Pure Pull-Only Mobile Pull-to-Refresh
+- On-demand mobile synchronization triggered by swipe-down gestures (`PullToRefresh`) is strictly a **UNIDIRECTIONAL PULL (READ-ONLY)** operation.
+- It queries Supabase REST endpoints, hydrates local React state, and updates the `localStorage` cache. It must NEVER push local catalog entities upstream.
+
+### 14.4 Mobile Visual Effect Parity
+- Mobile hero banners (`MobileHeroBanner.tsx`) must honor and render all administrator visual customizations (`bannerBlur`, `bannerDarkness`, `bannerEdgeDarkness`, `bannerSharpen`, `bannerZoom`), ensuring 1:1 visual parity with desktop banners.
+
+---
+
+*Last updated: 2026-11-21 | Icelauch v1.2.9 / Cloud Metadata Envelopes, Mobile Pull-to-Refresh & Hidden Item Filtering*

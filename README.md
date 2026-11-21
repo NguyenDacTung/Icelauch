@@ -1,8 +1,8 @@
 # Icelauch - Trình Quản Lý Game & Rạp Giải Trí Đa Nền Tảng (Windows, Mobile & Android TV)
 
 **Phiên bản phát hành:** 
-- 🖥️ **Windows PC:** `v1.2.9`
-- 📱 **Android Điện Thoại:** `v1.2.9` (Mã phiên bản build: `versionCode 25`)
+- 🖥️ **Windows PC:** `v1.2.10`
+- 📱 **Android Điện Thoại:** `v1.2.10` (Mã phiên bản build: `versionCode 26`)
 - 📺 **Android TV Edition:** `v1.0.0` (Bản chuyên biệt điều khiển 100% bằng Remote)
 
 **Hệ điều hành hỗ trợ:** 
@@ -28,7 +28,16 @@ Tại trang Releases, bạn sẽ có các file cài đặt tương ứng với t
 
 ---
 
-## 2. Các Nâng Cấp Nổi Bật Trong Phiên Bản v1.2.9 (Khắc Phục Triệt Để Toàn Bộ Lỗi Đồng Bộ Cloud Supabase, Khôi Phục Lưu Trữ Video/Game, Chuẩn Hóa Tag & Quick Hide)
+## 2. Các Nâng Cấp Nổi Bật Trong Phiên Bản v1.2.10 (Cơ Chế Pull-to-Refresh Chủ Động, Bộ Lọc Video Ẩn Điện Thoại & Đồng Bộ Hiệu Ứng Lớp Phủ Banner)
+
+Bản cập nhật v1.2.10 mang đến trải nghiệm đồng bộ Cloud chủ động và hoàn thiện giao diện di động:
+- **Cơ chế vuốt kéo làm mới (Pull-to-Refresh) trên Di động:** Người dùng khi ở đầu danh sách (trang Home Game & trang Phim/Media) có thể vuốt kéo xuống để lập tức lấy dữ liệu mới nhất từ Supabase Cloud. Đây là cơ chế **đơn hướng Pull-only**, chỉ tải dữ liệu mới từ Cloud về và đè lên cache local, tuyệt đối không tải dữ liệu local lên đám mây.
+- **Khắc phục triệt để video ẩn trên điện thoại:** Bổ sung bộ lọc `visibleMedia` cho `MobileMediaView`. Người dùng thông thường sẽ không nhìn thấy bất kỳ video nào bị ẩn. Đối với tài khoản Admin, video ẩn hiển thị độ mờ 65% kèm huy hiệu `EyeOff` màu vàng để quản trị viên dễ dàng nhận diện và quản lý.
+- **Đồng bộ hiển thị hiệu ứng ảnh trên MobileHeroBanner:** Đã kích hoạt đầy đủ các lớp phủ độ tối (`bannerDarkness`), độ mờ (`bannerBlur`), độ tương phản làm nét (`bannerSharpen`) và viền đen hai cạnh (`bannerEdgeDarkness`) trên điện thoại, đồng nhất 100% với giao diện banner PC.
+
+---
+
+## 3. Các Nâng Cấp Trong Phiên Bản v1.2.9 (Khắc Phục Lỗi Đồng Bộ Cloud Supabase, Khôi Phục Lưu Trữ Video/Game, Chuẩn Hóa Tag & Quick Hide)
 
 Bản cập nhật v1.2.9 giải quyết dứt điểm các lỗi đồng bộ dữ liệu đám mây:
 - **Đóng gói Metadata Envelope an toàn:** Toàn bộ thuộc tính tùy biến (`hidden`, `transform_metadata`, `secondaryTitle`, `episode`, `coverPosition`, `listCardPosition`) được đóng gói vào thẻ `<!--ICELAUCH_META:...-->` trong cột `description`. Loại bỏ hoàn toàn việc gửi cột lạ lên Supabase, chấm dứt triệt để lỗi `HTTP 400 Bad Request (PGRST204)`.

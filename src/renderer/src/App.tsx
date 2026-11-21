@@ -462,7 +462,7 @@ export default function App() {
         }
 
         // Version update check: require re-login on new app version update; keep auto-login on same version
-        const CURRENT_APP_VERSION = '1.2.9';
+        const CURRENT_APP_VERSION = '1.2.10';
         const isNewVersion = shouldRequireReLoginForNewVersion(CURRENT_APP_VERSION);
         if (isNewVersion) {
           console.log(`[Version Upgrade] New version ${CURRENT_APP_VERSION}: Requiring re-login.`);
@@ -779,6 +779,38 @@ export default function App() {
           if (cloudData.profiles) setProfiles(cloudData.profiles);
         }
       }).catch(console.warn);
+    }
+  };
+
+  const handlePullRefreshCloud = async () => {
+    try {
+      const cloudData = await fetchDirectCloudCatalog();
+      if (cloudData) {
+        const sys = (cloudData as any).systemSettings || {};
+        setAppData((prev) =>
+          prev
+            ? {
+                ...prev,
+                games: cloudData.games,
+                media: cloudData.media,
+                playlists: cloudData.playlists,
+                settings: {
+                  ...prev.settings,
+                  ...(sys.bannerSettings ? { bannerSettings: sys.bannerSettings } : {}),
+                  ...(sys.gameTags ? { gameTags: sys.gameTags } : {}),
+                  ...(sys.movieTags ? { movieTags: sys.movieTags } : {}),
+                  ...(sys.musicTags ? { musicTags: sys.musicTags } : {}),
+                  ...(sys.podcastTags ? { podcastTags: sys.podcastTags } : {}),
+                },
+              }
+            : null
+        );
+        if (cloudData.profiles) setProfiles(cloudData.profiles);
+        sfx.playSuccess();
+        showAdminCloudToast('Đã làm mới dữ liệu từ Cloud!');
+      }
+    } catch (err) {
+      console.warn('Pull refresh error:', err);
     }
   };
 
@@ -2485,6 +2517,7 @@ export default function App() {
                     onSelectGame={(game) => setViewingDetailGame(game)}
                     onIncompatibleClick={(game) => setIncompatibleGame(game)}
                     onToggleLibrary={handleToggleLibrary}
+                    onPullRefresh={handlePullRefreshCloud}
                   />
                 )}
 
@@ -2540,6 +2573,7 @@ export default function App() {
                     onDownloadMedia={handleDownloadMedia}
                     onDeleteDownloaded={handleDeleteDownloadedMedia}
                     onMinimizeToMiniPlayer={(m: any) => setMiniPlayerMedia(m)}
+                    onPullRefresh={handlePullRefreshCloud}
                   />
                 )}
 

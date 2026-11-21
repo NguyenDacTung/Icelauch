@@ -11,7 +11,8 @@ import {
   Flame,
   Plus,
   Heart,
-  ListPlus
+  ListPlus,
+  EyeOff
 } from 'lucide-react';
 import type { MediaItem, MediaPlaylist, SectionBannerSettings } from '../../types';
 import { MobileHeroBanner } from './MobileHeroBanner';
@@ -20,6 +21,7 @@ import { MobileVideoTheaterView } from './MobileVideoTheaterView';
 import { SafeImage } from '../common/SafeImage';
 import { AddToPlaylistModal } from '../media/AddToPlaylistModal';
 import { SurpriseMediaModal } from '../media/SurpriseMediaModal';
+import { PullToRefresh } from '../common/PullToRefresh';
 import { sfx } from '../../utils/sfx';
 import { formatMediaCardSubtitle } from '../../utils/mediaUrl';
 import { matchSmartSearch } from '../../utils/searchHelper';
@@ -49,6 +51,7 @@ interface MobileMediaViewProps {
   onDownloadMedia?: (id: string) => void;
   onDeleteDownloaded?: (id: string) => void;
   onMinimizeToMiniPlayer?: (item: MediaItem) => void;
+  onPullRefresh?: () => Promise<void>;
 }
 
 export const MobileMediaView: React.FC<MobileMediaViewProps> = ({
@@ -71,6 +74,7 @@ export const MobileMediaView: React.FC<MobileMediaViewProps> = ({
   onUpdateMediaProgress,
   onDownloadMedia,
   onDeleteDownloaded,
+  onPullRefresh,
 }) => {
   const { theme } = useTheme();
   const [mediaTab, setMediaTab] = useState<'video' | 'music' | 'podcast'>('video');
@@ -96,9 +100,17 @@ export const MobileMediaView: React.FC<MobileMediaViewProps> = ({
     onSelectTheaterMedia?.(item);
   };
 
-  const videoList = media.filter((m) => m.type === 'video');
-  const musicList = media.filter((m) => m.type === 'audio' && (m.subType === 'music' || !m.subType));
-  const podcastList = media.filter((m) => m.type === 'audio' && m.subType === 'podcast');
+  // Lọc dữ liệu hiển thị: Ẩn hoàn toàn với user thường, hiển thị kèm dấu hiệu nhận biết cho Admin
+  const visibleMedia = useMemo(() => {
+    return media.filter((m) => {
+      if (!isAdmin && m.hidden) return false;
+      return true;
+    });
+  }, [media, isAdmin]);
+
+  const videoList = useMemo(() => visibleMedia.filter((m) => m.type === 'video'), [visibleMedia]);
+  const musicList = useMemo(() => visibleMedia.filter((m) => m.type === 'audio' && (m.subType === 'music' || !m.subType)), [visibleMedia]);
+  const podcastList = useMemo(() => visibleMedia.filter((m) => m.type === 'audio' && m.subType === 'podcast'), [visibleMedia]);
 
   const currentList = mediaTab === 'video' ? videoList : mediaTab === 'music' ? musicList : podcastList;
 
@@ -178,7 +190,10 @@ export const MobileMediaView: React.FC<MobileMediaViewProps> = ({
   }
 
   return (
-    <div className="flex-1 w-full h-full flex flex-col bg-ice-bg text-ice-text select-none overflow-y-auto no-scrollbar p-3.5 pt-[max(0.75rem,env(safe-area-inset-top,0px))] pb-28 space-y-4">
+    <PullToRefresh
+      onRefresh={onPullRefresh}
+      className="flex-1 w-full h-full flex flex-col bg-ice-bg text-ice-text select-none p-3.5 pt-[max(0.75rem,env(safe-area-inset-top,0px))] pb-28 space-y-4"
+    >
       {/* 1. TOP MOBILE SEARCH BAR & SUB-TABS */}
       <div className="space-y-2.5 shrink-0 pt-1">
         {/* Search Input Form - Adaptive Pill Bar */}
@@ -344,7 +359,7 @@ export const MobileMediaView: React.FC<MobileMediaViewProps> = ({
                     if (item.type === 'video') handleSetActiveMedia(item);
                     else onPlayAudio?.(item);
                   }}
-                  className={`w-32 aspect-[2/3] rounded-2xl relative shrink-0 cursor-pointer group flex flex-col ${
+                  className={`w-32 aspect-[2/3] rounded-2xl relative shrink-0 cursor-pointer group flex flex-col ${item.hidden ? 'opacity-65' : ''} ${
                     theme === 'aer'
                       ? 'bg-white border border-[#CBD5E1] shadow-none overflow-hidden active:border-[#0284C7] transition-none'
                       : theme === 'ignis'
@@ -365,6 +380,13 @@ export const MobileMediaView: React.FC<MobileMediaViewProps> = ({
                   )}
 
                   <div className="relative w-full h-full bg-black rounded-2xl overflow-hidden">
+                    {/* Admin Indicator for Hidden Media */}
+                    {item.hidden && (
+                      <div className="absolute top-2 left-2 z-20 px-1.5 py-0.5 rounded-md bg-black/80 border border-amber-500/50 text-[9px] font-black text-amber-400 flex items-center gap-1 shadow-sm">
+                        <EyeOff className="w-2.5 h-2.5" />
+                        <span>Ẩn</span>
+                      </div>
+                    )}
                     <SafeImage
                       src={item.coverPath || item.bannerPath}
                       alt={item.title}
@@ -613,7 +635,7 @@ export const MobileMediaView: React.FC<MobileMediaViewProps> = ({
                       if (item.type === 'video') handleSetActiveMedia(item);
                       else onPlayAudio?.(item);
                     }}
-                    className={`rounded-2xl cursor-pointer group flex flex-col ${
+                    className={`rounded-2xl cursor-pointer group flex flex-col ${item.hidden ? 'opacity-65' : ''} ${
                       theme === 'aer'
                         ? 'bg-white border border-[#CBD5E1] shadow-none overflow-hidden active:border-[#0284C7] transition-none'
                         : theme === 'ignis'
@@ -635,6 +657,13 @@ export const MobileMediaView: React.FC<MobileMediaViewProps> = ({
 
                     {/* 4:6 (2:3) List Card Poster */}
                     <div className="relative aspect-[2/3] w-full bg-ice-hover/50 overflow-hidden rounded-t-2xl">
+                      {/* Admin Indicator for Hidden Media */}
+                      {item.hidden && (
+                        <div className="absolute top-2 left-2 z-20 px-1.5 py-0.5 rounded-md bg-black/80 border border-amber-500/50 text-[9px] font-black text-amber-400 flex items-center gap-1 shadow-sm">
+                          <EyeOff className="w-2.5 h-2.5" />
+                          <span>Ẩn</span>
+                        </div>
+                      )}
                       <SafeImage
                         src={item.coverPath || item.bannerPath}
                         alt={item.title}
@@ -779,6 +808,6 @@ export const MobileMediaView: React.FC<MobileMediaViewProps> = ({
           }}
         />
       )}
-    </div>
+    </PullToRefresh>
   );
 };
