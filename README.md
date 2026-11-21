@@ -1,8 +1,8 @@
 # Icelauch - Trình Quản Lý Game & Rạp Giải Trí Đa Nền Tảng (Windows, Mobile & Android TV)
 
 **Phiên bản phát hành:** 
-- 🖥️ **Windows PC:** `v1.2.6`
-- 📱 **Android Điện Thoại:** `v1.2.6` (Mã phiên bản build: `versionCode 22`)
+- 🖥️ **Windows PC:** `v1.2.7`
+- 📱 **Android Điện Thoại:** `v1.2.7` (Mã phiên bản build: `versionCode 23`)
 - 📺 **Android TV Edition:** `v1.0.0` (Bản chuyên biệt điều khiển 100% bằng Remote)
 
 **Hệ điều hành hỗ trợ:** 
@@ -28,7 +28,56 @@ Tại trang Releases, bạn sẽ có các file cài đặt tương ứng với t
 
 ---
 
-## 2. Các Nâng Cấp Nổi Bật Trong Phiên Bản v1.2.6 (Bộ Nhận Diện Thương Hiệu Mới & Đại Tu Toàn Diện Aqua & Solar Mode)
+## 2. Các Nâng Cấp Nổi Bật Trong Phiên Bản v1.2.7 (Trình Phát Video Dự Phòng HTML5 Cinema, Quản Lý Banner Nâng Cao, Series & Playlists, Lá Chắn Bảo Mật & Tối Ưu Trải Nghiệm Di Động)
+
+Bản cập nhật v1.2.7 mang đến bước hoàn thiện quan trọng về tính năng đa phương tiện, bảo mật thông tin và nâng tầm trải nghiệm nghe nhìn cho **Icelauch**:
+
+### 2.1 Trình Phát Video Dự Phòng (HTML5 Cinema Player) & Cảnh Báo Thông Minh Cho Google Drive
+- 🎬 **Trình phát HTML5 Cinema độc lập:** Tự code bộ điều khiển video chuyên nghiệp với nút Play/Pause lớn nổi bật ở tâm khi tạm dừng, nút tua nhanh tiến/lùi 10s (`RotateCw`/`RotateCcw`), thanh Scrubber thời gian thực mượt mà, thanh trượt âm lượng + tắt tiếng, chu kỳ điều chỉnh tốc độ xem (0.75x, 1x, 1.25x, 1.5x, 2x) và chế độ xem Toàn màn hình.
+- 🛡️ **Tự động phát hiện lỗi và đề xuất đổi trình phát:** Khi luồng phát Google Drive gặp sự cố tải, bị chặn cookie hoặc mạng chậm quá 10 giây, ứng dụng tự động hiển thị hộp thoại gợi ý thân thiện: *"Trình phát Drive đang gặp sự cố, bạn có muốn đổi sang Trình phát Dự phòng không?"* cho phép chuyển sang HTML5 Cinema tức thì.
+- ⚡ **Nút chuyển đổi nhanh thủ công:** Bổ sung nút gạt trực tiếp cạnh bộ chọn nguồn phát giúp chuyển đổi qua lại giữa Google Drive và Trình phát Dự phòng bất cứ lúc nào.
+
+### 2.2 Quản Lý Banner Admin Đầy Đủ & Đồng Bộ Đám Mây Tức Thì (Real-Time Cloud Sync)
+- 🔄 **Tính năng Thay thế Banner:** Admin có thể bấm nút *Thay thế* (`ArrowLeftRight`) trên bất kỳ thẻ banner nào để mở thanh chọn mục thay thế tức thì mà không cần xóa đi ghim lại.
+- 🗑️ **Gỡ bỏ linh hoạt:** Cho phép gỡ bỏ cả các mục đang ghim chính thức lẫn các mục tự động bù (đưa vào danh sách loại trừ `excludedIds` để không tự động xuất hiện).
+- ☁️ **Lưu đám mây tức thời:** Mọi thao tác thêm mới, thay thế, gỡ bỏ, đổi thứ tự hiển thị hay cấu hình banner đều được lưu ngay lập tức lên Supabase Cloud (`__system_catalog_settings__`).
+
+### 2.3 Quản Lý Phim Chuyên Sâu (Tên Khác / Tên Phụ, Số Tập) & Định Dạng Thẻ Chuẩn
+- 📝 **Trường dữ liệu mở rộng cho Phim:** Form Admin bổ sung 2 ô nhập: **"Tên khác / Tên phụ"** (`secondaryTitle`) và **"Tập / Phần"** (`episode`), lưu trữ đồng bộ lên Cloud qua description metadata.
+- 🏷️ **Định dạng thẻ phim thông minh:** Dòng phụ dưới tên phim nay hiển thị theo định dạng `Tên phụ - #tập`. Nếu thiếu một trong hai thì hiển thị mục còn lại; nếu không nhập cả hai thì tự động đưa tên chính xuống để thẻ luôn đầy đủ, cân đối.
+- 🎭 **Hiển thị Theater View đẳng cấp:** Màn hình xem phim thể hiện nổi bật tên chính kèm huy hiệu số tập `#{tập}` màu vàng kim và tên phụ in nghiêng sang trọng.
+
+### 2.4 Tìm Kiếm Đa Trường Toàn Diện
+- 🔍 Thanh tìm kiếm chính trên Header và thanh tìm kiếm nội bộ danh sách nay tự động tìm khớp theo: Tên chính, Tên khác/Tên phụ, Số tập (hỗ trợ cả dạng `1`, `#1`, `tập 1`), Thể loại và Thẻ tags.
+
+### 2.5 Lá Chắn Bảo Mật Dữ Liệu Tuyệt Đối (Privacy Shield)
+- 🔒 **Chặn rò rỉ liên kết gốc:** Loại bỏ hoàn toàn các nút "Sao chép link" và "Mở link nguồn trên trình duyệt ngoài" trên toàn bộ ứng dụng (PC, Mobile, TV, Chi tiết Game, Rạp phim và Nhạc). Người dùng trải nghiệm nội dung an toàn, khép kín trong ứng dụng mà không lo lộ nguồn tải.
+
+### 2.6 Đồng Bộ Chuỗi Series & Danh Sách Phát (Playlists) Trên PC
+- 📺 **Cùng Series cho mọi video:** Mọi video thuộc bất kỳ danh sách phát nào đều tự động kích hoạt tab *"Cùng Series"* trong cột đề xuất bên cạnh. Hỗ trợ dropdown chuyển đổi nhanh nếu video nằm trong nhiều series khác nhau.
+- 📑 **Danh sách phát chứa video:** Bên dưới phần mô tả video hiển thị đầy đủ các playlist mà video này trực thuộc; chỉ cần 1 click để nhảy ngay sang xem toàn bộ series đó.
+
+### 2.7 Thanh Điều Khiển Đề Xuất Sidebar Thông Minh
+- 🎛️ **Toolbar tiện ích ở giữa tab và danh sách:**
+  - **3 chế độ phát độc quyền:** Lặp lại video đang xem (`Repeat`), Phát theo thứ tự (`Sequential`), Phát ngẫu nhiên (`Shuffle`). Tự động chuyển bài/tập theo đúng chế độ đã chọn khi video kết thúc.
+  - **Nút đảo thứ tự phát:** Cho phép xem theo thứ tự xuôi `1 → N` hoặc ngược `N → 1`.
+  - **Ô tìm kiếm nội bộ danh sách:** Lọc tức thì video theo tên, tập hoặc thể loại ngay trong cột đề xuất.
+  - Hoạt động trơn tru trên cả 3 tab: Cùng Series, Gợi ý cùng thể loại, và Nổi bật.
+
+### 2.8 Dừng Nhạc Nền Toàn Cục (Universal BGM Interruption)
+- 🎵 Đấu nối sự kiện toàn cục `icelauch-pause-bgm`: Ngay khi người dùng mở xem phim, video, hoặc bật tiếng trailer game ở bất kỳ màn hình nào, nhạc nền đang phát sẽ tự động tạm dừng ngay 100%, không bị tình trạng chồng chéo âm thanh.
+
+### 2.9 Sửa Màu Nút Playlist Ở Mode Sáng & Giọt Nước Tab Mobile
+- ☀️ **Icon thêm vào playlist trắng tinh trên nền tối:** Khắc phục triệt để lỗi icon màu đen trên nền tròn đen mờ trong mode Solar và Aqua, đảm bảo hiển thị sắc nét với lớp bảo vệ `btn-keep-white`.
+- 💧 **Sửa lỗi lệch Tab Aqua Mobile:** Khắc phục lỗi giọt nước trượt bị lệch 2 vị trí trên thanh điều hướng di động bằng việc gán neo tọa độ tuyệt đối `left: 0 !important`.
+
+### 2.10 Tối Ưu Trình Phát YouTube Di Động Chuẩn 16:9
+- 📱 **Xóa bỏ vệt đen trên/dưới:** Khung phát YouTube di động nay chuẩn hóa theo tỉ lệ `w-full aspect-video` 16:9 khít màn hình, không còn vệt đen trên dưới gây khó chịu.
+- 🔄 **Loại bỏ tự động xoay:** Gỡ bỏ hoàn toàn listener xoay màn hình tự động và lớp overlay toàn màn hình phụ, chấm dứt hoàn toàn hiện tượng xung đột và phát đè 2 video cùng lúc.
+
+---
+
+## 3. Các Nâng Cấp Nổi Bật Trong Phiên Bản v1.2.6 (Bộ Nhận Diện Thương Hiệu Mới & Đại Tu Toàn Diện Aqua & Solar Mode)
 
 Bản cập nhật v1.2.6 mang đến bước đột phá mạnh mẽ về thị giác và công thái học cho **Icelauch**:
 

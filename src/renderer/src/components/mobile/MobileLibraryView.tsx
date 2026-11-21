@@ -23,6 +23,7 @@ import { SafeImage } from '../common/SafeImage';
 import { UserPlaylistModal } from '../media/UserPlaylistModal';
 import { AddToPlaylistModal } from '../media/AddToPlaylistModal';
 import { sfx } from '../../utils/sfx';
+import { formatMediaCardSubtitle } from '../../utils/mediaUrl';
 import { useTheme } from '../../hooks/useTheme';
 import { TerraBotanicalCardFrame } from '../common/TerraBotanicalCardFrame';
 import { TerraAppleFavoriteIcon } from '../common/TerraAppleFavoriteIcon';
@@ -562,8 +563,8 @@ export const MobileLibraryView: React.FC<MobileLibraryViewProps> = ({
                           <h4 className="text-xs font-bold text-ice-text line-clamp-1 group-hover:text-cyan-500 transition-colors">
                             {item.title}
                           </h4>
-                          <span className="text-[10px] text-ice-subtext line-clamp-1">
-                            {item.artist || item.category || (item.type === 'video' ? 'Phim' : 'Nhạc')}
+                          <span className="text-[10px] text-ice-subtext line-clamp-1" title={formatMediaCardSubtitle(item)}>
+                            {formatMediaCardSubtitle(item)}
                           </span>
                         </div>
                         <div className="pt-1 flex items-center justify-between text-[10px] text-cyan-500 font-semibold">

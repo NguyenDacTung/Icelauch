@@ -39,6 +39,8 @@ export const MediaFormModal: React.FC<MediaFormModalProps> = ({
   const [artist, setArtist] = useState('');
   const [aspectRatioMode, setAspectRatioMode] = useState<'16:9' | '9:16' | 'auto'>('16:9');
   const [title, setTitle] = useState('');
+  const [secondaryTitle, setSecondaryTitle] = useState('');
+  const [episode, setEpisode] = useState('');
   const [link, setLink] = useState('');
   const [backupLinksText, setBackupLinksText] = useState('');
   const [coverPath, setCoverPath] = useState('');
@@ -77,6 +79,8 @@ export const MediaFormModal: React.FC<MediaFormModalProps> = ({
         setArtist(media.artist || '');
         setAspectRatioMode(media.aspectRatioMode || '16:9');
         setTitle(media.title || '');
+        setSecondaryTitle(media.secondaryTitle || '');
+        setEpisode(media.episode || '');
         setLink(media.link || '');
         setBackupLinksText(media.backupLinks ? media.backupLinks.join('\n') : '');
         setCoverPath(media.coverPath || '');
@@ -142,6 +146,8 @@ export const MediaFormModal: React.FC<MediaFormModalProps> = ({
         setArtist('');
         setAspectRatioMode('16:9');
         setTitle('');
+        setSecondaryTitle('');
+        setEpisode('');
         setLink('');
         setBackupLinksText('');
         setCoverPath('');
@@ -309,6 +315,8 @@ export const MediaFormModal: React.FC<MediaFormModalProps> = ({
       artist: artist.trim() || media?.artist,
       aspectRatioMode,
       title: title.trim() || media?.title || '',
+      secondaryTitle: secondaryTitle.trim() || undefined,
+      episode: episode.trim() || undefined,
       link: link.trim() || media?.link || '',
       backupLinks: bLinks.length > 0 ? bLinks : media?.backupLinks,
       coverPath: finalCover || media?.coverPath,
@@ -470,6 +478,32 @@ export const MediaFormModal: React.FC<MediaFormModalProps> = ({
               className="w-full h-9 rounded bg-ice-bg border border-ice-border px-3 text-white focus:outline-none focus:border-amber-400"
             />
           </div>
+
+          {/* Secondary Title & Episode for Videos/Movies */}
+          {type === 'video' && (
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <div className="sm:col-span-2 space-y-1.5">
+                <label className="font-semibold text-white">Tên khác / Tên phụ (tuỳ chọn)</label>
+                <input
+                  type="text"
+                  value={secondaryTitle}
+                  onChange={(e) => setSecondaryTitle(e.target.value)}
+                  placeholder="Ví dụ: Detective Conan: Quarter of Silence"
+                  className="w-full h-9 rounded bg-ice-bg border border-ice-border px-3 text-white focus:outline-none focus:border-amber-400"
+                />
+              </div>
+              <div className="space-y-1.5">
+                <label className="font-semibold text-white">Tập / Phần (tuỳ chọn)</label>
+                <input
+                  type="text"
+                  value={episode}
+                  onChange={(e) => setEpisode(e.target.value)}
+                  placeholder="Ví dụ: 01, 15, Special..."
+                  className="w-full h-9 rounded bg-ice-bg border border-ice-border px-3 text-white focus:outline-none focus:border-amber-400"
+                />
+              </div>
+            </div>
+          )}
 
           {/* Artist / Author for Audio */}
           {type === 'audio' && (

@@ -198,6 +198,8 @@ export async function fetchDirectCloudCatalog(
       return {
         id: row.id,
         title: cleanQuestionMarks(row.title),
+        secondaryTitle: meta.secondaryTitle || row.secondary_title || undefined,
+        episode: meta.episode !== undefined && meta.episode !== null ? String(meta.episode) : undefined,
         type: (row.type as 'video' | 'audio') || 'video',
         subType: meta.subType || (row.type === 'audio' ? 'music' : undefined),
         artist: meta.artist,
@@ -315,6 +317,50 @@ export async function fetchDirectCloudCatalog(
     }
 
     return { games: [], media: [], profiles: [], playlists: [] };
+  }
+}
+
+/**
+ * Đồng bộ cài đặt hệ thống toàn cục (Banner, Thể loại Tags) lên Cloud Supabase tức thời
+ */
+export async function syncSystemSettingsToCloud(settingsToMerge: Record<string, any>): Promise<boolean> {
+  try {
+    let currentSystemSettings: any = {};
+    const rawSys = localStorage.getItem('icelauch_system_settings');
+    if (rawSys) {
+      try {
+        currentSystemSettings = JSON.parse(rawSys);
+      } catch {}
+    }
+    const merged = {
+      ...currentSystemSettings,
+      ...settingsToMerge,
+      updated_at: new Date().toISOString(),
+    };
+    try {
+      localStorage.setItem('icelauch_system_settings', JSON.stringify(merged));
+    } catch {}
+
+    await fetch(`${DEFAULT_SUPABASE_URL}/rest/v1/icelauch_playlists`, {
+      method: 'POST',
+      headers: {
+        apikey: DEFAULT_SUPABASE_ANON_KEY,
+        Authorization: `Bearer ${DEFAULT_SUPABASE_ANON_KEY}`,
+        'Content-Type': 'application/json',
+        Prefer: 'resolution=merge-duplicates',
+      },
+      body: JSON.stringify({
+        id: '__system_catalog_settings__',
+        title: '__system_catalog_settings__',
+        description: JSON.stringify(merged),
+        item_ids: [],
+        updated_at: new Date().toISOString(),
+      }),
+    });
+    return true;
+  } catch (err) {
+    console.warn('Failed to sync system settings to Supabase cloud:', err);
+    return false;
   }
 }
 

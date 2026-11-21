@@ -89,9 +89,10 @@ export function resolveBannerItems<T extends { id: string; hidden?: boolean; vie
   const settings = sectionSettings || DEFAULT_SECTION_BANNER_SETTINGS;
   const maxSlots = Math.max(1, Math.min(10, settings.maxBanners || 5));
   const now = new Date().getTime();
+  const excludedSet = new Set(settings.excludedIds || []);
 
   // Filter visible items
-  const visibleItems = allItems.filter((item) => !item.hidden);
+  const visibleItems = allItems.filter((item) => !item.hidden && !excludedSet.has(item.id));
   if (visibleItems.length === 0) return [];
 
   const itemMap = new Map<string, T>();

@@ -131,6 +131,8 @@ export interface MediaItem {
   type: 'video' | 'audio';
   subType?: MediaSubType;
   title: string;
+  secondaryTitle?: string; // Tên khác / tên phụ (tiếng Việt hoặc tiếng nước ngoài)
+  episode?: string; // Số tập hoặc phân đoạn (vd: 1, 02, Special, OVA)
   artist?: string;
   album?: string;
   link: string;
@@ -227,6 +229,7 @@ export interface SectionBannerSettings {
   fallbackMode: 'views_then_random' | 'views_only' | 'random_only';
   autoSlideIntervalSeconds: number;// Slide interval in seconds (default: 7)
   pinnedItems: BannerItemConfig[]; // Ordered list of pinned configs
+  excludedIds?: string[]; // Danh sách các ID bị admin xoá/loại bỏ khỏi banner
 }
 
 export interface AppBannerSettings {

@@ -73,6 +73,8 @@ import {
   fetchDirectCloudCatalog,
   verifyAdminPin,
   setAdminPinMobile,
+  syncSystemSettingsToCloud,
+  encodeDescriptionMetadata,
   DEFAULT_SUPABASE_URL,
   DEFAULT_SUPABASE_ANON_KEY
 } from './services/platformAdapter';
@@ -299,6 +301,16 @@ export default function App() {
   }, [isMobileOrTvNative]);
 
   useEffect(() => {
+    const handleGlobalPauseBgm = () => {
+      handlePauseAudio();
+    };
+    window.addEventListener('icelauch-pause-bgm', handleGlobalPauseBgm);
+    return () => {
+      window.removeEventListener('icelauch-pause-bgm', handleGlobalPauseBgm);
+    };
+  }, []);
+
+  useEffect(() => {
     // Check update silently on startup
     if (effectiveDevice === 'android_tv') {
       const timer = setTimeout(async () => {
@@ -450,7 +462,7 @@ export default function App() {
         }
 
         // Version update check: require re-login on new app version update; keep auto-login on same version
-        const CURRENT_APP_VERSION = '1.2.6';
+        const CURRENT_APP_VERSION = '1.2.7';
         const isNewVersion = shouldRequireReLoginForNewVersion(CURRENT_APP_VERSION);
         if (isNewVersion) {
           console.log(`[Version Upgrade] New version ${CURRENT_APP_VERSION}: Requiring re-login.`);
@@ -1348,6 +1360,27 @@ export default function App() {
       showAdminCloudToast('Đã lưu thay đổi media lên Cloud!');
     } else {
       try {
+        const meta: Record<string, any> = {
+          secondaryTitle: mediaData.secondaryTitle,
+          episode: mediaData.episode,
+          subType: mediaData.subType,
+          artist: mediaData.artist,
+          album: mediaData.album,
+          coverPosition: mediaData.coverPosition,
+          coverZoom: mediaData.coverZoom,
+          coverSharpen: mediaData.coverSharpen,
+          bannerPosition: mediaData.bannerPosition,
+          bannerZoom: mediaData.bannerZoom,
+          bannerBlur: mediaData.bannerBlur,
+          bannerDarkness: mediaData.bannerDarkness,
+          bannerEdgeDarkness: mediaData.bannerEdgeDarkness,
+          bannerSharpen: mediaData.bannerSharpen,
+          listCardPosition: mediaData.listCardPosition,
+          listCardZoom: mediaData.listCardZoom,
+          transform_metadata: mediaData.transform_metadata,
+        };
+        const finalDescription = encodeDescriptionMetadata(mediaData.description || '', meta);
+
         const finalMedia = {
           id: mediaData.id || `media-${Date.now()}`,
           title: mediaData.title || 'Untitled',
@@ -1355,7 +1388,7 @@ export default function App() {
           link: [mediaData.link, ...(mediaData.backupLinks || [])].filter(Boolean).join('\n'),
           cover_path: mediaData.coverPath || null,
           banner_path: mediaData.bannerPath || null,
-          description: mediaData.description || '',
+          description: finalDescription,
           category: mediaData.category || '',
           tags: mediaData.tags || [],
           duration: mediaData.duration || 0,
@@ -1576,6 +1609,8 @@ export default function App() {
     if (window.api) {
       await window.api.saveSettings({ bannerSettings: newBannerSettings });
     }
+    await syncSystemSettingsToCloud({ bannerSettings: newBannerSettings });
+    showAdminCloudToast('Đã lưu cấu hình banner lên Cloud!');
   };
 
   const handleDeleteMedia = async (id: string, skipConfirm = false) => {
@@ -2942,6 +2977,8 @@ export default function App() {
           if (window.api) {
             await window.api.saveSettings({ [type]: newTags });
           }
+          await syncSystemSettingsToCloud({ [type]: newTags });
+          showAdminCloudToast('Đã lưu cấu hình thể loại lên Cloud!');
         }}
         onRenameTag={handleRenameTag}
         onDeleteTag={handleDeleteTag}

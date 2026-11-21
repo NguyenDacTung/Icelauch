@@ -24,7 +24,6 @@ import { parseMediaUrl, getActiveProxyPort } from '../../utils/mediaUrl';
 import type { MediaItem, MediaPlaylist } from '../../types';
 import { SafeImage } from '../common/SafeImage';
 import { sfx } from '../../utils/sfx';
-import { lockToLandscape, unlockOrientation } from '../../utils/screenOrientation';
 
 interface MobileVideoTheaterViewProps {
   media: MediaItem;
@@ -91,70 +90,9 @@ export const MobileVideoTheaterView: React.FC<MobileVideoTheaterViewProps> = ({
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
 
-  // Landscape Theater & Fullscreen state
-  const [isLandscapeTheater, setIsLandscapeTheater] = useState(false);
-  const [videoFitMode, setVideoFitMode] = useState<'contain' | 'cover'>('cover');
-  const [showLandscapeHud, setShowLandscapeHud] = useState(true);
-  const hudTimerRef = useRef<NodeJS.Timeout | null>(null);
-  const youtubeContainerRef = useRef<HTMLDivElement>(null);
-
-  // Auto-listen to Fullscreen change events on Android WebView and Browser
   useEffect(() => {
-    const handleFullscreenChange = () => {
-      const isFs = !!(
-        document.fullscreenElement ||
-        (document as any).webkitFullscreenElement
-      );
-      if (isFs) {
-        setIsLandscapeTheater(true);
-        lockToLandscape();
-      } else {
-        setIsLandscapeTheater(false);
-        unlockOrientation();
-      }
-    };
-
-    document.addEventListener('fullscreenchange', handleFullscreenChange);
-    document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
-
-    return () => {
-      document.removeEventListener('fullscreenchange', handleFullscreenChange);
-      document.removeEventListener('webkitfullscreenchange', handleFullscreenChange);
-      unlockOrientation();
-      if (hudTimerRef.current) clearTimeout(hudTimerRef.current);
-    };
-  }, []);
-
-  const triggerHudAutoHide = () => {
-    setShowLandscapeHud(true);
-    if (hudTimerRef.current) clearTimeout(hudTimerRef.current);
-    hudTimerRef.current = setTimeout(() => {
-      setShowLandscapeHud(false);
-    }, 3500);
-  };
-
-  const handleEnterLandscapeTheater = async () => {
-    sfx.playClick();
-    setIsLandscapeTheater(true);
-    triggerHudAutoHide();
-    await lockToLandscape();
-    try {
-      if (youtubeContainerRef.current?.requestFullscreen) {
-        await youtubeContainerRef.current.requestFullscreen();
-      }
-    } catch {}
-  };
-
-  const handleExitLandscapeTheater = async () => {
-    sfx.playClick();
-    setIsLandscapeTheater(false);
-    await unlockOrientation();
-    try {
-      if (document.fullscreenElement) {
-        await document.exitFullscreen();
-      }
-    } catch {}
-  };
+    window.dispatchEvent(new CustomEvent('icelauch-pause-bgm'));
+  }, [media.id]);
 
   const driveEmbedUrl = parsed.id
     ? `https://drive.google.com/file/d/${parsed.id}/preview`
@@ -277,19 +215,11 @@ export const MobileVideoTheaterView: React.FC<MobileVideoTheaterViewProps> = ({
           <p className="text-[10px] text-slate-400 truncate">{media.category || 'Phim & Video'}</p>
         </div>
 
-        <button
-          type="button"
-          onClick={handleOpenExternal}
-          className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 font-semibold text-xs border border-cyan-500/20 active:scale-95 transition-all shrink-0"
-          title="Mở trên VLC, MX Player hoặc app Google Drive"
-        >
-          <ExternalLink className="w-3.5 h-3.5" />
-          <span className="text-[11px]">Mở ngoài</span>
-        </button>
+        <div className="w-8 shrink-0" />
       </div>
 
-      {/* 2. THEATER VIDEO CONTAINER (HEIGHT 275PX - 320PX) */}
-      <div className="relative w-full h-[275px] sm:h-[320px] bg-black flex items-center justify-center shrink-0 shadow-2xl overflow-hidden">
+      {/* 2. THEATER VIDEO CONTAINER (16:9 CINEMA ZERO BLACK BARS) */}
+      <div className="relative w-full aspect-video bg-black flex items-center justify-center shrink-0 shadow-2xl overflow-hidden">
         {/* MODE 1: EXTERNAL APP LAUNCHER CARD (VLC / MX PLAYER / DRIVE) */}
         {playbackMode === 'external' ? (
           <div className="absolute inset-0 w-full h-full flex flex-col items-center justify-center p-4 text-center overflow-hidden group">
@@ -381,27 +311,15 @@ export const MobileVideoTheaterView: React.FC<MobileVideoTheaterViewProps> = ({
             className="w-full h-full border-0 absolute inset-0"
           />
         ) : playbackMode === 'embed' && isYouTube ? (
-          <div className="relative w-full h-full">
-            <iframe
-              src={youtubeEmbedUrl}
-              title={media.title}
-              referrerPolicy="strict-origin-when-cross-origin"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen"
-              allowFullScreen
-              onLoad={() => setIsLoadingStream(false)}
-              className="w-full h-full border-0 absolute inset-0"
-            />
-            {/* Quick Landscape Fullscreen Button */}
-            <button
-              type="button"
-              onClick={handleEnterLandscapeTheater}
-              className="absolute top-2.5 right-2.5 z-20 flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-black/80 hover:bg-black text-cyan-400 hover:text-cyan-300 font-bold text-xs border border-cyan-500/40 shadow-xl backdrop-blur-md active:scale-95 transition-all"
-              title="Phóng to & Tự động xoay ngang"
-            >
-              <Maximize2 className="w-3.5 h-3.5" />
-              <span>Xoay ngang</span>
-            </button>
-          </div>
+          <iframe
+            src={youtubeEmbedUrl}
+            title={media.title}
+            referrerPolicy="strict-origin-when-cross-origin"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen"
+            allowFullScreen
+            onLoad={() => setIsLoadingStream(false)}
+            className="w-full h-full border-0 absolute inset-0"
+          />
         ) : playbackMode === 'embed' && isGoogleDrive ? (
           <iframe
             src={driveEmbedUrl}
@@ -811,70 +729,6 @@ export const MobileVideoTheaterView: React.FC<MobileVideoTheaterViewProps> = ({
           </div>
         )}
       </div>
-
-      {/* FULLSCREEN LANDSCAPE THEATER OVERLAY (YOUTUBE ZERO BLACK BARS & AUTO-ROTATE) */}
-      {isLandscapeTheater && isYouTube && (
-        <div
-          ref={youtubeContainerRef}
-          onClick={triggerHudAutoHide}
-          className="fixed inset-0 z-[9999] w-screen h-screen bg-black flex items-center justify-center overflow-hidden select-none"
-        >
-          {/* YouTube Video iframe with Fit vs Fill Scale */}
-          <div className="relative w-full h-full flex items-center justify-center overflow-hidden">
-            <iframe
-              src={youtubeEmbedUrl}
-              title={media.title}
-              referrerPolicy="strict-origin-when-cross-origin"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen"
-              allowFullScreen
-              className={`w-full h-full border-0 absolute inset-0 transition-transform duration-300 ${
-                videoFitMode === 'cover'
-                  ? 'scale-[1.18] sm:scale-[1.12] origin-center'
-                  : 'scale-100 object-contain'
-              }`}
-            />
-          </div>
-
-          {/* Minimal Floating HUD Overlay (Auto-Hides) */}
-          <div
-            className={`absolute inset-x-0 top-0 p-3 pt-[max(0.5rem,env(safe-area-inset-top,0px))] flex items-center justify-between pointer-events-none transition-opacity duration-300 ${
-              showLandscapeHud ? 'opacity-100' : 'opacity-0'
-            }`}
-          >
-            {/* Exit Fullscreen Button */}
-            <button
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                handleExitLandscapeTheater();
-              }}
-              className="pointer-events-auto flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-black/75 hover:bg-black/90 backdrop-blur-md text-white font-bold text-xs border border-white/20 active:scale-95 shadow-xl"
-            >
-              <ArrowLeft className="w-4 h-4 text-cyan-400" />
-              <span>Thoát</span>
-            </button>
-
-            <div className="pointer-events-none text-center px-2 min-w-0">
-              <p className="text-xs font-bold text-white truncate drop-shadow-md">{media.title}</p>
-            </div>
-
-            {/* Toggle Aspect Ratio: Fit 16:9 vs Fill Phone */}
-            <button
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                sfx.playClick();
-                setVideoFitMode((prev) => (prev === 'cover' ? 'contain' : 'cover'));
-              }}
-              className="pointer-events-auto flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-black/75 hover:bg-black/90 backdrop-blur-md text-white font-bold text-xs border border-white/20 active:scale-95 shadow-xl"
-              title={videoFitMode === 'cover' ? 'Chuyển sang Vừa màn hình (16:9)' : 'Chuyển sang Tràn viền (Fill)'}
-            >
-              <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-              <span>{videoFitMode === 'cover' ? 'Tràn viền (Không vệt đen)' : 'Chuẩn 16:9'}</span>
-            </button>
-          </div>
-        </div>
-      )}
     </div>
   );
 };

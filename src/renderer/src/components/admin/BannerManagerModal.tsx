@@ -17,7 +17,8 @@ import {
   ArrowDown, 
   Pin, 
   RotateCcw,
-  ExternalLink
+  ExternalLink,
+  ArrowLeftRight
 } from 'lucide-react';
 import type { 
   Game, 
@@ -67,6 +68,8 @@ export const BannerManagerModal: React.FC<BannerManagerModalProps> = ({
   const [selectedItemIdToAdd, setSelectedItemIdToAdd] = useState('');
   const [addDurationDays, setAddDurationDays] = useState(7);
   const [addIsPermanent, setAddIsPermanent] = useState(false);
+  const [replacingItemId, setReplacingItemId] = useState<string | null>(null);
+  const [selectedReplacementId, setSelectedReplacementId] = useState<string>('');
 
   if (!isOpen) return null;
 
@@ -122,11 +125,17 @@ export const BannerManagerModal: React.FC<BannerManagerModalProps> = ({
         'media'
       );
 
+  const saveAndSync = (newSettings: AppBannerSettings) => {
+    setSettings(newSettings);
+    onSaveBannerSettings(newSettings);
+  };
+
   const handleUpdateSection = (updater: (prev: SectionBannerSettings) => SectionBannerSettings) => {
-    setSettings((prev) => ({
-      ...prev,
-      [activeTab]: updater(prev[activeTab]),
-    }));
+    const updated: AppBannerSettings = {
+      ...settings,
+      [activeTab]: updater(settings[activeTab]),
+    };
+    saveAndSync(updated);
   };
 
   const handleSave = () => {
@@ -147,46 +156,109 @@ export const BannerManagerModal: React.FC<BannerManagerModalProps> = ({
       addIsPermanent ? null : addDurationDays,
       addIsPermanent
     );
-    setSettings(updated);
+    saveAndSync(updated);
     setIsAddingNew(false);
     setSelectedItemIdToAdd('');
   };
 
-  const handleUnpin = (id: string) => {
+  const handleUnpin = (id: string, isCurrentlyPinned: boolean) => {
     sfx.playClick();
-    const updated = unpinItemFromBanner(settings, activeTab, id);
-    setSettings(updated);
+    if (isCurrentlyPinned) {
+      const updated = unpinItemFromBanner(settings, activeTab, id);
+      saveAndSync(updated);
+    } else {
+      // Dynamic unpinned item -> add to excludedIds so it won't be picked by banner resolver
+      const prevSec = settings[activeTab];
+      const excluded = new Set(prevSec.excludedIds || []);
+      excluded.add(id);
+      const updated: AppBannerSettings = {
+        ...settings,
+        [activeTab]: {
+          ...prevSec,
+          excludedIds: Array.from(excluded),
+        },
+      };
+      saveAndSync(updated);
+    }
+  };
+
+  const handleConfirmReplace = () => {
+    if (!replacingItemId || !selectedReplacementId) return;
+    sfx.playSuccess();
+    const targetType = activeTab === 'games' ? 'game' : 'media';
+    const prevSec = settings[activeTab];
+    let updatedPinned = [...(prevSec.pinnedItems || [])];
+
+    const pinIdx = updatedPinned.findIndex((p) => p.id === replacingItemId);
+    if (pinIdx !== -1) {
+      // Replace in place
+      updatedPinned[pinIdx] = {
+        ...updatedPinned[pinIdx],
+        id: selectedReplacementId,
+        targetType: targetType,
+        pinnedAt: new Date().toISOString(),
+      };
+    } else {
+      // It was dynamic, so pin the replacement and exclude the old one
+      updatedPinned.push({
+        id: selectedReplacementId,
+        targetType: targetType,
+        isPermanent: false,
+        pinnedAt: new Date().toISOString(),
+        expiresAt: new Date(Date.now() + (prevSec.defaultExpiryDays || 7) * 24 * 60 * 60 * 1000).toISOString(),
+      });
+      const excluded = new Set(prevSec.excludedIds || []);
+      excluded.add(replacingItemId);
+      prevSec.excludedIds = Array.from(excluded);
+    }
+
+    const updated: AppBannerSettings = {
+      ...settings,
+      [activeTab]: {
+        ...prevSec,
+        pinnedItems: updatedPinned,
+      },
+    };
+    saveAndSync(updated);
+    setReplacingItemId(null);
+    setSelectedReplacementId('');
   };
 
   const handleTogglePermanent = (id: string) => {
     sfx.playClick();
-    handleUpdateSection((prev) => ({
-      ...prev,
-      pinnedItems: (prev.pinnedItems || []).map((p) => {
-        if (p.id === id) {
-          const newPerm = !p.isPermanent;
-          return {
-            ...p,
-            isPermanent: newPerm,
-            expiresAt: newPerm ? null : new Date(Date.now() + (prev.defaultExpiryDays || 7) * 24 * 60 * 60 * 1000).toISOString(),
-          };
-        }
-        return p;
-      }),
-    }));
+    const prevSec = settings[activeTab];
+    const updatedPinned = (prevSec.pinnedItems || []).map((p) => {
+      if (p.id === id) {
+        const newPerm = !p.isPermanent;
+        return {
+          ...p,
+          isPermanent: newPerm,
+          expiresAt: newPerm ? null : new Date(Date.now() + (prevSec.defaultExpiryDays || 7) * 24 * 60 * 60 * 1000).toISOString(),
+        };
+      }
+      return p;
+    });
+    const updated: AppBannerSettings = {
+      ...settings,
+      [activeTab]: { ...prevSec, pinnedItems: updatedPinned },
+    };
+    saveAndSync(updated);
   };
 
   const handleMoveOrder = (index: number, direction: 'up' | 'down') => {
     sfx.playClick();
-    handleUpdateSection((prev) => {
-      const items = [...(prev.pinnedItems || [])];
-      const targetIndex = direction === 'up' ? index - 1 : index + 1;
-      if (targetIndex < 0 || targetIndex >= items.length) return prev;
-      const temp = items[index];
-      items[index] = items[targetIndex];
-      items[targetIndex] = temp;
-      return { ...prev, pinnedItems: items };
-    });
+    const prevSec = settings[activeTab];
+    const items = [...(prevSec.pinnedItems || [])];
+    const targetIndex = direction === 'up' ? index - 1 : index + 1;
+    if (targetIndex < 0 || targetIndex >= items.length) return;
+    const temp = items[index];
+    items[index] = items[targetIndex];
+    items[targetIndex] = temp;
+    const updated: AppBannerSettings = {
+      ...settings,
+      [activeTab]: { ...prevSec, pinnedItems: items },
+    };
+    saveAndSync(updated);
   };
 
   return (
@@ -467,9 +539,9 @@ export const BannerManagerModal: React.FC<BannerManagerModalProps> = ({
               const isPinned = resolved.isPinned;
 
               return (
-                <div
-                  key={item.id}
-                  className={`flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 p-3 rounded-xl border transition-all ${
+                <React.Fragment key={item.id}>
+                  <div
+                    className={`flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 p-3 rounded-xl border transition-all ${
                     isPinned
                       ? 'bg-ice-hover border-amber-500/40 shadow-md'
                       : 'bg-ice-bg border-ice-border/70 opacity-90'
@@ -540,6 +612,25 @@ export const BannerManagerModal: React.FC<BannerManagerModalProps> = ({
                       </div>
                     )}
 
+                    {/* Thay thế button (available for all banner items) */}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        sfx.playClick();
+                        setReplacingItemId(replacingItemId === item.id ? null : item.id);
+                        setSelectedReplacementId('');
+                      }}
+                      className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold border transition-all flex items-center gap-1 ${
+                        replacingItemId === item.id
+                          ? 'bg-cyan-500 text-black border-cyan-400 font-bold'
+                          : 'bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 border-cyan-500/30'
+                      }`}
+                      title="Thay thế mục này bằng mục khác"
+                    >
+                      <ArrowLeftRight className="w-3.5 h-3.5" />
+                      <span>Thay thế</span>
+                    </button>
+
                     {isPinned ? (
                       <>
                         <button
@@ -557,7 +648,7 @@ export const BannerManagerModal: React.FC<BannerManagerModalProps> = ({
 
                         <button
                           type="button"
-                          onClick={() => handleUnpin(item.id)}
+                          onClick={() => handleUnpin(item.id, true)}
                           className="p-1.5 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/30 transition-colors"
                           title="Gỡ khỏi danh sách ghim Banner"
                         >
@@ -565,29 +656,86 @@ export const BannerManagerModal: React.FC<BannerManagerModalProps> = ({
                         </button>
                       </>
                     ) : (
-                      <button
-                        type="button"
-                        onClick={() => {
-                          const targetType = activeTab === 'games' ? 'game' : 'media';
-                          const updated = registerItemToBanner(
-                            settings,
-                            activeTab,
-                            item.id,
-                            targetType,
-                            currentSectionSettings.defaultExpiryDays || 7,
-                            false
-                          );
-                          setSettings(updated);
-                        }}
-                        className="px-2.5 py-1 rounded-lg bg-ice-hover hover:bg-amber-500 hover:text-black text-white text-[11px] font-semibold border border-ice-border transition-all flex items-center gap-1"
-                        title="Chuyển mục tự động bù này thành mục Ghim chính thức"
-                      >
-                        <Pin className="w-3 h-3" />
-                        <span>Ghim mục này</span>
-                      </button>
+                      <>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            sfx.playClick();
+                            const targetType = activeTab === 'games' ? 'game' : 'media';
+                            const updated = registerItemToBanner(
+                              settings,
+                              activeTab,
+                              item.id,
+                              targetType,
+                              currentSectionSettings.defaultExpiryDays || 7,
+                              false
+                            );
+                            saveAndSync(updated);
+                          }}
+                          className="px-2.5 py-1 rounded-lg bg-ice-hover hover:bg-amber-500 hover:text-black text-white text-[11px] font-semibold border border-ice-border transition-all flex items-center gap-1"
+                          title="Chuyển mục tự động bù này thành mục Ghim chính thức"
+                        >
+                          <Pin className="w-3 h-3" />
+                          <span>Ghim</span>
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => handleUnpin(item.id, false)}
+                          className="p-1.5 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/30 transition-colors"
+                          title="Gỡ khỏi Banner (loại trừ không cho tự động hiển thị)"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </>
                     )}
                   </div>
                 </div>
+
+                {/* Inline Replace Drawer */}
+                {replacingItemId === item.id && (
+                  <div className="mt-1 mb-2 p-3 rounded-xl bg-cyan-950/30 border border-cyan-500/40 flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 animate-in fade-in duration-200">
+                    <span className="text-xs text-cyan-300 font-semibold shrink-0 flex items-center gap-1.5">
+                      <ArrowLeftRight className="w-4 h-4 text-cyan-400" />
+                      <span>Chọn mục thay thế cho &quot;{title}&quot;:</span>
+                    </span>
+                    <select
+                      value={selectedReplacementId}
+                      onChange={(e) => setSelectedReplacementId(e.target.value)}
+                      className="flex-1 bg-ice-bg border border-cyan-500/50 rounded-lg px-3 py-1.5 text-ice-text text-xs outline-none focus:border-cyan-400"
+                    >
+                      <option value="">-- Chọn mục từ danh sách ({availableCandidates.filter((c) => c.id !== item.id).length}) --</option>
+                      {availableCandidates
+                        .filter((c) => c.id !== item.id)
+                        .map((c) => (
+                          <option key={c.id} value={c.id}>
+                            {c.title} {c.isAlreadyPinned ? '(Đang ghim)' : ''}
+                          </option>
+                        ))}
+                    </select>
+                    <div className="flex items-center gap-2 justify-end shrink-0">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setReplacingItemId(null);
+                          setSelectedReplacementId('');
+                        }}
+                        className="px-3 py-1.5 rounded-lg text-ice-subtext hover:text-white text-xs transition-colors"
+                      >
+                        Hủy
+                      </button>
+                      <button
+                        type="button"
+                        disabled={!selectedReplacementId}
+                        onClick={handleConfirmReplace}
+                        className="px-4 py-1.5 rounded-lg bg-cyan-500 hover:bg-cyan-400 disabled:opacity-50 text-black text-xs font-bold shadow-md shadow-cyan-500/20 transition-all"
+                      >
+                        Xác nhận thay thế
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </React.Fragment>
               );
             })}
 

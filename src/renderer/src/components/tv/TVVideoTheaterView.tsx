@@ -82,6 +82,7 @@ export const TVVideoTheaterView: React.FC<TVVideoTheaterViewProps> = ({
     : parsed.embedUrl || media.link;
 
   useEffect(() => {
+    window.dispatchEvent(new CustomEvent('icelauch-pause-bgm'));
     setIsLoadingStream(true);
     setLoadingStatus('Đang nạp video...');
     const timer = setTimeout(() => setIsLoadingStream(false), 1500);
@@ -455,18 +456,6 @@ export const TVVideoTheaterView: React.FC<TVVideoTheaterViewProps> = ({
             >
               <Zap className="w-4 h-4" />
               <span>Video Trực Tiếp HTML5</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => {
-                sfx.playClick();
-                window.open(media.link, '_blank');
-              }}
-              className="px-4 py-2 rounded-xl bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 text-white text-xs font-black flex items-center gap-2 shadow-lg"
-            >
-              <ExternalLink className="w-4 h-4" />
-              <span>Mở Bằng VLC / MX Player Ngoài</span>
             </button>
 
             {/* Virtual Mouse Toggle */}

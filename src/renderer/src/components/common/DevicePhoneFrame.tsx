@@ -90,6 +90,7 @@ export const DevicePhoneFrame: React.FC<DevicePhoneFrameProps> = ({
         <div
           className="aqua-droplet-bubble"
           style={{
+            left: 0,
             transform: `translate3d(${dropletStyle.left}px, -50%, 0)`,
             width: `${dropletStyle.width}px`,
             height: '46px',

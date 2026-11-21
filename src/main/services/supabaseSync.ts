@@ -593,6 +593,8 @@ export class SupabaseSyncService {
       return {
         id: r.id,
         title: cleanQuestionMarks(r.title),
+        secondaryTitle: meta.secondaryTitle || r.secondary_title || undefined,
+        episode: meta.episode !== undefined && meta.episode !== null ? String(meta.episode) : (r.episode !== undefined && r.episode !== null ? String(r.episode) : undefined),
         type: r.type || 'video',
         subType: meta.subType || (r.type === 'audio' ? 'music' : undefined),
         artist: meta.artist,
@@ -631,6 +633,8 @@ export class SupabaseSyncService {
     const endpoint = `${baseUrl}/rest/v1/icelauch_media`;
 
     const meta: Record<string, any> = {
+      secondaryTitle: item.secondaryTitle,
+      episode: item.episode,
       subType: item.subType,
       artist: item.artist,
       album: item.album,

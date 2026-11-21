@@ -205,19 +205,16 @@ export const GameDetailView: React.FC<GameDetailViewProps> = ({
                     allowFullScreen
                     className="w-full h-full border-0"
                   />
-                  {/* Floating Sound Toggle & Open in YouTube Buttons */}
+                  {/* Floating Sound Toggle */}
                   <div className="absolute top-4 right-4 z-20 flex items-center gap-2">
                     <button
-                      onClick={() => window.open(game.trailerUrl || `https://www.youtube.com/watch?v=${youtubeVideoId}`, '_blank')}
-                      className="px-3 py-1.5 rounded-full bg-black/75 hover:bg-black text-white backdrop-blur-md border border-white/20 transition-all shadow-xl hover:scale-105 flex items-center gap-1.5 text-xs font-bold"
-                      title="Mở xem trên YouTube"
-                    >
-                      <ExternalLink className="w-3.5 h-3.5 text-red-400" />
-                      <span className="hidden sm:inline">YouTube</span>
-                    </button>
-
-                    <button
-                      onClick={() => setIsMuted(!isMuted)}
+                      onClick={() => {
+                        const nextMuted = !isMuted;
+                        setIsMuted(nextMuted);
+                        if (!nextMuted) {
+                          window.dispatchEvent(new CustomEvent('icelauch-pause-bgm'));
+                        }
+                      }}
                       className="p-2.5 rounded-full bg-black/75 hover:bg-black text-white backdrop-blur-md border border-white/20 transition-all shadow-xl hover:scale-110 flex items-center gap-1.5 text-xs font-bold"
                       title={isMuted ? 'Bật âm thanh Trailer' : 'Tắt tiếng'}
                     >

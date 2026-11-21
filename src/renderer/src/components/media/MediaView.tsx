@@ -40,7 +40,7 @@ import { AddToPlaylistModal } from './AddToPlaylistModal';
 import { GenreShelfScroller } from '../common/GenreShelfScroller';
 import { SurpriseMediaModal } from './SurpriseMediaModal';
 import { AdminPlaylistManagerModal } from '../admin/AdminPlaylistManagerModal';
-import { parseMediaUrl } from '../../utils/mediaUrl';
+import { parseMediaUrl, formatMediaCardSubtitle } from '../../utils/mediaUrl';
 import { useTheme } from '../../hooks/useTheme';
 import { TerraBotanicalCardFrame } from '../common/TerraBotanicalCardFrame';
 import { TerraAppleFavoriteIcon } from '../common/TerraAppleFavoriteIcon';
@@ -250,7 +250,17 @@ export const MediaView: React.FC<MediaViewProps> = ({
   // Filter & Search using smart multi-token matcher
   const filteredMedia = tabMedia.filter((m) => {
     const matchesSearch = matchSmartSearch(
-      [m.title, m.category, m.artist, m.description, m.tags],
+      [
+        m.title,
+        m.secondaryTitle,
+        m.episode,
+        m.episode ? `#${m.episode}` : null,
+        m.episode ? `tập ${m.episode}` : null,
+        m.category,
+        m.artist,
+        m.description,
+        m.tags,
+      ],
       searchQuery
     );
 
@@ -367,14 +377,10 @@ export const MediaView: React.FC<MediaViewProps> = ({
                   sfx.playClick();
                   setTargetMediaForPlaylist(item);
                 }}
-                className={`p-1.5 rounded-full backdrop-blur-md bg-black/60 transition-all ${
-                  isLightMode
-                    ? 'text-white/80 hover:text-white hover:bg-black/80'
-                    : 'text-white/70 hover:text-amber-400 hover:bg-black/80'
-                }`}
+                className="p-1.5 rounded-full backdrop-blur-md bg-black/60 btn-keep-white text-white hover:bg-black/80 hover:text-white transition-all shadow-sm"
                 title="Thêm vào danh sách phát cá nhân"
               >
-                <ListPlus className="w-3.5 h-3.5" />
+                <ListPlus className="w-3.5 h-3.5 text-white stroke-[2]" />
               </button>
             )}
             {onToggleFavoriteMedia && (
@@ -442,8 +448,8 @@ export const MediaView: React.FC<MediaViewProps> = ({
             <h4 className="text-xs font-bold text-ice-text truncate group-hover:text-ice-accent">
               {item.title}
             </h4>
-            <p className="text-[10px] text-ice-muted truncate mt-0.5">
-              {item.artist || item.category || (item.tags?.[0] ? `#${item.tags[0]}` : '')}
+            <p className="text-[10px] text-ice-muted truncate mt-0.5" title={formatMediaCardSubtitle(item)}>
+              {formatMediaCardSubtitle(item)}
             </p>
           </div>
 

@@ -18,7 +18,7 @@ import {
 } from 'lucide-react';
 import type { MediaItem, SectionBannerSettings } from '../../types';
 import { resolveBannerItems } from '../../utils/bannerResolver';
-import { parseMediaUrl } from '../../utils/mediaUrl';
+import { parseMediaUrl, formatMediaCardSubtitle } from '../../utils/mediaUrl';
 import { sfx } from '../../utils/sfx';
 
 interface TVHomeMediaViewProps {
@@ -263,8 +263,8 @@ export const TVHomeMediaView: React.FC<TVHomeMediaViewProps> = ({
                   </div>
 
                   <div className="absolute bottom-3 left-3 right-3 z-10 space-y-1">
-                    <span className="text-[9px] px-1.5 py-0.5 rounded bg-amber-500/30 text-amber-300 font-bold uppercase">
-                      {item.category || 'Phim'}
+                    <span className="text-[9px] px-1.5 py-0.5 rounded bg-amber-500/30 text-amber-300 font-bold uppercase truncate max-w-full block" title={formatMediaCardSubtitle(item)}>
+                      {formatMediaCardSubtitle(item)}
                     </span>
                     <h3 className="text-xs font-black text-white leading-tight line-clamp-1">
                       {item.title}

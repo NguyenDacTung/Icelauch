@@ -21,6 +21,7 @@ import { SafeImage } from '../common/SafeImage';
 import { AddToPlaylistModal } from '../media/AddToPlaylistModal';
 import { SurpriseMediaModal } from '../media/SurpriseMediaModal';
 import { sfx } from '../../utils/sfx';
+import { formatMediaCardSubtitle } from '../../utils/mediaUrl';
 import { matchSmartSearch } from '../../utils/searchHelper';
 import { useTheme } from '../../hooks/useTheme';
 import { TerraBotanicalCardFrame } from '../common/TerraBotanicalCardFrame';
@@ -127,6 +128,10 @@ export const MobileMediaView: React.FC<MobileMediaViewProps> = ({
       matchSmartSearch(
         [
           m.title,
+          m.secondaryTitle,
+          m.episode,
+          m.episode ? `#${m.episode}` : undefined,
+          m.episode ? `tập ${m.episode}` : undefined,
           m.category,
           m.artist,
           m.description,
@@ -375,10 +380,10 @@ export const MobileMediaView: React.FC<MobileMediaViewProps> = ({
                             sfx.playClick();
                             setTargetMediaForPlaylist(item);
                           }}
-                          className="p-1 rounded-full bg-black/70 text-white/80 hover:text-cyan-300 backdrop-blur-sm"
+                          className="p-1 rounded-full bg-black/70 btn-keep-white text-white hover:bg-black/90 hover:text-white backdrop-blur-sm transition-all"
                           title="Thêm vào playlist"
                         >
-                          <ListPlus className="w-3 h-3" />
+                          <ListPlus className="w-3 h-3 text-white" />
                         </button>
                       )}
                       {onToggleFavoriteMedia && (
@@ -411,8 +416,8 @@ export const MobileMediaView: React.FC<MobileMediaViewProps> = ({
 
                     <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-transparent to-transparent flex flex-col justify-end p-2">
                       <p className="text-xs font-bold text-white line-clamp-1">{item.title}</p>
-                      <span className="text-[9px] text-cyan-300/80 line-clamp-1">
-                        {item.artist || item.category || (item.tags?.[0] ? `#${item.tags[0]}` : '')}
+                      <span className="text-[9px] text-cyan-300/80 line-clamp-1" title={formatMediaCardSubtitle(item)}>
+                        {formatMediaCardSubtitle(item)}
                       </span>
                     </div>
                   </div>
@@ -557,7 +562,9 @@ export const MobileMediaView: React.FC<MobileMediaViewProps> = ({
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-transparent to-transparent flex flex-col justify-end p-2">
                           <p className="text-xs font-bold text-white line-clamp-1">{item.title}</p>
-                          <span className="text-[9px] text-cyan-300/80">{cat}</span>
+                          <span className="text-[9px] text-cyan-300/80 line-clamp-1" title={formatMediaCardSubtitle(item)}>
+                            {formatMediaCardSubtitle(item)}
+                          </span>
                         </div>
                       </div>
                     </div>
@@ -643,10 +650,10 @@ export const MobileMediaView: React.FC<MobileMediaViewProps> = ({
                               sfx.playClick();
                               setTargetMediaForPlaylist(item);
                             }}
-                            className="p-1 rounded-full bg-black/70 text-white/80 hover:text-cyan-300 backdrop-blur-sm"
+                            className="p-1 rounded-full bg-black/70 btn-keep-white text-white hover:bg-black/90 hover:text-white backdrop-blur-sm transition-all"
                             title="Thêm vào danh sách phát"
                           >
-                            <ListPlus className="w-3 h-3" />
+                            <ListPlus className="w-3 h-3 text-white" />
                           </button>
                         )}
                         {onToggleFavoriteMedia && (
@@ -692,8 +699,8 @@ export const MobileMediaView: React.FC<MobileMediaViewProps> = ({
                         <h4 className="text-xs font-bold text-ice-text line-clamp-1 group-hover:text-cyan-400 transition-colors">
                           {item.title}
                         </h4>
-                        <span className="text-[10px] text-ice-subtext line-clamp-1">
-                          {item.category || (item.type === 'video' ? 'Phim' : 'Nhạc')}
+                        <span className="text-[10px] text-ice-subtext line-clamp-1" title={formatMediaCardSubtitle(item)}>
+                          {formatMediaCardSubtitle(item)}
                         </span>
                       </div>
                       <div className="pt-1 flex items-center justify-between text-[10px] text-cyan-500 font-semibold">

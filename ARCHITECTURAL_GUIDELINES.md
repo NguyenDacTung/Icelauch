@@ -341,16 +341,31 @@ When the active theme is one of the light modes (`aer`, `solar`, `aqua`), the ap
 3. **Horizontal Scroll Container Padding (Zero Ring Clipping):**
    - Whenever horizontal scrollers with `overflow-x-auto` (such as Celestial Themes row in Mobile Settings) contain items with active rings (`ring-2 ring-ice-accent`), always allocate vertical breathing room (`pt-2.5 pb-2.5 px-2 -mx-2`). Failure to provide top padding causes the parent's `overflow-y: hidden` to clip off the top 2px ring border.
 
-4. **Mobile Video Player Fullscreen Auto-Rotate & Letterbox Elimination:**
-   - YouTube iframe and HTML5 video players must listen to `fullscreenchange` and `webkitfullscreenchange`.
-   - When entering fullscreen, the app must automatically lock to sensor landscape (`ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE` via `ScreenOrientationPlugin.java` and `screen.orientation?.lock('landscape')`).
-   - Fullscreen landscape theater must occupy `fixed inset-0 z-[9999] w-screen h-screen bg-black` without safe area insets or header bars pushing the video down.
-   - An aspect ratio switcher (`Fit 16:9` vs `Tràn Viền (Fill)`) must be provided, where fill scales the video slightly (`1.15x`–`1.18x`) to eliminate all edge black bars on ultra-wide 20:9/21:9 smartphone displays.
-   - Drive/External video launcher cards must display the crisp 16:9 thumbnail preview banner (`media.bannerPath || media.coverPath`) with a subtle cinematic gradient and glowing play button instead of a pitch-black blurred screen.
+4. **Mobile Video Player Natural Orientation & Letterbox Elimination:**
+   - Avoid programmatic forced screen orientation locks (`lockToLandscape`) during video playback, as this can crash or cause overlapping video render bugs on various Android WebViews. Allow natural device sensor rotation.
+   - Container must enforce standard `aspect-video` (16:9) and fill width/height seamlessly to eliminate top and bottom black letterbox bars without cropping or distorting video.
+   - Drive/External video launcher cards must display the crisp 16:9 thumbnail preview banner (`media.bannerPath || media.coverPath`) with a subtle cinematic gradient and glowing play button instead of a pitch-black screen.
 
 ---
 
-## 9. Quick Reference — Key Files
+## 10. Data Privacy, Sliding Indicator Anchoring & Media Theater Stability
+
+### 10.1 Data Privacy Shield — No Leaked Source/Download Links
+- Non-admin users must NEVER have access to raw download URLs, Google Drive links, or stream sources.
+- **RULE:** Remove all "Copy Link", "Sao chép link", and "Mở link nguồn trên trình duyệt" buttons from client-facing video theater, media cards, game cards, and audio views.
+- Only Admin forms (`GameFormModal`, `MediaFormModal`) are permitted to view and edit raw link strings.
+
+### 10.2 Sliding Indicator Flex Anchoring (`left: 0`)
+- When creating animated sliding indicators (e.g., `.aqua-droplet-bubble`) inside a flex container with `transform: translate3d(offsetLeft, ...)`:
+- **RULE:** Always explicitly specify `left: 0; top: 50%;` in CSS. Without `left: 0`, Blink/WebKit lays out the absolute element according to flex item flow before applying the transform, causing cumulative offset errors (shifting by 2 or more tabs).
+
+### 10.3 Universal BGM Interruption
+- Background music (BGM) must be paused unconditionally whenever ANY video, trailer, or media stream begins playback.
+- **RULE:** Emit a global `window.dispatchEvent(new CustomEvent('icelauch-pause-bgm'))` on video start, and handle it in the root audio manager to ensure 100% pause reliability across all views.
+
+---
+
+## 11. Quick Reference — Key Files
 
 | Concern | File(s) |
 |---------|---------|
@@ -370,4 +385,4 @@ When the active theme is one of the light modes (`aer`, `solar`, `aqua`), the ap
 
 ---
 
-*Last updated: 2026-11-19 | Icelauch v1.2.6 / Mobile Edge-to-Edge Cutout, Floating Island & Video Theater Overhaul*
+*Last updated: 2026-11-21 | Icelauch v1.2.7 / Video Backup Player, Privacy Shield & Multi-Playlist Overhaul*

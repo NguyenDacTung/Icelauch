@@ -655,6 +655,7 @@
 .aqua-droplet-bubble {
   position: absolute;
   top: 50%;
+  left: 0 !important;
   border-radius: 9999px;
   background: radial-gradient(circle at 35% 25%, rgba(255, 255, 255, 0.95) 0%, rgba(186, 230, 253, 0.8) 45%, rgba(56, 189, 248, 0.4) 80%, rgba(2, 132, 199, 0.3) 100%);
   border: 1.5px solid rgba(56, 189, 248, 0.75);
@@ -1098,8 +1099,15 @@
 [data-theme="solar"] .glass-panel .text-white,
 [data-theme="solar"] .bg-ice-card .text-white:not(button:not(.btn-subtle) *):not(button:not(.btn-subtle)),
 [data-theme="solar"] .bg-ice-card .text-white\/90,
-[data-theme="solar"] .bg-ice-card .text-white\/80 {
+[data-theme="solar"] .bg-ice-card .text-white\/80:not(button.bg-black\/60 *):not(button.bg-black\/60):not(button.bg-black\/70 *):not(button.bg-black\/70):not(.btn-keep-white *):not(.btn-keep-white) {
   color: var(--theme-text) !important;
+}
+
+[data-theme="solar"] button.bg-black\/60,
+[data-theme="solar"] button.bg-black\/60 svg,
+[data-theme="solar"] button.bg-black\/70,
+[data-theme="solar"] button.bg-black\/70 svg {
+  color: #FFFFFF !important;
 }
 
 /* Deep Amber Text Shield: Ban Faint Yellow on Light Surfaces */
@@ -1214,8 +1222,15 @@
 [data-theme="aqua"] .glass-panel .text-white,
 [data-theme="aqua"] .bg-ice-card .text-white:not(button:not(.btn-subtle) *):not(button:not(.btn-subtle)),
 [data-theme="aqua"] .bg-ice-card .text-white\/90,
-[data-theme="aqua"] .bg-ice-card .text-white\/80 {
+[data-theme="aqua"] .bg-ice-card .text-white\/80:not(button.bg-black\/60 *):not(button.bg-black\/60):not(button.bg-black\/70 *):not(button.bg-black\/70):not(.btn-keep-white *):not(.btn-keep-white) {
   color: var(--theme-text) !important;
+}
+
+[data-theme="aqua"] button.bg-black\/60,
+[data-theme="aqua"] button.bg-black\/60 svg,
+[data-theme="aqua"] button.bg-black\/70,
+[data-theme="aqua"] button.bg-black\/70 svg {
+  color: #FFFFFF !important;
 }
 
 /* Ghost Buttons on Light Ocean Card */

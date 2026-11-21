@@ -128,3 +128,29 @@ export function getDirectAudioStreamUrl(rawUrl: string, fallbackLevel: number = 
 
   return trimmed;
 }
+
+/**
+ * Định dạng dòng phụ của thẻ Media (Phim / Nhạc)
+ * Với Phim/Video: Hiển thị "Tên phụ - #tập" (nếu có cả 2), hoặc "Tên phụ", hoặc "#tập", nếu không có cả 2 thì fallback về tên chính
+ * Với Nhạc/Audio: Hiển thị Nghệ sĩ / Thể loại / Tag
+ */
+export function formatMediaCardSubtitle(item: {
+  title: string;
+  secondaryTitle?: string;
+  episode?: string;
+  type?: string;
+  artist?: string;
+  category?: string;
+  tags?: string[];
+}): string {
+  if (item.type === 'video' || (!item.type && !item.artist)) {
+    const sec = item.secondaryTitle?.trim();
+    const ep = item.episode?.trim();
+    if (sec && ep) return `${sec} - #${ep}`;
+    if (sec) return sec;
+    if (ep) return `#${ep}`;
+    return item.title;
+  }
+  return item.artist || item.category || (item.tags?.[0] ? `#${item.tags[0]}` : '') || item.title;
+}
+

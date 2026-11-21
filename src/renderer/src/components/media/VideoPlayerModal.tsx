@@ -51,6 +51,7 @@ export const VideoPlayerModal: React.FC<VideoPlayerModalProps> = ({
 
   useEffect(() => {
     if (isOpen && media) {
+      window.dispatchEvent(new CustomEvent('icelauch-pause-bgm'));
       if (media.lastPosition && media.lastPosition > 10 && !media.watched) {
         setResumePrompt({ show: true, position: media.lastPosition });
       } else {
@@ -303,15 +304,6 @@ export const VideoPlayerModal: React.FC<VideoPlayerModalProps> = ({
               {playerMode === 'stream' ? 'Chuyển sang HTML5 Proxy' : 'Chuyển sang Google Stream'}
             </button>
           )}
-
-          <button
-            onClick={() => window.open(media.link, '_blank')}
-            className="flex items-center gap-1.5 px-2.5 py-1 rounded bg-black/60 border border-white/20 text-ice-text hover:text-white text-[11px] font-medium transition-colors"
-            title="Mở link nguồn trên trình duyệt"
-          >
-            <ExternalLink className="w-3.5 h-3.5" />
-            <span>Mở trình duyệt</span>
-          </button>
 
           {(isYouTube || isGoogleDriveStream) && (
             <button

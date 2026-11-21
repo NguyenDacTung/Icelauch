@@ -34,6 +34,7 @@ import { SafeImage } from '../common/SafeImage';
 import type { Game, AppActionButton, MediaItem, MediaPlaylist } from '../../types';
 import { GameActionsWidget } from '../common/GameActionsWidget';
 import { sfx } from '../../utils/sfx';
+import { formatMediaCardSubtitle } from '../../utils/mediaUrl';
 import { useTheme } from '../../hooks/useTheme';
 import { TerraBotanicalCardFrame } from '../common/TerraBotanicalCardFrame';
 import { TerraAppleFavoriteIcon } from '../common/TerraAppleFavoriteIcon';
@@ -1056,8 +1057,8 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
                   <h4 className="text-xs font-bold text-ice-text truncate group-hover:text-ice-accent transition-colors">
                     {item.title}
                   </h4>
-                  <p className="text-[10px] text-ice-muted truncate mt-0.5">
-                    {item.artist || item.category || 'Nội dung'}
+                  <p className="text-[10px] text-ice-muted truncate mt-0.5" title={formatMediaCardSubtitle(item)}>
+                    {formatMediaCardSubtitle(item)}
                   </p>
                 </div>
               </div>

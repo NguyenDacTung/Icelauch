@@ -82,19 +82,7 @@ export const MobileGameDetailView: React.FC<MobileGameDetailViewProps> = ({
           <p className="text-[10px] text-ice-subtext truncate">{game.genre || 'Game PC'}</p>
         </div>
 
-        {youtubeVideoId ? (
-          <button
-            type="button"
-            onClick={() => window.open(game.trailerUrl, '_blank')}
-            className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-500 font-semibold text-xs border border-red-500/30 active:scale-95 transition-all shrink-0"
-            title="Mở xem trên YouTube"
-          >
-            <ExternalLink className="w-3.5 h-3.5" />
-            <span className="text-[11px]">YouTube</span>
-          </button>
-        ) : (
-          <div className="w-8 shrink-0" />
-        )}
+        <div className="w-8 shrink-0" />
       </div>
 
       {/* 2. SCROLLABLE CONTENT BODY */}
