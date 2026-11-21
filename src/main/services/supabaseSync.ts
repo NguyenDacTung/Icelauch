@@ -475,7 +475,7 @@ export class SupabaseSyncService {
         extensions: Array.isArray(r.extensions) ? r.extensions : [],
         expectedSize: r.file_size ? Number(r.file_size) : undefined,
         featured: Boolean(r.featured),
-        hidden: Boolean(r.hidden),
+        hidden: meta.hidden !== undefined ? Boolean(meta.hidden) : Boolean(r.hidden),
         runAsAdmin: false,
         deleteArchiveAfterInstall: true,
         status: 'uninstalled',
@@ -516,6 +516,7 @@ export class SupabaseSyncService {
       listCardPosition: game.listCardPosition,
       listCardZoom: game.listCardZoom,
       transform_metadata: game.transform_metadata,
+      hidden: Boolean(game.hidden),
     };
     const finalDescription = encodeDescriptionMetadata(game.description || '', meta);
 
@@ -531,13 +532,9 @@ export class SupabaseSyncService {
       tags: game.tags || [],
       action_buttons: game.actionButtonIds || [],
       featured: Boolean(game.featured),
-      hidden: Boolean(game.hidden),
       file_size: game.expectedSize ? Math.round(game.expectedSize) : null,
       updated_at: new Date().toISOString(),
     };
-    if (game.transform_metadata) {
-      payload.transform_metadata = game.transform_metadata;
-    }
 
     const res = await this.makeRequest(endpoint, anonKey, {
       method: 'POST',
@@ -608,7 +605,7 @@ export class SupabaseSyncService {
         tags: Array.isArray(r.tags) ? r.tags.map((t: string) => cleanQuestionMarks(t)) : [],
         duration: r.duration || 0,
         isBannerPinned: Boolean(r.is_banner_pinned),
-        hidden: Boolean(r.hidden),
+        hidden: meta.hidden !== undefined ? Boolean(meta.hidden) : Boolean(r.hidden),
         lastPosition: 0,
         watched: false,
         addedAt: r.updated_at || new Date().toISOString(),
@@ -650,6 +647,7 @@ export class SupabaseSyncService {
       listCardPosition: item.listCardPosition,
       listCardZoom: item.listCardZoom,
       transform_metadata: item.transform_metadata,
+      hidden: Boolean(item.hidden),
     };
     const finalDescription = encodeDescriptionMetadata(item.description || '', meta);
 
@@ -665,12 +663,8 @@ export class SupabaseSyncService {
       tags: item.tags || [],
       duration: item.duration || 0,
       is_banner_pinned: Boolean(item.isBannerPinned),
-      hidden: Boolean(item.hidden),
       updated_at: new Date().toISOString(),
     };
-    if (item.transform_metadata) {
-      payload.transform_metadata = item.transform_metadata;
-    }
 
     const res = await this.makeRequest(endpoint, anonKey, {
       method: 'POST',
@@ -931,6 +925,7 @@ export class SupabaseSyncService {
         if (rg.bannerPosition) local.bannerPosition = rg.bannerPosition;
         if (rg.bannerZoom) local.bannerZoom = rg.bannerZoom;
         if (rg.transform_metadata) local.transform_metadata = rg.transform_metadata;
+        if (rg.hidden !== undefined) local.hidden = rg.hidden;
       }
     }
     const finalGames = Array.from(gameMap.values());
@@ -971,6 +966,9 @@ export class SupabaseSyncService {
         if (rm.bannerPosition) local.bannerPosition = rm.bannerPosition;
         if (rm.bannerZoom) local.bannerZoom = rm.bannerZoom;
         if (rm.transform_metadata) local.transform_metadata = rm.transform_metadata;
+        if (rm.hidden !== undefined) local.hidden = rm.hidden;
+        if (rm.secondaryTitle !== undefined) local.secondaryTitle = rm.secondaryTitle;
+        if (rm.episode !== undefined) local.episode = rm.episode;
       }
     }
     const finalMedia = Array.from(mediaMap.values());

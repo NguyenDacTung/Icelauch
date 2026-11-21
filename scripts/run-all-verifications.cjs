@@ -718,22 +718,22 @@ try {
 }
 
 try {
-  // TC-SEC-09: Version Upgrade Re-Login Enforcement (1.2.8)
+  // TC-SEC-09: Version Upgrade Re-Login Enforcement (1.2.9)
   const appSrc = fs.readFileSync(path.join(ROOT_DIR, 'src/renderer/src/App.tsx'), 'utf8');
   const pkgSrc = fs.readFileSync(path.join(ROOT_DIR, 'package.json'), 'utf8');
   const gradleSrc = fs.readFileSync(path.join(ROOT_DIR, 'android/app/build.gradle'), 'utf8');
   const updaterSrc = fs.readFileSync(path.join(ROOT_DIR, 'src/renderer/src/utils/apkUpdater.ts'), 'utf8');
 
-  const appHasVersion = appSrc.includes("CURRENT_APP_VERSION = '1.2.8'");
-  const pkgHasVersion = pkgSrc.includes('"version": "1.2.8"');
-  const gradleHasVersion = gradleSrc.includes('versionName "1.2.8"') && gradleSrc.includes('versionCode 24');
-  const updaterHasVersion = updaterSrc.includes("CURRENT_MOBILE_VERSION = '1.2.8'");
+  const appHasVersion = appSrc.includes("CURRENT_APP_VERSION = '1.2.9'");
+  const pkgHasVersion = pkgSrc.includes('"version": "1.2.9"');
+  const gradleHasVersion = gradleSrc.includes('versionName "1.2.9"') && gradleSrc.includes('versionCode 25');
+  const updaterHasVersion = updaterSrc.includes("CURRENT_MOBILE_VERSION = '1.2.9'");
   const hasReLoginLogic = appSrc.includes('shouldRequireReLoginForNewVersion');
 
-  assert.ok(appHasVersion && pkgHasVersion && gradleHasVersion && updaterHasVersion && hasReLoginLogic, 'Version 1.2.8 must be synchronized across App.tsx, package.json, build.gradle, and apkUpdater.ts');
-  recordTest('TC-SEC-09', 'Version Upgrade Re-Login Enforcement (v1.2.8 / Code 24)', 'Module 8: Device Whitelist & Security', 'Cross-Platform', true, 'Upgraded to v1.2.8 (versionCode 24); sessions maintained across restarts but purged on version upgrade');
+  assert.ok(appHasVersion && pkgHasVersion && gradleHasVersion && updaterHasVersion && hasReLoginLogic, 'Version 1.2.9 must be synchronized across App.tsx, package.json, build.gradle, and apkUpdater.ts');
+  recordTest('TC-SEC-09', 'Version Upgrade Re-Login Enforcement (v1.2.9 / Code 25)', 'Module 8: Device Whitelist & Security', 'Cross-Platform', true, 'Upgraded to v1.2.9 (versionCode 25); sessions maintained across restarts but purged on version upgrade');
 } catch (e) {
-  recordTest('TC-SEC-09', 'Version Upgrade Re-Login Enforcement (v1.2.7 / Code 23)', 'Module 8: Device Whitelist & Security', 'Cross-Platform', false, e.message);
+  recordTest('TC-SEC-09', 'Version Upgrade Re-Login Enforcement (v1.2.9 / Code 25)', 'Module 8: Device Whitelist & Security', 'Cross-Platform', false, e.message);
 }
 
 try {

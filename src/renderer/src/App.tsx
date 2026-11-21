@@ -80,15 +80,15 @@ import {
 } from './services/platformAdapter';
 import { sfx } from './utils/sfx';
 import { registerItemToBanner } from './utils/bannerResolver';
-import type { 
-  AppData, 
-  Game, 
-  MediaItem, 
-  NavigationTab, 
-  DownloadProgress, 
-  InstallProgress, 
-  MediaPlaylist, 
-  AppSettings, 
+import type {
+  AppData,
+  Game,
+  MediaItem,
+  NavigationTab,
+  DownloadProgress,
+  InstallProgress,
+  MediaPlaylist,
+  AppSettings,
   AppBannerSettings,
   UserProfile,
   CloudSyncSettings,
@@ -187,7 +187,7 @@ export default function App() {
         if (stored === 'android_tv' || stored === 'android_mobile') {
           localStorage.removeItem('icelauch_device_preference');
         }
-      } catch {}
+      } catch { }
     }
   }, [isDesktopElectron]);
 
@@ -282,11 +282,11 @@ export default function App() {
                       hostIp: paired.ip,
                     });
                   }
-                } catch {}
+                } catch { }
               };
             }
           }
-        } catch {}
+        } catch { }
       };
 
       connectMobileListener();
@@ -462,7 +462,7 @@ export default function App() {
         }
 
         // Version update check: require re-login on new app version update; keep auto-login on same version
-        const CURRENT_APP_VERSION = '1.2.8';
+        const CURRENT_APP_VERSION = '1.2.9';
         const isNewVersion = shouldRequireReLoginForNewVersion(CURRENT_APP_VERSION);
         if (isNewVersion) {
           console.log(`[Version Upgrade] New version ${CURRENT_APP_VERSION}: Requiring re-login.`);
@@ -472,7 +472,7 @@ export default function App() {
             if (window.api?.logoutProfile) {
               await window.api.logoutProfile();
             }
-          } catch {}
+          } catch { }
         }
 
         // Multi-User Profile Auto-Login & Initialization
@@ -544,7 +544,7 @@ export default function App() {
           try {
             localStorage.removeItem('icelauch_active_profile_id');
             localStorage.removeItem('icelauch_remembered_profile_id');
-          } catch {}
+          } catch { }
         }
 
         const cloudData = await fetchDirectCloudCatalog();
@@ -664,7 +664,7 @@ export default function App() {
           }
           return { ...prev, media: newMedia };
         });
-      }) : () => {};
+      }) : () => { };
 
       const unsubMediaDownload = window.api.onMediaDownloadProgress ? window.api.onMediaDownloadProgress(({ mediaId, progress }: { mediaId: string; progress: number }) => {
         setAppData((prev) => {
@@ -677,7 +677,7 @@ export default function App() {
           });
           return { ...prev, media: newMedia };
         });
-      }) : () => {};
+      }) : () => { };
 
       const unsubCloud = (window.api as any).onCloudSynced ? (window.api as any).onCloudSynced((data: { profiles: UserProfile[]; games?: Game[]; media?: MediaItem[]; playlists?: MediaPlaylist[]; message: string }) => {
         if (data?.profiles) {
@@ -701,7 +701,7 @@ export default function App() {
           lastSyncStatus: 'success',
           lastSyncMessage: data.message,
         }));
-      }) : () => {};
+      }) : () => { };
 
       return () => {
         unsubGame();
@@ -930,7 +930,7 @@ export default function App() {
           'icelauch_saved_profiles',
           JSON.stringify(profiles.map((p) => (p.id === activeProfile.id ? updatedProfile : p)))
         );
-      } catch (e) {}
+      } catch (e) { }
     }
     sfx.playSuccess();
   };
@@ -1014,7 +1014,7 @@ export default function App() {
   const handleSaveGame = async (gameData: Partial<Game>) => {
     if (window.api) {
       const savedGame = await window.api.saveGame(gameData);
-      
+
       // Auto register to banner if pinned or autoAddNew is enabled for newly created games (NEVER if isBannerPinned is false)
       const shouldAddToBanner = gameData.isBannerPinned === true ||
         (gameData.isBannerPinned !== false && !gameData.id && Boolean(appData?.settings.bannerSettings?.games.autoAddNew));
@@ -1035,6 +1035,24 @@ export default function App() {
       showAdminCloudToast('Đã lưu thay đổi game lên Cloud!');
     } else {
       try {
+        const meta: Record<string, any> = {
+          screenshots: gameData.screenshots,
+          coverPosition: gameData.coverPosition,
+          coverZoom: gameData.coverZoom,
+          coverSharpen: gameData.coverSharpen,
+          bannerPosition: gameData.bannerPosition,
+          bannerZoom: gameData.bannerZoom,
+          bannerBlur: gameData.bannerBlur,
+          bannerDarkness: gameData.bannerDarkness,
+          bannerEdgeDarkness: gameData.bannerEdgeDarkness,
+          bannerSharpen: gameData.bannerSharpen,
+          listCardPosition: gameData.listCardPosition,
+          listCardZoom: gameData.listCardZoom,
+          transform_metadata: gameData.transform_metadata,
+          hidden: Boolean(gameData.hidden),
+        };
+        const finalDescription = encodeDescriptionMetadata(gameData.description || '', meta);
+
         const finalGame = {
           id: gameData.id || `game-${Date.now()}`,
           name: gameData.name || 'Untitled',
@@ -1042,16 +1060,15 @@ export default function App() {
           trailer_url: gameData.trailerUrl || null,
           banner_url: gameData.bannerPath || null,
           cover_url: gameData.coverPath || null,
-          description: gameData.description || '',
+          description: finalDescription,
           genre: gameData.genre || '',
           tags: gameData.tags || [],
           action_buttons: gameData.actionButtonIds || [],
           featured: Boolean(gameData.featured),
-          hidden: Boolean(gameData.hidden),
-          transform_metadata: gameData.transform_metadata || null,
+          file_size: gameData.expectedSize ? Math.round(gameData.expectedSize) : null,
           updated_at: new Date().toISOString(),
         };
-        await fetch(`${DEFAULT_SUPABASE_URL}/rest/v1/icelauch_games`, {
+        const res = await fetch(`${DEFAULT_SUPABASE_URL}/rest/v1/icelauch_games`, {
           method: 'POST',
           headers: {
             apikey: DEFAULT_SUPABASE_ANON_KEY,
@@ -1061,6 +1078,11 @@ export default function App() {
           },
           body: JSON.stringify(finalGame),
         });
+        if (!res.ok) {
+          const errText = await res.text().catch(() => '');
+          console.error('Supabase game save error:', res.status, errText);
+          throw new Error(`Supabase error ${res.status}: ${errText}`);
+        }
         showAdminCloudToast('Đã lưu thay đổi game lên Cloud!');
         await loadData();
       } catch (e) {
@@ -1077,12 +1099,12 @@ export default function App() {
         if (!prev) return prev;
         const cleanBanners = prev.settings.bannerSettings
           ? {
-              ...prev.settings.bannerSettings,
-              games: {
-                ...prev.settings.bannerSettings.games,
-                pinnedItems: (prev.settings.bannerSettings.games.pinnedItems || []).filter((p) => p.id !== id),
-              },
-            }
+            ...prev.settings.bannerSettings,
+            games: {
+              ...prev.settings.bannerSettings.games,
+              pinnedItems: (prev.settings.bannerSettings.games.pinnedItems || []).filter((p) => p.id !== id),
+            },
+          }
           : prev.settings.bannerSettings;
 
         return {
@@ -1171,8 +1193,11 @@ export default function App() {
     });
     setViewingDetailGame((prev) => (prev && prev.id === gameId ? updated : prev));
     if (window.api) {
-      await window.api.saveGame({ id: gameId, hidden: newHidden });
+      await window.api.saveGame(updated);
+    } else {
+      await handleSaveGame(updated);
     }
+    showAdminCloudToast(newHidden ? 'Đã ẩn game và đồng bộ lên Cloud!' : 'Đã hiện game và đồng bộ lên Cloud!');
   };
 
   const handleToggleHideMedia = async (mediaId: string) => {
@@ -1186,8 +1211,11 @@ export default function App() {
       media: appData.media.map((m) => (m.id === mediaId ? updated : m)),
     });
     if (window.api) {
-      await window.api.saveMedia({ id: mediaId, hidden: newHidden });
+      await window.api.saveMedia(updated);
+    } else {
+      await handleSaveMedia(updated);
     }
+    showAdminCloudToast(newHidden ? 'Đã ẩn video và đồng bộ lên Cloud!' : 'Đã hiện video và đồng bộ lên Cloud!');
   };
 
   // Media actions
@@ -1332,12 +1360,12 @@ export default function App() {
 
       // Auto register to banner if pinned or autoAddNew is enabled for newly created media
       if (appData && savedMedia) {
-        const secKey: keyof AppBannerSettings = 
-          mediaData.type === 'video' 
-            ? 'videos' 
-            : mediaData.subType === 'podcast' 
-            ? 'podcasts' 
-            : 'music';
+        const secKey: keyof AppBannerSettings =
+          mediaData.type === 'video'
+            ? 'videos'
+            : mediaData.subType === 'podcast'
+              ? 'podcasts'
+              : 'music';
 
         // Auto register to banner if pinned or autoAddNew is enabled for newly created media (NEVER if isBannerPinned is false)
         const shouldAddToBanner = mediaData.isBannerPinned === true ||
@@ -1378,6 +1406,7 @@ export default function App() {
           listCardPosition: mediaData.listCardPosition,
           listCardZoom: mediaData.listCardZoom,
           transform_metadata: mediaData.transform_metadata,
+          hidden: Boolean(mediaData.hidden),
         };
         const finalDescription = encodeDescriptionMetadata(mediaData.description || '', meta);
 
@@ -1385,7 +1414,7 @@ export default function App() {
           id: mediaData.id || `media-${Date.now()}`,
           title: mediaData.title || 'Untitled',
           type: mediaData.type || 'video',
-          link: [mediaData.link, ...(mediaData.backupLinks || [])].filter(Boolean).join('\n'),
+          link: [mediaData.link, ...(mediaData.backupLinks || [])].filter(Boolean).join('\n') || 'https://example.com',
           cover_path: mediaData.coverPath || null,
           banner_path: mediaData.bannerPath || null,
           description: finalDescription,
@@ -1393,11 +1422,9 @@ export default function App() {
           tags: mediaData.tags || [],
           duration: mediaData.duration || 0,
           is_banner_pinned: Boolean(mediaData.isBannerPinned),
-          hidden: Boolean(mediaData.hidden),
-          transform_metadata: mediaData.transform_metadata || null,
           updated_at: new Date().toISOString(),
         };
-        await fetch(`${DEFAULT_SUPABASE_URL}/rest/v1/icelauch_media`, {
+        const res = await fetch(`${DEFAULT_SUPABASE_URL}/rest/v1/icelauch_media`, {
           method: 'POST',
           headers: {
             apikey: DEFAULT_SUPABASE_ANON_KEY,
@@ -1407,6 +1434,11 @@ export default function App() {
           },
           body: JSON.stringify(finalMedia),
         });
+        if (!res.ok) {
+          const errText = await res.text().catch(() => '');
+          console.error('Supabase media save error:', res.status, errText);
+          throw new Error(`Supabase error ${res.status}: ${errText}`);
+        }
         showAdminCloudToast('Đã lưu thay đổi media lên Cloud!');
         await loadData();
       } catch (e) {
@@ -1417,14 +1449,15 @@ export default function App() {
 
   const handleRenameTag = async (oldTag: string, newTag: string) => {
     if (!appData) return;
+    const matchOld = (t: string) => t.trim().toLowerCase() === oldTag.trim().toLowerCase();
     if (tagManagerMode === 'game') {
       const currentTags = appData.settings.gameTags || [];
-      const updatedTags = currentTags.map((t) => (t === oldTag ? newTag : t));
-      if (!updatedTags.includes(newTag)) updatedTags.push(newTag);
+      const updatedTags = currentTags.map((t) => (matchOld(t) ? newTag : t));
+      if (!updatedTags.some((t) => t.trim().toLowerCase() === newTag.trim().toLowerCase())) updatedTags.push(newTag);
 
       const updatedGames = appData.games.map((g) => {
-        if (g.tags && g.tags.includes(oldTag)) {
-          const newGtags = g.tags.map((t) => (t === oldTag ? newTag : t));
+        if (g.tags && g.tags.some(matchOld)) {
+          const newGtags = g.tags.map((t) => (matchOld(t) ? newTag : t));
           return { ...g, tags: newGtags, genre: newGtags.join(', ') };
         }
         return g;
@@ -1443,6 +1476,12 @@ export default function App() {
             await window.api.saveGame(g);
           }
         }
+      } else {
+        for (const g of updatedGames) {
+          if (g.tags?.includes(newTag)) {
+            await handleSaveGame(g);
+          }
+        }
       }
       await syncSystemSettingsToCloud({ gameTags: updatedTags });
       showAdminCloudToast('Đã đổi tên thể loại và đồng bộ lên Cloud!');
@@ -1451,18 +1490,18 @@ export default function App() {
         tagManagerMode === 'movie'
           ? 'movieTags'
           : tagManagerMode === 'music'
-          ? 'musicTags'
-          : tagManagerMode === 'podcast'
-          ? 'podcastTags'
-          : 'mediaTags';
+            ? 'musicTags'
+            : tagManagerMode === 'podcast'
+              ? 'podcastTags'
+              : 'mediaTags';
 
       const currentTags = (appData.settings as any)[tagSettingKey] || [];
-      const updatedTags = currentTags.map((t: string) => (t === oldTag ? newTag : t));
-      if (!updatedTags.includes(newTag)) updatedTags.push(newTag);
+      const updatedTags = currentTags.map((t: string) => (matchOld(t) ? newTag : t));
+      if (!updatedTags.some((t: string) => t.trim().toLowerCase() === newTag.trim().toLowerCase())) updatedTags.push(newTag);
 
       const updatedMedia = appData.media.map((m) => {
-        if (m.tags && m.tags.includes(oldTag)) {
-          const newMtags = m.tags.map((t) => (t === oldTag ? newTag : t));
+        if (m.tags && m.tags.some(matchOld)) {
+          const newMtags = m.tags.map((t) => (matchOld(t) ? newTag : t));
           return { ...m, tags: newMtags, category: newMtags.join(', ') };
         }
         return m;
@@ -1496,13 +1535,14 @@ export default function App() {
 
   const handleDeleteTag = async (tagToDelete: string) => {
     if (!appData) return;
+    const matchDelete = (t: string) => t.trim().toLowerCase() === tagToDelete.trim().toLowerCase();
     if (tagManagerMode === 'game') {
       const currentTags = appData.settings.gameTags || [];
-      const updatedTags = currentTags.filter((t) => t !== tagToDelete);
+      const updatedTags = currentTags.filter((t) => !matchDelete(t));
 
       const updatedGames = appData.games.map((g) => {
-        if (g.tags && g.tags.includes(tagToDelete)) {
-          const newGtags = g.tags.filter((t) => t !== tagToDelete);
+        if (g.tags && g.tags.some(matchDelete)) {
+          const newGtags = g.tags.filter((t) => !matchDelete(t));
           return { ...g, tags: newGtags, genre: newGtags.join(', ') };
         }
         return g;
@@ -1517,8 +1557,14 @@ export default function App() {
       if (window.api) {
         await window.api.saveSettings({ gameTags: updatedTags });
         for (const g of updatedGames) {
-          if ((appData.games.find(orig => orig.id === g.id)?.tags || []).includes(tagToDelete)) {
+          if ((appData.games.find(orig => orig.id === g.id)?.tags || []).some(matchDelete)) {
             await window.api.saveGame(g);
+          }
+        }
+      } else {
+        for (const g of updatedGames) {
+          if ((appData.games.find(orig => orig.id === g.id)?.tags || []).some(matchDelete)) {
+            await handleSaveGame(g);
           }
         }
       }
@@ -1529,17 +1575,17 @@ export default function App() {
         tagManagerMode === 'movie'
           ? 'movieTags'
           : tagManagerMode === 'music'
-          ? 'musicTags'
-          : tagManagerMode === 'podcast'
-          ? 'podcastTags'
-          : 'mediaTags';
+            ? 'musicTags'
+            : tagManagerMode === 'podcast'
+              ? 'podcastTags'
+              : 'mediaTags';
 
       const currentTags = (appData.settings as any)[tagSettingKey] || [];
-      const updatedTags = currentTags.filter((t: string) => t !== tagToDelete);
+      const updatedTags = currentTags.filter((t: string) => !matchDelete(t));
 
       const updatedMedia = appData.media.map((m) => {
-        if (m.tags && m.tags.includes(tagToDelete)) {
-          const newMtags = m.tags.filter((t) => t !== tagToDelete);
+        if (m.tags && m.tags.some(matchDelete)) {
+          const newMtags = m.tags.filter((t) => !matchDelete(t));
           return { ...m, tags: newMtags, category: newMtags.join(', ') };
         }
         return m;
@@ -1554,13 +1600,13 @@ export default function App() {
       if (window.api) {
         await window.api.saveSettings({ [tagSettingKey]: updatedTags });
         for (const m of updatedMedia) {
-          if ((appData.media.find(orig => orig.id === m.id)?.tags || []).includes(tagToDelete)) {
+          if ((appData.media.find(orig => orig.id === m.id)?.tags || []).some(matchDelete)) {
             await window.api.saveMedia(m);
           }
         }
       } else {
         for (const m of updatedMedia) {
-          if ((appData.media.find(orig => orig.id === m.id)?.tags || []).includes(tagToDelete)) {
+          if ((appData.media.find(orig => orig.id === m.id)?.tags || []).some(matchDelete)) {
             await handleSaveMedia(m);
           }
         }
@@ -1644,20 +1690,20 @@ export default function App() {
         if (!prev) return prev;
         const cleanBanners = prev.settings.bannerSettings
           ? {
-              ...prev.settings.bannerSettings,
-              videos: {
-                ...prev.settings.bannerSettings.videos,
-                pinnedItems: (prev.settings.bannerSettings.videos.pinnedItems || []).filter((p) => p.id !== id),
-              },
-              music: {
-                ...prev.settings.bannerSettings.music,
-                pinnedItems: (prev.settings.bannerSettings.music.pinnedItems || []).filter((p) => p.id !== id),
-              },
-              podcasts: {
-                ...prev.settings.bannerSettings.podcasts,
-                pinnedItems: (prev.settings.bannerSettings.podcasts.pinnedItems || []).filter((p) => p.id !== id),
-              },
-            }
+            ...prev.settings.bannerSettings,
+            videos: {
+              ...prev.settings.bannerSettings.videos,
+              pinnedItems: (prev.settings.bannerSettings.videos.pinnedItems || []).filter((p) => p.id !== id),
+            },
+            music: {
+              ...prev.settings.bannerSettings.music,
+              pinnedItems: (prev.settings.bannerSettings.music.pinnedItems || []).filter((p) => p.id !== id),
+            },
+            podcasts: {
+              ...prev.settings.bannerSettings.podcasts,
+              pinnedItems: (prev.settings.bannerSettings.podcasts.pinnedItems || []).filter((p) => p.id !== id),
+            },
+          }
           : prev.settings.bannerSettings;
 
         return {
@@ -1838,7 +1884,7 @@ export default function App() {
         const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
         const hashArray = Array.from(new Uint8Array(hashBuffer));
         pinHash = hashArray.map((b) => b.toString(16).padStart(2, '0')).join('');
-      } catch (e) {}
+      } catch (e) { }
     }
 
     let passwordHash = '';
@@ -1854,7 +1900,7 @@ export default function App() {
         const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
         const hashArray = Array.from(new Uint8Array(hashBuffer));
         passwordHash = hashArray.map((b) => b.toString(16).padStart(2, '0')).join('');
-      } catch (e) {}
+      } catch (e) { }
     }
 
     const existing = profiles.find((p) => p.id === data.id);
@@ -1906,7 +1952,7 @@ export default function App() {
           localStorage.setItem('icelauch_remembered_profile_id', toSave.id);
         }
         localStorage.setItem('icelauch_saved_profiles', JSON.stringify(updatedProfiles));
-      } catch (e) {}
+      } catch (e) { }
     }
 
     sfx.playSuccess();
@@ -2974,12 +3020,12 @@ export default function App() {
           tagManagerMode === 'game'
             ? aggregatedGameTags
             : tagManagerMode === 'movie'
-            ? aggregatedMovieTags
-            : tagManagerMode === 'music'
-            ? aggregatedMusicTags
-            : tagManagerMode === 'podcast'
-            ? aggregatedPodcastTags
-            : aggregatedMediaTags
+              ? aggregatedMovieTags
+              : tagManagerMode === 'music'
+                ? aggregatedMusicTags
+                : tagManagerMode === 'podcast'
+                  ? aggregatedPodcastTags
+                  : aggregatedMediaTags
         }
         games={appData.games}
         media={appData.media}
@@ -2988,12 +3034,12 @@ export default function App() {
             tagManagerMode === 'game'
               ? 'gameTags'
               : tagManagerMode === 'movie'
-              ? 'movieTags'
-              : tagManagerMode === 'music'
-              ? 'musicTags'
-              : tagManagerMode === 'podcast'
-              ? 'podcastTags'
-              : 'mediaTags';
+                ? 'movieTags'
+                : tagManagerMode === 'music'
+                  ? 'musicTags'
+                  : tagManagerMode === 'podcast'
+                    ? 'podcastTags'
+                    : 'mediaTags';
           setAppData({
             ...appData,
             settings: { ...appData.settings, [type]: newTags },

@@ -110,14 +110,22 @@ export const MobileMediaView: React.FC<MobileMediaViewProps> = ({
       .slice(0, 10);
   }, [currentList]);
 
-  // Extract all categories
-  const categories = Array.from(
-    new Set(
-      currentList
-        .flatMap((m) => (m.category ? m.category.split(',').map((s) => s.trim()) : []))
-        .filter(Boolean)
-    )
-  );
+  // Extract all categories (case-insensitive deduplication)
+  const categories = useMemo(() => {
+    const rawCategories = currentList
+      .flatMap((m) => (m.category ? m.category.split(',').map((s) => s.trim()) : []))
+      .filter(Boolean);
+    const seen = new Set<string>();
+    const unique: string[] = [];
+    for (const cat of rawCategories) {
+      const lower = cat.toLowerCase();
+      if (!seen.has(lower)) {
+        seen.add(lower);
+        unique.push(cat);
+      }
+    }
+    return unique;
+  }, [currentList]);
 
   const effectiveSearch = (deferredSearch || searchQuery).trim();
 

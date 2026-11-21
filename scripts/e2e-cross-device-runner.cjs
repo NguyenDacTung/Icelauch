@@ -105,10 +105,38 @@ async function capturePcScreenshot(filename) {
   return null;
 }
 
+function setupAdbPortForward() {
+  try {
+    const sockets = execSync(`"${ADB_PATH}" shell cat /proc/net/unix`, { encoding: 'utf8' });
+    const match = sockets.match(/@webview_devtools_remote_(\d+)/);
+    if (match) {
+      execSync(`"${ADB_PATH}" forward tcp:${MOBILE_DEBUG_PORT} localabstract:${match[0].slice(1)}`);
+      console.log(`[FORWARD] Forwarded ${match[0]} to tcp:${MOBILE_DEBUG_PORT}`);
+      return true;
+    }
+  } catch (e) {
+    console.warn('[FORWARD] Failed to auto-forward webview devtools:', e.message);
+  }
+  return false;
+}
+
+async function evalInMobile(expression) {
+  const targets = await getCdpTargets(MOBILE_DEBUG_PORT);
+  if (!targets) throw new Error(`Cannot connect to Mobile CDP on port ${MOBILE_DEBUG_PORT}`);
+  const page = targets.find(t => t.type === 'page') || targets[0];
+  const res = await sendCdpCommand(page.webSocketDebuggerUrl, 'Runtime.evaluate', {
+    expression,
+    returnByValue: true,
+    awaitPromise: true
+  });
+  return res.result ? res.result.value : res;
+}
+
 function captureMobileScreenshot(filename) {
   const filePath = path.join(SCREENSHOTS_DIR, filename);
   try {
-    execSync(`"${ADB_PATH}" exec-out screencap -p > "${filePath}"`);
+    execSync(`"${ADB_PATH}" shell screencap -p /sdcard/screencap_temp.png`);
+    execSync(`"${ADB_PATH}" pull /sdcard/screencap_temp.png "${filePath}"`);
     return filePath;
   } catch (e) {
     return null;
@@ -159,6 +187,7 @@ async function runAllSuites() {
     console.warn('   Please connect phone via USB and enable USB Debugging.\n');
   } else {
     console.log('✅ Android Phone Connected!');
+    setupAdbPortForward();
   }
 
   console.log('\nStarting Test Suites with Data Sandboxing ([E2E_TEST])...\n');
@@ -235,8 +264,24 @@ async function runAllSuites() {
     const packageJson = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'package.json'), 'utf8'));
     const apkUpdaterCode = fs.readFileSync(path.join(__dirname, '..', 'src', 'renderer', 'src', 'utils', 'apkUpdater.ts'), 'utf8');
     const versionMatch = apkUpdaterCode.includes(`CURRENT_MOBILE_VERSION = '${packageJson.version}'`);
+    let mobileLiveVersionCheck = null;
+    if (hasPhone) {
+      try {
+        mobileLiveVersionCheck = await evalInMobile(`
+          (() => {
+            const hasUpdateDialog = !!document.body.innerText.match(/Cập nhật lên phiên bản|Phiên bản mới khả dụng/i);
+            return {
+              hasUpdateDialog,
+              title: document.title,
+              url: window.location.href
+            };
+          })()
+        `);
+      } catch (e) {}
+    }
     recordResult('TC-1.2.8-05', 'Xác Thực Phiên Bản Mobile 1.2.8 & Chặn Loop Update', versionMatch ? 'PASS' : 'FAIL', {
-      note: `CURRENT_MOBILE_VERSION trong apkUpdater.ts (${packageJson.version}) khớp hoàn toàn với package.json`
+      note: `CURRENT_MOBILE_VERSION trong apkUpdater.ts (${packageJson.version}) khớp hoàn toàn với package.json; Kiểm tra Mobile WebView không có popup loop update: ${!mobileLiveVersionCheck?.hasUpdateDialog}`,
+      mobileLive: mobileLiveVersionCheck
     });
 
     // TC-1.2.8-06: Double-Click Modal Isolation

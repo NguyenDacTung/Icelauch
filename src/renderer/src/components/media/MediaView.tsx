@@ -240,12 +240,22 @@ export const MediaView: React.FC<MediaViewProps> = ({
       .slice(0, 15);
   }, [tabMedia]);
 
-  // Extract all unique tags for current active tab
-  const availableTags = Array.from(
-    new Set(
-      tabMedia.flatMap((m) => m.tags || (m.category ? m.category.split(',').map((s) => s.trim()) : []))
-    )
-  ).filter(Boolean);
+  // Extract all unique tags for current active tab (case-insensitive deduplication)
+  const availableTags = useMemo(() => {
+    const rawTags = tabMedia
+      .flatMap((m) => m.tags || (m.category ? m.category.split(',').map((s) => s.trim()) : []))
+      .filter(Boolean);
+    const seen = new Set<string>();
+    const unique: string[] = [];
+    for (const tag of rawTags) {
+      const lower = tag.toLowerCase();
+      if (!seen.has(lower)) {
+        seen.add(lower);
+        unique.push(tag);
+      }
+    }
+    return unique;
+  }, [tabMedia]);
 
   // Filter & Search using smart multi-token matcher
   const filteredMedia = tabMedia.filter((m) => {

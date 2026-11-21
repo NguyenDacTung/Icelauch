@@ -1201,6 +1201,12 @@
           "currentTime": 3.072209,
           "lastWatchedAt": 1794998722508
         },
+        "171f34bb-5678-40b9-b9b0-94ddf1a3819d": {
+          "duration": 0,
+          "completed": false,
+          "currentTime": 2.166703,
+          "lastWatchedAt": 1795256928046
+        },
         "2b1b21f3-e4ed-4478-b307-db25743470a6": {
           "duration": 0,
           "completed": false,
@@ -1256,9 +1262,9 @@
     "supabaseUrl": "https://wqmmagfrwwctvipopazx.supabase.co",
     "supabaseAnonKey": "sb_publishable_l1vNbLKXXhLNnfi1pI5UnQ_0EaqbXuJ",
     "autoSyncIntervalMinutes": 5,
-    "lastSyncStatus": "error",
-    "lastSyncedAt": "2026-11-21T08:08:09.562Z",
-    "lastSyncMessage": "EPERM: operation not permitted, rename 'C:\\Icelauch\\Data\\data.json.tmp' -> 'C:\\Icelauch\\Data\\data.json'"
+    "lastSyncStatus": "success",
+    "lastSyncedAt": "2026-11-21T12:23:03.411Z",
+    "lastSyncMessage": "Đồng bộ thành công danh mục dùng chung (6 game, 32 phim/media, 3 playlists, 4 tài khoản)!"
   },
   "iceDropShares": [],
   "approvedDevices": [

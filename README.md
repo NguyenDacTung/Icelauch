@@ -1,8 +1,8 @@
 # Icelauch - Trình Quản Lý Game & Rạp Giải Trí Đa Nền Tảng (Windows, Mobile & Android TV)
 
 **Phiên bản phát hành:** 
-- 🖥️ **Windows PC:** `v1.2.8`
-- 📱 **Android Điện Thoại:** `v1.2.8` (Mã phiên bản build: `versionCode 24`)
+- 🖥️ **Windows PC:** `v1.2.9`
+- 📱 **Android Điện Thoại:** `v1.2.9` (Mã phiên bản build: `versionCode 25`)
 - 📺 **Android TV Edition:** `v1.0.0` (Bản chuyên biệt điều khiển 100% bằng Remote)
 
 **Hệ điều hành hỗ trợ:** 
@@ -28,7 +28,17 @@ Tại trang Releases, bạn sẽ có các file cài đặt tương ứng với t
 
 ---
 
-## 2. Các Nâng Cấp Nổi Bật Trong Phiên Bản v1.2.8 (Sửa Tràn Banner Drawer, Đồng Bộ Xóa Thể Loại Cloud, Triệt Tiêu Vệt Đen Thanh Cử Chỉ Android, Đồng Bộ Phiên Bản & Gợi Ý Đăng Nhập PC)
+## 2. Các Nâng Cấp Nổi Bật Trong Phiên Bản v1.2.9 (Khắc Phục Triệt Để Toàn Bộ Lỗi Đồng Bộ Cloud Supabase, Khôi Phục Lưu Trữ Video/Game, Chuẩn Hóa Tag & Quick Hide)
+
+Bản cập nhật v1.2.9 giải quyết dứt điểm các lỗi đồng bộ dữ liệu đám mây:
+- **Đóng gói Metadata Envelope an toàn:** Toàn bộ thuộc tính tùy biến (`hidden`, `transform_metadata`, `secondaryTitle`, `episode`, `coverPosition`, `listCardPosition`) được đóng gói vào thẻ `<!--ICELAUCH_META:...-->` trong cột `description`. Loại bỏ hoàn toàn việc gửi cột lạ lên Supabase, chấm dứt triệt để lỗi `HTTP 400 Bad Request (PGRST204)`.
+- **Đồng bộ Quick Hide hai chiều:** Bấm nút ẩn bên ngoài danh sách lập tức gửi toàn bộ thông tin media lên Cloud, hiển thị Toast thông báo và đồng bộ tức thì trên cả PC lẫn điện thoại.
+- **Hỗ trợ đầy đủ trên Điện thoại:** Hàm `fetchDirectCloudCatalog` trên Android giải mã trọn vẹn `hidden` và `transform_metadata`, đồng bộ 100% với PC.
+- **Khử trùng lặp Tag không phân biệt hoa thường:** Tự động chuẩn hóa và gộp các tag trùng lặp (như `Hoạt hình` và `Hoạt Hình`) thành 1 thẻ duy nhất, xóa sạch khỏi tất cả video trên Supabase.
+
+---
+
+## 3. Các Nâng Cấp Trong Phiên Bản v1.2.8
 
 Bản cập nhật v1.2.8 tập trung giải quyết triệt để các phản hồi kiểm thử thực tế từ người dùng:
 
