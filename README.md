@@ -1,8 +1,8 @@
 # Icelauch - Trình Quản Lý Game & Rạp Giải Trí Đa Nền Tảng (Windows, Mobile & Android TV)
 
 **Phiên bản phát hành:** 
-- 🖥️ **Windows PC:** `v1.2.7`
-- 📱 **Android Điện Thoại:** `v1.2.7` (Mã phiên bản build: `versionCode 23`)
+- 🖥️ **Windows PC:** `v1.2.8`
+- 📱 **Android Điện Thoại:** `v1.2.8` (Mã phiên bản build: `versionCode 24`)
 - 📺 **Android TV Edition:** `v1.0.0` (Bản chuyên biệt điều khiển 100% bằng Remote)
 
 **Hệ điều hành hỗ trợ:** 
@@ -28,7 +28,34 @@ Tại trang Releases, bạn sẽ có các file cài đặt tương ứng với t
 
 ---
 
-## 2. Các Nâng Cấp Nổi Bật Trong Phiên Bản v1.2.7 (Trình Phát Video Dự Phòng HTML5 Cinema, Quản Lý Banner Nâng Cao, Series & Playlists, Lá Chắn Bảo Mật & Tối Ưu Trải Nghiệm Di Động)
+## 2. Các Nâng Cấp Nổi Bật Trong Phiên Bản v1.2.8 (Sửa Tràn Banner Drawer, Đồng Bộ Xóa Thể Loại Cloud, Triệt Tiêu Vệt Đen Thanh Cử Chỉ Android, Đồng Bộ Phiên Bản & Gợi Ý Đăng Nhập PC)
+
+Bản cập nhật v1.2.8 tập trung giải quyết triệt để các phản hồi kiểm thử thực tế từ người dùng:
+
+### 2.1 Khắc Phục Lỗi Hiển Thị Ngăn Thay Thế Banner (Inline Replace Drawer)
+- 📐 **Bố cục 2 hàng chống tràn:** Tái thiết kế giao diện chọn mục thay thế trên Banner Manager. Tiêu đề mục được rút gọn thông minh (`truncate max-w-[280px]`), dropdown chiếm toàn bộ chiều rộng khả dụng (`w-full min-w-0`), hàng nút Hủy & Xác nhận căn phải rõ ràng.
+- 🎯 **Hiển thị 100% không cần cuộn ngang:** Nút *"Xác nhận thay thế"* luôn nằm trọn vẹn trong khung nhìn trên mọi kích thước màn hình PC và tablet.
+
+### 2.2 Sửa Dứt Điểm Lỗi Xóa Tag / Thể Loại Bị Hiện Lại
+- ☁️ **Đồng bộ Cloud đa điểm:** Khi xóa một tag thể loại, ứng dụng lập tức gỡ bỏ tag khỏi toàn bộ các mục video/game có liên quan, cập nhật ngay các media này lên Supabase và lưu cài đặt mới vào `__system_catalog_settings__`.
+- 🔔 **Toast xác nhận rõ ràng:** Có thông báo Toast hiển thị ngay sau khi thao tác: *"Đã xóa thể loại và đồng bộ lên Cloud!"*. Tag không còn bị hiện lại do xung đột dữ liệu cũ.
+
+### 2.3 Loại Bỏ Vệt Đen Dưới Cùng Quanh Thanh Cử Chỉ Điều Hướng Trên Android
+- 📱 **True Edge-to-Edge:** Tắt tính năng ép độ tương phản thanh điều hướng (`setNavigationBarContrastEnforced(false)`) trên Android 10+ (API 29+) trong `MainActivity.java` và `values-v29/styles.xml`.
+- ✨ **Không còn dải đen:** Loại bỏ hoàn toàn vệt đen mờ nằm đè lên thanh cử chỉ vuốt của điện thoại khi xem video hoặc duyệt ứng dụng.
+
+### 2.4 Đồng Bộ Phiên Bản Điện Thoại & Chấm Dứt Lặp Lại Popup Cập Nhật
+- 🚀 **Khắc phục biến phiên bản:** Đưa hằng số `CURRENT_MOBILE_VERSION` lên đồng bộ tuyệt đối với `1.2.8` (versionCode 24), loại bỏ thông báo cập nhật lặp lại vô tận trên điện thoại.
+
+### 2.5 Ngăn Chặn Nhấp Đúp Vào Hộp Chọn Giao Diện Gây Thu Nhỏ Cửa Sổ PC
+- 🖥️ **Cách ly sự kiện:** Thêm `onDoubleClick={(e) => e.stopPropagation()}` và `style={{ WebkitAppRegion: 'no-drag' }}` vào hộp thoại chọn 9 chế độ giao diện thời không (`CelestialThemeHub`). Nhấp đúp chuột không còn làm cửa sổ Electron bị co về dạng cửa sổ nhỏ.
+
+### 2.6 Tự Động Gợi Ý Tài Khoản Đã Đăng Nhập Trên Thiết Bị PC
+- 👤 **Khởi tạo danh sách tài khoản đã nhớ:** Bổ sung cơ chế auto-seed danh sách tài khoản đã nhớ từ cơ sở dữ liệu `profiles` của PC, giúp người dùng PC thấy ngay các tài khoản của máy tính ở khung *"Tài khoản đã nhớ trên máy này"*.
+
+---
+
+## 3. Các Nâng Cấp Nổi Bật Trong Phiên Bản v1.2.7 (Trình Phát Video Dự Phòng HTML5 Cinema, Quản Lý Banner Nâng Cao, Series & Playlists, Lá Chắn Bảo Mật & Tối Ưu Trải Nghiệm Di Động)
 
 Bản cập nhật v1.2.7 mang đến bước hoàn thiện quan trọng về tính năng đa phương tiện, bảo mật thông tin và nâng tầm trải nghiệm nghe nhìn cho **Icelauch**:
 

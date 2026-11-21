@@ -378,6 +378,28 @@ When the active theme is one of the light modes (`aer`, `solar`, `aqua`), the ap
 | Electron window focus | `src/main/index.ts` |
 | Android IME / keyboard | `android/app/src/main/AndroidManifest.xml`, `capacitor.config.json` |
 | Android Display Cutout & Native Orientation | `android/app/src/main/java/com/icelauch/app/MainActivity.java`, `ScreenOrientationPlugin.java` |
+| Mobile Version Invariant & APK Updater | `src/renderer/src/utils/apkUpdater.ts` |
+| Known Accounts & Profile Memory | `src/renderer/src/components/profile/ProfilePickerView.tsx` |
+
+---
+
+## 12. Cross-Platform Version Invariant & Modal Isolation Guardrails
+
+### 12.1 Version SSOT & Update Alert Accuracy
+- `CURRENT_MOBILE_VERSION` in `src/renderer/src/utils/apkUpdater.ts` MUST match `package.json`, `android/app/build.gradle`, and `App.tsx` on every release.
+- A mismatch causes false update popups on mobile devices immediately after updating.
+
+### 12.2 Modal Event Isolation in Frameless Windows
+- Modals opened on PC must isolate double-click events (`onDoubleClick={(e) => e.stopPropagation()}`) and declare `style={{ WebkitAppRegion: 'no-drag' }}`.
+- Without this, React synthetic event bubbling from portals inside draggable headers will trigger native window maximize/unmaximize on double-click.
+
+### 12.3 Cloud-First Reconciliation Over Local Cache
+- Local storage acts as a fast-boot cache. Upon startup or network connectivity, Supabase Cloud catalog data must take precedence and hydrate local cache.
+- Admin mutations (hide/unhide, transform metadata, tags, banners) must write atomically to Supabase to prevent app updates from resetting catalog customizations back to template `data.json`.
+
+### 12.4 Android Gesture Bar Contrast Elimination
+- On Android 10+ (API 29+), call `getWindow().setNavigationBarContrastEnforced(false)` in `MainActivity.java` and declare `enforceNavigationBarContrast = false` in `values-v29/styles.xml` to eliminate the dark overlay bar over bottom system gestures.
+
 | Mobile Floating Island & Phone Frame | `src/renderer/src/components/common/DevicePhoneFrame.tsx` |
 | Mobile Video Theater & YouTube Fullscreen | `src/renderer/src/components/mobile/MobileVideoTheaterView.tsx`, `src/renderer/src/utils/screenOrientation.ts` |
 | Theme engine & tokens | `src/renderer/src/index.css`, `src/renderer/src/hooks/useTheme.ts` |

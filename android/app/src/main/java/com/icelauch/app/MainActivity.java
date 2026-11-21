@@ -47,6 +47,11 @@ public class MainActivity extends BridgeActivity {
             WindowCompat.setDecorFitsSystemWindows(getWindow(), false);
             getWindow().setStatusBarColor(Color.TRANSPARENT);
             getWindow().setNavigationBarColor(Color.TRANSPARENT);
+
+            // Android 10+ (API 29+): Disable navigation bar contrast enforcement to prevent dark bar around gesture bar
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                getWindow().setNavigationBarContrastEnforced(false);
+            }
         } catch (Exception ignored) {}
     }
 

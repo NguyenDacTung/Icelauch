@@ -72,11 +72,34 @@ export const ProfilePickerView: React.FC<ProfilePickerViewProps> = ({
   const [savedRecords, setSavedRecords] = useState<SavedAccountRecord[]>(() => {
     try {
       const stored = localStorage.getItem(STORAGE_KEY_KNOWN_ACCOUNTS);
-      return stored ? JSON.parse(stored) : [];
-    } catch {
-      return [];
-    }
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch {}
+    return [];
   });
+
+  // Cross-Platform & PC Seed: If savedRecords is empty on this device but profiles exist in local system,
+  // auto-seed known accounts so the user on PC or Mobile sees their accounts immediately
+  useEffect(() => {
+    if (profiles && profiles.length > 0) {
+      setSavedRecords((prev) => {
+        if (prev.length > 0) return prev;
+        const seeded: SavedAccountRecord[] = profiles.map((p) => ({
+          id: p.id,
+          username: p.username,
+          nickname: p.nickname,
+          avatar: p.avatar,
+          role: p.role,
+        }));
+        try {
+          localStorage.setItem(STORAGE_KEY_KNOWN_ACCOUNTS, JSON.stringify(seeded));
+        } catch {}
+        return seeded;
+      });
+    }
+  }, [profiles]);
 
   // Direct login form state
   const [loginUsername, setLoginUsername] = useState('');

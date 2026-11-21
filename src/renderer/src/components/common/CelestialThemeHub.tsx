@@ -88,10 +88,14 @@ export const CelestialThemeHub: React.FC<CelestialThemeHubProps> = ({ isOpen, on
   return createPortal(
     <div 
       onClick={onClose}
+      onDoubleClick={(e) => e.stopPropagation()}
+      style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
       className="fixed inset-0 z-[9999] flex items-center justify-center p-3 sm:p-5 bg-black/75 backdrop-blur-md animate-in fade-in duration-200"
     >
       <div
         onClick={(e) => e.stopPropagation()}
+        onDoubleClick={(e) => e.stopPropagation()}
+        style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
         className="relative w-full max-w-xl glass-header-elevated rounded-3xl border border-ice-border shadow-[0_20px_60px_rgba(0,0,0,0.65)] flex flex-col overflow-hidden animate-in zoom-in-95 duration-200 bg-ice-card"
       >
         {/* Header Bar */}

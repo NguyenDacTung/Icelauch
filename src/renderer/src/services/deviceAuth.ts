@@ -632,7 +632,7 @@ export async function listAuthorizedDevices(): Promise<AuthorizedDevice[]> {
   }
 }
 
-export const APP_VERSION = '1.2.7';
+export const APP_VERSION = '1.2.8';
 
 /**
  * Session version check: Requires re-login when app version changes

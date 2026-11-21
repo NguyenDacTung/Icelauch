@@ -694,44 +694,48 @@ export const BannerManagerModal: React.FC<BannerManagerModalProps> = ({
 
                 {/* Inline Replace Drawer */}
                 {replacingItemId === item.id && (
-                  <div className="mt-1 mb-2 p-3 rounded-xl bg-cyan-950/30 border border-cyan-500/40 flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 animate-in fade-in duration-200">
-                    <span className="text-xs text-cyan-300 font-semibold shrink-0 flex items-center gap-1.5">
-                      <ArrowLeftRight className="w-4 h-4 text-cyan-400" />
-                      <span>Chọn mục thay thế cho &quot;{title}&quot;:</span>
-                    </span>
-                    <select
-                      value={selectedReplacementId}
-                      onChange={(e) => setSelectedReplacementId(e.target.value)}
-                      className="flex-1 bg-ice-bg border border-cyan-500/50 rounded-lg px-3 py-1.5 text-ice-text text-xs outline-none focus:border-cyan-400"
-                    >
-                      <option value="">-- Chọn mục từ danh sách ({availableCandidates.filter((c) => c.id !== item.id).length}) --</option>
-                      {availableCandidates
-                        .filter((c) => c.id !== item.id)
-                        .map((c) => (
-                          <option key={c.id} value={c.id}>
-                            {c.title} {c.isAlreadyPinned ? '(Đang ghim)' : ''}
-                          </option>
-                        ))}
-                    </select>
-                    <div className="flex items-center gap-2 justify-end shrink-0">
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setReplacingItemId(null);
-                          setSelectedReplacementId('');
-                        }}
-                        className="px-3 py-1.5 rounded-lg text-ice-subtext hover:text-white text-xs transition-colors"
+                  <div className="mt-1 mb-2 p-3 rounded-xl bg-cyan-950/30 border border-cyan-500/40 flex flex-col gap-2.5 animate-in fade-in duration-200">
+                    <div className="flex items-center gap-1.5 min-w-0">
+                      <ArrowLeftRight className="w-4 h-4 text-cyan-400 shrink-0" />
+                      <span className="text-xs text-cyan-300 font-semibold truncate">
+                        Chọn mục thay thế cho &quot;{title}&quot;:
+                      </span>
+                    </div>
+                    <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+                      <select
+                        value={selectedReplacementId}
+                        onChange={(e) => setSelectedReplacementId(e.target.value)}
+                        className="flex-1 min-w-0 w-full bg-ice-bg border border-cyan-500/50 rounded-lg px-3 py-1.5 text-ice-text text-xs outline-none focus:border-cyan-400"
                       >
-                        Hủy
-                      </button>
-                      <button
-                        type="button"
-                        disabled={!selectedReplacementId}
-                        onClick={handleConfirmReplace}
-                        className="px-4 py-1.5 rounded-lg bg-cyan-500 hover:bg-cyan-400 disabled:opacity-50 text-black text-xs font-bold shadow-md shadow-cyan-500/20 transition-all"
-                      >
-                        Xác nhận thay thế
-                      </button>
+                        <option value="">-- Chọn mục từ danh sách ({availableCandidates.filter((c) => c.id !== item.id).length}) --</option>
+                        {availableCandidates
+                          .filter((c) => c.id !== item.id)
+                          .map((c) => (
+                            <option key={c.id} value={c.id}>
+                              {c.title} {c.isAlreadyPinned ? '(Đang ghim)' : ''}
+                            </option>
+                          ))}
+                      </select>
+                      <div className="flex items-center gap-2 justify-end shrink-0">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setReplacingItemId(null);
+                            setSelectedReplacementId('');
+                          }}
+                          className="px-3 py-1.5 rounded-lg text-ice-subtext hover:text-white text-xs transition-colors cursor-pointer"
+                        >
+                          Hủy
+                        </button>
+                        <button
+                          type="button"
+                          disabled={!selectedReplacementId}
+                          onClick={handleConfirmReplace}
+                          className="px-4 py-1.5 rounded-lg bg-cyan-500 hover:bg-cyan-400 disabled:opacity-50 text-black text-xs font-bold shadow-md shadow-cyan-500/20 transition-all cursor-pointer shrink-0"
+                        >
+                          Xác nhận thay thế
+                        </button>
+                      </div>
                     </div>
                   </div>
                 )}

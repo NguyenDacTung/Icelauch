@@ -1,12 +1,13 @@
 {
   "name": "icelauch",
-  "version": "1.2.7",
+  "version": "1.2.8",
   "description": "Trình quản lý game và giải trí cá nhân cho Windows 10",
   "main": "dist-electron/main/index.js",
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
     "start": "node scripts/launch.cjs",
+    "start:debug": "node scripts/launch-debug.cjs",
     "preview": "vite preview",
     "test": "node scripts/run-all-verifications.cjs",
     "test:verify": "node scripts/run-all-verifications.cjs",

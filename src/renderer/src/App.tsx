@@ -462,7 +462,7 @@ export default function App() {
         }
 
         // Version update check: require re-login on new app version update; keep auto-login on same version
-        const CURRENT_APP_VERSION = '1.2.7';
+        const CURRENT_APP_VERSION = '1.2.8';
         const isNewVersion = shouldRequireReLoginForNewVersion(CURRENT_APP_VERSION);
         if (isNewVersion) {
           console.log(`[Version Upgrade] New version ${CURRENT_APP_VERSION}: Requiring re-login.`);
@@ -1444,6 +1444,8 @@ export default function App() {
           }
         }
       }
+      await syncSystemSettingsToCloud({ gameTags: updatedTags });
+      showAdminCloudToast('Đã đổi tên thể loại và đồng bộ lên Cloud!');
     } else {
       const tagSettingKey =
         tagManagerMode === 'movie'
@@ -1479,7 +1481,15 @@ export default function App() {
             await window.api.saveMedia(m);
           }
         }
+      } else {
+        for (const m of updatedMedia) {
+          if (m.tags?.includes(newTag)) {
+            await handleSaveMedia(m);
+          }
+        }
       }
+      await syncSystemSettingsToCloud({ [tagSettingKey]: updatedTags });
+      showAdminCloudToast('Đã đổi tên thể loại và đồng bộ lên Cloud!');
     }
     await loadData();
   };
@@ -1507,9 +1517,13 @@ export default function App() {
       if (window.api) {
         await window.api.saveSettings({ gameTags: updatedTags });
         for (const g of updatedGames) {
-          await window.api.saveGame(g);
+          if ((appData.games.find(orig => orig.id === g.id)?.tags || []).includes(tagToDelete)) {
+            await window.api.saveGame(g);
+          }
         }
       }
+      await syncSystemSettingsToCloud({ gameTags: updatedTags });
+      showAdminCloudToast('Đã xóa thể loại và đồng bộ lên Cloud!');
     } else {
       const tagSettingKey =
         tagManagerMode === 'movie'
@@ -1540,9 +1554,19 @@ export default function App() {
       if (window.api) {
         await window.api.saveSettings({ [tagSettingKey]: updatedTags });
         for (const m of updatedMedia) {
-          await window.api.saveMedia(m);
+          if ((appData.media.find(orig => orig.id === m.id)?.tags || []).includes(tagToDelete)) {
+            await window.api.saveMedia(m);
+          }
+        }
+      } else {
+        for (const m of updatedMedia) {
+          if ((appData.media.find(orig => orig.id === m.id)?.tags || []).includes(tagToDelete)) {
+            await handleSaveMedia(m);
+          }
         }
       }
+      await syncSystemSettingsToCloud({ [tagSettingKey]: updatedTags });
+      showAdminCloudToast('Đã xóa thể loại và đồng bộ lên Cloud!');
     }
     await loadData();
   };
